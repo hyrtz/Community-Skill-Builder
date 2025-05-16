@@ -1,0 +1,218 @@
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.AssemblyInfoInputs.cache
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.AssemblyInfo.cs
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.csproj.CoreCompileInputs.cache
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.RazorAssemblyInfo.cache
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.RazorAssemblyInfo.cs
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\bin\Debug\net9.0\appsettings.Development.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\bin\Debug\net9.0\appsettings.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.staticwebassets.runtime.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.staticwebassets.endpoints.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.exe
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.deps.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.runtimeconfig.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.dll
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.pdb
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\scopedcss\bundle\SkillBuilder.styles.css
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\scopedcss\projectbundle\SkillBuilder.bundle.scp.css
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\dvdpqbibi8-61n19gt1b8.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\d6i00aaxg6-xtxxf3hu2r.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\llo0pwhiti-bqjiyaj88i.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\na94pk60pi-c2jlpeoesf.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\kg0r30dhzu-erw9l3u2r3.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\b2e91p2dwf-aexeepp0ev.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\gez75urzkl-d7shbmvgxk.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\0yvunqj53b-ausgxo2sd3.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\filrx159ik-k8d9w2qqmf.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ytq81b1gth-cosvhxvwiu.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\5gmufstsil-ub07r2b239.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\f67rlqyvh9-fvhpjtyr6v.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\m3ie8957h3-b7pk76d08c.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\juctd6ly5e-fsbi9cje9m.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\8jj5pdr2g5-rzd6atqjts.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\myw8z63zjp-ee0r1s7dh0.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\rt4yjjs0rm-dxx9fxp4il.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\whnjk3v6yk-jd9uben2k1.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\w5i9sszhba-khv3u5hwcm.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\e9wcgokq0q-r4e9w2rdcm.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\kwubo69l6g-lcd1t2u6c8.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\cesb53yahw-c2oey78nd0.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\6j53z6ah6i-tdbxkamptv.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\usycb73yto-j5mq2jizvt.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\tykne342dk-06098lyss8.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\6ocacya4d6-nvvlpmu67g.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\yiyijh3n2p-s35ty4nyc5.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\m28p8770nt-pj5nd1wqec.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\bhaeslc78k-46ein0sx1k.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\cdsoj3yzsz-v0zj4ognzu.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\uzbudlblg5-37tfw0ft22.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\q6juhdeu4n-hrwsygsryq.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\o5urlmi01v-pk9g2wxc8p.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\oihfodjuc3-ft3s53vfgj.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\xey7c7k2ba-6cfz1n2cew.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\2q579cwv5n-6pdc2jztkx.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\r2ok4ivn3j-493y06b0oq.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ar2v8h16cs-iovd86k7lj.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\cy6z77nuvw-vr1egmr9el.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\j7a77iey1l-kbrnm935zg.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\8kpn0ixlfz-jj8uyg4cgr.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\pf8t6dbpkf-y7v9cxd14o.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\br8pz6233h-notf2xhcfb.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ncg696f4tk-h1s4sie4z3.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\gtknw01tss-63fj8s7r0e.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\7vaa6am8uq-0j3bgjxly4.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\fobsl9gs1c-47otxtyo56.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\708jidclt3-4v8eqarkd7.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ysjewgzdzr-356vix0kms.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\e0xytdzpwg-83jwlth58m.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\mr873yh9bp-mrlpezrjn3.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\0nxe5g8y87-lzl9nlhx6b.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\aiix345nbc-ag7o75518u.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\oqwqbdlyqw-x0q3zqp4vz.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\nxryb79ebx-0i3buxo5is.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\achzkrzx0k-o1o13a6vjx.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\svhcspbkny-ttgo8qnofa.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\brs5yo05b8-2z0ns9nrw6.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\6vcdkfrsyx-muycvpuwrr.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ndkc0i26lu-87fc7y1x7t.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\httmk0ho3d-mlv21k5csn.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\pbzqekcglo-d0vi5ngyr0.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\tubvmwshkh-d0vi5ngyr0.gz
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.build.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.development.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.SkillBuilder.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.SkillBuilder.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.build.SkillBuilder.props
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.SkillBuilder.props
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.SkillBuilder.props
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.pack.json
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.dll
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\refint\SkillBuilder.dll
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.pdb
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.genruntimeconfig.cache
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\ref\SkillBuilder.dll
+C:\Users\PREDATOR\Desktop\C# Activities\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\iwb5h6zhyn-l78v4vsqhg.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\bin\Debug\net9.0\appsettings.Development.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\bin\Debug\net9.0\appsettings.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.staticwebassets.runtime.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.staticwebassets.endpoints.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.exe
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.deps.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.runtimeconfig.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.dll
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\bin\Debug\net9.0\SkillBuilder.pdb
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.AssemblyInfoInputs.cache
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.AssemblyInfo.cs
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.csproj.CoreCompileInputs.cache
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.RazorAssemblyInfo.cache
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.RazorAssemblyInfo.cs
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\scopedcss\bundle\SkillBuilder.styles.css
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\scopedcss\projectbundle\SkillBuilder.bundle.scp.css
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\sp5mdjqlee-p7n99ha1jl.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\v648sku7bq-ttx09e5z6s.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\pax2tbxdag-5mobmin9uz.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\yst72ed6sd-6lr93igmv0.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\gp1vd8uvrr-t6qbwjo7d8.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\fnld8h85ep-08m1w29qap.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\iwq8vir6ws-bzqr90kebj.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\3p4u0slwfx-zs9rev0k3s.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\dvdpqbibi8-61n19gt1b8.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\llo0pwhiti-bqjiyaj88i.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\na94pk60pi-c2jlpeoesf.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\kg0r30dhzu-erw9l3u2r3.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\b2e91p2dwf-aexeepp0ev.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\gez75urzkl-d7shbmvgxk.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\0yvunqj53b-ausgxo2sd3.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\filrx159ik-k8d9w2qqmf.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ytq81b1gth-cosvhxvwiu.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\5gmufstsil-ub07r2b239.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\f67rlqyvh9-fvhpjtyr6v.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\m3ie8957h3-b7pk76d08c.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\juctd6ly5e-fsbi9cje9m.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\8jj5pdr2g5-rzd6atqjts.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\myw8z63zjp-ee0r1s7dh0.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\rt4yjjs0rm-dxx9fxp4il.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\whnjk3v6yk-jd9uben2k1.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\w5i9sszhba-khv3u5hwcm.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\e9wcgokq0q-r4e9w2rdcm.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\kwubo69l6g-lcd1t2u6c8.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\cesb53yahw-c2oey78nd0.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\6j53z6ah6i-tdbxkamptv.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\usycb73yto-j5mq2jizvt.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\tykne342dk-06098lyss8.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\6ocacya4d6-nvvlpmu67g.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\yiyijh3n2p-s35ty4nyc5.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\m28p8770nt-pj5nd1wqec.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\bhaeslc78k-46ein0sx1k.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\cdsoj3yzsz-v0zj4ognzu.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\uzbudlblg5-37tfw0ft22.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\q6juhdeu4n-hrwsygsryq.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\o5urlmi01v-pk9g2wxc8p.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\oihfodjuc3-ft3s53vfgj.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\xey7c7k2ba-6cfz1n2cew.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\2q579cwv5n-6pdc2jztkx.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\r2ok4ivn3j-493y06b0oq.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ar2v8h16cs-iovd86k7lj.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\cy6z77nuvw-vr1egmr9el.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\j7a77iey1l-kbrnm935zg.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\8kpn0ixlfz-jj8uyg4cgr.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\pf8t6dbpkf-y7v9cxd14o.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\br8pz6233h-notf2xhcfb.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ncg696f4tk-h1s4sie4z3.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\gtknw01tss-63fj8s7r0e.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\7vaa6am8uq-0j3bgjxly4.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\fobsl9gs1c-47otxtyo56.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\708jidclt3-4v8eqarkd7.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ysjewgzdzr-356vix0kms.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\e0xytdzpwg-83jwlth58m.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\mr873yh9bp-mrlpezrjn3.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\0nxe5g8y87-lzl9nlhx6b.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\aiix345nbc-ag7o75518u.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\oqwqbdlyqw-x0q3zqp4vz.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\nxryb79ebx-0i3buxo5is.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\achzkrzx0k-o1o13a6vjx.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\svhcspbkny-ttgo8qnofa.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\brs5yo05b8-2z0ns9nrw6.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\6vcdkfrsyx-muycvpuwrr.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ndkc0i26lu-87fc7y1x7t.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\httmk0ho3d-mlv21k5csn.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\pbzqekcglo-d0vi5ngyr0.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\tubvmwshkh-d0vi5ngyr0.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.build.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.development.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.SkillBuilder.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.SkillBuilder.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.build.SkillBuilder.props
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.SkillBuilder.props
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.SkillBuilder.props
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.pack.json
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.dll
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\refint\SkillBuilder.dll
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.pdb
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.genruntimeconfig.cache
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\ref\SkillBuilder.dll
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\bs921y46pf-s46h4rui2y.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\zurnifyknq-z1jyd0dzpt.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\iusyryvmxg-8obpmc17lb.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\48xyfdus24-3ry6hwinus.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\0b4q2gy7cg-27e5kygi3w.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\ybjrg4yfp3-gb0zffw9a2.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\0113mnf49p-1vvs87td7w.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\szpisc2uy3-u1qv34pmza.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\kwfr1z0y02-i398uf6gq1.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\bm92v1r7k8-da89zkpv8w.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\4bzoocm273-uub78glsaq.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\645b4ss78a-9095xibqza.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\a30ywuick9-oe7kn1s3co.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\l0ke4v8nz4-g08lkjz50r.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\d6i00aaxg6-t77hamz86m.gz
+C:\Users\PREDATOR\Desktop\CAPSTONE\SkillBuilder\SkillBuilder\obj\Debug\net9.0\compressed\iwb5h6zhyn-dnny9bj5a2.gz

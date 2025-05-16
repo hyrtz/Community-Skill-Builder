@@ -1,0 +1,67 @@
+﻿@model List<SkillBuilder.Models.Course>
+
+<!-- Course Section -->
+
+<section class="featured-courses-section" id="courses">
+
+    @* Search Section*@
+    @* <div class="course-filter-bar"> *@
+    @*     <div class="dropdown featured-dropdown"> *@
+    @*         <button class="dropdown-toggle">Featured ▾</button> *@
+    @*         <div class="dropdown-menu"> *@
+    @*             <a href="#">Most Popular</a> *@
+    @*             <a href="#">Newest</a> *@
+    @*             <a href="#">Top Rated</a> *@
+    @*         </div> *@
+    @*     </div> *@
+
+    @*     <div class="search-bar-wrapper"> *@
+    @*         <div class="search-bar"> *@
+    @*             <input type="text" placeholder="What do you want to learn?" class="search-input" /> *@
+    @*             <button class="search-button"><img src="/assets/icons/Search.ico" class="search-icon" /></button> *@
+    @*         </div> *@
+    @*     </div> *@
+
+    @*     <div class="dropdown filter-dropdown"> *@
+    @*         <button class="dropdown-toggle">Filter ▾</button> *@
+    @*         <div class="dropdown-menu"> *@
+    @*             <a href="#">Beginner</a> *@
+    @*             <a href="#">Intermediate</a> *@
+    @*             <a href="#">Advanced</a> *@
+    @*         </div> *@
+    @*     </div> *@
+    @* </div> *@
+
+    <h2 class="section-header">Featured Courses</h2>
+    <p class="section-description">Discover our most popular courses taught by master artisans and skilled instructors.</p>
+
+    <div class="courses-container">
+        @foreach (var course in Model)
+        {
+            <a href="@course.Link" class="course-card-link">
+                <div class="course-card">
+                    <div class="course-image" style="background-image: url('@course.ImageUrl');"></div>
+                    <h3 class="course-title">@course.Title</h3>
+                    <p class="course-description">@course.Description</p>
+                    <div class="course-details">
+                        <div class="course-detail">
+                            <img src="@course.DurationIcon" class="detail-icon" />
+                            <p>@course.Duration</p>
+                        </div>
+                        <div class="course-detail">
+                            <img src="@course.UsersIcon" class="detail-icon" />
+                            <p>@course.Users enrolled</p>
+                        </div>
+                        <div class="course-detail">
+                            <img src="@course.RatingIcon" class="detail-icon" />
+                            <p>@course.Rating/5</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+
+    <a href="#" class="course-btn">Click Here To See All Tahi Courses</a>
+
+</section>

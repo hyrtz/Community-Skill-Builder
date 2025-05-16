@@ -1,0 +1,23 @@
+﻿@model List<SkillBuilder.Models.AboutFeature>
+
+<!-- About Section -->
+
+<section class="about-section" id="about">
+    <div class="about-content">
+        <h2>Bridging Tradition with Technology </h2>
+        <h5>
+            Our platform offers unique features designed to preserve cultural heritage
+            while embracing modern learning approaches.
+        </h5>
+        <div class="features">
+            @foreach (var feature in Model)
+            {
+                <div class="feature-box">
+                    <img src="@feature.IconPath" alt="@feature.Title" class="feature-icon" />
+                    <h3>@feature.Title</h3>
+                    <p>@feature.Description</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>

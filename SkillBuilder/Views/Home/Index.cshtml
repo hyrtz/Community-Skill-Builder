@@ -1,0 +1,42 @@
+﻿@model SkillBuilder.Models.HomeViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Skillbuilder</title>
+        <link rel="stylesheet" href="~/css/style.css">
+    </head>
+
+        <body>
+
+
+            <!-- Home Section -->
+            @Html.Partial("Sections/_HomeSection")
+
+            <!-- About Section -->
+            @Html.Partial("Sections/_AboutSection", Model.Features)
+
+            <!-- Course Section -->
+            @Html.Partial("Sections/_CourseSection", Model.Courses)
+
+            <!-- Mission Section -->
+            @Html.Partial("Sections/_MissionSection")
+
+            <!-- Community Section -->
+            @Html.Partial("Sections/_CommunitySection", Model.Testimonials)
+
+            <!-- Community Highlight Section -->
+            @Html.Partial("Sections/_CommunityHighlightSection", Model.Highlights)
+
+            <!-- Join Section -->
+            @Html.Partial("Sections/_JoinSection")
+
+            <!-- Include JavaScript files -->
+            <script src="~/js/script.js"></script>
+
+        </body>
+
+</html>

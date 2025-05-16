@@ -1,0 +1,34 @@
+﻿@model List<SkillBuilder.Models.CommunityHighlight>
+
+<!-- Community Highlights Section -->
+
+<section class="community-highlights" id="community_highlight">
+    <h2>Community Highlights</h2>
+    <p class="description">See what our community members sharing, creating, and discussing.</p>
+
+    <div class="highlight-cards">
+        @foreach (var highlight in Model)
+        {
+            <div class="highlight-card">
+                <div class="highlight-user">
+                    <img src="@highlight.Avatar" alt="Avatar of @highlight.Name" class="highlight-avatar" />
+                    <div class="highlight-user-info">
+                        <h4>@highlight.Name</h4>
+                        <span>@highlight.Role</span>
+                    </div>
+                </div>
+                <div class="highlight-content">
+                    <p class="highlight-comment">@highlight.Comment</p>
+                    <img src="@highlight.Image" alt="Highlight Image" class="highlight-image" />
+                </div>
+                <div class="highlight-actions">
+                    <div class="left-actions">
+                        <span class="action">❤️ 212</span>
+                        <span class="action">💬 41</span>
+                    </div>
+                    <a href="#" class="action share-icon">🔗 Share</a>
+                </div>
+            </div>
+        }
+    </div>
+</section>

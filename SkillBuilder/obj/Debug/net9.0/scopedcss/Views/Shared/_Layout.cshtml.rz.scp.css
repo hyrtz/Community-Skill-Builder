@@ -1,0 +1,96 @@
+/* Overlay (initially hidden) */
+.modal-overlay[b-xrkq1zrc63] {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    pointer-events: all;
+}
+
+/* Modal */
+.auth-modal[b-xrkq1zrc63] {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 25%;
+    background: #fff;
+    z-index: 1001;
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal Content */
+.auth-modal-content[b-xrkq1zrc63] {
+    position: relative;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Close Button */
+.auth-close-btn[b-xrkq1zrc63] {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+    .auth-close-btn:hover[b-xrkq1zrc63] {
+        color: red;
+    }
+
+/* Input Fields */
+.auth-modal input[type="text"][b-xrkq1zrc63],
+.auth-modal input[type="password"][b-xrkq1zrc63],
+.auth-modal input[type="email"][b-xrkq1zrc63] {
+    width: 100%;
+    padding: 0.7rem;
+    border: 0.1rem solid #ccc;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+}
+
+/* Checkboxes */
+.remember-me[b-xrkq1zrc63],
+.agree-checkbox[b-xrkq1zrc63] {
+    font-size: 0.75rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    text-align: center;
+}
+
+/* Buttons */
+.modal-btn[b-xrkq1zrc63] {
+    width: 100%;
+    padding: 0.7rem;
+    background-color: #0055aa;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+/* Forgot Password Link */
+.auth-modal p[b-xrkq1zrc63] {
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+    text-align: center;
+    width: 100%;
+    color: #555;
+}
+

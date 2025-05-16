@@ -1,0 +1,26 @@
+﻿@model List<SkillBuilder.Models.CommunityTestimonial>
+
+<!-- Community Section -->
+
+<section class="community-section" id="community">
+    <div class="community-header">
+        <h2>What Community Says</h2>
+        <p>Hear from artisans, learners, and researchers who are part of our growing community.</p>
+    </div>
+
+    <div class="community-cards">
+        @foreach (var testimonial in Model)
+        {
+            <div class="community-card">
+                <p class="comment">@testimonial.Comment</p>
+                <div class="card-footer">
+                    <img src="@testimonial.AvatarPath" alt="@($"Avatar of {testimonial.UserName}")" class="avatar" />
+                    <div class="user-info">
+                        <h4>@testimonial.UserName</h4>
+                        <span>@testimonial.Role</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
