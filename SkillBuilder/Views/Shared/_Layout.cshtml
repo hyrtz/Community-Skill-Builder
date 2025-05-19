@@ -9,104 +9,101 @@
     <!-- Modal Overlay (unclickable) -->
     <div id="modal-overlay" class="modal-overlay"></div>
 
-    <!-- Login Modal -->
+<!-- Login Modal -->
 
-    <div id="login-modal" class="auth-modal">
-        <div class="auth-modal-container">
-            <!-- Left Side (Image) -->
-            <div class="auth-modal-left">
-                <img src="~/assets/Background Pics/LogInBG.png"/>
-            </div>
+<div id="login-modal" class="auth-modal">
+    <div class="auth-modal-container">
+        <!-- Left Side (Image) -->
+        <div class="auth-modal-left">
+            <img src="~/assets/Background Pics/LogInBG.png" />
+        </div>
 
-            <!-- Right Side (Form) -->
-            <div class="auth-modal-right">
-                <span class="auth-close-btn" onclick="closeModal('login-modal')">&times;</span>
+        <!-- Right Side (Form) -->
+        <div class="auth-modal-right">
+            <span class="auth-close-btn" onclick="closeModal('login-modal', true)">&times;</span>
             <h2>Log in to <span style="color: #364BE9">Tahi</span></h2>
 
-                <!-- Social Login Buttons -->
-                <div class="social-login">
-                    <button class="social-btn google">Continue with Google</button>
-                    <button class="social-btn facebook">Continue with Facebook</button>
+            <!-- Social Login Buttons -->
+            <div class="social-login">
+                <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
+                <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+            </div>
+
+            <!-- Separator -->
+            <div class="separator"><span>or</span></div>
+
+            <!-- Login Form -->
+            <form id="login-form" oninput="checkLoginInputs()">
+                <label for="email">Email</label>
+                <input type="email" id="login-email" required />
+
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="login-password" required />
+                    <span class="toggle-password" onclick="togglePasswordVisibility('login-password', this)">👁️‍🗨️</span>
                 </div>
 
-                <!-- Separator -->
-                <div class="separator"><span>or</span></div>
-
-                <!-- Login Form -->
-                <form id="login-form" oninput="checkLoginInputs()">
-                    <input type="email" id="login-email" placeholder="Email" required />
-
-                    <div class="password-wrapper">
-                        <input type="password" id="login-password" placeholder="Password" required />
-                        <span class="toggle-password" onclick="togglePasswordVisibility('login-password', this)">👁️</span>
-                    </div>
-
-                    <div class="forgot-password">
-                        <a href="#">Forgot password?</a>
-                    </div>
-
-                    <button type="submit" class="modal-btn login-btn" disabled>Log In</button>
-
-                    <p class="signup-redirect">Don't have an account yet? <a href="#" onclick="switchToSignup()">Sign up</a></p>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sign Up Modal -->
-
-    <div id="signup-modal" class="auth-modal">
-        <div class="auth-modal-content auth-modal-container">
-            <span class="auth-close-btn" onclick="closeModal('signup-modal')">&times;</span>
-
-            <!-- Left panel for image or illustration -->
-            <div class="auth-modal-left">
-                <img src="~/assets/Background Pics/LogInBG.png"/>
-            </div>
-
-            <!-- Right panel for form and buttons -->
-            <div class="auth-modal-right">
-                <h2 class="signup-header">Sign up to Tahi</h2>
-
-                <!-- Social login buttons -->
-                <div class="social-login">
-                    <button class="social-btn google" type="button">Continue with Google</button>
-                    <button class="social-btn facebook" type="button">Continue with Facebook</button>
+                <div class="forgot-password">
+                    <a href="#">Forgot your password?</a>
                 </div>
 
-                <!-- Separator -->
-                <div class="separator"><span>or</span></div>
+                <button type="submit" class="modal-btn login-btn" disabled>Log In</button>
 
-                <!-- Continue with Email Button -->
-                <button class="continue-email-btn" type="button" onclick="showSignupForm()">Continue with Email</button>
-
-                <!-- Hidden form initially -->
-                <form id="signup-form" style="display: none; margin-top: 1rem;">
-                    <input type="text" id="signup-fullname" placeholder="Full Name" required />
-                    <input type="email" id="signup-email" placeholder="Email Address" required />
-                    <input type="password" id="signup-password" placeholder="Password" required />
-                    <input type="password" id="signup-confirm" placeholder="Confirm Password" required />
-
-                    <label class="agree-checkbox">
-                        <input type="checkbox" required />
-                        I agree to the <a href="#">user agreement</a> and <a href="#">privacy policy</a>.
-                    </label>
-
-                    <button type="submit" class="modal-btn signup-btn">Create Account</button>
-                </form>
-
-                <!-- Terms and privacy small text -->
-                <p class="signup-description">
-                    By creating an account you agree with our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-                </p>
-
-                <!-- Redirect to Log In -->
-                <p class="signup-redirect">
-                    Already have an account? <a href="#" onclick="switchToLogin()">Log In</a>
-                </p>
-            </div>
+                <p class="signup-redirect">Don't have an account yet? <a href="#" onclick="switchToSignup()">Sign up</a></p>
+            </form>
         </div>
     </div>
+</div>
+
+<!-- Sign Up Modal -->
+
+<div id="signup-modal" class="auth-modal">
+    <div class="auth-modal-content auth-modal-container">
+        <span class="auth-close-btn" onclick="closeModal('signup-modal', true)">&times;</span>
+
+        <!-- Left panel for image or illustration -->
+        <div class="auth-modal-left">
+            <img src="~/assets/Background Pics/LogInBG.png" />
+        </div>
+
+        <!-- Right panel for form and buttons -->
+        <div class="auth-modal-right">
+            <h2 class="signup-header">Sign up to <span style="color: #364BE9">Tahi</span></h2>
+
+            <!-- Social login buttons -->
+            <div class="social-login">
+                <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
+                <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+            </div>
+
+            <!-- Separator -->
+            <div class="separator"><span>or</span></div>
+
+            <!-- Continue with Email Button -->
+            <button class="continue-email-btn" type="button" onclick="showSignupForm()">Continue with Email</button>
+
+            <!-- Hidden form initially -->
+            <form id="signup-form" style="display: none; margin-top: 1rem;">
+                <input type="text" id="signup-fullname" placeholder="Full Name" required />
+                <input type="email" id="signup-email" placeholder="Email Address" required />
+                <input type="password" id="signup-password" placeholder="Password" required />
+                <input type="password" id="signup-confirm" placeholder="Confirm Password" required />
+
+                <label>I agree to the <a href="#">user agreement</a> and <a href="#">privacy policy</a>.</label>
+            </form>
+
+            <!-- Terms and privacy small text -->
+            <p class="signup-description">
+                By creating an account you agree with our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+            </p>
+
+            <!-- Redirect to Log In -->
+            <p class="signup-redirect">
+                Already have an account? <a href="#" onclick="switchToLogin()">Log In</a>
+            </p>
+        </div>
+    </div>
+</div>
 
     <body>
         <header>

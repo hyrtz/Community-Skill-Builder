@@ -1,49 +1,49 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\",
+  "WorkspaceRootPath": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\wwwroot\\css\\style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\wwwroot\\css\\style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\wwwroot\\js\\script.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\wwwroot\\js\\script.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\views\\shared\\sections\\_communitysection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\wwwroot\\js\\script.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\wwwroot\\js\\script.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\wwwroot\\css\\style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\wwwroot\\css\\style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\views\\shared\\sections\\_communitysection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\views\\shared\\sections\\_communitysection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\models\\homeviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\models\\homeviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\models\\homeviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\views\\shared\\sections\\_aboutsection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\views\\shared\\sections\\_aboutsection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\views\\shared\\sections\\_aboutsection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\views\\shared\\sections\\_coursesection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\views\\shared\\sections\\_coursesection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\views\\shared\\sections\\_coursesection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\models\\communitytestimonial.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\models\\communitytestimonial.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\models\\communitytestimonial.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\capstone\\skillbuilder\\skillbuilder\\views\\shared\\sections\\_missionsection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|c:\\users\\predator\\desktop\\tahi\\community-skill-builder\\skillbuilder\\views\\shared\\sections\\_missionsection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{BB428528-01D6-444F-98EF-812DEB4043F2}|SkillBuilder\\SkillBuilder.csproj|solutionrelative:skillbuilder\\views\\shared\\sections\\_missionsection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
@@ -64,11 +64,11 @@
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "script.js",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\wwwroot\\js\\script.js",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\wwwroot\\js\\script.js",
               "RelativeDocumentMoniker": "SkillBuilder\\wwwroot\\js\\script.js",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\wwwroot\\js\\script.js",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\wwwroot\\js\\script.js",
               "RelativeToolTip": "SkillBuilder\\wwwroot\\js\\script.js",
-              "ViewState": "AgIAAEIAAAAAAAAAAAAAAFkAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-05-16T08:16:18.986Z",
               "EditorCaption": ""
@@ -77,48 +77,47 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "_Layout.cshtml",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "SkillBuilder\\Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\_Layout.cshtml",
               "RelativeToolTip": "SkillBuilder\\Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAADIAAAAAAAAAAAAAAEIAAAA1AAAAAAAAAA==",
+              "ViewState": "AgIAAE8AAAAAAAAAAAAmwFsAAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-05-16T07:54:15.989Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "style.css",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\wwwroot\\css\\style.css",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\wwwroot\\css\\style.css",
               "RelativeDocumentMoniker": "SkillBuilder\\wwwroot\\css\\style.css",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\wwwroot\\css\\style.css",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\wwwroot\\css\\style.css",
               "RelativeToolTip": "SkillBuilder\\wwwroot\\css\\style.css",
-              "ViewState": "AgIAADwBAAAAAAAAAAAIwEYBAAAWAAAAAAAAAA==",
+              "ViewState": "AgIAAHQBAAAAAAAAAAAuwIIBAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
               "WhenOpened": "2025-05-16T01:38:02.96Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "HomeController.cs",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Controllers\\HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "SkillBuilder\\Controllers\\HomeController.cs",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Controllers\\HomeController.cs",
               "RelativeToolTip": "SkillBuilder\\Controllers\\HomeController.cs",
               "ViewState": "AgIAAJoAAAAAAAAAAAAAAKcAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-16T06:05:57.553Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T06:05:57.553Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Home\\Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "SkillBuilder\\Views\\Home\\Index.cshtml",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Home\\Index.cshtml",
               "RelativeToolTip": "SkillBuilder\\Views\\Home\\Index.cshtml",
               "ViewState": "AgIAAA8AAAAAAAAAAAAAACMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
@@ -129,79 +128,73 @@
               "$type": "Document",
               "DocumentIndex": 5,
               "Title": "_CommunitySection.cshtml",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\Sections\\_CommunitySection.cshtml",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\Sections\\_CommunitySection.cshtml",
               "RelativeDocumentMoniker": "SkillBuilder\\Views\\Shared\\Sections\\_CommunitySection.cshtml",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\Sections\\_CommunitySection.cshtml",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\Sections\\_CommunitySection.cshtml",
               "RelativeToolTip": "SkillBuilder\\Views\\Shared\\Sections\\_CommunitySection.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-05-16T06:08:24.042Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T06:08:24.042Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
               "Title": "HomeViewModel.cs",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Models\\HomeViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Models\\HomeViewModel.cs",
               "RelativeDocumentMoniker": "SkillBuilder\\Models\\HomeViewModel.cs",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Models\\HomeViewModel.cs",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Models\\HomeViewModel.cs",
               "RelativeToolTip": "SkillBuilder\\Models\\HomeViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAABEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-16T06:07:08.28Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T06:07:08.28Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
               "Title": "_AboutSection.cshtml",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\Sections\\_AboutSection.cshtml",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\Sections\\_AboutSection.cshtml",
               "RelativeDocumentMoniker": "SkillBuilder\\Views\\Shared\\Sections\\_AboutSection.cshtml",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\Sections\\_AboutSection.cshtml",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\Sections\\_AboutSection.cshtml",
               "RelativeToolTip": "SkillBuilder\\Views\\Shared\\Sections\\_AboutSection.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-05-16T07:04:57.261Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T07:04:57.261Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 8,
               "Title": "_CourseSection.cshtml",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\Sections\\_CourseSection.cshtml",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\Sections\\_CourseSection.cshtml",
               "RelativeDocumentMoniker": "SkillBuilder\\Views\\Shared\\Sections\\_CourseSection.cshtml",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\Sections\\_CourseSection.cshtml",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\Sections\\_CourseSection.cshtml",
               "RelativeToolTip": "SkillBuilder\\Views\\Shared\\Sections\\_CourseSection.cshtml",
               "ViewState": "AgIAAAwAAAAAAAAAAAAowCYAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-05-16T07:05:17.001Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T07:05:17.001Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 9,
               "Title": "CommunityTestimonial.cs",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Models\\CommunityTestimonial.cs",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Models\\CommunityTestimonial.cs",
               "RelativeDocumentMoniker": "SkillBuilder\\Models\\CommunityTestimonial.cs",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Models\\CommunityTestimonial.cs",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Models\\CommunityTestimonial.cs",
               "RelativeToolTip": "SkillBuilder\\Models\\CommunityTestimonial.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-16T06:05:43.168Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T06:05:43.168Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 10,
               "Title": "_MissionSection.cshtml",
-              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\Sections\\_MissionSection.cshtml",
+              "DocumentMoniker": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\Sections\\_MissionSection.cshtml",
               "RelativeDocumentMoniker": "SkillBuilder\\Views\\Shared\\Sections\\_MissionSection.cshtml",
-              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\Views\\Shared\\Sections\\_MissionSection.cshtml",
+              "ToolTip": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\Views\\Shared\\Sections\\_MissionSection.cshtml",
               "RelativeToolTip": "SkillBuilder\\Views\\Shared\\Sections\\_MissionSection.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-05-16T01:40:53.313Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T01:40:53.313Z"
             }
           ]
         }

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\SkillBuilder.csproj": {}
+    "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\SkillBuilder.csproj": {}
   },
   "projects": {
-    "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\SkillBuilder.csproj": {
+    "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\SkillBuilder.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\SkillBuilder.csproj",
+        "projectUniqueName": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\SkillBuilder.csproj",
         "projectName": "SkillBuilder",
-        "projectPath": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\SkillBuilder.csproj",
+        "projectPath": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\SkillBuilder.csproj",
         "packagesPath": "C:\\Users\\PREDATOR\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\PREDATOR\\Desktop\\CAPSTONE\\SkillBuilder\\SkillBuilder\\obj\\",
+        "outputPath": "C:\\Users\\PREDATOR\\Desktop\\Tahi\\Community-Skill-Builder\\SkillBuilder\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
