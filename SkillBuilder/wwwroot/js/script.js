@@ -22,11 +22,8 @@
 
 document.addEventListener("DOMContentLoaded", function () {
     const overlay = document.getElementById("modal-overlay");
-    const loginModal = document.getElementById("login-modal");
-    const signupModal = document.getElementById("signup-modal");
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
-
     const navButtons = document.querySelectorAll(".nav-buttons a");
 
     document.querySelector(".nav-buttons-login").addEventListener("click", function (e) {
@@ -39,17 +36,22 @@ document.addEventListener("DOMContentLoaded", function () {
         openModal("signup-modal");
     });
 
-    function openModal(modalId) {
+    window.openModal = function (modalId) {
         overlay.style.display = "block";
         document.getElementById(modalId).style.display = "block";
-
-        // Disable navbar interactions
         navButtons.forEach(btn => btn.style.pointerEvents = "none");
-    }
+    };
 
-    window.closeModal = function (modalId) {
+    // Updated closeModal function with second param hideOverlay (default true)
+    window.closeModal = function (modalId, hideOverlay = true) {
         document.getElementById(modalId).style.display = "none";
-        overlay.style.display = "none";
+
+        if (hideOverlay) {
+            overlay.style.display = "none";
+
+            // Re-enable navbar interactions
+            navButtons.forEach(btn => btn.style.pointerEvents = "auto");
+        }
 
         // Reset forms
         if (modalId === "login-modal") {
@@ -57,9 +59,6 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if (modalId === "signup-modal") {
             signupForm.reset();
         }
-
-        // Re-enable navbar interactions
-        navButtons.forEach(btn => btn.style.pointerEvents = "auto");
     };
 });
 
@@ -67,7 +66,7 @@ function togglePasswordVisibility(id, icon) {
     const input = document.getElementById(id);
     const isPassword = input.type === "password";
     input.type = isPassword ? "text" : "password";
-    icon.textContent = isPassword ? "🙈" : "👁️";
+    icon.textContent = isPassword ? "👁️" : "👁️‍🗨️";
 }
 
 function checkLoginInputs() {
@@ -85,6 +84,27 @@ function checkLoginInputs() {
 }
 
 function switchToSignup() {
-    closeModal('login-modal');
-    openModal('signup-modal');
+    closeModal('login-modal', false); // hide login modal but keep overlay
+    openModal('signup-modal');        // open signup modal (overlay remains)
+}
+
+function openModal(id) {
+    document.getElementById(id).style.display = 'block';
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+function switchToLogin() {
+    closeModal('signup-modal', false); // hide signup modal but keep overlay
+    openModal('login-modal');           // open login modal (overlay remains)
+}
+
+function openModal(id) {
+    document.getElementById(id).style.display = 'block';
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
 }
