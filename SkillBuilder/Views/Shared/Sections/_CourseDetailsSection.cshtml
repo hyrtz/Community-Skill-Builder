@@ -1,0 +1,241 @@
+﻿@model SkillBuilder.Models.Course
+
+<style>
+    .course-detail-section {
+        background-color: #f9f9f9;
+        padding-bottom: 4rem;
+    }
+
+    .course-detail-top-section {
+        padding: 6.5rem 13rem 2rem;
+    }
+
+    .course-detail-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+
+    .course-detail-left {
+        width: 80%;
+    }
+
+    .course-detail-right {
+        width: 20%;
+        background-color: #fff;
+        padding: 2rem;
+        margin-left: 5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+
+    .course-detail-level {
+        display: inline-block;
+        background-color: #FFEB3B;
+        color: #222;
+        font-weight: bold;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .course-detail-title {
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .course-detail-creator {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+        color: #555;
+    }
+
+    .course-detail-description {
+        font-size: 1rem;
+        color: #444;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .course-detail-meta-box {
+        display: flex;
+        justify-content: space-between;
+        background-color: #E0F2FF;
+        border: 2px solid #4A90E2;
+        padding: 1.5rem;
+        border-radius: 12px;
+        gap: 1.5rem;
+    }
+
+    .course-detail-meta-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.95rem;
+        color: #333;
+        gap: 0.5rem;
+    }
+
+        .course-detail-meta-col img {
+            width: 24px;
+            height: 24px;
+        }
+
+    .course-detail-free-label {
+        color: #344AEA;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .course-detail-enroll-btn {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        font-weight: bold;
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+        .course-detail-enroll-btn:hover {
+            background-color: #2A3EC1;
+        }
+
+    .course-detail-notebook {
+        margin: 2rem 36.5rem 2rem 13rem;
+    }
+
+    .course-detail-notebook-tabs {
+        display: flex;
+        gap: 2rem;
+        border-bottom: 2px solid #ddd;
+        margin-bottom: 1rem;
+    }
+
+    .notebook-tab {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        font-weight: 600;
+        color: #333;
+        text-decoration: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+        .notebook-tab:hover {
+            color: #344AEA;
+        }
+
+        .notebook-tab.active {
+            color: #344AEA;
+            border-bottom-color: #344AEA;
+        }
+
+    .course-detail-tab-contents {
+        background-color: #fff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+        .tab-content.active {
+            display: block;
+        }
+</style>
+
+<section class="course-detail-section">
+    <!-- Top Detail Section -->
+    <div class="course-detail-top-section">
+        <div class="course-detail-wrapper">
+            <div class="course-detail-left">
+                <span class="course-detail-level">@Model.Level</span>
+                <h1 class="course-detail-title">@Model.Title</h1>
+                <h5 class="course-detail-creator">A course by @Model.CreatedBy</h5>
+                <p class="course-detail-description">@Model.Description</p>
+
+                <div class="course-detail-meta-box">
+                    <div class="course-detail-meta-col">
+                        <img src="/assets/Icons/Star.ico" alt="Rating" />
+                        <span>@Model.Rating / 5</span>
+                    </div>
+                    <div class="course-detail-meta-col">
+                        <img src="/assets/Icons/Book.ico" alt="Modules" />
+                        <span>@Model</span>
+                    </div>
+                    <div class="course-detail-meta-col">
+                        <img src="/assets/Icons/Time.ico" alt="Duration" />
+                        <span>@Model.Duration</span>
+                    </div>
+                    <div class="course-detail-meta-col">
+                        <img src="/assets/Icons/User.ico" alt="Certification" />
+                        <span>Certificate Included</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="course-detail-right">
+                <h1 class="course-detail-free-label">FREE COURSE</h1>
+                <button class="course-detail-enroll-btn">Enroll Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notebook Navigation -->
+    <div class="course-detail-notebook">
+        <nav class="course-detail-notebook-tabs">
+            <a class="notebook-tab active" data-tab="info">Information</a>
+            <a class="notebook-tab" data-tab="modules">Modules</a>
+            <a class="notebook-tab" data-tab="materials">Materials</a>
+            <a class="notebook-tab" data-tab="mentor">Mentor</a>
+            <a class="notebook-tab" data-tab="reviews">Reviews</a>
+        </nav>
+
+        <div class="course-detail-tab-contents">
+            <div class="tab-content active" data-tab="info">
+                @Html.Partial("Sections/CourseNotebooks/_CourseNotebookInformation", Model)
+            </div>
+            <div class="tab-content" data-tab="modules">
+                @Html.Partial("Sections/CourseNotebooks/_CourseNotebookModule", Model)
+            </div>
+            <div class="tab-content" data-tab="materials">
+                @Html.Partial("Sections/CourseNotebooks/_CourseNotebookMaterials", Model)
+            </div>
+            <div class="tab-content" data-tab="mentor">
+                @Html.Partial("Sections/CourseNotebooks/_CourseNotebookMentor", Model)
+            </div>
+            <div class="tab-content" data-tab="reviews">
+                @Html.Partial("Sections/CourseNotebooks/_CourseNotebookReviews", Model)
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const tabs = document.querySelectorAll(".notebook-tab");
+    const contents = document.querySelectorAll(".tab-content");
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            // Update tab styles
+            tabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            // Show corresponding content
+            const selectedTab = tab.getAttribute("data-tab");
+            contents.forEach(content => {
+                content.classList.toggle("active", content.getAttribute("data-tab") === selectedTab);
+            });
+        });
+    });
+</script>

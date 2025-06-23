@@ -1,193 +1,123 @@
-﻿<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <title>@ViewData["Title"] - SkillBuilder</title>
-        <link rel="stylesheet" href="~/css/style.css" />
-    </head>
+﻿@{
+    var isCourseNavbar = ViewData["UseCourseNavbar"] as bool? ?? false;
+}
 
-    <!-- Modal Overlay (unclickable) -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - SkillBuilder</title>
+    <link rel="stylesheet" href="~/assets/css/style.css" />
+</head>
+
+<body>
+
+    <!-- Modal Overlay -->
     <div id="modal-overlay" class="modal-overlay"></div>
 
-<!-- Login Modal -->
+    <!-- Login Modal -->
+    @Html.Partial("Sections/_LoginModal")
 
-<div id="login-modal" class="auth-modal">
-    <div class="auth-modal-container">
-        <!-- Left Side (Image) -->
-        <div class="auth-modal-left">
-            <img src="~/assets/Background Pics/LogInBG.png" />
-        </div>
+    <!-- Signup Modal -->
+    @Html.Partial("Sections/_SignupModal")
 
-        <!-- Right Side (Form) -->
-        <div class="auth-modal-right">
-            <span class="auth-close-btn" onclick="closeModal('login-modal', true)">&times;</span>
-            <h2>Log in to <span style="color: #364BE9">Tahi</span></h2>
+    <header>
+        @if (ViewData["UseCourseNavbar"] as bool? ?? false)
+        {
+            @Html.Partial("Sections/_CourseCatalogNavbar")
+        }
+        else
+        {
+            @Html.Partial("Sections/_LandingPageNavbar")
+        }
+    </header>
 
-            <!-- Social Login Buttons -->
-            <div class="social-login">
-                <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
-                <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+    <main role="main">
+        @RenderBody()
+     </main>
+
+    <footer class="footer-section">
+        <div class="footer-content">
+            <!-- First Column -->
+            <div class="footer-column footer-col-wide">
+                <img src="~/assets/Logos/Tahi.svg" alt="Logo" class="footer-logo" />
+                <p class="footer-description">
+                    Connecting Tradition and Technology through Learning: A Community-Based Skill Builder for Cultural and Creative Art Skills
+                </p>
             </div>
 
-            <!-- Separator -->
-            <div class="separator"><span>or</span></div>
-
-            <!-- Login Form -->
-            <form id="login-form" oninput="checkLoginInputs()">
-                <label for="email">Email</label>
-                <input type="email" id="login-email" required />
-
-                <label for="password">Password</label>
-                <div class="password-wrapper">
-                    <input type="password" id="login-password" required />
-                    <span class="toggle-password" onclick="togglePasswordVisibility('login-password', this)">👁️‍🗨️</span>
-                </div>
-
-                <div class="forgot-password">
-                    <a href="#">Forgot your password?</a>
-                </div>
-
-                <button type="submit" class="modal-btn login-btn" disabled>Log In</button>
-
-                <p class="signup-redirect">Don't have an account yet? <a href="#" onclick="switchToSignup()">Sign up</a></p>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Sign Up Modal -->
-
-<div id="signup-modal" class="auth-modal">
-    <div class="auth-modal-content auth-modal-container">
-        <span class="auth-close-btn" onclick="closeModal('signup-modal', true)">&times;</span>
-
-        <!-- Left panel for image or illustration -->
-        <div class="auth-modal-left">
-            <img src="~/assets/Background Pics/LogInBG.png" />
-        </div>
-
-        <!-- Right panel for form and buttons -->
-        <div class="auth-modal-right">
-            <h2 class="signup-header">Sign up to <span style="color: #364BE9">Tahi</span></h2>
-
-            <!-- Social login buttons -->
-            <div class="social-login">
-                <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
-                <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+            <!-- Second Column -->
+            <div class="footer-column">
+                <h5>Courses</h5>
+                <a href="#">Traditional Skills</a>
+                <a href="#">General Skills</a>
+                <a href="#">Beginner Course</a>
+                <a href="#">Advanced Course</a>
             </div>
 
-            <!-- Separator -->
-            <div class="separator"><span>or</span></div>
+            <!-- Third Column -->
+            <div class="footer-column">
+                <h5>About Us</h5>
+                <a href="#">About</a>
+                <a href="#">Terms and Conditions</a>
+                <a href="#">Privacy Policy</a>
+            </div>
 
-            <!-- Continue with Email Button -->
-            <button class="continue-email-btn" type="button" onclick="showSignupForm()">Continue with Email</button>
+            <!-- Fourth Column -->
+            <div class="footer-column">
+                <h5>Inquiries</h5>
+                <a href="tel:+639123456789">+63 912 3456 789</a>
+                <a href="tel:+0201234567">(02) 0123 4567</a>
+                <a href="mailto:tahi@gmail.com">tahi@gmail.com</a>
+            </div>
 
-            <!-- Hidden form initially -->
-            <form id="signup-form" style="display: none; margin-top: 1rem;">
-                <input type="text" id="signup-fullname" placeholder="Full Name" required />
-                <input type="email" id="signup-email" placeholder="Email Address" required />
-                <input type="password" id="signup-password" placeholder="Password" required />
-                <input type="password" id="signup-confirm" placeholder="Confirm Password" required />
-
-                <label>I agree to the <a href="#">user agreement</a> and <a href="#">privacy policy</a>.</label>
-            </form>
-
-            <!-- Terms and privacy small text -->
-            <p class="signup-description">
-                By creating an account you agree with our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-            </p>
-
-            <!-- Redirect to Log In -->
-            <p class="signup-redirect">
-                Already have an account? <a href="#" onclick="switchToLogin()">Log In</a>
-            </p>
+            <!-- Fifth Column -->
+            <div class="footer-column">
+                <h5>Follow us</h5>
+                <div class="social-icons">
+                    <a href="#"><img src="/assets/Logos/Instagram.svg"></a>
+                    <a href="#"><img src="/assets/Logos/Facebook.svg"></a>
+                    <a href="#"><img src="/assets/Logos/Gmail.svg"></a>
+                    <a href="#"><img src="/assets/Logos/Twitter.svg"></a>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-    <body>
-        <header>
-            <nav class="navbar">
-                <div class="logo">
-                    <a href="#home"><img src="~/assets/Logos/Tahi.svg" alt="Logo"></a>
-                </div>
+        <hr class="footer-separator" />
 
-                <div class="nav-center">
-                    <a href="#home" data-text="Home">Home</a>
-                    <a href="#about" data-text="About">About</a>
-                    <a href="#courses" data-text="Courses">Courses</a>
-                    <a href="#community" data-text="Community">Community</a>
-                    <a href="#join" data-text="Resources">Resources</a>
-                </div>
+        <div class="footer-bottom">
+            <p class="footer-left">© @DateTime.Now.Year Tahi Paborito. All rights reserved.</p>
+            <p class="footer-right">Philippines</p>
+        </div>
 
-                <div class="nav-buttons">
-                    <a href="#" class="nav-buttons-login">Log In</a>
-                    <a href="#" class="nav-buttons-signup">Sign Up</a>
-                </div>
-            </nav>
-        </header>
+    </footer>
 
-        <main role="main">
-            @RenderBody()
-        </main>
+    <script src="@(Url.Content("~/assets/js/script.js"))"></script>
 
-        <footer class="footer-section">
-            <div class="footer-content">
-                <!-- First Column -->
-                <div class="footer-column footer-col-wide">
-                    <img src="~/assets/Logos/Tahi.svg" alt="Logo" class="footer-logo" />
-                    <p class="footer-description">
-                        Connecting Tradition and Technology through Learning: A Community-Based Skill Builder for Cultural and Creative Art Skills
-                    </p>
-                </div>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById("exploreDropdown");
+            const button = document.querySelector(".dropbtn");
 
-                <!-- Second Column -->
-                <div class="footer-column">
-                    <h5>Courses</h5>
-                    <a href="#">Traditional Skills</a>
-                    <a href="#">General Skills</a>
-                    <a href="#">Beginner Course</a>
-                    <a href="#">Advanced Course</a>
-                </div>
+            const isOpen = dropdown.classList.contains("show");
 
-                <!-- Third Column -->
-                <div class="footer-column">
-                    <h5>About Us</h5>
-                    <a href="#">About</a>
-                    <a href="#">Terms and Conditions</a>
-                    <a href="#">Privacy Policy</a>
-                </div>
+            dropdown.classList.toggle("show");
+            button.classList.toggle("active", !isOpen); // apply active only when opening
+        }
 
-                <!-- Fourth Column -->
-                <div class="footer-column">
-                    <h5>Inquiries</h5>
-                    <a href="tel:+639123456789">+63 912 3456 789</a>
-                    <a href="tel:+0201234567">(02) 0123 4567</a>
-                    <a href="mailto:tahi@gmail.com">tahi@gmail.com</a>
-                </div>
+        document.addEventListener("click", function (event) {
+            const button = event.target.closest(".dropbtn");
+            const dropdown = document.getElementById("exploreDropdown");
 
-                <!-- Fifth Column -->
-                <div class="footer-column">
-                    <h5>Follow us</h5>
-                    <div class="social-icons">
-                        <a href="#"><img src="/assets/Logos/Instagram.svg"></a>
-                        <a href="#"><img src="/assets/Logos/Facebook.svg"></a>
-                        <a href="#"><img src="/assets/Logos/Gmail.svg"></a>
-                        <a href="#"><img src="/assets/Logos/Twitter.svg"></a>
-                    </div>
-                </div>
-            </div>
+            // Clicked outside both button and dropdown
+            if (!button && !event.target.closest(".dropdown")) {
+                dropdown.classList.remove("show");
+                document.querySelector(".dropbtn")?.classList.remove("active");
+            }
+        });
+    </script>
 
-            <hr class="footer-separator" />
 
-            <div class="footer-bottom">
-                <p class="footer-left">© @DateTime.Now.Year Tahi Paborito. All rights reserved.</p>
-                <p class="footer-right">Philippines</p>
-            </div>
-
-        </footer>
-
-        <script src="~/js/your-script.js"></script>
-
-    </body>
+</body>
 </html>

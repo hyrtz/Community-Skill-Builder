@@ -1,0 +1,177 @@
+﻿<style>
+    .review-heading {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        color: #222;
+    }
+
+    .review-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 3rem;
+    }
+
+    /* Scrollable Cards */
+    .review-cards-wrapper {
+        width: 60%;
+        overflow-x: auto;
+    }
+
+    .review-cards-scroll {
+        display: flex;
+        gap: 1.5rem;
+        padding-bottom: 1rem;
+        scroll-snap-type: x mandatory;
+    }
+
+    .review-card {
+        min-width: 250px;
+        max-width: 250px;
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        scroll-snap-align: start;
+    }
+
+    .review-card-top {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .review-user {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .review-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .review-name {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    .review-stars {
+        font-size: 1rem;
+        color: #ccc;
+    }
+
+        .review-stars .star.filled {
+            color: #FFD700;
+        }
+
+    .review-date {
+        font-size: 0.85rem;
+        color: #777;
+    }
+
+    .review-text {
+        font-size: 0.95rem;
+        color: #333;
+        line-height: 1.4;
+    }
+
+    /* Summary */
+    .review-summary {
+        width: 30%;
+        text-align: center;
+        padding: 1rem;
+    }
+
+        .review-summary h1 {
+            font-size: 3rem;
+            margin: 0;
+            color: #344AEA;
+        }
+
+        .review-summary h5 {
+            font-size: 1rem;
+            color: #555;
+            margin-top: 0.5rem;
+        }
+
+    .spacer {
+        height: 2rem;
+    }
+
+    .show-all-btn {
+        margin-top: 1.5rem;
+        padding: 0.75rem 1.25rem;
+        background-color: #344AEA;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .show-all-btn:hover {
+            background-color: #2A3EC1;
+        }
+</style>
+
+<h1 class="review-heading">Learner Reviews</h1>
+
+<div class="review-section">
+    <!-- Left: Horizontal Scrollable Review Cards -->
+    <div class="review-cards-wrapper">
+        <div class="review-cards-scroll">
+            @* Example static review cards *@
+            @for (int i = 0; i < 5; i++)
+            {
+                <div class="review-card">
+                    <div class="review-card-top">
+                        <div class="review-user">
+                            <img src="/assets/Users/user@(i + 1).png" class="review-avatar" />
+                            <div>
+                                <h4 class="review-name">User Name @(i + 1)</h4>
+                                <div class="review-stars">
+                                    @for (int star = 1; star <= 5; star++)
+                                    {
+                                        <span class="star @(star <= 4 ? "filled" : "")">&#9733;</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-date">
+                            <p>June 18, 2025</p>
+                        </div>
+                    </div>
+                    <p class="review-text">
+                        This course was incredibly helpful. The instructions were clear, and I really enjoyed learning through the hands-on project.
+                    </p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right: Summary + Button -->
+    <div class="review-summary">
+        <h1>@Model.Rating</h1>
+        <div class="review-stars">
+            @{
+                var rating = Math.Round(double.Parse(Model.Rating));
+                for (int i = 1; i <= 5; i++)
+                {
+                    <span class="star @(i <= rating ? "filled" : "")">&#9733;</span>
+                }
+            }
+        </div>
+        <h5>Average Rating</h5>
+
+        <div class="spacer"></div>
+
+        <h1>108</h1> @* Placeholder for @Model.TotalReviews *@
+        <h5>Reviews</h5>
+
+        <button class="show-all-btn" onclick="openReviewModal()">Show All Reviews</button>
+    </div>
+</div>

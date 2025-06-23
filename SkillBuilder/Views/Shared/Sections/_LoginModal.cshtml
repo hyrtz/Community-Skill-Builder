@@ -1,0 +1,112 @@
+﻿<!-- Login Modal -->
+
+<style>
+    /* ========== LOGIN MODAL ========== */
+
+    .password-wrapper input {
+        margin-bottom: 0 !important;
+    }
+
+    .password-wrapper {
+        margin-bottom: 1rem;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 0.75rem;
+        cursor: pointer;
+        user-select: none;
+        font-size: 1.2rem;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .forgot-password {
+        font-size: 0.7rem;
+        margin-bottom: 1.5rem;
+        text-align: right;
+    }
+
+    .login-btn:enabled {
+        background-color: #0056b3;
+        color: white;
+        cursor: pointer;
+    }
+
+    .signup-redirect {
+        font-size: 0.8rem;
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+</style>
+
+<div id="login-modal" class="auth-modal">
+    <div class="auth-modal-container">
+        <!-- Left Side (Image) -->
+        <div class="auth-modal-left">
+            <img src="~/assets/Background Pics/LogInBG.png" />
+        </div>
+
+        <!-- Right Side (Form) -->
+        <div class="auth-modal-right">
+            <span class="auth-close-btn" onclick="closeModal('login-modal', true)">&times;</span>
+
+            <!-- Container for login-related elements -->
+            <div id="login-main-content">
+                <h2>Log in to <span style="color: #364BE9">Tahi</span></h2>
+
+                <!-- Social Login Buttons -->
+                <div class="social-login">
+                    <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
+                    <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+                </div>
+
+                <!-- Separator -->
+                <div class="separator"><span>or</span></div>
+
+                <!-- Login Form -->
+                <form id="login-form" oninput="checkLoginInputs()">
+                    <label for="email">Email</label>
+                    <input type="email" id="login-email" required />
+
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="login-password" required />
+                        <span class="toggle-password" onclick="togglePasswordVisibility('login-password', this)">👁️‍🗨️</span>
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="#" onclick="showForgotPasswordForm(event)">Forgot your password?</a>
+                    </div>
+
+                    <button type="submit" class="modal-btn login-btn" disabled>Log In</button>
+
+                    <p class="signup-redirect">Don't have an account yet? <a href="#" onclick="switchToSignup()">Sign up</a></p>
+                </form>
+            </div>
+
+            <!-- Forgot Password Form inserted here -->
+            <div id="forgot-password-form" style="display: none;">
+                <span class="auth-close-btn" onclick="closeModal('login-modal', true)">&times;</span>
+                <h2>Forgot Password</h2>
+                <p>Please enter your recovery email address below.</p>
+
+                <form onsubmit="handleRecovery(event)">
+                    <label for="recovery-email">Email</label>
+                    <input type="email" id="recovery-email" required />
+
+                    <button type="submit" class="modal-btn">Confirm Recovery Email</button>
+                </form>
+
+                <p class="signup-redirect">
+                    Remember your password? <a href="#" onclick="showLoginForm()">Back to Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

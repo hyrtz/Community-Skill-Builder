@@ -2,6 +2,99 @@
 
 <!-- Community Section -->
 
+<style>
+
+    .community-section {
+        scroll-margin-top: 74px;
+        padding: 40px 20px;
+        background-color: #F7F9FF;
+        text-align: center;
+    }
+
+    /* Header */
+    .community-header {
+        margin-top: 4rem;
+        margin-bottom: 4rem;
+    }
+
+        .community-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+        }
+
+        .community-header p {
+            max-width: 28rem;
+            font-size: 1.1rem;
+            color: #555;
+            margin: 0 auto;
+        }
+
+    /* Cards Container */
+    .community-cards {
+        column-count: 3;
+        column-gap: 0;
+        padding: 0;
+        margin: 2rem 20rem 2rem 20rem;
+    }
+
+    /* Individual Card */
+    .community-card {
+        background-color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid #364BE9;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: inline-block;
+        width: 90%;
+        box-sizing: border-box;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .community-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .community-card .comment {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: left;
+            word-wrap: break-word; /* Ensures long words wrap */
+            white-space: normal;
+        }
+
+    /* Footer: Avatar + Info */
+    .card-footer {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        margin-top: auto; /* Pushes footer to the bottom if content is short */
+    }
+
+        .card-footer .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+    .user-info h4 {
+        font-size: 1rem;
+        margin: 0;
+        color: #111;
+    }
+
+    .user-info span {
+        font-size: 0.9rem;
+        color: #666;
+    }
+</style>
+
 <section class="community-section" id="community">
     <div class="community-header">
         <h2>What Community Says</h2>

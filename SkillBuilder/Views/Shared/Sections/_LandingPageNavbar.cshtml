@@ -1,0 +1,42 @@
+﻿
+<nav class="custom-navbar">
+    <!-- Left: Logo and nav links -->
+    <div class="navbar-left">
+        <a asp-controller="Home" asp-action="Index" class="navbar-logo">tahi.</a>
+
+        <div class="navbar-item dropdown">
+            <button class="dropbtn" onclick="toggleDropdown()">Explore ▾</button>
+            <div id="exploreDropdown" class="dropdown-content">
+                <h5>Explore Courses</h5>
+                <a href="#">Paper Crafts</a>
+                <a href="#">Pottery</a>
+                <a href="#">Weaving</a>
+                <a href="#">Shoe Stitching</a>
+            </div>
+        </div>
+
+        <a href="#community" class="navbar-item">Community</a>
+    </div>
+
+    <!-- Center: Search -->
+    <div class="navbar-center">
+        <input type="text" class="search-bar-input" placeholder="Search courses" />
+        <button class="search-bar-button"><img src="/assets/icons/Search.ico" class="search-icon" /></button>
+    </div>
+
+    <!-- Right: Actions -->
+    <div class="navbar-right">
+        <a href="/notifications" class="navbar-item nav-notification-icon" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none");">
+            <img src="/assets/icons/Bell.ico" alt="Notifications" style="width: 2rem;" />
+        </a>
+        <a href="/profile" class="navbar-item nav-profile-icon" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none");">
+            <img src="/assets/icons/Profile.ico" alt="Profile" style="width: 2.7rem; border-radius: 50%;" />
+        </a>
+
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <a href="#" class="nav-login-btn">Log in</a>
+            <a href="#" class="nav-signup-btn">Sign up</a>
+        }
+    </div>
+</nav>

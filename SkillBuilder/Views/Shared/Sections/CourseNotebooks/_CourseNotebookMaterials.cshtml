@@ -1,0 +1,36 @@
+﻿@model SkillBuilder.Models.Course
+
+<style>
+    .tab-section {
+        padding: 2rem 40rem 2rem 0rem;
+    }
+
+    .materials-lessons-header {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #222;
+    }
+
+    .materials-lesson-item {
+        margin-left: 2rem;
+        padding: 1rem 0;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+        font-size: 1rem;
+        color: #333;
+    }
+
+        .materials-lesson-item:not(:first-child) {
+            border-top: none;
+        }
+</style>
+
+<div class="tab-section">
+    <h1 class="materials-lessons-header">Lessons</h1>
+    <div class="materials-lesson-item">M1: Introduction to @Model.Title</div>
+    <div class="materials-lesson-item">M2: Tools and Preparation</div>
+    <div class="materials-lesson-item">M3: Hands-on Techniques</div>
+    <div class="materials-lesson-item">M4: Crafting with Detail</div>
+    <div class="materials-lesson-item">Final Project Overview</div>
+</div>

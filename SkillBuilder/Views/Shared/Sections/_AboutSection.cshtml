@@ -2,6 +2,85 @@
 
 <!-- About Section -->
 
+<style>
+
+    .about-section {
+        scroll-margin-top: 74px;
+        text-align: center;
+        padding: 4rem 1rem 4rem 1rem;
+        background-color: #F7F9FF;
+    }
+
+    .about-content {
+        position: relative;
+        max-width: 88rem;
+        margin: 0 auto;
+    }
+
+        .about-content h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #344AEA;
+        }
+
+        .about-content h5 {
+            font-size: 0.9rem;
+            max-width: 50%;
+            color: #555;
+            text-align: center;
+            margin: 0 auto 4rem auto;
+        }
+
+    .features {
+        scroll-margin-top: 75px;
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        gap: 2rem;
+        margin: 0;
+        overflow-x: auto;
+    }
+
+    .feature-box {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        width: 35%;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+        cursor: pointer;
+    }
+
+        .feature-box:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+        }
+
+    .feature-icon {
+        width: 1.7rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        padding: 0.5rem;
+        box-sizing: content-box;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-box h3 {
+        margin: 1rem 0 0 0;
+    }
+
+    .feature-box p {
+        color: #333;
+    }
+
+</style>
+
 <section class="about-section" id="about">
     <div class="about-content">
         <h2>Bridging Tradition with Technology </h2>
