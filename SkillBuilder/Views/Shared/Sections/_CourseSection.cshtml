@@ -1,44 +1,141 @@
 ﻿@model List<SkillBuilder.Models.Course>
 
+@{
+    var isCatalog = ViewData["IsCatalogPage"] as bool? ?? false;
+}
+
 <!-- Course Section -->
+
+<style>
+
+
+    /* Courses Section */
+    .featured-courses-section {
+        scroll-margin-top: 74px;
+        padding: 4rem 2rem 6rem 2rem;
+        background-color: #f9f9f9;
+        text-align: center;
+    }
+
+    .section-header {
+        font-size: 2rem;
+        margin-top: 50px;
+        margin-bottom: 10px;
+        color: #344AEA;
+    }
+
+    .section-description {
+        font-size: 1rem;
+        margin-bottom: 40px;
+        color: #555;
+    }
+
+    .courses-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1.5rem;
+        margin: 4rem 10rem 4rem 10rem;
+    }
+
+    .course-card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        width: 28%;
+    }
+
+        .course-card-link:hover .course-card {
+            transform: scale(1.02);
+            transition: transform 0.3s ease;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+    .course-card {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+        .course-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+    .course-image {
+        background-size: cover;
+        background-position: center;
+        height: 15rem;
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+    }
+
+    .course-title {
+        font-size: 1.2rem;
+        margin: 1rem;
+        color: #333;
+    }
+
+    .course-description {
+        font-size: 0.9rem;
+        margin: 0 1rem 1rem 1rem;
+        color: #666;
+    }
+
+    .course-details {
+        display: flex;
+        justify-content: space-around;
+        padding: 16px;
+        border-top: 1px solid #eee;
+    }
+
+    .course-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .course-btn {
+        color: white;
+        background-color: #344AEA;
+        padding: 1rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .course-btn:hover {
+            color: #FFFF00;
+            background-color: #2A3EC1;
+        }
+
+</style>
 
 <section class="featured-courses-section" id="courses">
 
-    @* Search Section*@
-    @* <div class="course-filter-bar"> *@
-    @*     <div class="dropdown featured-dropdown"> *@
-    @*         <button class="dropdown-toggle">Featured ▾</button> *@
-    @*         <div class="dropdown-menu"> *@
-    @*             <a href="#">Most Popular</a> *@
-    @*             <a href="#">Newest</a> *@
-    @*             <a href="#">Top Rated</a> *@
-    @*         </div> *@
-    @*     </div> *@
-
-    @*     <div class="search-bar-wrapper"> *@
-    @*         <div class="search-bar"> *@
-    @*             <input type="text" placeholder="What do you want to learn?" class="search-input" /> *@
-    @*             <button class="search-button"><img src="/assets/icons/Search.ico" class="search-icon" /></button> *@
-    @*         </div> *@
-    @*     </div> *@
-
-    @*     <div class="dropdown filter-dropdown"> *@
-    @*         <button class="dropdown-toggle">Filter ▾</button> *@
-    @*         <div class="dropdown-menu"> *@
-    @*             <a href="#">Beginner</a> *@
-    @*             <a href="#">Intermediate</a> *@
-    @*             <a href="#">Advanced</a> *@
-    @*         </div> *@
-    @*     </div> *@
-    @* </div> *@
-
-    <h2 class="section-header">Featured Courses</h2>
-    <p class="section-description">Discover our most popular courses taught by master artisans and skilled instructors.</p>
+    @if (!isCatalog)
+    {
+        <h2 class="section-header">Featured Courses</h2>
+        <p class="section-description">Discover our most popular courses taught by master artisans and skilled instructors.</p>
+    }
+    else
+    {
+        <h1 class="section-header">Courses you might be interested in</h1>
+    }
 
     <div class="courses-container">
         @foreach (var course in Model)
         {
-            <a href="@course.Link" class="course-card-link">
+            <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="course-card-link">
                 <div class="course-card">
                     <div class="course-image" style="background-image: url('@course.ImageUrl');"></div>
                     <h3 class="course-title">@course.Title</h3>
@@ -62,6 +159,6 @@
         }
     </div>
 
-    <a href="#" class="course-btn">Click Here To See All Tahi Courses</a>
+    <a asp-controller="Courses" asp-action="CourseCatalog" class="course-btn">Click Here To See All Tahi Courses</a>
 
 </section>

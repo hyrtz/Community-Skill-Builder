@@ -1,0 +1,312 @@
+﻿<!-- Sign Up Modal -->
+
+<style>
+    .signup-description {
+        font-size: 0.7rem;
+        text-align: center;
+        margin-top: 1rem;
+        color: gray;
+        width: 70%;
+        margin: 2.5rem auto 0.5rem auto;
+    }
+
+    .signup-modal .terms {
+        font-size: 0.7rem;
+        color: #888;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .continue-email-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        padding: 0.75rem 1rem;
+        color: blue;
+        background-color: #fff;
+        cursor: pointer;
+        border: 0.5px solid blue;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        width: 100%;
+    }
+
+    .signup-modal .login-redirect {
+        font-size: 0.8rem;
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+        .signup-modal .login-redirect a {
+            color: #0055aa;
+            text-decoration: underline;
+        }
+
+    #email-verification-message {
+        padding: 2rem 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+        #email-verification-message h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #email-verification-message p {
+            margin-bottom: 0.5rem;
+        }
+
+    .match-message {
+        color: red;
+        font-size: 0.75rem;
+        margin-top: -0.5rem;
+        margin-bottom: 0.8rem;
+        display: none;
+    }
+
+    .password-requirements {
+        display: none;
+        font-size: 0.7rem;
+        margin-bottom: 1rem;
+        line-height: 1.2rem;
+        color: #666;
+    }
+
+    .requirement-text {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .checkbox-signup {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        color: #1a1a1a;
+        margin: 1.5rem 0;
+        line-height: 1.3rem;
+    }
+
+        .checkbox-signup p {
+            margin: 0;
+            line-height: 0.7rem;
+            font-size: 0.52rem;
+            font-weight: 600;
+        }
+
+        .checkbox-signup input[type="checkbox"] {
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+            margin-bottom: 0.2rem;
+        }
+
+        .checkbox-signup a {
+            color: #1a1a1a;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+    .checkbox-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .signup-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .signup-error-message {
+        font-size: 0.8rem;
+        text-align: center;
+        color: red;
+        margin-top: 0.5rem;
+        min-height: 1rem;
+    }
+
+    .back-social-btn {
+        position: absolute;
+        top: 1rem;
+        width: 2rem;
+        height: 2rem;
+        background-color: #e0e0e0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        z-index: 10;
+        left: 21.5rem;
+        text-align: center;
+        font-weight: bold;
+        padding: 0;
+        margin: 0;
+    }
+
+        .back-social-btn:hover {
+            color: red;
+        }
+
+    .signup-btn:enabled {
+        background-color: #0056b3;
+        color: white;
+        cursor: pointer;
+    }
+
+    #email-verification-message {
+        display: none;
+        padding: 2rem 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+        #email-verification-message h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #email-verification-message p {
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+    #skip-verification-btn {
+        margin-top: 1rem;
+        background-color: #364BE9;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        #skip-verification-btn:hover {
+            background-color: #253bbf;
+        }
+
+</style>
+
+<div id="signup-modal" class="auth-modal">
+    <div class="auth-modal-content auth-modal-container">
+        <span class="auth-close-btn" onclick="closeModal('signup-modal', true)">&times;</span>
+
+        <!-- Left panel for image or illustration -->
+        <div class="auth-modal-left">
+            <img src="~/assets/Background Pics/LogInBG.png" />
+        </div>
+
+        <!-- Right panel for form and buttons -->
+        <div class="auth-modal-right">
+            <h2 class="signup-header">Sign up to <span style="color: #364BE9">Tahi</span></h2>
+
+            <!-- Social login buttons -->
+            <div class="social-login">
+                <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
+                <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+            </div>
+
+            <!-- Separator -->
+            <div class="separator"><span>or</span></div>
+
+            <!-- Continue with Email Button -->
+            <button class="continue-email-btn" type="button" onclick="showSignupForm()">Continue with Email</button>
+
+            <!-- Hidden form initially -->
+            <form id="signup-form">
+
+                <button type="button" class="back-social-btn" onclick="resetSignupModalView()">←</button>
+
+                <div id="signup-inputs-wrapper">
+                    <label for="signup-firstname">First Name</label>
+                    <input type="text" id="signup-firstname" name="FirstName" required />
+
+                    <label for="signup-lastname">Last Name</label>
+                    <input type="text" id="signup-lastname" name="LastName" required />
+
+                    <label for="signup-email">Email Address</label>
+                    <input type="email" id="signup-email" name="Email" required />
+
+                    <div class="password-group">
+                        <label for="signup-password">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="signup-password" name="Password" required />
+                            <span class="toggle-password" onclick="togglePasswordVisibility('signup-password', this)">👁️‍🗨️</span>
+                        </div>
+
+                        <div id="password-requirements" class="password-requirements">
+                            <p id="req-uppercase" class="requirement-text" data-text="At least one upper case letter">❌ At least one upper case letter</p>
+                            <p id="req-number" class="requirement-text" data-text="At least one numeral (0–9)">❌ At least one numeral (0–9)</p>
+                            <p id="req-symbol" class="requirement-text" data-text="At least one symbol (!#^*_- etc.)">❌ At least one symbol (!#^*_- etc.)</p>
+                            <p id="req-length" class="requirement-text" data-text="Minimum 8 characters">❌ Minimum 8 characters</p>
+                        </div>
+
+                        <label for="signup-confirm">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="signup-confirm" name="ConfirmPassword" required />
+                            <span class="toggle-password" onclick="togglePasswordVisibility('signup-confirm', this)">👁️‍🗨️</span>
+                        </div>
+
+                        <p id="match-message" class="match-message">⚠️ Passwords do not match</p>
+                    </div>
+
+                    <div class="checkbox-signup">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="signup-agree" name="AgreeToTerms" />
+                            <span class="checkmark"></span>
+                        </label>
+                        <p>
+                            By creating an account you agree with our
+                            <a href="#">Terms of Service</a>,
+                            <a href="#">Privacy Policy</a>, and our default
+                            <a href="#">Notification Settings</a>.
+                        </p>
+                    </div>
+
+                    <button type="submit" class="modal-btn signup-btn" disabled>Create Account</button>
+
+                    <p class="signup-error-message" style="color: red; margin-top: 10px;"></p>
+
+                    <!-- Terms and privacy small text -->
+                    <p class="signup-description">
+                        By creating an account you agree with our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                    </p>
+
+                </div>
+
+                <div id="email-verification-message">
+                    <h3>Verify your email to continue</h3>
+                    <p>
+                        A verification link has been sent to <strong id="obfuscated-email"></strong>.<br>
+                        Please check your inbox and click the link to activate your account.
+                    </p>
+                    <p>
+                        Didn’t receive it? Try checking your spam folder.
+                    </p>
+                    <button id="skip-verification-btn" class="modal-btn">
+                        Do it later
+                    </button>
+                </div>
+
+            </form>
+
+            <p class="signup-redirect">
+                Already have an account? <a href="#" onclick="switchToLogin()">Log In</a>
+            </p>
+
+        </div>
+    </div>
+</div>

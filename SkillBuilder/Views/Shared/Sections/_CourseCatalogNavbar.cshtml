@@ -1,0 +1,68 @@
+﻿
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<style>
+    .navbar-center {
+        gap: 1.5rem;
+        justify-content: center;
+    }
+
+    /* Center nav items */
+    .navbar-item,
+    .navbar-itemn {
+        text-decoration: none;
+        color: #333;
+        font-size: 1rem;
+        font-weight: 500;
+        padding: 0.5rem;
+    }
+
+        .navbar-item:hover,
+        .navbar-itemn:hover {
+            color: blue;
+        }
+
+        .navbar-item.active-nav {
+            border-bottom: 2px solid #3182ce;
+            color: #3182ce;
+        }
+
+</style>
+<nav class="custom-navbar">
+    <!-- Left: Logo -->
+    <div class="navbar-left">
+        <a asp-controller="Home" asp-action="Index" class="navbar-logo">tahi.</a>
+    </div>
+
+    <!-- Center: Nav links -->
+    <div class="navbar-center">
+        <a asp-controller="Courses"
+           asp-action="CourseCatalog"
+           class="navbar-item @(currentController == "Courses" ? "active-nav" : "")">Courses ▾</a>
+
+        <a asp-controller="Community"
+           asp-action="CommunityHub"
+           class="navbar-item @(currentController == "Community" ? "active-nav" : "")">Community</a>
+
+        <a href="#resources" class="navbar-item">Resources</a>
+    </div>
+
+    <!-- Right: Login/Signup -->
+    <div class="navbar-right">
+        <a href="/notifications" class="navbar-item nav-notification-icon" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none");">
+            <img src="/assets/icons/Bell.ico" alt="Notifications" style="width: 2rem;" />
+        </a>
+        <a href="/profile" class="navbar-item nav-profile-icon" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none");">
+            <img src="/assets/icons/Profile.ico" alt="Profile" style="width: 2.7rem; border-radius: 50%;" />
+        </a>
+
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <a href="#" class="nav-login-btn">Log in</a>
+            <a href="#" class="nav-signup-btn">Sign up</a>
+        }
+    </div>
+</nav>

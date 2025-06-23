@@ -1,0 +1,31 @@
+﻿<!-- Video -->
+<div class="course-information-video" style="margin-bottom: 2rem;">
+    <video width="100%" height="auto" controls poster="@Model.Thumbnail">
+        <source src="@Url.Content(Model.Video)" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<!-- What You'll Learn -->
+<div class="course-information-learn">
+    <h1>What You'll Learn</h1>
+    <p>@Model.WhatToLearn</p>
+</div>
+
+<!-- Full Description -->
+<div class="course-information-description" style="margin-top: 2rem;">
+    <h1>Course Description</h1>
+    <p>@Model.FullDescription</p>
+</div>
+
+<!-- Project Details -->
+<div class="course-information-project" style="margin-top: 2rem;">
+    <h1>What is this course's project?</h1>
+    <p>@Model.ProjectDetails</p>
+</div>
+
+<!-- Requirements -->
+<div class="course-information-requirements" style="margin-top: 2rem;">
+    <h1>Requirements and Materials</h1>
+    <p>@Model.Requirements</p>
+</div>
