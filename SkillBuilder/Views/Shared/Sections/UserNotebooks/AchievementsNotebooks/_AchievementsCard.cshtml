@@ -1,0 +1,90 @@
+﻿@model SkillBuilder.Models.AchievementViewModel
+
+<style>
+    .achievement-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background-color: #f0f4ff;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        transition: 0.2s ease-in-out;
+    }
+
+        .achievement-card:hover {
+            transform: translateY(-2px);
+        }
+
+    .achievement-icon img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .achievement-info {
+        flex: 1;
+    }
+
+    .achievement-title {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #344AEA;
+    }
+
+    .achievement-condition {
+        margin: 0.3rem 0 0;
+        color: #555;
+        font-size: 0.95rem;
+    }
+
+    .achievement-status {
+        margin-left: auto;
+    }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+        .status-badge.pending {
+            background-color: #ffe9e9;
+            color: #c93030;
+        }
+
+        .status-badge.achieved {
+            background-color: #e6fbe9;
+            color: #28a745;
+        }
+
+    .achievement-card.achieved {
+        background-color: #e8fbe9;
+    }
+
+    .achievement-card.pending {
+        background-color: #f9f9f9;
+    }
+</style>
+
+<div class="achievement-card @((Model.IsAchieved ? "achieved" : "pending"))">
+    <div class="achievement-icon">
+        <img src="/assets/Icons/Medal.ico" alt="Achievement Icon" />
+    </div>
+    <div class="achievement-info">
+        <h4 class="achievement-title">@Model.Title</h4>
+        <p class="achievement-condition">@Model.Condition</p>
+    </div>
+    <div class="achievement-status">
+        @if (Model.IsAchieved)
+        {
+            <span class="status-badge achieved">Achieved</span>
+        }
+        else
+        {
+            <span class="status-badge pending">Pending</span>
+        }
+    </div>
+</div>

@@ -1,0 +1,182 @@
+﻿@model SkillBuilder.Models.ArtisanProfileViewModel
+
+@{
+    ViewData["Title"] = "Artisan Profile";
+    ViewData["UseCourseNavbar"] = true;
+}
+
+<style>
+    .artisan-profile {
+        display: flex;
+        align-items: flex-start; /* ensures top alignment */
+        gap: 3rem;
+        padding: 6rem 10rem;
+        background-color: #f9f9f9;
+    }
+
+    .artisan-left {
+        width: 30%;
+        background-color: #E0F2FF;
+        padding: 2rem;
+        border-radius: 1rem;
+        text-align: center;
+        height: auto; /* ensure height adjusts */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .artisan-avatar {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 100px;
+        margin-bottom: 1rem;
+    }
+
+    .artisan-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .artisan-profession {
+        font-size: 1rem;
+        color: #666;
+    }
+
+    .instructor-badge {
+        margin-top: 1.5rem;
+        background-color: #344AEA;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        display: inline-block;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+
+    /* Right Section */
+    .artisan-right {
+        width: 70%;
+    }
+
+    .artisan-section {
+        margin-bottom: 3rem;
+    }
+
+        .artisan-section h1 {
+            font-size: 2rem;
+            color: #344AEA;
+            margin-bottom: 1rem;
+        }
+
+        .artisan-section p {
+            font-size: 1rem;
+            color: #444;
+            line-height: 1.6;
+        }
+
+    /* My Work Gallery */
+    .artisan-gallery {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .gallery-img {
+        width: 200px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* My Courses */
+    .artisan-courses {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .course-card {
+        width: 30%;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s ease;
+    }
+
+        .course-card:hover {
+            transform: scale(1.03);
+        }
+
+        .course-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+    .course-card-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin: 1rem;
+        color: #333;
+    }
+
+    .course-card-desc {
+        font-size: 0.9rem;
+        margin: 0 1rem 1rem;
+        color: #555;
+    }
+</style>
+
+<div class="artisan-profile">
+    <!-- Left Section -->
+    <div class="artisan-left">
+        <img src="@(Model.Artisan.UserAvatar ?? "/assets/icons/Users.ico")" class="artisan-avatar" />
+        @if (Model.Artisan.User != null)
+        {
+            <div class="artisan-name">@Model.Artisan.User.FirstName @Model.Artisan.User.LastName</div>
+        }
+        <div class="artisan-profession">@Model.Artisan.Profession, @Model.Artisan.Hometown</div>
+        <div class="instructor-badge">Instructor</div>
+    </div>
+
+    <!-- Right Section -->
+    <div class="artisan-right">
+        <!-- About Me -->
+        <div class="artisan-section">
+            <h1>About Me</h1>
+            <p>@Model.Artisan.Introduction</p>
+        </div>
+
+        <!-- My Work -->
+        <div class="artisan-section">
+            <h1>My Work</h1>
+            <div class="artisan-gallery">
+                @foreach (var work in Model.ArtisanWorks)
+                {
+                    <img src="@work.ImageUrl" alt="@work.Caption" class="gallery-img" />
+                }
+            </div>
+        </div>
+
+        <!-- My Courses -->
+        <div class="artisan-section">
+            <h1>My Courses</h1>
+            <div class="artisan-courses">
+                @foreach (var course in Model.Courses)
+                {
+                    <a href="/Courses/@course.Link" class="course-card">
+                        <img src="@course.ImageUrl" alt="Course Image" />
+                        <div class="course-card-title">@course.Title</div>
+                        <div class="course-card-desc">@course.Description</div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -408,6 +408,39 @@ html {
         height: 1rem;
     }
 
+/* ========== FOR USER PROFILE CARD ALIGNMENT ========== */
+
+.courses-container.profile-layout {
+    margin: 3rem 0; /* top and bottom 3rem, left and right 0 */
+}
+
+.courses-container.profile-layout .course-card-link {
+    width: 31%;
+}
+
+.featured-courses-section.profile-layout {
+    padding: 2rem 2rem;
+}
+
+/* ========== NOTIFICATION ========== */
+
+.notification-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.notification-dropdown {
+    position: absolute;
+    right: 0;
+    top: 2.5rem;
+    background-color: white;
+    width: 250px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 0.5rem;
+    z-index: 1000;
+    padding: 1rem;
+}
+
 /* ========== FOOTER ========== */
 
 .footer-section {
@@ -495,4 +528,22 @@ html {
     align-items: center;
     font-size: 0.85rem;
     color: #cccccc;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.hide-force {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+
+/* ========== My Course Notebooks ========== */
+.course-tab-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
 }

@@ -7,6 +7,7 @@ namespace SkillBuilder.Models
         public string AdminId { get; set; }
         public string UserId { get; set; }
         public string Role { get; set; } = "Admin";
+        public string UserAvatar { get; set; }
 
         public User User { get; set; }
     }

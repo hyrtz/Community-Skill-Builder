@@ -1,0 +1,25 @@
+﻿@model SkillBuilder.Models.UserProfileViewModel
+
+@if (Model.Courses == null || !Model.Courses.Any())
+{
+    <p>No courses in progress yet.</p>
+}
+else
+{
+    <div class="course-tab-grid">
+        @foreach (var course in Model.Courses)
+        {
+            <!-- Later, filter by progress when implemented -->
+            <div class="course-card-link">
+                <div class="course-card">
+                    <div class="course-image" style="background-image: url('@course.ImageUrl');"></div>
+                    <h3 class="course-title">@course.Title</h3>
+                    <p class="course-description">@course.Description</p>
+                    <div class="course-details">
+                        <p>Progress: 0%</p> <!-- Placeholder for progress -->
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,71 @@
+﻿@model SkillBuilder.Models.UserProfileViewModel
+
+<style>
+    .notebook-section {
+        padding: 2rem 0;
+    }
+
+    .notebook-header {
+        font-size: 1.8rem;
+        color: #344AEA;
+        margin-bottom: 1.5rem;
+    }
+
+    .notebook-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .notebook-tab {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f0f0f0;
+        cursor: pointer;
+    }
+
+        .notebook-tab.active {
+            background-color: #344AEA;
+            color: white;
+            border-color: #344AEA;
+        }
+
+    .notebook-content {
+        padding: 1rem;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
+</style>
+
+<section class="notebook-section">
+    <h2 class="notebook-header">Achievements</h2>
+
+    <div class="notebook-tabs">
+        <div class="notebook-tab active" onclick="showAchievementTab('inProgress')">Pending</div>
+        <div class="notebook-tab" onclick="showAchievementTab('completed')">Achieved</div>
+    </div>
+
+    <div class="notebook-content" id="inProgressAchievements">
+        @await Html.PartialAsync("Sections/UserNotebooks/AchievementsNotebooks/_AchievementsNotebookPending", Model.Achievements)
+    </div>
+
+    <div class="notebook-content" id="completedAchievements" style="display: none;">
+        @await Html.PartialAsync("Sections/UserNotebooks/AchievementsNotebooks/_AchievementsNotebookAchieved", Model.Achievements)
+    </div>
+</section>
+
+<script>
+    function showAchievementTab(tab) {
+        document.getElementById("inProgressAchievements").style.display = tab === 'inProgress' ? 'block' : 'none';
+        document.getElementById("completedAchievements").style.display = tab === 'completed' ? 'block' : 'none';
+
+        const tabs = document.querySelectorAll('.notebook-tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        if (tab === 'inProgress') {
+            tabs[0].classList.add('active');
+        } else {
+            tabs[1].classList.add('active');
+        }
+    }
+</script>

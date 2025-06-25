@@ -1,0 +1,74 @@
+﻿@{
+    var activeTab = ViewData["ActiveCourseTab"] as string ?? "in-progress";
+}
+
+
+
+<style>
+    .course-tabs {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .course-tab {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .course-tab.active {
+            border-bottom: 3px solid #344AEA;
+            color: #344AEA;
+        }
+
+        .course-tab:hover {
+            color: #344AEA;
+        }
+
+    .course-tab-content .course-panel {
+        display: none;
+    }
+
+        .course-tab-content .course-panel.active {
+            display: block;
+        }
+</style>
+
+<h2 class="notebook-header">My Courses</h2>
+
+<div class="course-tabs">
+    <button class="course-tab @(activeTab == "in-progress" ? "active" : "")" data-tab="in-progress">In Progress</button>
+    <button class="course-tab @(activeTab == "completed" ? "active" : "")" data-tab="completed">Completed</button>
+</div>
+
+<div class="course-tab-content">
+    <div class="course-panel @(activeTab == "in-progress" ? "active" : "")" data-tab="in-progress">
+        @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookInProgress")
+    </div>
+    <div class="course-panel @(activeTab == "completed" ? "active" : "")" data-tab="completed">
+        @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookCompleted")
+    </div>
+</div>
+
+<script>
+    const courseTabs = document.querySelectorAll('.course-tab');
+    const coursePanels = document.querySelectorAll('.course-panel');
+
+    courseTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const selected = tab.dataset.tab;
+
+            courseTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            coursePanels.forEach(panel => {
+                panel.classList.toggle('active', panel.dataset.tab === selected);
+            });
+        });
+    });
+</script>
