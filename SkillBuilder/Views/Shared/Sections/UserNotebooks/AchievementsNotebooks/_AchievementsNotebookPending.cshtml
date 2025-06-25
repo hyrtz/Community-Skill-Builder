@@ -1,0 +1,6 @@
+﻿@model List<SkillBuilder.Models.AchievementViewModel>
+
+@foreach (var achievement in Model.Where(a => !a.IsAchieved))
+{
+    @await Html.PartialAsync("Sections/UserNotebooks/AchievementsNotebooks/_AchievementsCard", achievement)
+}

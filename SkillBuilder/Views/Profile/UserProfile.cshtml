@@ -1,0 +1,149 @@
+﻿@model SkillBuilder.Models.UserProfileViewModel
+@{
+    ViewData["Title"] = "User Profile";
+    ViewData["UseCourseNavbar"] = true;
+    ViewData["IsUserProfile"] = true;
+}
+
+<style>
+    .user-profile-section {
+        padding: 8rem 10rem 4rem;
+        background-color: #f9f9f9;
+    }
+
+    .user-profile-wrapper {
+        display: flex;
+        gap: 2.5rem;
+        align-items: flex-start;
+    }
+
+    .user-profile-sidebar {
+        width: 20%;
+        background-color: #E0F2FF;
+        padding: 2rem 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .user-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+    }
+
+    .user-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .user-email {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 1.5rem;
+    }
+
+    .user-nav-tabs {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .user-tab {
+        padding: 0.75rem;
+        border: none;
+        background-color: transparent;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        text-align: left;
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease;
+        color: #333;
+    }
+
+        .user-tab:hover {
+            background-color: #D6EBFF;
+        }
+
+        .user-tab.active {
+            border-left-color: #344AEA;
+            background-color: #D6EBFF;
+            color: #344AEA;
+        }
+
+    .user-profile-main {
+        flex: 1;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .tab-panel {
+        display: none;
+    }
+
+        .tab-panel.active {
+            display: block;
+        }
+</style>
+
+<section class="user-profile-section">
+    <div class="user-profile-wrapper">
+
+        <!-- Sidebar -->
+        <div class="user-profile-sidebar">
+            <img src="@Model.User.UserAvatar" class="user-avatar" />
+            <div class="user-name">@Model.User.FirstName @Model.User.LastName</div>
+            <div class="user-email">@Model.User.Email</div>
+
+            <div class="user-nav-tabs">
+                <button class="user-tab active" data-tab="dashboard">Dashboard</button>
+                <button class="user-tab" data-tab="courses">My Courses</button>
+                <button class="user-tab" data-tab="projects">Projects</button>
+                <button class="user-tab" data-tab="achievements">Achievements</button>
+            </div>
+        </div>
+
+        <!-- Main Panel -->
+        <div class="user-profile-main">
+            <div class="tab-panel active" data-tab="dashboard">
+                @Html.Partial("Sections/UserNotebooks/_UserNotebookDashboard", Model)
+            </div>
+            <div class="tab-panel" data-tab="courses">
+                @Html.Partial("Sections/UserNotebooks/_UserNotebookMyCourses", Model)
+            </div>
+            <div class="tab-panel" data-tab="projects">
+                @Html.Partial("Sections/UserNotebooks/_UserNotebookProjects", Model.SubmittedProjects)
+            </div>
+            <div class="tab-panel" data-tab="achievements">
+                @Html.Partial("Sections/UserNotebooks/_UserNotebookAchievements", Model)
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const userTabs = document.querySelectorAll(".user-tab");
+    const tabPanels = document.querySelectorAll(".tab-panel");
+
+    userTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            // Update active tab
+            userTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            // Update panel visibility
+            const selected = tab.getAttribute("data-tab");
+            tabPanels.forEach(panel => {
+                panel.classList.toggle("active", panel.getAttribute("data-tab") === selected);
+            });
+        });
+    });
+</script>

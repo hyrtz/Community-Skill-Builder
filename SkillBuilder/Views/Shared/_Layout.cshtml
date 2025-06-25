@@ -100,17 +100,21 @@
             const dropdown = document.getElementById("exploreDropdown");
             const button = document.querySelector(".dropbtn");
 
+            if (!dropdown || !button) return; // guard clause
+
             const isOpen = dropdown.classList.contains("show");
 
             dropdown.classList.toggle("show");
-            button.classList.toggle("active", !isOpen); // apply active only when opening
+            button.classList.toggle("active", !isOpen);
         }
 
         document.addEventListener("click", function (event) {
-            const button = event.target.closest(".dropbtn");
             const dropdown = document.getElementById("exploreDropdown");
 
-            // Clicked outside both button and dropdown
+            if (!dropdown) return; // dropdown doesn't exist on this page
+
+            const button = event.target.closest(".dropbtn");
+
             if (!button && !event.target.closest(".dropdown")) {
                 dropdown.classList.remove("show");
                 document.querySelector(".dropbtn")?.classList.remove("active");

@@ -613,5 +613,7 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\ne
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\SkillBui.B2448FA2.Up2Date
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.genruntimeconfig.cache
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\ref\SkillBuilder.dll
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\kui8okoj2m-l8ss533dz8.gz
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\gwr47kqyb5-2atyak4kc4.gz
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\mna1ntk3db-swlysa4uho.gz
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\gwr47kqyb5-ggjhka97un.gz
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\kui8okoj2m-w7qs4dng7h.gz
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\rhqh4krk5s-zu6ij7x9ur.gz

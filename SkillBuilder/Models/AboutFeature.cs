@@ -1,11 +1,19 @@
-﻿namespace SkillBuilder.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SkillBuilder.Models
 {
     public class AboutFeature
     {
-        public string Title { get; set; }
-        public string Description { get; set; }
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
         public string IconPath { get; set; }
 
+        [Required]
+        public string Title { get; set; }
 
+        [Required]
+        public string Description { get; set; }
     }
 }

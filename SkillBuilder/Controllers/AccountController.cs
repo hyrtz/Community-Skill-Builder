@@ -28,7 +28,14 @@ namespace SkillBuilder.Controllers
         public async Task<IActionResult> Signup([FromBody] SignupRequest model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(new { message = "Invalid signup data." });
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(new { message = string.Join(" ", errors) });
+            }
 
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
             if (existingUser != null)
@@ -43,7 +50,8 @@ namespace SkillBuilder.Controllers
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
                 Role = "Learner",
                 CreatedAt = DateTime.UtcNow,
-                IsVerified = false // just to be explicit
+                IsVerified = false, // just to be explicit
+                UserAvatar = "/assets/Avatar/Sample10.svg"
             };
 
             _context.Users.Add(newUser);
@@ -53,6 +61,7 @@ namespace SkillBuilder.Controllers
 
             var claims = new List<Claim>
             {
+                new Claim("UserId", newUser.Id),
                 new Claim(ClaimTypes.NameIdentifier, newUser.Id),
                 new Claim(ClaimTypes.Name, newUser.FirstName + " " + newUser.LastName),
                 new Claim(ClaimTypes.Email, newUser.Email),
@@ -61,6 +70,8 @@ namespace SkillBuilder.Controllers
 
             var identity = new ClaimsIdentity(claims, "TahiAuth");
             var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync("TahiAuth", principal);
 
             return Ok(new { message = "Account created. Please check your email to verify." });
         }
@@ -137,6 +148,7 @@ namespace SkillBuilder.Controllers
 
             var claims = new List<Claim>
             {
+                new Claim("UserId", user.Id),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
                 new Claim(ClaimTypes.Email, user.Email),
@@ -186,6 +198,42 @@ namespace SkillBuilder.Controllers
         {
             await HttpContext.SignOutAsync("TahiAuth");
             return Redirect("/");
+        }
+
+        [HttpPost("/login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Invalid input." });
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
+            {
+                return Unauthorized(new { message = "Invalid email or password." });
+            }
+
+            if (!user.IsVerified)
+            {
+                return Unauthorized(new { message = "Please verify your email first." });
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim("UserId", user.Id),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
+
+            var identity = new ClaimsIdentity(claims, "TahiAuth");
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync("TahiAuth", principal);
+
+            return Ok(new { message = "Login successful." });
         }
 
         [HttpPost("/logout")]

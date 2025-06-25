@@ -1,4 +1,8 @@
 ﻿
+@{
+    var userId = User.FindFirst("UserId")?.Value;
+}
+
 <nav class="custom-navbar">
     <!-- Left: Logo and nav links -->
     <div class="navbar-left">
@@ -26,12 +30,23 @@
 
     <!-- Right: Actions -->
     <div class="navbar-right">
-        <a href="/notifications" class="navbar-item nav-notification-icon" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none");">
-            <img src="/assets/icons/Bell.ico" alt="Notifications" style="width: 2rem;" />
-        </a>
-        <a href="/profile" class="navbar-item nav-profile-icon" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none");">
-            <img src="/assets/icons/Profile.ico" alt="Profile" style="width: 2.7rem; border-radius: 50%;" />
-        </a>
+        <div class="notification-wrapper">
+            <a href="javascript:void(0);" class="navbar-item nav-notification-icon" onclick="toggleNotificationDropdown()" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none")">
+                <img src="/assets/icons/Bell.ico" style="width: 2rem;" />
+            </a>
+            <div id="notificationDropdown" class="notification-dropdown" style="display: none;">
+                <h5>Notifications</h5>
+                <p style="padding: 0.5rem;">No notifications at the moment.</p>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(userId))
+        {
+            <a href="/UserProfile/@userId" class="navbar-item nav-profile-icon"
+               style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none")">
+                <img src="/assets/icons/Profile.ico" alt="Profile" style="width: 2.7rem; border-radius: 50%;" />
+            </a>
+        }
 
         @if (!User.Identity.IsAuthenticated)
         {
@@ -40,3 +55,10 @@
         }
     </div>
 </nav>
+
+<script>
+        function toggleNotificationDropdown() {
+        const dropdown = document.getElementById("notificationDropdown");
+        dropdown.style.display = dropdown.style.display === "none" || dropdown.style.display === "" ? "block" : "none";
+    }
+</script>

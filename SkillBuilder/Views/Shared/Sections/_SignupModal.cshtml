@@ -43,23 +43,6 @@
             text-decoration: underline;
         }
 
-    #email-verification-message {
-        padding: 2rem 1rem;
-        text-align: center;
-        font-size: 0.9rem;
-        color: #333;
-    }
-
-        #email-verification-message h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        #email-verification-message p {
-            margin-bottom: 0.5rem;
-        }
-
     .match-message {
         color: red;
         font-size: 0.75rem;
@@ -121,6 +104,9 @@
     .signup-header {
         font-size: 1.5rem;
         font-weight: bold;
+        text-align: center;
+        width: 100%;
+        margin: 0 auto;
     }
 
     .signup-error-message {
@@ -157,10 +143,16 @@
             color: red;
         }
 
-    .signup-btn:enabled {
+    .modal-btn:enabled {
         background-color: #0056b3;
         color: white;
         cursor: pointer;
+    }
+
+    .modal-btn:disabled {
+        background-color: #ccc;
+        color: #666;
+        cursor: not-allowed;
     }
 
     #email-verification-message {
@@ -197,7 +189,7 @@
         #skip-verification-btn:hover {
             background-color: #253bbf;
         }
-
+    
 </style>
 
 <div id="signup-modal" class="auth-modal">
@@ -233,9 +225,11 @@
                 <div id="signup-inputs-wrapper">
                     <label for="signup-firstname">First Name</label>
                     <input type="text" id="signup-firstname" name="FirstName" required />
-
+                    <span id="firstname-error" class="text-sm text-red-500"></span>
+                    
                     <label for="signup-lastname">Last Name</label>
                     <input type="text" id="signup-lastname" name="LastName" required />
+                    <span id="lastname-error" class="text-sm text-red-500"></span>
 
                     <label for="signup-email">Email Address</label>
                     <input type="email" id="signup-email" name="Email" required />
@@ -276,32 +270,31 @@
                         </p>
                     </div>
 
-                    <button type="submit" class="modal-btn signup-btn" disabled>Create Account</button>
+                    <button type="submit" class="modal-btn" id="signup-submit-btn" disabled>Create Account</button>
 
-                    <p class="signup-error-message" style="color: red; margin-top: 10px;"></p>
+                    <p class="signup-error-message" style="color: red; margin-top: 10px; text-align: center;"></p>
 
-                    <!-- Terms and privacy small text -->
                     <p class="signup-description">
                         By creating an account you agree with our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
                     </p>
 
                 </div>
 
-                <div id="email-verification-message">
-                    <h3>Verify your email to continue</h3>
-                    <p>
-                        A verification link has been sent to <strong id="obfuscated-email"></strong>.<br>
-                        Please check your inbox and click the link to activate your account.
-                    </p>
-                    <p>
-                        Didn’t receive it? Try checking your spam folder.
-                    </p>
-                    <button id="skip-verification-btn" class="modal-btn">
-                        Do it later
-                    </button>
-                </div>
-
             </form>
+
+            <div id="email-verification-message">
+                <h3>Verify your email to continue</h3>
+                <p>
+                    A verification link has been sent to <strong id="obfuscated-email"></strong>.<br>
+                    Please check your inbox and click the link to activate your account.
+                </p>
+                <p>
+                    Didn’t receive it? Try checking your spam folder.
+                </p>
+                <button id="skip-verification-btn" class="modal-btn">
+                    Do it later
+                </button>
+            </div>
 
             <p class="signup-redirect">
                 Already have an account? <a href="#" onclick="switchToLogin()">Log In</a>

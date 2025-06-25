@@ -2,6 +2,7 @@
 
 @{
     var isCatalog = ViewData["IsCatalogPage"] as bool? ?? false;
+    var isUserProfile = ViewData["IsUserProfile"] as bool? ?? false;
 }
 
 <!-- Course Section -->
@@ -19,9 +20,7 @@
 
     .section-header {
         font-size: 2rem;
-        margin-top: 50px;
         margin-bottom: 10px;
-        color: #344AEA;
     }
 
     .section-description {
@@ -120,9 +119,13 @@
 
 </style>
 
-<section class="featured-courses-section" id="courses">
+<section class="featured-courses-section @(ViewData["IsUserProfile"] as bool? == true ? "profile-layout" : "")" id="courses">
 
-    @if (!isCatalog)
+    @if (ViewData["IsUserProfile"] as bool? == true)
+    {
+        <h2 class="section-header">Recommended just for you</h2>
+    }
+    else if (!isCatalog)
     {
         <h2 class="section-header">Featured Courses</h2>
         <p class="section-description">Discover our most popular courses taught by master artisans and skilled instructors.</p>
@@ -132,7 +135,7 @@
         <h1 class="section-header">Courses you might be interested in</h1>
     }
 
-    <div class="courses-container">
+    <div class="courses-container @(ViewData["IsUserProfile"] as bool? == true ? "profile-layout" : "")">
         @foreach (var course in Model)
         {
             <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="course-card-link">
@@ -142,16 +145,16 @@
                     <p class="course-description">@course.Description</p>
                     <div class="course-details">
                         <div class="course-detail">
-                            <img src="@course.DurationIcon" class="detail-icon" />
+                            <img src="/assets/Icons/Time.ico" class="detail-icon" />
                             <p>@course.Duration</p>
                         </div>
                         <div class="course-detail">
-                            <img src="@course.UsersIcon" class="detail-icon" />
-                            <p>@course.Users enrolled</p>
+                            <img src="/assets/Icons/Users.ico" class="detail-icon" />
+                            <span>@course.UserCount</span>
                         </div>
                         <div class="course-detail">
-                            <img src="@course.RatingIcon" class="detail-icon" />
-                            <p>@course.Rating/5</p>
+                            <img src="/assets/Icons/Star.ico" class="detail-icon" />
+                            <span>@course.AverageRating.ToString("0.0")</span>
                         </div>
                     </div>
                 </div>

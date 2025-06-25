@@ -155,10 +155,10 @@
 
     <!-- Right: Summary + Button -->
     <div class="review-summary">
-        <h1>@Model.Rating</h1>
+        <h1>@Model.AverageRating</h1>
         <div class="review-stars">
             @{
-                var rating = Math.Round(double.Parse(Model.Rating));
+                var rating = Math.Round(Model.AverageRating);
                 for (int i = 1; i <= 5; i++)
                 {
                     <span class="star @(i <= rating ? "filled" : "")">&#9733;</span>

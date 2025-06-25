@@ -1,0 +1,25 @@
+﻿@model List<SkillBuilder.Models.Course>
+
+<div class="keep-learning-section">
+    <div class="header">
+        <h3>Keep Learning</h3>
+        <a href="#">View all courses in progress <span>→</span></a>
+    </div>
+
+    @foreach (var course in Model)
+    {
+        <div class="course-progress-card">
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: 92%;"></div>
+                <span class="progress-label">92%</span>
+            </div>
+
+            <div class="course-content">
+                <p class="label">Course</p>
+                <h4>@course.Title</h4>
+                <p class="desc">@course.Description</p>
+                <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="resume-btn">Resume <span>→</span></a>
+            </div>
+        </div>
+    }
+</div>
