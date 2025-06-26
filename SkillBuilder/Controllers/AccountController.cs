@@ -243,22 +243,5 @@ namespace SkillBuilder.Controllers
             return Redirect("/");
         }
 
-        [HttpPost("SaveInterests")]
-        public IActionResult SaveInterests([FromBody] InterestSelectionDto data)
-        {
-            var user = _context.Users.FirstOrDefault(u => u.Id == data.UserId);
-            if (user == null) return NotFound();
-
-            user.SelectedInterests = string.Join(",", data.Interests);
-            _context.SaveChanges();
-
-            return Ok();
-        }
-
-        public class InterestSelectionDto
-        {
-            public string UserId { get; set; }
-            public List<string> Interests { get; set; }
-        }
     }
 }

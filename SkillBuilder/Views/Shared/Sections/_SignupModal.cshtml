@@ -189,6 +189,15 @@
         #skip-verification-btn:hover {
             background-color: #253bbf;
         }
+
+    .text-error {
+        color: red;
+        font-size: 0.75rem;
+        margin-top: -0.5rem;
+        margin-bottom: 0.8rem;
+        display: block;
+        font-weight: 500;
+    }
     
 </style>
 
@@ -225,11 +234,11 @@
                 <div id="signup-inputs-wrapper">
                     <label for="signup-firstname">First Name</label>
                     <input type="text" id="signup-firstname" name="FirstName" required />
-                    <span id="firstname-error" class="text-sm text-red-500"></span>
+                    <span id="firstname-error" class="text-error"></span>
                     
                     <label for="signup-lastname">Last Name</label>
                     <input type="text" id="signup-lastname" name="LastName" required />
-                    <span id="lastname-error" class="text-sm text-red-500"></span>
+                    <span id="lastname-error" class="text-error"></span>
 
                     <label for="signup-email">Email Address</label>
                     <input type="email" id="signup-email" name="Email" required />

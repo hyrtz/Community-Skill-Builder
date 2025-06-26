@@ -12,8 +12,8 @@ using SkillBuilder.Data;
 namespace SkillBuilder.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250625044348_AddedProjectSubmissions")]
-    partial class AddedProjectSubmissions
+    [Migration("20250626015520_AddCourseProgress")]
+    partial class AddCourseProgress
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -163,6 +163,44 @@ namespace SkillBuilder.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.ArtisanApplication", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AboutArtisan")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Hometown")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Profession")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ArtisanApplications");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.ArtisanWork", b =>
                 {
                     b.Property<int>("Id")
@@ -285,6 +323,43 @@ namespace SkillBuilder.Migrations
                             Name = "Kim Navarro",
                             Role = "Researcher"
                         });
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.CommunityPost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("CommunityPosts");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CommunityTestimonial", b =>
@@ -425,6 +500,9 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Level")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -474,13 +552,14 @@ namespace SkillBuilder.Migrations
                             Duration = "15 hours",
                             FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.",
                             ImageUrl = "/assets/Courses Pics/Pottery.png",
+                            IsPublished = false,
                             Level = "Beginner",
                             Link = "pottery",
                             ProjectDetails = "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.",
                             Requirements = "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.",
                             Thumbnail = "/assets/Courses Pics/Pottery.png",
                             Title = "Pottery",
-                            Video = "/wwwroot/assets/Videos/Pottery.mp4",
+                            Video = "/assets/Videos/Pottery.mp4",
                             WhatToLearn = "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques."
                         },
                         new
@@ -493,13 +572,14 @@ namespace SkillBuilder.Migrations
                             Duration = "29 hours",
                             FullDescription = "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.",
                             ImageUrl = "/assets/Courses Pics/Woodcarving.png",
+                            IsPublished = false,
                             Level = "Intermediate",
                             Link = "woodcarving",
                             ProjectDetails = "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.",
                             Requirements = "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).",
                             Thumbnail = "/assets/Courses Pics/Woodcarving.png",
                             Title = "Woodcarving",
-                            Video = "/wwwroot/assets/Videos/Wood Carving.mp4",
+                            Video = "/assets/Videos/Wood Carving.mp4",
                             WhatToLearn = "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing."
                         },
                         new
@@ -512,15 +592,53 @@ namespace SkillBuilder.Migrations
                             Duration = "18 hours",
                             FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.",
                             ImageUrl = "/assets/Courses Pics/Weaving.png",
+                            IsPublished = false,
                             Level = "Professional",
                             Link = "weaving",
                             ProjectDetails = "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.",
                             Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
                             Thumbnail = "/assets/Courses Pics/Weaving.png",
                             Title = "Weaving",
-                            Video = "/wwwroot/assets/Videos/Weaving.mp4",
+                            Video = "/assets/Videos/Weaving.mp4",
                             WhatToLearn = "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation."
                         });
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.CourseModule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VideoUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CourseModules");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CourseProjectSubmission", b =>
@@ -586,6 +704,35 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("CourseReviews");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Comment = "An excellent course! The mentor was very knowledgeable.",
+                            CourseId = 1,
+                            CreatedAt = new DateTime(2024, 6, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Rating = 5,
+                            UserId = "A1111111"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Comment = "Really enjoyed learning pottery. A few lessons were a bit fast though.",
+                            CourseId = 1,
+                            CreatedAt = new DateTime(2024, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Rating = 4,
+                            UserId = "A1111111"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Comment = "Very hands-on and engaging! Perfect for intermediate learners.",
+                            CourseId = 3,
+                            CreatedAt = new DateTime(2024, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Rating = 5,
+                            UserId = "A1111111"
+                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.Enrollment", b =>
@@ -613,6 +760,39 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Enrollments");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.ModuleProgress", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CourseModuleId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseModuleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ModuleProgress");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.User", b =>
@@ -695,6 +875,17 @@ namespace SkillBuilder.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.ArtisanApplication", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.ArtisanWork", b =>
                 {
                     b.HasOne("SkillBuilder.Models.Artisan", "Artisan")
@@ -706,6 +897,17 @@ namespace SkillBuilder.Migrations
                     b.Navigation("Artisan");
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.CommunityPost", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.Course", b =>
                 {
                     b.HasOne("SkillBuilder.Models.Artisan", "Artisan")
@@ -715,6 +917,17 @@ namespace SkillBuilder.Migrations
                         .IsRequired();
 
                     b.Navigation("Artisan");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.CourseModule", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CourseProjectSubmission", b =>
@@ -774,6 +987,25 @@ namespace SkillBuilder.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.ModuleProgress", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.CourseModule", "CourseModule")
+                        .WithMany("Progresses")
+                        .HasForeignKey("CourseModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SkillBuilder.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CourseModule");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.Artisan", b =>
                 {
                     b.Navigation("Courses");
@@ -788,6 +1020,11 @@ namespace SkillBuilder.Migrations
                     b.Navigation("ProjectSubmissions");
 
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.CourseModule", b =>
+                {
+                    b.Navigation("Progresses");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.User", b =>

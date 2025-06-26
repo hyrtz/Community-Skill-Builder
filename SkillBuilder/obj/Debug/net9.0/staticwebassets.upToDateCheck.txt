@@ -1,4 +1,5 @@
 wwwroot\assets\Avatar\Sample1.ico
+wwwroot\assets\Avatar\Sample10.svg
 wwwroot\assets\Avatar\Sample2.ico
 wwwroot\assets\Avatar\Sample3.ico
 wwwroot\assets\Avatar\Sample4.ico
@@ -16,16 +17,19 @@ wwwroot\assets\Community Pics\CompleteWoodcarving.png
 wwwroot\assets\Courses Pics\Pottery.png
 wwwroot\assets\Courses Pics\Weaving.png
 wwwroot\assets\Courses Pics\Woodcarving.png
+wwwroot\assets\css\style.css
 wwwroot\assets\Icons\Bell.ico
 wwwroot\assets\Icons\Community.ico
 wwwroot\assets\Icons\Course.ico
 wwwroot\assets\Icons\Download.ico
+wwwroot\assets\Icons\Medal.ico
 wwwroot\assets\Icons\Profile.ico
 wwwroot\assets\Icons\Search.ico
 wwwroot\assets\Icons\Sessions.ico
 wwwroot\assets\Icons\Star.ico
 wwwroot\assets\Icons\Time.ico
 wwwroot\assets\Icons\Users.ico
+wwwroot\assets\js\script.js
 wwwroot\assets\Logos\Facebook.svg
 wwwroot\assets\Logos\FacebookLogo.svg
 wwwroot\assets\Logos\Gmail.svg
@@ -36,9 +40,10 @@ wwwroot\assets\Logos\Twitter.svg
 wwwroot\assets\Videos\Pottery.mp4
 wwwroot\assets\Videos\Weaving.mp4
 wwwroot\assets\Videos\Wood Carving.mp4
-wwwroot\assets\css\style.css
+wwwroot\assets\Works\JuanWorks1.png
+wwwroot\assets\Works\JuanWorks2.png
+wwwroot\assets\Works\JuanWorks3.png
 wwwroot\favicon.ico
-wwwroot\assets\js\script.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
@@ -99,11 +104,6 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\assets\Works\JuanWorks1.png
-wwwroot\assets\Works\JuanWorks2.png
-wwwroot\assets\Works\JuanWorks3.png
-wwwroot\assets\Avatar\Sample10.svg
-wwwroot\assets\Icons\Medal.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\LICENSE.txt
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\dist\jquery.slim.min.map
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\dist\jquery.slim.min.js

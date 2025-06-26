@@ -1,25 +1,128 @@
-﻿@model List<SkillBuilder.Models.Course>
+﻿@model List<SkillBuilder.Models.ViewModels.CourseProgressViewModel>
+
+<style>
+    .keep-learning-section {
+        margin-bottom: 4rem;
+    }
+
+    .keep-learning-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+        .keep-learning-header h2 {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #111;
+        }
+
+        .keep-learning-header a {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #344AEA;
+            text-decoration: none;
+        }
+
+    .course-progress-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .progress-bar-container {
+        background-color: #e6edff;
+        height: 14px;
+        position: relative;
+    }
+
+    .progress-bar-fill {
+        background-color: #344AEA;
+        height: 100%;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+        text-align: right;
+        color: white;
+        font-size: 0.75rem;
+        line-height: 14px;
+        padding-right: 6px;
+        font-weight: 600;
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+
+        .card-content h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #222;
+            font-weight: 700;
+        }
+
+        .card-content small {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-content p {
+            font-size: 0.95rem;
+            color: #444;
+            margin-top: 0.5rem;
+        }
+
+    .card-resume-button {
+        background-color: #344AEA;
+        color: white;
+        width: 100%;
+        text-align: center;
+        padding: 1rem;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .card-resume-button:hover {
+            background-color: #1f36b6;
+        }
+</style>
 
 <div class="keep-learning-section">
-    <div class="header">
-        <h3>Keep Learning</h3>
-        <a href="#">View all courses in progress <span>→</span></a>
+    <div class="keep-learning-header">
+        <h2>Keep Learning</h2>
+        <a asp-controller="UserProfile" asp-action="Courses" asp-route-id="@Model.FirstOrDefault()?.UserId">
+            View all courses in progress &rarr;
+        </a>
     </div>
 
     @foreach (var course in Model)
     {
+        var progress = Math.Round(course.ProgressPercentage, 0);
         <div class="course-progress-card">
+            <!-- Progress Bar -->
             <div class="progress-bar-container">
-                <div class="progress-bar" style="width: 92%;"></div>
-                <span class="progress-label">92%</span>
+                <div class="progress-bar-fill" style="width:@progress%">@($"{progress}%")</div>
             </div>
 
-            <div class="course-content">
-                <p class="label">Course</p>
-                <h4>@course.Title</h4>
-                <p class="desc">@course.Description</p>
-                <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="resume-btn">Resume <span>→</span></a>
+            <!-- Course Info -->
+            <div class="card-content">
+                <small>Course</small>
+                <h4>@course.CourseTitle</h4>
+                <p>@course.CourseDescription</p>
             </div>
+
+            <!-- Resume Button -->
+            <form asp-controller="Courses" asp-action="CourseModule" asp-route-id="@course.CourseId" method="get">
+                <button type="submit" class="card-resume-button">Resume</button>
+            </form>
         </div>
     }
 </div>

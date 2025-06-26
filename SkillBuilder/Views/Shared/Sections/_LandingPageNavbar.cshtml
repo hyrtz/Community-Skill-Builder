@@ -1,6 +1,14 @@
 ﻿
 @{
     var userId = User.FindFirst("UserId")?.Value;
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    string profileUrl = userRole switch
+    {
+        "Learner" => $"/UserProfile/{userId}",
+        "Artisan" => $"/ArtisanProfile/{userId}",
+        "Admin" => $"/AdminProfile/{userId}",
+        _ => "#"
+    };
 }
 
 <nav class="custom-navbar">
@@ -42,7 +50,7 @@
 
         @if (!string.IsNullOrEmpty(userId))
         {
-            <a href="/UserProfile/@userId" class="navbar-item nav-profile-icon"
+            <a href="@profileUrl" class="navbar-item nav-profile-icon"
                style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none")">
                 <img src="/assets/icons/Profile.ico" alt="Profile" style="width: 2.7rem; border-radius: 50%;" />
             </a>

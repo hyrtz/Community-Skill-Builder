@@ -10,14 +10,18 @@ namespace SkillBuilder.Data
         public DbSet<User> Users { get; set; }
         public DbSet<CourseProjectSubmission> CourseProjectSubmissions { get; set; }
         public DbSet<Artisan> Artisans { get; set; }
+        public DbSet<ArtisanApplication> ArtisanApplications { get; set; }
         public DbSet<ArtisanWork> ArtisanWorks { get; set; }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<AboutFeature> AboutFeatures { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
+        public DbSet<CourseModule> CourseModules { get; set; }
+        public DbSet<ModuleProgress> ModuleProgress { get; set; }
         public DbSet<CourseReview> CourseReviews { get; set; }
         public DbSet<CommunityTestimonial> CommunityTestimonials { get; set; }
         public DbSet<CommunityHighlight> CommunityHighlights { get; set; }
+        public DbSet<CommunityPost> CommunityPosts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -102,7 +106,7 @@ namespace SkillBuilder.Data
                     Duration = "15 hours",
                     Classes = "Pottery",
                     Level = "Beginner",
-                    Video = "/wwwroot/assets/Videos/Pottery.mp4",
+                    Video = "/assets/Videos/Pottery.mp4",
                     Thumbnail = "/assets/Courses Pics/Pottery.png",
                     WhatToLearn = "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques.",
                     FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.",
@@ -121,7 +125,7 @@ namespace SkillBuilder.Data
                     Duration = "29 hours",
                     Classes = "Wood Carving",
                     Level = "Intermediate",
-                    Video = "/wwwroot/assets/Videos/Wood Carving.mp4",
+                    Video = "/assets/Videos/Wood Carving.mp4",
                     Thumbnail = "/assets/Courses Pics/Woodcarving.png",
                     WhatToLearn = "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing.",
                     FullDescription = "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.",
@@ -140,7 +144,7 @@ namespace SkillBuilder.Data
                     Duration = "18 hours",
                     Classes = "Weaving",
                     Level = "Professional",
-                    Video = "/wwwroot/assets/Videos/Weaving.mp4",
+                    Video = "/assets/Videos/Weaving.mp4",
                     Thumbnail = "/assets/Courses Pics/Weaving.png",
                     WhatToLearn = "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation.",
                     FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.",
@@ -148,6 +152,37 @@ namespace SkillBuilder.Data
                     Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
                     CreatedBy = "A1111111",
                     CreatedAt = new DateTime(2024, 6, 1)
+                }
+            );
+
+            // Course Review
+            modelBuilder.Entity<CourseReview>().HasData(
+                new CourseReview
+                {
+                    Id = 1,
+                    CourseId = 00001,
+                    UserId = "A1111111",
+                    Rating = 5,
+                    Comment = "An excellent course! The mentor was very knowledgeable.",
+                    CreatedAt = new DateTime(2024, 6, 5)
+                },
+                new CourseReview
+                {
+                    Id = 2,
+                    CourseId = 00001,
+                    UserId = "A1111111",
+                    Rating = 4,
+                    Comment = "Really enjoyed learning pottery. A few lessons were a bit fast though.",
+                    CreatedAt = new DateTime(2024, 6, 10)
+                },
+                new CourseReview
+                {
+                    Id = 3,
+                    CourseId = 00003,
+                    UserId = "A1111111",
+                    Rating = 5,
+                    Comment = "Very hands-on and engaging! Perfect for intermediate learners.",
+                    CreatedAt = new DateTime(2024, 6, 15)
                 }
             );
 
@@ -326,6 +361,19 @@ namespace SkillBuilder.Data
                 .WithMany(c => c.ProjectSubmissions)
                 .HasForeignKey(p => p.CourseId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // COURSE MODULE ⇄ COURSE (M:1)
+            modelBuilder.Entity<CourseModule>()
+                .HasOne(cm => cm.Course)
+                .WithMany(c => c.CourseModules)
+                .HasForeignKey(cm => cm.CourseId);
+
+            // MODULE PROGRESS ⇄ COURSE MODULE (M:1)
+            modelBuilder.Entity<ModuleProgress>()
+                .HasOne(mp => mp.CourseModule)
+                .WithMany(cm => cm.Progresses)
+                .HasForeignKey(mp => mp.CourseModuleId);
+
         }
     }
 }

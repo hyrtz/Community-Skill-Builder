@@ -1,4 +1,4 @@
-﻿namespace SkillBuilder.Models
+﻿namespace SkillBuilder.Models.ViewModels
 {
     public class AchievementViewModel
     {

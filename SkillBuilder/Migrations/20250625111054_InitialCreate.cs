@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SkillBuilder.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedProjectSubmissions : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -126,6 +126,30 @@ namespace SkillBuilder.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CommunityPosts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SubmittedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsPublished = table.Column<bool>(type: "bit", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommunityPosts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CommunityPosts_Users_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -328,9 +352,19 @@ namespace SkillBuilder.Migrations
                 columns: new[] { "Id", "Classes", "CreatedAt", "CreatedBy", "Description", "Duration", "FullDescription", "ImageUrl", "Level", "Link", "ProjectDetails", "Requirements", "Thumbnail", "Title", "Video", "WhatToLearn" },
                 values: new object[,]
                 {
-                    { 1, "Pottery", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.", "15 hours", "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.", "/assets/Courses Pics/Pottery.png", "Beginner", "pottery", "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.", "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.", "/assets/Courses Pics/Pottery.png", "Pottery", "/wwwroot/assets/Videos/Pottery.mp4", "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques." },
-                    { 2, "Wood Carving", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.", "29 hours", "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.", "/assets/Courses Pics/Woodcarving.png", "Intermediate", "woodcarving", "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.", "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).", "/assets/Courses Pics/Woodcarving.png", "Woodcarving", "/wwwroot/assets/Videos/Wood Carving.mp4", "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing." },
-                    { 3, "Weaving", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.", "18 hours", "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.", "/assets/Courses Pics/Weaving.png", "Professional", "weaving", "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.", "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.", "/assets/Courses Pics/Weaving.png", "Weaving", "/wwwroot/assets/Videos/Weaving.mp4", "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation." }
+                    { 1, "Pottery", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.", "15 hours", "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.", "/assets/Courses Pics/Pottery.png", "Beginner", "pottery", "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.", "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.", "/assets/Courses Pics/Pottery.png", "Pottery", "/assets/Videos/Pottery.mp4", "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques." },
+                    { 2, "Wood Carving", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.", "29 hours", "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.", "/assets/Courses Pics/Woodcarving.png", "Intermediate", "woodcarving", "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.", "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).", "/assets/Courses Pics/Woodcarving.png", "Woodcarving", "/assets/Videos/Wood Carving.mp4", "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing." },
+                    { 3, "Weaving", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.", "18 hours", "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.", "/assets/Courses Pics/Weaving.png", "Professional", "weaving", "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.", "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.", "/assets/Courses Pics/Weaving.png", "Weaving", "/assets/Videos/Weaving.mp4", "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation." }
+                });
+
+            migrationBuilder.InsertData(
+                table: "CourseReviews",
+                columns: new[] { "Id", "Comment", "CourseId", "CreatedAt", "Rating", "UserId" },
+                values: new object[,]
+                {
+                    { 1, "An excellent course! The mentor was very knowledgeable.", 1, new DateTime(2024, 6, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), 5, "A1111111" },
+                    { 2, "Really enjoyed learning pottery. A few lessons were a bit fast though.", 1, new DateTime(2024, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, "A1111111" },
+                    { 3, "Very hands-on and engaging! Perfect for intermediate learners.", 3, new DateTime(2024, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), 5, "A1111111" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -348,6 +382,11 @@ namespace SkillBuilder.Migrations
                 name: "IX_ArtisanWorks_ArtisanId",
                 table: "ArtisanWorks",
                 column: "ArtisanId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommunityPosts_AuthorId",
+                table: "CommunityPosts",
+                column: "AuthorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CourseProjectSubmissions_CourseId",
@@ -399,6 +438,9 @@ namespace SkillBuilder.Migrations
 
             migrationBuilder.DropTable(
                 name: "CommunityHighlights");
+
+            migrationBuilder.DropTable(
+                name: "CommunityPosts");
 
             migrationBuilder.DropTable(
                 name: "CommunityTestimonials");

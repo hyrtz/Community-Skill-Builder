@@ -1,4 +1,5 @@
-﻿@model SkillBuilder.Models.UserProfileViewModel
+﻿@using SkillBuilder.Models.ViewModels
+@model UserProfileViewModel
 @{
     ViewData["Title"] = "User Profile";
     ViewData["UseCourseNavbar"] = true;
@@ -107,6 +108,7 @@
                 <button class="user-tab active" data-tab="dashboard">Dashboard</button>
                 <button class="user-tab" data-tab="courses">My Courses</button>
                 <button class="user-tab" data-tab="projects">Projects</button>
+                <button class="user-tab" data-tab="requests">Request Sessions</button>
                 <button class="user-tab" data-tab="achievements">Achievements</button>
             </div>
         </div>
@@ -121,6 +123,9 @@
             </div>
             <div class="tab-panel" data-tab="projects">
                 @Html.Partial("Sections/UserNotebooks/_UserNotebookProjects", Model.SubmittedProjects)
+            </div>
+            <div class="tab-panel" data-tab="requests">
+                @Html.Partial("Sections/UserNotebooks/_UserNotebookRequestSessions", Model)
             </div>
             <div class="tab-panel" data-tab="achievements">
                 @Html.Partial("Sections/UserNotebooks/_UserNotebookAchievements", Model)

@@ -1,0 +1,650 @@
+﻿@model SkillBuilder.Models.Course
+@{
+    var progress = ViewData["CourseProgress"] != null ? (double)ViewData["CourseProgress"] : 0;
+    ViewData["UseCourseNavbar"] = true;
+}
+
+<style>
+    .course-module-container {
+        margin-top: 5rem;
+        display: flex;
+        width: 100%;
+        background-color: #f3f3f3;
+        flex-direction: column;
+    }
+
+    .course-module-header {
+        width: 100%;
+        background-color: #ddd;
+        padding: 2rem 4rem;
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: #222;
+        text-align: left;
+    }
+
+    .course-module-body {
+        display: flex;
+        padding: 2rem 4rem;
+        gap: 2rem;
+    }
+
+    .progress-header {
+        position: relative;
+        background-color: #f8f8f8;
+        padding: 1.5rem 4rem 3rem;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .course-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #222;
+    }
+
+    .course-progress-label {
+        position: absolute;
+        right: 4rem;
+        top: 1.6rem;
+        font-size: 1.2rem;
+        color: #364BE9;
+        font-weight: 600;
+    }
+
+    .course-progress-bar {
+        position: absolute;
+        bottom: 1rem;
+        left: 4rem;
+        right: 4rem;
+        height: 10px;
+        background-color: #e0e0e0;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+        .course-progress-bar .filled {
+            height: 100%;
+            background-color: #344AEA;
+            border-radius: 5px 0 0 5px;
+            transition: width 0.4s ease-in-out;
+        }
+
+    /* Left side */
+    .module-sidebar {
+        width: 25%;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+        .module-sidebar h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            color: #344AEA;
+        }
+
+    .module-chapter {
+        margin-bottom: 2rem;
+    }
+
+        .module-chapter h3 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 0.8rem;
+        }
+
+    .module-tab {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        background-color: #E0F2FF;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        color: #333;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+        .module-tab.locked {
+            background-color: #ccc;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .module-tab:hover:not(.locked) {
+            background-color: #cde7fa;
+        }
+
+        .module-tab.active {
+            background-color: #364BE9;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Right side */
+    .module-content {
+        width: 75%;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        position: relative;
+        min-height: 600px;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .module-content h1 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            color: #344AEA;
+        }
+
+        .module-content p {
+            font-size: 1rem;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .module-content button:disabled {
+            background-color: #aaa !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+
+    video {
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .module-tab.completed {
+        background-color: #c0e8c0;
+        font-weight: bold;
+        position: relative;
+    }
+</style>
+
+<div class="course-module-container">
+    <!-- Header -->
+    <div class="course-module-header progress-header">
+        <span class="course-title">@Model.Title</span>
+        <span class="course-progress-label">@progress%</span>
+        <div class="course-progress-bar">
+            <div class="filled" style="width: @progress%;"></div>
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="course-module-body">
+        <!-- Sidebar (Left) -->
+        <div class="module-sidebar">
+            <h2>Course Content</h2>
+
+            <!-- Chapters -->
+            <div class="module-chapter">
+                <h3>C1: Introduction to @Model.Title</h3>
+                <div class="module-tab active" data-tab="0">Watch Introduction</div>
+            </div>
+
+            <div class="module-chapter">
+                <h3>C2: History of @Model.Title</h3>
+                <div class="module-tab locked" data-tab="1">Explore History</div>
+            </div>
+
+            <div class="module-chapter">
+                <h3>C3: Short Quiz</h3>
+                <div class="module-tab locked" data-tab="2">Take Quiz</div>
+            </div>
+
+            <div class="module-chapter">
+                <h3>C4: Final Activity</h3>
+                <div class="module-tab locked" data-tab="3">Real-Time Session with Artisan</div>
+                <div class="module-tab locked" data-tab="4">Submit Activity</div>
+            </div>
+        </div>
+
+        <!-- Content Area (Right) -->
+        <div class="module-content" id="moduleContent">
+            <!-- Dynamic Content loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- QUIZ MODAL -->
+<div id="quizModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:12px; width:600px; max-width:90%; padding:2rem; position:relative; display:flex; flex-direction:column; align-items:center;">
+        <!-- Progress Bar -->
+        <div style="width:100%; height:10px; background:#eee; border-radius:6px; margin-bottom:1rem;">
+            <div id="quizProgress" style="height:100%; width:0%; background:#364BE9; border-radius:6px;"></div>
+        </div>
+
+        <!-- Question -->
+        <div id="quizBox" style="margin-top:1.5rem; text-align:center;">
+            <p id="questionText">Loading...</p>
+            <div id="quizOptions" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;"></div>
+            <button id="submitAnswerBtn" disabled onclick="submitAnswer()" style="margin-top:1.5rem; background:#364BE9; color:#fff; padding:0.6rem 1.5rem; border:none; border-radius:8px; cursor:pointer;">Submit Answer</button>
+        </div>
+
+        <!-- Feedback Modal Layer -->
+        <div id="feedbackBox" style="display:none; margin-top:2rem; text-align:center;">
+            <p id="feedbackMsg"></p>
+            <div style="margin-top:1rem;">
+                <button id="tryAgainBtn" onclick="tryAgain()" style="margin-right:1rem;">Try Again</button>
+                <button onclick="nextQuestion()">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quiz Completion Celebration -->
+<div id="quizCompleteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10000; justify-content:center; align-items:center;">
+    <div style="background:#fff; padding:3rem; border-radius:16px; text-align:center; width:90%; max-width:600px;">
+        <h1 style="font-size:2rem; color:#364BE9;">Quiz Complete!</h1>
+        <p style="font-size:1.2rem; margin-top:0.5rem;">You're on a roll for completing this quiz!</p>
+        <div style="background:#f0f8ff; margin:2rem auto; padding:1rem 2rem; border-radius:12px; display:inline-block; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color:#28a745; font-size:1.5rem;">You got <span id="quizScore"></span> out of 5 correct!</h3>
+        </div>
+        <button onclick="exitQuizModal()" style="background:#364BE9; color:white; padding:0.7rem 1.8rem; font-weight:bold; border:none; border-radius:8px;">Continue Course</button>
+    </div>
+</div>
+
+<script>
+    const moduleTabs = document.querySelectorAll(".module-tab");
+    const moduleContent = document.getElementById("moduleContent");
+    let completedModules = JSON.parse(localStorage.getItem("progress_course_@Model.Id")) || [];
+    let nextBtn = null;
+
+    const moduleData = [
+        {
+            title: "Introduction to @Model.Title",
+            video: "@Url.Content(Model.Video)",
+            poster: "@Model.Thumbnail",
+            learn: `@Model.WhatToLearn`,
+            desc: `@Model.FullDescription`,
+            project: `@Model.ProjectDetails`,
+            requirements: `@Model.Requirements`,
+            showDetails: true
+        },
+        {
+            title: "History of @Model.Title",
+            custom: `
+                <h1 style="color:#344AEA; margin-bottom:1rem;">What is Pottery?</h1>
+                <p style="font-size:1rem; line-height:1.6;">
+                    Pottery in the Philippines is one of the oldest surviving art forms dating back to the Neolithic age.
+                    Early Filipinos used pottery for ceremonial and domestic purposes — from cooking to storing grains and liquids.
+                    The Manunggul Jar, discovered in Palawan and dated to around 890–710 B.C., is a striking example of burial jar artistry.
+                    Across regions, each community developed its own techniques. In Ilocos, the *burnay* jar uses clay mixed with sand for durability.
+                    In the Visayas and Mindanao, earthenware traditions still persist with indigenous motifs and firing styles.
+                    Pottery remains not only a utilitarian craft, but also a vital part of Filipino cultural identity.
+                </p>
+            `
+        },
+        {
+            title: "Short Quiz",
+            custom: `
+                <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
+                    <h1 style="font-size:2rem; color:#344AEA;">Quiz Activity</h1>
+                    <h3 style="font-weight:400; margin-top:0.5rem;">Before proceeding with next chapter, Are you ready for a short Quiz?</h3>
+                    <button onclick="openQuizModal()" style="margin-top:2rem; background:#364BE9; color:white; padding:0.75rem 2rem; border:none; border-radius:8px; font-size:1rem;">Start Quiz</button>
+                </div>
+            `
+        },
+        {
+            title: "Real-Time Session",
+            custom: `
+                <h1>Join the Live Session</h1>
+                <p>A Zoom link will be available here on your scheduled date.</p>
+            `
+        },
+        {
+            title: "Final Activity Submission",
+            custom: `
+                <h1>Submit Your Work</h1>
+                <p>Upload photos/videos of your final project here.</p>
+                <input type="file" />
+            `
+        }
+    ];
+
+    function updateModuleTabs() {
+        completedModules.forEach(i => {
+            const tab = moduleTabs[i];
+            if (tab) {
+                tab.classList.remove("locked");
+                tab.classList.add("completed");
+            }
+        });
+
+        const maxCompleted = Math.max(...completedModules, 0);
+        if (moduleTabs[maxCompleted + 1]) {
+            moduleTabs[maxCompleted + 1].classList.remove("locked");
+        }
+    }
+
+    // Unlock next tab if not already completed
+    const maxCompleted = Math.max(...completedModules, 0);
+    if (moduleTabs[maxCompleted + 1]) {
+        moduleTabs[maxCompleted + 1].classList.remove("locked");
+    }
+
+    // Set correct tab as active
+    const lastTab = moduleTabs[maxCompleted];
+    if (lastTab) {
+        lastTab.classList.add("active");
+        loadTab(maxCompleted);
+    }
+    updateProgressDisplay();
+
+    function updateProgressDisplay() {
+        const percentage = Math.round((completedModules.length / moduleTabs.length) * 100);
+        document.querySelector(".course-progress-label").innerText = `${percentage}%`;
+        document.querySelector(".course-progress-bar .filled").style.width = `${percentage}%`;
+    }
+
+    function syncProgressWithServer() {
+        fetch('/Courses/UpdateProgress', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                courseId: '@Model.Id',
+                completedModules: completedModules
+            })
+        });
+    }
+
+    loadTab(completedModules.includes(0) ? completedModules.at(-1) : 0);
+
+    function loadTab(index) {
+        const data = moduleData[index];
+        moduleContent.innerHTML = `<div id="moduleInnerContent" style="flex:1 1 auto;"></div>`;
+        const inner = document.getElementById("moduleInnerContent");
+
+        if (data.video) {
+            const videoEl = document.createElement('video');
+            videoEl.controls = true;
+            videoEl.poster = data.poster;
+            videoEl.style.width = "100%";
+            videoEl.innerHTML = `<source src="${data.video}" type="video/mp4">Your browser does not support the video tag.`;
+
+            inner.appendChild(videoEl);
+
+            const nextBtnWrapper = document.createElement("div");
+            nextBtnWrapper.style.position = "absolute";
+            nextBtnWrapper.style.bottom = "2rem";
+            nextBtnWrapper.style.right = "2rem";
+
+            nextBtn = document.createElement("button");
+            nextBtn.innerText = "Next";
+            nextBtn.onclick = () => goToNextTab(index);
+            nextBtn.style.background = "#364BE9";
+            nextBtn.style.color = "#fff";
+            nextBtn.style.padding = "0.7rem 2rem";
+            nextBtn.style.fontSize = "1rem";
+            nextBtn.style.fontWeight = "500";
+            nextBtn.style.border = "none";
+            nextBtn.style.borderRadius = "8px";
+            nextBtn.style.cursor = "pointer";
+            nextBtn.disabled = true;
+
+            videoEl.addEventListener("ended", () => {
+                nextBtn.disabled = false;
+            });
+
+            nextBtnWrapper.appendChild(nextBtn);
+            moduleContent.appendChild(nextBtnWrapper);
+        }
+
+        if (data.showDetails) {
+            inner.innerHTML += `
+                <div class="course-information-learn">
+                    <h1>What You'll Learn</h1>
+                    <p>${data.learn || "..."}</p>
+                </div>
+
+                <div class="course-information-description" style="margin-top: 2rem;">
+                    <h1>Course Description</h1>
+                    <p>${data.desc || "..."}</p>
+                </div>
+
+                <div class="course-information-project" style="margin-top: 2rem;">
+                    <h1>What is this course's project?</h1>
+                    <p>${data.project || "..."}</p>
+                </div>
+
+                <div class="course-information-requirements" style="margin-top: 2rem;">
+                    <h1>Requirements and Materials</h1>
+                    <p>${data.requirements || "..."}</p>
+                </div>
+            `;
+        }
+
+        if (data.custom) {
+            inner.innerHTML += data.custom;
+        }
+
+        const nextBtnWrapper = document.createElement("div");
+        nextBtnWrapper.style.position = "absolute";
+        nextBtnWrapper.style.bottom = "2rem";
+        nextBtnWrapper.style.right = "2rem";
+
+        nextBtn = document.createElement("button");
+        nextBtn.innerText = "Next";
+        nextBtn.onclick = () => goToNextTab(index);
+        nextBtn.style.background = "#364BE9";
+        nextBtn.style.color = "#fff";
+        nextBtn.style.padding = "0.7rem 2rem";
+        nextBtn.style.fontSize = "1rem";
+        nextBtn.style.fontWeight = "500";
+        nextBtn.style.border = "none";
+        nextBtn.style.borderRadius = "8px";
+        nextBtn.style.cursor = "pointer";
+
+        if (index === 2 && !completedModules.includes(2)) {
+            nextBtn.disabled = true;
+        }
+
+        nextBtnWrapper.appendChild(nextBtn);
+        moduleContent.appendChild(nextBtnWrapper);
+
+        if (nextBtn) nextBtn.disabled = false;
+    }
+
+    function updateModuleProgressToServer(courseId, moduleIndex) {
+        fetch('/api/ModuleProgress/CompleteModule', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                courseId: courseId,
+                moduleIndex: moduleIndex
+            })
+        });
+    }
+
+    function goToNextTab(currentIndex) {
+
+        const currentTab = moduleTabs[currentIndex];
+        if (currentTab) currentTab.classList.add("completed");
+
+        if (!completedModules.includes(currentIndex)) {
+            completedModules.push(currentIndex);
+            localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
+            updateProgressDisplay();
+            syncProgressWithServer();
+        }
+
+        const nextTab = moduleTabs[currentIndex + 1];
+        if (nextTab) {
+            nextTab.classList.remove("locked");
+            nextTab.click();
+        }
+
+        completedModules.forEach(i => {
+        const tab = moduleTabs[i];
+        if (tab) {
+            tab.classList.remove("locked");
+            tab.classList.add("completed");
+        }
+    });
+    }
+
+    moduleTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            if (tab.classList.contains("locked")) return;
+            // Only allow current or previously completed tabs
+            const index = parseInt(tab.dataset.tab);
+
+            moduleTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            loadTab(index);
+        });
+    });
+
+    // Quiz Modal
+    const quizQuestions = [
+        {
+            q: "What is the traditional Filipino term for pottery?",
+            a: ["Palayok", "Tapayan", "Almires", "Kalan"],
+            correct: 0
+        },
+        {
+            q: "Which region in the Philippines is known for its burnay pottery?",
+            a: ["Pampanga", "Ilocos", "Bicol", "Cebu"],
+            correct: 1
+        },
+        {
+            q: "What is the primary material used in pottery?",
+            a: ["Stone", "Wood", "Clay", "Sand"],
+            correct: 2
+        },
+        {
+            q: "Pottery in the Philippines dates back to which era?",
+            a: ["Spanish Colonial", "Pre-Colonial", "American Era", "Post-War"],
+            correct: 1
+        },
+        {
+            q: "Which artifact proves ancient pottery in PH?",
+            a: ["Manunggul Jar", "Balangay Boat", "Laguna Copperplate", "Gold Death Mask"],
+            correct: 0
+        }
+    ];
+
+    let currentQ = 0;
+    let selected = null;
+    let score = 0;
+
+    function openQuizModal() {
+        document.getElementById("quizModal").style.display = "flex";
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const q = quizQuestions[currentQ];
+        selected = null;
+
+        document.getElementById("questionText").innerText = q.q;
+        document.getElementById("questionText").style.fontSize = "1.3rem";
+        document.getElementById("questionText").style.fontWeight = "600";
+        document.getElementById("questionText").style.marginBottom = "1rem";
+        document.getElementById("quizOptions").innerHTML = "";
+        document.getElementById("submitAnswerBtn").disabled = true;
+        document.getElementById("feedbackBox").style.display = "none";
+        document.getElementById("quizBox").style.display = "block";
+
+        q.a.forEach((option, i) => {
+            const btn = document.createElement("div");
+            btn.innerText = option;
+            btn.className = "quiz-option";
+            btn.style.padding = "1rem";
+            btn.style.border = "2px solid #ccc";
+            btn.style.borderRadius = "12px";
+            btn.style.cursor = "pointer";
+            btn.style.backgroundColor = "#f1f5ff";
+            btn.style.fontSize = "1.1rem";
+            btn.style.fontWeight = "500";
+            btn.style.boxShadow = "0 2px 6px rgba(0,0,0,0.05)";
+            btn.style.transition = "0.2s all";
+
+            btn.onmouseover = () => {
+                if (!btn.classList.contains("selected")) btn.style.backgroundColor = "#e0eaff";
+            };
+            btn.onmouseout = () => {
+                if (!btn.classList.contains("selected")) btn.style.backgroundColor = "#f1f5ff";
+            };
+            btn.onclick = () => {
+                document.querySelectorAll(".quiz-option").forEach(el => {
+                    el.style.backgroundColor = "#f1f5ff";
+                    el.classList.remove("selected");
+                });
+                btn.style.backgroundColor = "#d0e0ff";
+                btn.classList.add("selected");
+                selected = i;
+                document.getElementById("submitAnswerBtn").disabled = false;
+            };
+            document.getElementById("quizOptions").appendChild(btn);
+        });
+
+        document.getElementById("quizProgress").style.width = `${(currentQ / quizQuestions.length) * 100}%`;
+    }
+
+    function submitAnswer() {
+        const q = quizQuestions[currentQ];
+        const isCorrect = selected === q.correct;
+
+        if (isCorrect) score++;
+
+        document.getElementById("quizBox").style.display = "none";
+        document.getElementById("feedbackBox").style.display = "block";
+        document.getElementById("feedbackMsg").innerText = isCorrect ? "✅ Correct! Great job." : "❌ Wrong answer.";
+
+        document.getElementById("tryAgainBtn").style.display = isCorrect ? "none" : "inline-block";
+    }
+
+    function tryAgain() {
+        loadQuestion();
+    }
+
+    function nextQuestion() {
+        currentQ++;
+        if (currentQ < quizQuestions.length) {
+            loadQuestion();
+        } else {
+            showQuizComplete();
+        }
+    }
+
+    function showQuizComplete() {
+        document.getElementById("quizModal").style.display = "none";
+        document.getElementById("quizCompleteModal").style.display = "flex";
+        document.getElementById("quizScore").innerText = `${score}`;
+    }
+
+    function exitQuizModal() {
+        document.getElementById("quizCompleteModal").style.display = "none";
+        const realTimeTab = moduleTabs[3];
+        if (realTimeTab.classList.contains("locked")) {
+            realTimeTab.classList.remove("locked");
+        }
+
+        if (!completedModules.includes(2)) {
+            completedModules.push(2);
+            localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
+            updateProgressDisplay();
+            syncProgressWithServer();
+        }
+
+        // ✅ Enable Next button now
+        if (nextBtn) nextBtn.disabled = false;
+    }
+
+    window.addEventListener("beforeunload", () => {
+        localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
+    });
+
+</script>

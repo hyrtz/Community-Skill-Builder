@@ -1,182 +1,139 @@
-﻿@model SkillBuilder.Models.ArtisanProfileViewModel
+﻿@using SkillBuilder.Models.ViewModels
+@model ArtisanProfileViewModel
 
 @{
-    ViewData["Title"] = "Artisan Profile";
+    ViewData["Title"] = "Artisan Dashboard";
     ViewData["UseCourseNavbar"] = true;
 }
 
 <style>
-    .artisan-profile {
+    .artisan-dashboard-wrapper {
         display: flex;
-        align-items: flex-start; /* ensures top alignment */
-        gap: 3rem;
         padding: 6rem 10rem;
         background-color: #f9f9f9;
+        gap: 2.5rem;
     }
 
-    .artisan-left {
-        width: 30%;
+    .artisan-sidebar {
+        width: 22%;
         background-color: #E0F2FF;
-        padding: 2rem;
-        border-radius: 1rem;
+        padding: 2rem 1.5rem;
+        border-radius: 12px;
         text-align: center;
-        height: auto; /* ensure height adjusts */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
     }
 
     .artisan-avatar {
-        width: 150px;
-        height: 150px;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
         object-fit: cover;
-        border-radius: 100px;
         margin-bottom: 1rem;
     }
 
     .artisan-name {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .artisan-profession {
-        font-size: 1rem;
-        color: #666;
-    }
-
-    .instructor-badge {
-        margin-top: 1.5rem;
-        background-color: #344AEA;
-        color: #fff;
-        padding: 0.5rem 1rem;
-        display: inline-block;
-        border-radius: 8px;
-        font-weight: bold;
-    }
-
-    /* Right Section */
-    .artisan-right {
-        width: 70%;
-    }
-
-    .artisan-section {
-        margin-bottom: 3rem;
-    }
-
-        .artisan-section h1 {
-            font-size: 2rem;
-            color: #344AEA;
-            margin-bottom: 1rem;
-        }
-
-        .artisan-section p {
-            font-size: 1rem;
-            color: #444;
-            line-height: 1.6;
-        }
-
-    /* My Work Gallery */
-    .artisan-gallery {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .gallery-img {
-        width: 200px;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    /* My Courses */
-    .artisan-courses {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-    }
-
-    .course-card {
-        width: 30%;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        text-decoration: none;
-        color: inherit;
-        transition: transform 0.2s ease;
-    }
-
-        .course-card:hover {
-            transform: scale(1.03);
-        }
-
-        .course-card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
-
-    .course-card-title {
         font-size: 1.2rem;
         font-weight: bold;
-        margin: 1rem;
+        margin-bottom: 0.5rem;
         color: #333;
     }
 
-    .course-card-desc {
-        font-size: 0.9rem;
-        margin: 0 1rem 1rem;
+    .artisan-role {
+        font-size: 0.95rem;
         color: #555;
+        margin-bottom: 1.5rem;
     }
+
+    .artisan-tabs {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .artisan-tab {
+        padding: 0.75rem;
+        border: none;
+        background-color: transparent;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        text-align: left;
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease;
+        color: #333;
+    }
+
+        .artisan-tab:hover {
+            background-color: #D6EBFF;
+        }
+
+        .artisan-tab.active {
+            border-left-color: #344AEA;
+            background-color: #D6EBFF;
+            color: #344AEA;
+        }
+
+    .artisan-main {
+        flex: 1;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .artisan-panel {
+        display: none;
+    }
+
+        .artisan-panel.active {
+            display: block;
+        }
 </style>
 
-<div class="artisan-profile">
-    <!-- Left Section -->
-    <div class="artisan-left">
-        <img src="@(Model.Artisan.UserAvatar ?? "/assets/icons/Users.ico")" class="artisan-avatar" />
-        @if (Model.Artisan.User != null)
-        {
-            <div class="artisan-name">@Model.Artisan.User.FirstName @Model.Artisan.User.LastName</div>
-        }
-        <div class="artisan-profession">@Model.Artisan.Profession, @Model.Artisan.Hometown</div>
-        <div class="instructor-badge">Instructor</div>
+<div class="artisan-dashboard-wrapper">
+
+    <!-- Sidebar -->
+    <div class="artisan-sidebar">
+        <img src="@Model.Artisan.UserAvatar" class="artisan-avatar" />
+        <div class="artisan-name">@Model.Artisan.User.FirstName @Model.Artisan.User.LastName</div>
+        <div class="artisan-role">Instructor</div>
+
+        <div class="artisan-tabs">
+            <button class="artisan-tab active" data-tab="dashboard">Dashboard</button>
+            <button class="artisan-tab" data-tab="courses">My Courses</button>
+            <button class="artisan-tab" data-tab="projects">Submitted Projects</button>
+            <button class="artisan-tab" data-tab="reviews">Student Reviews</button>
+        </div>
     </div>
 
-    <!-- Right Section -->
-    <div class="artisan-right">
-        <!-- About Me -->
-        <div class="artisan-section">
-            <h1>About Me</h1>
-            <p>@Model.Artisan.Introduction</p>
+    <!-- Main Panel -->
+    <div class="artisan-main">
+        <div class="artisan-panel active" data-tab="dashboard">
+            @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookDashboard", Model)
         </div>
-
-        <!-- My Work -->
-        <div class="artisan-section">
-            <h1>My Work</h1>
-            <div class="artisan-gallery">
-                @foreach (var work in Model.ArtisanWorks)
-                {
-                    <img src="@work.ImageUrl" alt="@work.Caption" class="gallery-img" />
-                }
-            </div>
+        <div class="artisan-panel" data-tab="courses">
+            @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookCourses", Model)
         </div>
-
-        <!-- My Courses -->
-        <div class="artisan-section">
-            <h1>My Courses</h1>
-            <div class="artisan-courses">
-                @foreach (var course in Model.Courses)
-                {
-                    <a href="/Courses/@course.Link" class="course-card">
-                        <img src="@course.ImageUrl" alt="Course Image" />
-                        <div class="course-card-title">@course.Title</div>
-                        <div class="course-card-desc">@course.Description</div>
-                    </a>
-                }
-            </div>
+        <div class="artisan-panel" data-tab="projects">
+            @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookSupportSessions", Model)
         </div>
     </div>
 </div>
+
+<script>
+    const artisanTabs = document.querySelectorAll(".artisan-tab");
+    const artisanPanels = document.querySelectorAll(".artisan-panel");
+
+    artisanTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            artisanTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            const selected = tab.getAttribute("data-tab");
+            artisanPanels.forEach(panel => {
+                panel.classList.toggle("active", panel.getAttribute("data-tab") === selected);
+            });
+        });
+    });
+</script>

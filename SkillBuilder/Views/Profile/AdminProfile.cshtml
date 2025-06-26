@@ -1,0 +1,141 @@
+﻿@using SkillBuilder.Models.ViewModels
+@model AdminProfileViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    ViewData["UseCourseNavbar"] = true;
+}
+
+<style>
+    .admin-profile-wrapper {
+        display: flex;
+        padding: 6rem 10rem;
+        background-color: #f9f9f9;
+        gap: 2.5rem;
+    }
+
+    .admin-sidebar {
+        width: 22%;
+        background-color: #E0F2FF;
+        padding: 2rem 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .admin-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+    }
+
+    .admin-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .admin-role {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 1.5rem;
+    }
+
+    .admin-tabs {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .admin-tab {
+        padding: 0.75rem;
+        border: none;
+        background-color: transparent;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        text-align: left;
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease;
+        color: #333;
+    }
+
+        .admin-tab:hover {
+            background-color: #D6EBFF;
+        }
+
+        .admin-tab.active {
+            border-left-color: #344AEA;
+            background-color: #D6EBFF;
+            color: #344AEA;
+        }
+
+    .admin-main {
+        flex: 1;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .admin-panel {
+        display: none;
+    }
+
+        .admin-panel.active {
+            display: block;
+        }
+</style>
+
+<div class="admin-profile-wrapper">
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+        <img src="@Model.Admin.UserAvatar" class="admin-avatar" />
+        <div class="admin-name">@Model.Admin.User.FirstName @Model.Admin.User.LastName</div>
+        <div class="admin-role">Administrator</div>
+
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="users">User Management</button>
+            <button class="admin-tab" data-tab="applications">Artisan Applications</button>
+            <button class="admin-tab" data-tab="courses">Course Management</button>
+            <button class="admin-tab" data-tab="community">Community Management</button>
+        </div>
+    </div>
+
+    <!-- Main Panel -->
+    <div class="admin-main">
+        <div class="admin-panel active" data-tab="users">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookUserManagement", Model)
+        </div>
+        <div class="admin-panel" data-tab="applications">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookArtisanApplicationManagement", Model)
+        </div>
+        <div class="admin-panel" data-tab="courses">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookCourseManagement", Model)
+        </div>
+        <div class="admin-panel" data-tab="community">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookCommunityManagement", Model)
+        </div>
+    </div>
+</div>
+
+<script>
+    const tabs = document.querySelectorAll(".admin-tab");
+    const panels = document.querySelectorAll(".admin-panel");
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            tabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            const selected = tab.getAttribute("data-tab");
+            panels.forEach(panel => {
+                panel.classList.toggle("active", panel.getAttribute("data-tab") === selected);
+            });
+        });
+    });
+</script>

@@ -121,33 +121,31 @@
 <h1 class="review-heading">Learner Reviews</h1>
 
 <div class="review-section">
-    <!-- Left: Horizontal Scrollable Review Cards -->
     <div class="review-cards-wrapper">
         <div class="review-cards-scroll">
-            @* Example static review cards *@
-            @for (int i = 0; i < 5; i++)
+            @foreach (var review in Model.Reviews)
             {
                 <div class="review-card">
                     <div class="review-card-top">
                         <div class="review-user">
-                            <img src="/assets/Users/user@(i + 1).png" class="review-avatar" />
+                            <img src="@review.User.UserAvatar" class="review-avatar" />
                             <div>
-                                <h4 class="review-name">User Name @(i + 1)</h4>
+                                <h4 class="review-name">@review.User.FirstName @review.User.LastName</h4>
                                 <div class="review-stars">
-                                    @for (int star = 1; star <= 5; star++)
-                                    {
-                                        <span class="star @(star <= 4 ? "filled" : "")">&#9733;</span>
+                                    @{
+                                        for (int star = 1; star <= 5; star++)
+                                        {
+                                            <span class="star @(star <= review.Rating ? "filled" : "")">&#9733;</span>
+                                        }
                                     }
                                 </div>
                             </div>
                         </div>
                         <div class="review-date">
-                            <p>June 18, 2025</p>
+                            <p>@review.CreatedAt.ToString("MMMM dd, yyyy")</p>
                         </div>
                     </div>
-                    <p class="review-text">
-                        This course was incredibly helpful. The instructions were clear, and I really enjoyed learning through the hands-on project.
-                    </p>
+                    <p class="review-text">@review.Comment</p>
                 </div>
             }
         </div>
@@ -155,13 +153,13 @@
 
     <!-- Right: Summary + Button -->
     <div class="review-summary">
-        <h1>@Model.AverageRating</h1>
+        <h1>@Model.AverageRating.ToString("0.0")</h1>
         <div class="review-stars">
             @{
-                var rating = Math.Round(Model.AverageRating);
+                var avg = Math.Round(Model.AverageRating);
                 for (int i = 1; i <= 5; i++)
                 {
-                    <span class="star @(i <= rating ? "filled" : "")">&#9733;</span>
+                    <span class="star @(i <= avg ? "filled" : "")">&#9733;</span>
                 }
             }
         </div>
@@ -169,7 +167,7 @@
 
         <div class="spacer"></div>
 
-        <h1>108</h1> @* Placeholder for @Model.TotalReviews *@
+        <h1>@Model.Reviews.Count</h1>
         <h5>Reviews</h5>
 
         <button class="show-all-btn" onclick="openReviewModal()">Show All Reviews</button>
