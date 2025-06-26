@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "ContainingType": "SkillBuilder.Controllers.ModuleProgressController",
+    "Method": "CompleteModule",
+    "RelativePath": "api/ModuleProgress/CompleteModule",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "SkillBuilder.Controllers.ModuleProgressController\u002BModuleProgressDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

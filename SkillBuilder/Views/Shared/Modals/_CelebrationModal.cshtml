@@ -1,0 +1,116 @@
+﻿<style>
+    /* Animation */
+    @@keyframes scaleIn {
+        0% {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Modal overlay hidden by default */
+    #celebration-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: none; /* HIDDEN by default */
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+        #celebration-modal.show {
+            display: flex; /* visible when .show is added */
+        }
+
+    /* Modal content box */
+    .celebration-content {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+        animation: scaleIn 0.3s ease-out;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    /* Headline */
+    .celebration-title {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #344AEA;
+        margin-bottom: 1rem;
+    }
+
+    /* Description */
+    .celebration-text {
+        color: #4A4A4A;
+        margin-bottom: 1.5rem;
+    }
+
+    .celebration-navbar-disabled {
+        pointer-events: none;
+        opacity: 0.5;
+        filter: grayscale(100%);
+    }
+
+    /* Buttons */
+    .celebration-button {
+        padding: 0.6rem 1.5rem;
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+    }
+
+        .celebration-button:hover {
+            background-color: #2a3ec1;
+        }
+
+    /* Close X button */
+    .close-button {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.75rem;
+        font-size: 1.25rem;
+        color: #999;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .close-button:hover {
+            color: #333;
+        }
+</style>
+
+<!-- Modal -->
+<div id="celebration-modal">
+    <div class="celebration-content">
+        <h2 class="celebration-title">🎉 Achievement Unlocked!</h2>
+        <p class="celebration-text">You’ve successfully enrolled in your first course.</p>
+        <button onclick="hideCelebrationModal()" class="celebration-button">Great</button>
+    </div>
+</div>
+
+<script>
+    function showAchievementCelebration() {
+        confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+        document.getElementById("celebration-modal").classList.add("show");
+    }
+
+    function hideCelebrationModal() {
+        document.getElementById("celebration-modal").classList.remove("show");
+        location.reload();
+    }
+</script>

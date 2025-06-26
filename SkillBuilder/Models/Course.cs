@@ -19,21 +19,29 @@ namespace SkillBuilder.Models
         public string FullDescription { get; set; }
         public string ProjectDetails { get; set; }
         public string Requirements { get; set; }
+
+        // FK to Artisan (CreatedBy)
         public string CreatedBy { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsPublished { get; set; } = false;
 
-        // Navigation
-        public ICollection<Enrollment> Enrollments { get; set; }
-        public ICollection<CourseReview> Reviews { get; set; }
-        public List<CourseProjectSubmission> ProjectSubmissions { get; set; }
+        // Navigation Properties
+        public Artisan Artisan { get; set; }
 
-        // Not mapped to DB — calculated properties
+        public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+        public ICollection<CourseReview> Reviews { get; set; } = new List<CourseReview>();
+        public ICollection<CourseModule> CourseModules { get; set; } = new List<CourseModule>();
+        public ICollection<CourseProjectSubmission> ProjectSubmissions { get; set; } = new List<CourseProjectSubmission>();
+
+        // Computed properties
         [NotMapped]
         public int UserCount => Enrollments?.Count ?? 0;
 
         [NotMapped]
-        public double AverageRating => (Reviews?.Any() == true) ? Reviews.Average(r => r.Rating) : 0;
+        public int TotalModules => CourseModules?.Count ?? 0;
 
-        public Artisan Artisan { get; set; }
+        [NotMapped]
+        public double AverageRating => (Reviews != null && Reviews.Any()) ? Reviews.Average(r => r.Rating) : 0;
     }
 }

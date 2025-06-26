@@ -1,4 +1,8 @@
 ﻿@model SkillBuilder.Models.Course
+@{
+    var userId = User.FindFirst("UserId")?.Value;
+    var isEnrolled = Model.Enrollments?.Any(e => e.UserId == userId) ?? false;
+}
 
 <style>
     .course-detail-section {
@@ -161,7 +165,7 @@
             <div class="course-detail-left">
                 <span class="course-detail-level">@Model.Level</span>
                 <h1 class="course-detail-title">@Model.Title</h1>
-                <h5 class="course-detail-creator">A course by @Model.CreatedBy</h5>
+                <h5 class="course-detail-creator">A course by @Model.Artisan.FirstName @Model.Artisan.LastName, @Model.Artisan.Profession from @Model.Artisan.Hometown</h5>
                 <p class="course-detail-description">@Model.Description</p>
 
                 <div class="course-detail-meta-box">
@@ -170,7 +174,7 @@
                         <span>@Model.AverageRating.ToString("0.0")</span>
                     </div>
                     <div class="course-detail-meta-col">
-                        <img src="/assets/Icons/Book.ico" alt="Modules" />
+                        <img src="/assets/Icons/Course.ico" alt="Modules" />
                         <span>@Model</span>
                     </div>
                     <div class="course-detail-meta-col">
@@ -178,7 +182,7 @@
                         <span>@Model.Duration</span>
                     </div>
                     <div class="course-detail-meta-col">
-                        <img src="/assets/Icons/User.ico" alt="Certification" />
+                        <img src="/assets/Icons/Medal.ico" alt="Certification" />
                         <span>Certificate Included</span>
                     </div>
                 </div>
@@ -186,7 +190,16 @@
 
             <div class="course-detail-right">
                 <h1 class="course-detail-free-label">FREE COURSE</h1>
-                <button class="course-detail-enroll-btn">Enroll Now</button>
+                @if (!isEnrolled)
+                {
+                    <button class="course-detail-enroll-btn" onclick="enrollCourse(@Model.Id)">Enroll Now</button>
+                }
+                else
+                {
+                    <form method="get" action="/Courses/CourseModule/@Model.Id">
+                        <button type="submit" class="course-detail-enroll-btn">Start Course</button>
+                    </form>
+                }
             </div>
         </div>
     </div>
@@ -238,4 +251,64 @@
             });
         });
     });
+
+    function enrollCourse(courseId) {
+        fetch("/Courses/Enroll", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({ courseId: courseId })
+        })
+        .then(res => {
+            if (!res.ok) {
+                console.error("Failed to enroll:", res.status);
+                return;
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (!data) return;
+
+            if (data.success) {
+                if (data.showAchievement) {
+                    const firstAchievement = data.achievements[0];
+                    document.querySelector(".celebration-title").textContent = `🎉 ${firstAchievement}`;
+                    document.querySelector(".celebration-text").textContent =
+                        firstAchievement === "Lifelong Learner"
+                            ? "You've enrolled in 3 courses — keep going!"
+                            : "You’ve successfully enrolled in your first course.";
+                    showAchievementCelebration();
+                } else {
+                    location.reload();
+                }
+            }
+        });
+    }
+
+    function showAchievementCelebration() {
+        confetti({
+            particleCount: 200,
+            spread: 80,
+            origin: { y: 0.6 }
+        });
+
+        const modal = document.getElementById("celebration-modal");
+        modal.classList.add("show");
+
+        // Disable navbar
+        document.querySelector("nav").classList.add("celebration-navbar-disabled");
+    }
+
+    function hideCelebrationModal() {
+        const modal = document.getElementById("celebration-modal");
+        modal.classList.remove("show");
+
+        // Re-enable navbar
+        document.querySelector("nav").classList.remove("celebration-navbar-disabled");
+
+        location.reload();
+    }
+
 </script>

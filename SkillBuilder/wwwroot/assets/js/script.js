@@ -45,8 +45,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Utility
     const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const isValidFirstName = (name) => /^[A-Za-z\s]{2,50}$/.test(name);
-    const isValidLastName = (name) => /^[A-Za-z\s]{2,50}$/.test(name);
+    const isValidFirstName = (name) => /^[A-Za-z\s]{1,50}$/.test(name);
+    const isValidLastName = (name) => /^[A-Za-z\s]{1,50}$/.test(name);
 
 
     // Reset signup view
@@ -175,9 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const confirmPassword = confirmPasswordInput.value;
         const agree = document.getElementById("signup-agree").checked;
 
-        // Password match check
         const passwordsMatch = password === confirmPassword;
-        matchMessage.style.display = confirmPassword.length > 0 && !passwordsMatch ? "block" : "none";
 
         const firstNameError = document.getElementById("firstname-error");
         const lastNameError = document.getElementById("lastname-error");
@@ -185,11 +183,29 @@ document.addEventListener("DOMContentLoaded", function () {
         const validFirstName = isValidFirstName(firstname);
         const validLastName = isValidLastName(lastname);
 
-        // Show errors
-        firstNameError.textContent = validFirstName ? "" : "First name must contain only letters.";
-        lastNameError.textContent = validLastName ? "" : "Last name must contain only letters.";
+        // First Name error handling
+        if (firstname.length === 0) {
+            firstNameError.textContent = "";
+        } else if (!validFirstName) {
+            firstNameError.textContent = "⚠️ Only letters allowed";
+        } else {
+            firstNameError.textContent = "";
+        }
 
-        // Combine all validations
+        // Last Name error handling
+        if (lastname.length === 0) {
+            lastNameError.textContent = "";
+        } else if (!validLastName) {
+            lastNameError.textContent = "⚠️ Only letters allowed";
+        } else {
+            lastNameError.textContent = "";
+        }
+
+        // Password match message
+        matchMessage.style.display =
+            confirmPassword.length > 0 && !passwordsMatch ? "block" : "none";
+
+        // Final enable/disable logic
         const valid =
             validFirstName &&
             validLastName &&
@@ -203,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         signupSubmitBtn.disabled = !valid;
 
-        validatePassword(); // still useful
+        validatePassword();
     }
 
     function validatePassword() {

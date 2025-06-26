@@ -2,12 +2,12 @@
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     var userId = User.FindFirst("UserId")?.Value;
-    var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
 
     string homeLink = "/";
-    if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(role))
+    if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(userRole))
     {
-        homeLink = role switch
+        homeLink = userRole switch
         {
             "Learner" => $"/UserProfile/{userId}",
             "Artisan" => $"/ArtisanProfile/{userId}",
@@ -15,6 +15,14 @@
             _ => "/"
         };
     }
+
+    string profileUrl = userRole switch
+    {
+        "Learner" => $"/UserProfile/{userId}",
+        "Artisan" => $"/ArtisanProfile/{userId}",
+        "Admin" => $"/AdminProfile/{userId}",
+        _ => "#"
+    };
 }
 
 <style>
@@ -53,9 +61,9 @@
     <!-- Center: Nav links -->
 
     <div class="navbar-center">
-        @if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(role))
+        @if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(userRole))
         {
-            <a href="@homeLink" class="navbar-item @(currentController == "UserProfile" || currentController == "ArtisanProfile" ? "active-nav" : "")">Home</a>
+            <a href="@homeLink" class="navbar-item @(currentController == "UserProfile" || currentController == "ArtisanProfile" || currentController == "AdminProfile" ? "active-nav" : "")">Home</a>
         }
 
         <a asp-controller="Courses" asp-action="CourseCatalog" class="navbar-item @(currentController == "Courses" ? "active-nav" : "")">Courses ▾</a>
@@ -77,7 +85,7 @@
 
         @if (!string.IsNullOrEmpty(userId))
         {
-            <a href="/UserProfile/@userId" class="navbar-item nav-profile-icon"
+            <a href="@profileUrl" class="navbar-item nav-profile-icon"
                style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none")">
                 <img src="/assets/icons/Profile.ico" alt="Profile" style="width: 2.7rem; border-radius: 50%;" />
             </a>

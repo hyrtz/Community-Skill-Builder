@@ -1,0 +1,213 @@
+﻿@using SkillBuilder.Models.ViewModels
+@model AdminProfileViewModel
+
+<style>
+    .artisan-application-section {
+        padding: 2rem;
+    }
+
+    .artisan-application-header {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: #344AEA;
+    }
+
+    .artisan-application-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .artisan-search-bar {
+        display: flex;
+        flex: 0 0 90%;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .artisan-search-bar input {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .artisan-search-bar button {
+            background-color: #344AEA;
+            border: none;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+        }
+
+            .artisan-search-bar button img {
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+
+    .artisan-filter-btn {
+        flex: 0 0 10%;
+        background-color: #eee;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .artisan-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 1.2rem;
+    }
+
+        .artisan-table th {
+            text-align: left;
+            font-size: 1rem;
+            color: #666;
+            padding: 0.5rem 1rem;
+        }
+
+    .artisan-row {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .artisan-cell {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .artisan-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .artisan-info img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+    .artisan-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .artisan-name {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .artisan-email {
+        font-size: 0.85rem;
+        color: #777;
+    }
+
+    .artisan-status {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #222;
+        text-align: center;
+    }
+
+    .artisan-action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+        .artisan-action-buttons button {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+    .review-btn {
+        background-color: #344AEA;
+        color: white;
+    }
+
+    .approve-btn {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .reject-btn {
+        background-color: #FF4C4C;
+        color: white;
+    }
+</style>
+
+<div class="artisan-application-section">
+    <div class="artisan-application-header">All Artisan Applications</div>
+
+    <div class="artisan-application-controls">
+        <div class="artisan-search-bar">
+            <input type="text" placeholder="Search by name or email..." />
+            <button type="button">
+                <img src="/assets/Icons/Search.ico" alt="Search" />
+            </button>
+        </div>
+        <button class="artisan-filter-btn">Filter</button>
+    </div>
+
+    <table class="artisan-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th style="text-align: center;">Status</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.AllPendingApplications != null && Model.AllPendingApplications.Any())
+            {
+                foreach (var application in Model.AllPendingApplications)
+                {
+                    var user = application.User;
+
+                    <tr class="artisan-row">
+                        <td class="artisan-cell">
+                            <div class="artisan-info">
+                                <img src="@user.UserAvatar" alt="Avatar" />
+                                <div class="artisan-details">
+                                    <div class="artisan-name">@user.FirstName @user.LastName</div>
+                                    <div class="artisan-email">@user.Email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="artisan-cell artisan-status">
+                            @application.Status
+                        </td>
+                        <td class="artisan-cell">
+                            <div class="action-buttons">
+                                <button class="review-btn">Review</button>
+                                <button class="approve-btn">Approve</button>
+                                <button class="reject-btn">Reject</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="artisan-cell" style="text-align: center; padding: 2rem; color: #888;">
+                        No pending artisan applications at the moment.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

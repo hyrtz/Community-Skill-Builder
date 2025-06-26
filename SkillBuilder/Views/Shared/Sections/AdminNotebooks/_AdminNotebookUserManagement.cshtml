@@ -1,0 +1,208 @@
+﻿@using SkillBuilder.Models.ViewModels
+@model AdminProfileViewModel
+
+<style>
+    .admin-user-section {
+        padding: 2rem;
+    }
+
+    .admin-user-header {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: #344AEA;
+    }
+
+    .admin-user-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-bar {
+        display: flex;
+        flex: 0 0 90%;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .search-bar button {
+            background-color: #344AEA;
+            border: none;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+        }
+
+            .search-bar button img {
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+
+    .filter-btn {
+        flex: 0 0 10%;
+        background-color: #eee;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .user-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 1.2rem;
+    }
+
+        .user-table th {
+            text-align: left;
+            font-size: 1rem;
+            color: #666;
+            padding: 0.5rem 1rem;
+        }
+
+    .user-row {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .user-cell {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .user-info img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .user-email {
+        font-size: 0.85rem;
+        color: #777;
+    }
+
+    .user-role {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #222;
+        text-align: center;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+        .action-buttons button {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+    .delete-btn {
+        background-color: #FF4C4C;
+        color: white;
+    }
+
+    .deactivate-btn {
+        background-color: #FFA500;
+        color: white;
+    }
+
+    .reactivate-btn {
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
+
+<div class="admin-user-section">
+    <div class="admin-user-header">All Users</div>
+
+    <div class="admin-user-controls">
+        <div class="search-bar">
+            <input type="text" placeholder="Search by name or email..." />
+            <button type="button">
+                <img src="/assets/Icons/Search.ico" alt="Search" />
+            </button>
+        </div>
+        <button class="filter-btn">Filter</button>
+    </div>
+
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th style="text-align: center;">User Type</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.AllUsers)
+            {
+                <tr class="user-row">
+                    <td class="user-cell">
+                        <div class="user-info">
+                            <img src="@user.UserAvatar" alt="Avatar" />
+                            <div class="user-details">
+                                <div class="user-name">@user.FirstName @user.LastName</div>
+                                <div class="user-email">@user.Email</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="user-cell user-role">
+                        @user.Role
+                    </td>
+
+                    <td class="user-cell">
+                        <div class="action-buttons">
+                            <button class="delete-btn">Delete</button>
+                            @if (user.IsVerified)
+                            {
+                                <button class="deactivate-btn">Deactivate</button>
+                            }
+                            else
+                            {
+                                <button class="reactivate-btn">Reactivate</button>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

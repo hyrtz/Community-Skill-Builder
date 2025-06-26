@@ -10,7 +10,7 @@ namespace SkillBuilder.Models
         public string LastName { get; set; }
         public string Profession { get; set; }
         public string Hometown { get; set; }
-        public string UserAvatar { get; set; }
+        public string UserAvatar { get; set; } = "/assets/Avatar/Sample10.svg";
         public string Introduction { get; set; }
         public string Role { get; set; } = "Artisan";
 

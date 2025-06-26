@@ -1,13 +1,16 @@
-﻿@model SkillBuilder.Models.UserProfileViewModel
+﻿@using SkillBuilder.Models.ViewModels
+@model UserProfileViewModel
 
 @{
     ViewData["IsCatalogPage"] = false;
     ViewData["IsUserProfile"] = true;
 }
 
-@if (Model.EnrolledCourses != null && Model.EnrolledCourses.Any())
+@if (Model.CourseProgresses != null && Model.CourseProgresses.Any())
 {
-    @await Html.PartialAsync("Sections/UserNotebooks/_UserNotebookProgress", Model.EnrolledCourses)
+    @await Html.PartialAsync("Sections/UserNotebooks/_UserNotebookProgress", Model.CourseProgresses)
 }
-
-@await Html.PartialAsync("Sections/_CourseSection", Model.AllCourses, ViewData)
+else
+{
+    @await Html.PartialAsync("Sections/_CourseSection", Model.AllCourses, ViewData)
+}

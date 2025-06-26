@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Models;
+using SkillBuilder.Models.ViewModels;
 using SkillBuilder.Data;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -8,6 +9,7 @@ using System.Text;
 public class HomeController : Controller
 {
     private readonly AppDbContext _context;
+
 
     public HomeController(AppDbContext context)
     {
@@ -33,6 +35,6 @@ public class HomeController : Controller
 
     public IActionResult Error()
     {
-        return View("CustomError"); // Point to a custom error view if needed
+        return View("CustomError");
     }
 }

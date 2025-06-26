@@ -1,7 +1,6 @@
 ﻿@model SkillBuilder.Models.Course
 
 <style>
-    /* Mentor Notebook Styles */
     .mentor-heading {
         font-size: 2rem;
         margin-bottom: 2rem;
@@ -53,25 +52,27 @@
 </style>
 
 @{
-    // Get the artisan from a hardcoded source or service later — here assume you extract values from Model
-    var artisanId = Model.CreatedBy; // e.g., "A1111111"
-    var artisanName = "Juan Dela Cruz"; // Ideally resolved via lookup using CreatedBy
-    var artisanProfession = "Pottery Artisan";
-    var artisanHometown = "Vigan, Ilocos Sur";
-    var artisanAvatar = "/assets/Mentors/juan.png";
-    var artisanBio = "Juan is a 3rd-generation artisan who has taught pottery for over 15 years. He specializes in both traditional and modern techniques, promoting Filipino culture globally.";
+    var artisan = Model.Artisan;
+    var fullName = $"{artisan.FirstName} {artisan.LastName}";
 }
 
 <h1 class="mentor-heading">Get to know your mentor</h1>
 
-<div class="mentor-profile">
-    <img src="@artisanAvatar" class="mentor-avatar" alt="Mentor Avatar" />
-    <div class="mentor-info">
-        <a href="/ArtisanProfile/A1111111">@artisanName</a>
-        <p class="mentor-sub">@artisanProfession from @artisanHometown</p>
+@if (artisan != null)
+{
+    <div class="mentor-profile">
+        <img src="/assets/Avatar/Sample10.svg" class="mentor-avatar" />
+        <div class="mentor-info">
+            <a href="/ArtisanViewAsMentor/@artisan.ArtisanId" class="mentor-name">@fullName</a>
+            <p class="mentor-sub">@artisan.Profession from @artisan.Hometown</p>
+        </div>
     </div>
-</div>
 
-<p class="mentor-bio">
-    @artisanBio
-</p>
+    <p class="mentor-bio">
+        @artisan.Introduction
+    </p>
+}
+else
+{
+    <p>Mentor information not available.</p>
+}
