@@ -1,5 +1,96 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
+
+<style>
+    .artisan-courses-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .artisan-courses-heading {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .artisan-courses-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .artisan-course-card {
+        width: 30%;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s ease;
+        border: 1px solid #e5e5e5;
+    }
+
+        .artisan-course-card:hover {
+            transform: scale(1.02);
+        }
+
+    .artisan-course-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .artisan-course-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin: 1rem;
+        color: #222;
+    }
+
+    .artisan-course-desc {
+        font-size: 0.95rem;
+        margin: 0 1rem 1rem;
+        color: #555;
+    }
+
+    .artisan-courses-empty {
+        padding: 2rem;
+        background-color: #fdfdfd;
+        border: 1px dashed #ccc;
+        border-radius: 10px;
+        text-align: center;
+        color: #777;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+        .artisan-courses-empty strong {
+            color: #344AEA;
+        }
+</style>
+
+<div class="artisan-courses-section">
+    <div class="artisan-courses-heading">My Courses</div>
+
+    @if (Model.Courses.Any())
+    {
+        <div class="artisan-courses-grid">
+            @foreach (var course in Model.Courses)
+            {
+                <a href="/Courses/@course.Link" class="artisan-course-card">
+                    <img src="@course.ImageUrl" alt="Course Image" class="artisan-course-image" />
+                    <div class="artisan-course-title">@course.Title</div>
+                    <div class="artisan-course-desc">@course.Overview</div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="artisan-courses-empty">
+            You haven't created any courses yet.<br />
+            To get started, click the <strong>"Create Course"</strong> button in the navigation bar.
+        </div>
+    }
+</div>

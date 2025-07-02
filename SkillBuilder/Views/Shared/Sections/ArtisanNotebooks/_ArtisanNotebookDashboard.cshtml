@@ -1,5 +1,116 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
+
+<style>
+    .artisan-dash-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .artisan-dash-heading {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .artisan-dash-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .artisan-dash-card {
+        flex: 1;
+        background-color: #f0f8ff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .artisan-dash-card-title {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+
+    .artisan-dash-card-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #344AEA;
+    }
+
+    .artisan-dash-latest {
+        background-color: #fff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        border: 1px solid #eee;
+    }
+
+    .artisan-dash-latest-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #222;
+        margin-bottom: 0.5rem;
+    }
+
+    .artisan-dash-latest-overview {
+        font-size: 1rem;
+        color: #555;
+        margin-bottom: 1rem;
+    }
+
+    .artisan-dash-latest-link {
+        color: #344AEA;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+        .artisan-dash-latest-link:hover {
+            text-decoration: underline;
+        }
+
+    .artisan-dash-quote {
+        background-color: #f1f1f1;
+        padding: 1.5rem;
+        border-left: 4px solid #344AEA;
+        font-style: italic;
+        color: #666;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="artisan-dash-section">
+    <div class="artisan-dash-heading">
+        Welcome back, @Model.Artisan.User?.FirstName!
+    </div>
+
+    <div class="artisan-dash-stats">
+        <div class="artisan-dash-card">
+            <div class="artisan-dash-card-title">Total Courses</div>
+            <div class="artisan-dash-card-value">@Model.Courses.Count()</div>
+        </div>
+        <div class="artisan-dash-card">
+            <div class="artisan-dash-card-title">Artisan Works</div>
+            <div class="artisan-dash-card-value">@Model.ArtisanWorks.Count()</div>
+        </div>
+        <div class="artisan-dash-card">
+            <div class="artisan-dash-card-title">Profile Status</div>
+            <div class="artisan-dash-card-value">Active</div>
+        </div>
+    </div>
+
+    @if (Model.Courses.Any())
+    {
+        var latest = Model.Courses.Last();
+        <div class="artisan-dash-latest">
+            <div class="artisan-dash-latest-title">Latest Course: @latest.Title</div>
+            <div class="artisan-dash-latest-overview">@latest.Overview</div>
+            <a class="artisan-dash-latest-link" href="/Courses/@latest.Link">View Course</a>
+        </div>
+    }
+
+    <div class="artisan-dash-quote">
+        “Teaching others is the best way to learn twice.”
+    </div>
+</div>

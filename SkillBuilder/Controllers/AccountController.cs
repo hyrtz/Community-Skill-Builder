@@ -94,7 +94,7 @@ namespace SkillBuilder.Controllers
             <p><a href='{verificationLink}' style='background:#364BE9;padding:10px 20px;color:white;text-decoration:none;border-radius:4px;'>Verify My Account</a></p>"
             };
 
-            message.Body = builder.ToMessageBody(); // ✅ only once per request
+            message.Body = builder.ToMessageBody();
 
             using var smtp = new SmtpClient();
             await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);

@@ -1,0 +1,198 @@
+﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
+
+<style>
+    .create-course-container {
+        padding: 5rem 8.5rem 2rem 8rem;
+    }
+
+    .create-course-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem 0rem;
+    }
+
+    .create-course-back-link {
+        font-size: 0.9rem;
+        color: #555;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+        .create-course-back-link:hover {
+            color: #000;
+        }
+
+    .create-course-top-buttons {
+        text-align: right;
+    }
+
+        .create-course-top-buttons button {
+            padding: 0.6rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 2px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+
+    .create-course-btn-cancel {
+        background-color: white;
+        border: solid 1px;
+    }
+
+        .create-course-btn-cancel:hover {
+            background-color: #ccc;
+            border: none;
+        }
+
+    .create-course-btn-publish {
+        background-color: #1957d2;
+        color: white;
+    }
+
+        .create-course-btn-publish:hover {
+            background-color: #1349b3;
+        }
+
+    .create-course-title {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .create-course-tabs {
+        display: flex;
+        gap: 3rem;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 2rem;
+    }
+
+    .create-course-tab {
+        padding: 0.75rem 1.25rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        border-bottom: 4px solid transparent;
+        transition: all 0.2s ease;
+        color: #333;
+    }
+
+        .create-course-tab:hover {
+            background-color: #D6EBFF;
+        }
+
+        .create-course-tab.active {
+            border-bottom-color: #344AEA;
+            background-color: #D6EBFF;
+            color: #344AEA;
+        }
+
+    .create-course-tab-panel {
+        display: none;
+    }
+
+        .create-course-tab-panel.active {
+            display: block;
+        }
+
+    .create-course-btn-publish:disabled {
+        background-color: #A0A0A0; /* Grayish background */
+        color: #ddd;
+        cursor: not-allowed;
+        pointer-events: none;
+        border: none;
+        opacity: 0.7;
+    }
+</style>
+
+@using (Html.BeginForm("CreateCourse", "ArtisanCourse", FormMethod.Post, new { enctype = "multipart/form-data", id = "create-course-form" }))
+{
+    <div class="create-course-container">
+        <a href="javascript:history.back()" class="create-course-back-link">&larr; Back</a>
+
+        <div class="create-course-top-bar">
+            <h1 class="create-course-title">Create Course</h1>
+            <div class="create-course-top-buttons">
+                <button type="button" class="create-course-btn-cancel" onclick="history.back()">Cancel</button>
+                <button type="submit" class="create-course-btn-publish" id="createBtn" disabled>Create</button>
+            </div>
+        </div>
+
+        <div class="create-course-tabs">
+            <button type="button" class="create-course-tab active" data-tab="basic">Basic Info</button>
+            <button type="button" class="create-course-tab" data-tab="curriculum">Curriculum</button>
+            <button type="button" class="create-course-tab" data-tab="materials">Materials</button>
+        </div>
+
+        <div class="create-course-tab-panel" data-tab="basic">
+            <partial name="Sections/CreateCourseNotebooks/_CreateCourseBasicInfo" model="Model" />
+        </div>
+        <div class="create-course-tab-panel" data-tab="curriculum">
+            <partial name="Sections/CreateCourseNotebooks/_CreateCourseCurriculum" model="Model" />
+        </div>
+        <div class="create-course-tab-panel" data-tab="materials">
+            <partial name="Sections/CreateCourseNotebooks/_CreateCourseMaterials" model="Model" />
+        </div>
+    </div>
+}
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const tabs = document.querySelectorAll(".create-course-tab");
+        const panels = document.querySelectorAll(".create-course-tab-panel");
+
+        // Tab switching logic
+        function activateTab(tabName) {
+            localStorage.setItem("createCourseSelectedTab", tabName);
+            tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
+            panels.forEach(p => p.classList.toggle("active", p.dataset.tab === tabName));
+        }
+
+        const savedTab = localStorage.getItem("createCourseSelectedTab") || "basic";
+        activateTab(savedTab);
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => activateTab(tab.dataset.tab));
+        });
+
+        // Form validation logic
+        const form = document.getElementById("create-course-form");
+        const submitBtn = document.getElementById("createBtn");
+
+        const requiredFields = form.querySelectorAll("input[required], textarea[required], select[required]");
+
+        function validateFormFields() {
+            let allValid = true;
+
+            requiredFields.forEach(field => {
+                // Check if field is visible
+                const isVisible = field.offsetParent !== null;
+                if (!field.value.trim() || !isVisible) {
+                    allValid = false;
+                }
+            });
+
+            submitBtn.disabled = !allValid;
+        }
+
+        requiredFields.forEach(field => {
+            field.addEventListener("input", validateFormFields);
+            field.addEventListener("change", validateFormFields);
+        });
+
+        // Initial check on load
+        validateFormFields();
+
+        form.addEventListener("submit", function () {
+            console.log("🕐 Form is submitting now...");
+            localStorage.removeItem("createCourseSelectedTab");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting...";
+        });
+    });
+</script>

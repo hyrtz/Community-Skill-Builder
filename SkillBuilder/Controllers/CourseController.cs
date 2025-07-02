@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
 using SkillBuilder.Models.ViewModels;
+using System.Security.Claims;
 
 namespace SkillBuilder.Controllers
 {
@@ -22,9 +23,10 @@ namespace SkillBuilder.Controllers
             ViewData["UseCourseNavbar"] = true;
 
             var courses = _context.Courses
-                .Include(c => c.Artisan) 
-                .Include(c => c.Enrollments) 
+                .Include(c => c.Artisan)
+                .Include(c => c.Enrollments)
                 .Include(c => c.Reviews).ThenInclude(r => r.User)
+                .Include(c => c.CourseModules).ThenInclude(m => m.Contents)
                 .ToList();
 
             if (!string.IsNullOrEmpty(selectedCourse))
@@ -116,26 +118,29 @@ namespace SkillBuilder.Controllers
                 .Include(c => c.Artisan)
                 .Include(c => c.Enrollments)
                 .Include(c => c.Reviews)
+                .Include(c => c.Materials)
+                .Include(c => c.CourseModules)
+                    .ThenInclude(m => m.Contents)
+                        .ThenInclude(content => content.QuizQuestions) // ✅ ADD THIS LINE
                 .FirstOrDefault(c => c.Id == id);
 
             if (course == null) return NotFound();
 
-            // Get total modules (for now hardcoded as 5)
-            int totalModules = 5;
+            int totalModules = course.CourseModules
+                .SelectMany(m => m.Contents)
+                .Count();
 
             int completedModules = _context.ModuleProgress
                 .Include(p => p.CourseModule)
                 .Count(p => p.UserId == userId && p.CourseModule.CourseId == course.Id && p.IsCompleted);
 
-            double progress = (double)completedModules / totalModules * 100;
-
+            double progress = totalModules == 0 ? 0 : (double)completedModules / totalModules * 100;
             ViewData["CourseProgress"] = Math.Round(progress, 0);
 
             return View("CourseModules/CourseModule", course);
         }
 
-        [HttpPost]
-        [Route("Courses/UpdateProgress")]
+        [HttpPost("UpdateProgress")]
         public IActionResult UpdateProgress([FromBody] ProgressUpdateModel model)
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -180,6 +185,21 @@ namespace SkillBuilder.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpPost("ResetProgress")]
+        public IActionResult ResetProgress([FromBody] ProgressUpdateModel model)
+        {
+            var userId = User.FindFirstValue("UserId");
+
+            var toDelete = _context.ModuleProgress
+                .Where(p => p.UserId == userId && p.CourseModule.CourseId == model.CourseId)
+                .ToList();
+
+            _context.ModuleProgress.RemoveRange(toDelete);
+            _context.SaveChanges();
+
+            return Ok(new { message = "Reset successful" });
         }
     }
 }

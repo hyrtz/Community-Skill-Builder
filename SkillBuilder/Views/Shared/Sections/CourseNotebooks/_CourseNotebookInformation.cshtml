@@ -1,31 +1,52 @@
-﻿<!-- Video -->
-<div class="course-information-video" style="margin-bottom: 2rem;">
-    <video width="100%" height="auto" controls poster="@Model.Thumbnail">
-        <source src="@Url.Content(Model.Video)" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-</div>
+﻿<style>
 
-<!-- What You'll Learn -->
-<div class="course-information-learn">
-    <h1>What You'll Learn</h1>
-    <p>@Model.WhatToLearn</p>
-</div>
+    h1 {
+        margin-bottom: 0.5rem;
+    }
 
-<!-- Full Description -->
-<div class="course-information-description" style="margin-top: 2rem;">
-    <h1>Course Description</h1>
-    <p>@Model.FullDescription</p>
-</div>
+</style>
 
-<!-- Project Details -->
-<div class="course-information-project" style="margin-top: 2rem;">
-    <h1>What is this course's project?</h1>
-    <p>@Model.ProjectDetails</p>
-</div>
+<div>
+    <!-- Video -->
+    <div class="course-information-video" style="margin-bottom: 2rem;">
+        <video width="100%" height="auto" controls poster="@Model.Thumbnail">
+            <source src="@Url.Content(Model.Video)" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 
-<!-- Requirements -->
-<div class="course-information-requirements" style="margin-top: 2rem;">
-    <h1>Requirements and Materials</h1>
-    <p>@Model.Requirements</p>
+    <!-- What You'll Learn -->
+    @if (!string.IsNullOrWhiteSpace(Model.WhatToLearn))
+    {
+        <h1>What You'll Learn</h1>
+        <ul style="list-style: none; padding-left: 0;">
+            @foreach (var item in Model.WhatToLearn.Split("||"))
+            {
+                if (!string.IsNullOrWhiteSpace(item))
+                {
+                    <li style="margin-bottom: 0.5rem;">
+                        <span style="color: #344AEA; font-weight: bold;">&gt;</span> @item
+                    </li>
+                }
+            }
+        </ul>
+    }
+
+    <!-- Full Description -->
+    <div class="course-information-description" style="margin-top: 2rem;">
+        <h1>Course Description</h1>
+        <p>@Model.FullDescription</p>
+    </div>
+
+    <!-- Project Details -->
+    <div class="course-information-project" style="margin-top: 2rem;">
+        <h1>What is this course's project?</h1>
+        <p>@Model.ProjectDetails</p>
+    </div>
+
+    <!-- Requirements -->
+    <div class="course-information-requirements" style="margin-top: 2rem;">
+        <h1>Requirements and Materials</h1>
+        <p>@Model.Requirements</p>
+    </div>
 </div>

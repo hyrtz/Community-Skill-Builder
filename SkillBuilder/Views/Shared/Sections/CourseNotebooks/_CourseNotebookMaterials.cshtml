@@ -1,10 +1,6 @@
 ﻿@model SkillBuilder.Models.Course
 
 <style>
-    .tab-section {
-        padding: 2rem 40rem 2rem 0rem;
-    }
-
     .materials-lessons-header {
         font-size: 1.75rem;
         font-weight: 700;
@@ -27,10 +23,24 @@
 </style>
 
 <div class="tab-section">
-    <h1 class="materials-lessons-header">Lessons</h1>
-    <div class="materials-lesson-item">M1: Introduction to @Model.Title</div>
-    <div class="materials-lesson-item">M2: Tools and Preparation</div>
-    <div class="materials-lesson-item">M3: Hands-on Techniques</div>
-    <div class="materials-lesson-item">M4: Crafting with Detail</div>
-    <div class="materials-lesson-item">Final Project Overview</div>
+    @if (Model.Materials != null && Model.Materials.Any())
+    {
+        foreach (var material in Model.Materials)
+        {
+            <div class="materials-lesson-item">
+                <strong>@material.Title</strong> <br />
+                <span style="font-size: 0.9rem; color: #555;">@material.Description</span><br />
+                @if (!string.IsNullOrWhiteSpace(material.FilePath))
+                {
+                    <a href="@material.FilePath" download style="color: #344AEA; font-weight: 600;">
+                        📥 Download File (@(material.FileSize / 1024.0):F1 KB)
+                    </a>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <p>No materials available for this course yet.</p>
+    }
 </div>

@@ -1,0 +1,353 @@
+﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
+
+<style>
+    .basicinfo-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .basicinfo-form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .basicinfo-form-control,
+    .basicinfo-form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .basicinfo-form-row {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .basicinfo-form-col {
+        flex: 1;
+    }
+
+    .basicinfo-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+
+    .basicinfo-objectives-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+        .basicinfo-objectives-container input {
+            margin-bottom: 0.75rem;
+        }
+
+    .basicinfo-objective-item {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #fff;
+    }
+
+        .basicinfo-objective-item input {
+            flex: 1;
+            border: none;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            outline: none;
+            background: transparent;
+        }
+
+    .basicinfo-delete-btn {
+        background-color: transparent;
+        border: none;
+        color: #333;
+        font-size: 1.1rem;
+        padding: 0 1rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .basicinfo-delete-btn:hover {
+            color: #d00;
+        }
+
+    .basicinfo-add-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #344AEA;
+        background-color: transparent;
+        border: 1.5px solid #344AEA;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+        .basicinfo-add-btn:hover {
+            background-color: #344AEA;
+            color: white;
+        }
+
+    .basicinfo-upload-box {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+    }
+
+    .basicinfo-upload-preview {
+        width: 100px;
+        height: 100px;
+        background-color: #eee;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #aaa;
+    }
+</style>
+
+<div class="basicinfo-form-wrapper">
+
+    <!-- Course Title & Category -->
+    <div class="basicinfo-form-row">
+        <div class="basicinfo-form-col basicinfo-form-group">
+            <label for="Course_Title">Course Title *</label>
+            <input asp-for="Course.Title" class="basicinfo-form-control" placeholder="Enter course title" required />
+        </div>
+        <div class="basicinfo-form-col basicinfo-form-group">
+            <label for="Course_Category">Category *</label>
+            <select asp-for="Course.Category" class="basicinfo-form-select" required>
+                <option value="">Select category</option>
+                <option>Pottery</option>
+                <option>Weaving</option>
+                <option>Woodcarving</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <div class="basicinfo-form-group">
+        <label for="Course_Overview">Course Overview *</label>
+        <textarea asp-for="Course.Overview" class="basicinfo-form-control" rows="4" placeholder="Write a brief overview..." required></textarea>
+    </div>
+
+    <!-- Difficulty & Duration -->
+    <div class="basicinfo-form-row">
+        <div class="basicinfo-form-col basicinfo-form-group">
+            <label for="Course_Difficulty">Difficulty Level *</label>
+            <select asp-for="Course.Difficulty" class="basicinfo-form-select" required>
+                <option value="">-- Select --</option>
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Professional</option>
+            </select>
+        </div>
+        <div class="basicinfo-form-col basicinfo-form-group">
+            <label for="Course_Duration">Duration *</label>
+            <input asp-for="Course.Duration" class="basicinfo-form-control" placeholder="e.g. 7 hours" required />
+        </div>
+    </div>
+
+    <!-- Requirements -->
+    <div class="basicinfo-form-group">
+        <label for="Course_Requirements">Requirements *</label>
+        <textarea asp-for="Course.Requirements" class="basicinfo-form-control" rows="3" placeholder="List required tools or skills" required></textarea>
+    </div>
+
+    <!-- Learning Objectives -->
+    <div class="basicinfo-form-group">
+        <label>Learning Objectives *</label>
+        <div id="objectives-container" class="basicinfo-objectives-container">
+            @for (int i = 0; i < Model.LearningObjectives.Count; i++)
+            {
+                <div class="basicinfo-objective-item">
+                    <input type="text" name="LearningObjectives[@i]" value="@Model.LearningObjectives[i]" class="basicinfo-form-control" placeholder="Objective" required />
+                    <button type="button" class="basicinfo-delete-btn" onclick="this.parentElement.remove()">🗑️</button>
+                </div>
+            }
+        </div>
+        <button type="button" id="add-objective" class="basicinfo-add-btn">+ Add Objective</button>
+    </div>
+
+    <!-- Full Description -->
+    <div class="basicinfo-form-group">
+        <label for="Course_FullDescription">Full Course Description *</label>
+        <textarea asp-for="Course.FullDescription" class="basicinfo-form-control" rows="5" placeholder="Detailed explanation..." required></textarea>
+    </div>
+
+    <!-- Project Details -->
+    <div class="basicinfo-form-group">
+        <label for="Course_ProjectDetails">Final Project Details *</label>
+        <textarea asp-for="Course.ProjectDetails" class="basicinfo-form-control" rows="4" placeholder="Describe the final project..." required></textarea>
+    </div>
+
+    <!-- Image Upload -->
+    <div class="basicinfo-form-group">
+        <label>Course Image *</label>
+        <div class="basicinfo-upload-box">
+            <div class="basicinfo-upload-preview">
+                <img id="imagePreview" src="#" alt="Preview" style="width: 100px; height: 100px; display: none; object-fit: cover;" />
+            </div>
+            <div>
+                <label for="ImageFile">Upload image</label>
+                <input type="file" name="ImageFile" id="ImageFile" accept="image/*" required />
+            </div>
+        </div>
+    </div>
+
+    <!-- Thumbnail Upload -->
+    <div class="basicinfo-form-group">
+        <label>Video Thumbnail *</label>
+        <div class="basicinfo-upload-box">
+            <div class="basicinfo-upload-preview">
+                <img id="thumbPreview" src="#" alt="Thumbnail" style="width: 100px; height: 100px; display: none; object-fit: cover;" />
+            </div>
+            <div>
+                <label for="ThumbnailFile">Upload thumbnail</label>
+                <input type="file" name="ThumbnailFile" id="ThumbnailFile" accept="image/*" required />
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Upload -->
+    <div class="basicinfo-form-group">
+        <label>Course Intro Video *</label>
+        <div class="basicinfo-upload-box">
+            <div class="basicinfo-upload-preview">
+                <video id="videoPreview" width="100" height="100" controls style="display: none;"></video>
+            </div>
+            <div>
+                <label for="VideoFile">Upload video</label>
+                <input type="file" name="VideoFile" id="VideoFile" accept="video/*" required />
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        
+        // Image Preview
+        const imageInput = document.getElementById("ImageFile");
+        const imagePreview = document.getElementById("imagePreview");
+
+        imageInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Video Preview
+        const videoInput = document.getElementById("VideoFile");
+        const videoPreview = document.getElementById("videoPreview");
+
+        videoInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                const videoURL = URL.createObjectURL(file);
+                videoPreview.src = videoURL;
+                videoPreview.style.display = "block";
+            }
+        });
+
+        // Thumbnail Preview
+        const thumbInput = document.getElementById("ThumbnailFile");
+        const thumbPreview = document.getElementById("thumbPreview");
+
+        thumbInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    thumbPreview.src = e.target.result;
+                    thumbPreview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        const container = document.getElementById("objectives-container");
+        const addBtn = document.getElementById("add-objective");
+        let objectiveIndex = container.children.length; // initial count
+
+        function createObjectiveItem(index) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "basicinfo-objective-item";
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.name = `LearningObjectives[${index}]`;
+            input.className = "basicinfo-form-control";
+            input.placeholder = "Add learning objective";
+            input.required = true;
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.type = "button";
+            deleteBtn.className = "basicinfo-delete-btn";
+            deleteBtn.innerHTML = "🗑️";
+            deleteBtn.title = "Remove Objective";
+            deleteBtn.onclick = function () {
+                wrapper.remove();
+                renumberObjectives();
+            };
+
+            wrapper.appendChild(input);
+            wrapper.appendChild(deleteBtn);
+            return wrapper;
+        }
+
+        addBtn.addEventListener("click", function () {
+            const newItem = createObjectiveItem(objectiveIndex++);
+            container.appendChild(newItem);
+        });
+
+        function renumberObjectives() {
+            const items = container.querySelectorAll(".basicinfo-objective-item");
+            items.forEach((item, i) => {
+                const input = item.querySelector("input");
+                if (input) {
+                    input.name = `LearningObjectives[${i}]`;
+                }
+            });
+            objectiveIndex = items.length;
+        }
+
+        // Button enable logic
+        const form = document.getElementById("create-course-form");
+        const submitBtn = form?.querySelector(".create-course-btn-publish");
+        if (!form || !submitBtn) return;
+
+        function checkRequiredFields() {
+            const requiredInputs = form.querySelectorAll("input[required], textarea[required], select[required]");
+            const allValid = Array.from(requiredInputs).every(field => field.value.trim() !== "");
+            submitBtn.disabled = !allValid;
+        }
+
+        form.addEventListener("input", checkRequiredFields);
+        form.addEventListener("change", checkRequiredFields);
+        checkRequiredFields(); // initial check
+    });
+</script>>

@@ -306,11 +306,11 @@
                 @foreach (var course in Model)
                 {
                     <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="course-card-link">
-                        <div class="course-card" data-classes="@course.Classes" data-level="@course.Level">
+                        <div class="course-card" data-classes="@course.Category" data-level="@course.Difficulty">
                             <img src="@course.ImageUrl" alt="@course.Title" />
                             <div class="course-card-body">
                                 <h2 class="course-card-title">@course.Title</h2>
-                                <p class="course-card-description">@course.Description</p>
+                                <p class="course-card-description">@course.Overview</p>
                                 <div class="course-card-meta">
                                     <span><img src="/assets/Icons/Time.ico" class="icon" /> @course.Duration</span>
                                     <span><img src="/assets/Icons/Users.ico" class="icon" /> @course.UserCount</span>

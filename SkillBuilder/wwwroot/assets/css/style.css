@@ -89,7 +89,7 @@ html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 6rem;
+    padding: 0.5rem 8rem;
     font-family: sans-serif;
     background-color: white;
     width: 100%;
@@ -219,6 +219,18 @@ html {
     align-items: center;
     gap: 1rem;
 }
+
+.create-course-btn {
+    padding: 0.6rem 1rem;
+    border: solid 1px;
+    border-radius: 1rem;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+    .create-course-btn:hover {
+        border: solid 2px #3b44f6;
+    }
 
 .navbar-item {
     text-decoration: none;

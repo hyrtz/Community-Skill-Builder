@@ -47,7 +47,7 @@ namespace SkillBuilder.Controllers
                 {
                     CourseId = courseId,
                     CourseTitle = e.Course.Title,
-                    CourseDescription = e.Course.Description,
+                    CourseDescription = e.Course.Overview,
                     Link = e.Course.Link,
                     ProgressPercentage = Math.Round(percentage, 0)
                 };
@@ -73,7 +73,7 @@ namespace SkillBuilder.Controllers
                     UserId = user.Id,
                     CourseId = course.Id,
                     CourseTitle = course.Title,
-                    CourseDescription = course.Description,
+                    CourseDescription = course.Overview,
                     ProgressPercentage = Math.Round(progress, 0)
                 };
             }).ToList();

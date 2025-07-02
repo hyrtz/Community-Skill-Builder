@@ -470,7 +470,7 @@ namespace SkillBuilder.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Classes")
+                    b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -481,7 +481,7 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Difficulty")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -494,17 +494,15 @@ namespace SkillBuilder.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsPublished")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Level")
-                        .IsRequired()
+                    b.Property<string>("Link")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Link")
+                    b.Property<string>("Overview")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -517,7 +515,6 @@ namespace SkillBuilder.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Thumbnail")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -525,11 +522,9 @@ namespace SkillBuilder.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Video")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WhatToLearn")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -542,16 +537,16 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 1,
-                            Classes = "Pottery",
+                            Category = "Pottery",
                             CreatedAt = new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedBy = "A1111111",
-                            Description = "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.",
+                            Difficulty = "Beginner",
                             Duration = "15 hours",
                             FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.",
                             ImageUrl = "/assets/Courses Pics/Pottery.png",
                             IsPublished = false,
-                            Level = "Beginner",
                             Link = "pottery",
+                            Overview = "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.",
                             ProjectDetails = "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.",
                             Requirements = "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.",
                             Thumbnail = "/assets/Courses Pics/Pottery.png",
@@ -562,16 +557,16 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 2,
-                            Classes = "Wood Carving",
+                            Category = "Wood Carving",
                             CreatedAt = new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedBy = "A1111111",
-                            Description = "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.",
+                            Difficulty = "Intermediate",
                             Duration = "29 hours",
                             FullDescription = "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.",
                             ImageUrl = "/assets/Courses Pics/Woodcarving.png",
                             IsPublished = false,
-                            Level = "Intermediate",
                             Link = "woodcarving",
+                            Overview = "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.",
                             ProjectDetails = "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.",
                             Requirements = "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).",
                             Thumbnail = "/assets/Courses Pics/Woodcarving.png",
@@ -582,16 +577,16 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 3,
-                            Classes = "Weaving",
+                            Category = "Weaving",
                             CreatedAt = new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedBy = "A1111111",
-                            Description = "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.",
+                            Difficulty = "Professional",
                             Duration = "18 hours",
                             FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.",
                             ImageUrl = "/assets/Courses Pics/Weaving.png",
                             IsPublished = false,
-                            Level = "Professional",
                             Link = "weaving",
+                            Overview = "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.",
                             ProjectDetails = "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.",
                             Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
                             Thumbnail = "/assets/Courses Pics/Weaving.png",
@@ -599,6 +594,40 @@ namespace SkillBuilder.Migrations
                             Video = "/assets/Videos/Weaving.mp4",
                             WhatToLearn = "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation."
                         });
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.CourseMaterial", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CourseMaterials");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CourseModule", b =>
@@ -617,7 +646,6 @@ namespace SkillBuilder.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Order")
@@ -628,7 +656,6 @@ namespace SkillBuilder.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VideoUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -636,6 +663,128 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("CourseModules");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ContentType = "",
+                            CourseId = 1,
+                            Order = 0,
+                            Title = "Introduction"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ContentType = "",
+                            CourseId = 1,
+                            Order = 0,
+                            Title = "History"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ContentType = "",
+                            CourseId = 1,
+                            Order = 0,
+                            Title = "Session"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ContentType = "",
+                            CourseId = 1,
+                            Order = 0,
+                            Title = "Quiz"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ContentType = "",
+                            CourseId = 1,
+                            Order = 0,
+                            Title = "Final Activity"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ContentType = "",
+                            CourseId = 2,
+                            Order = 0,
+                            Title = "Introduction"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ContentType = "",
+                            CourseId = 2,
+                            Order = 0,
+                            Title = "History"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ContentType = "",
+                            CourseId = 2,
+                            Order = 0,
+                            Title = "Session"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            ContentType = "",
+                            CourseId = 2,
+                            Order = 0,
+                            Title = "Quiz"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            ContentType = "",
+                            CourseId = 2,
+                            Order = 0,
+                            Title = "Final Activity"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            ContentType = "",
+                            CourseId = 3,
+                            Order = 0,
+                            Title = "Introduction"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            ContentType = "",
+                            CourseId = 3,
+                            Order = 0,
+                            Title = "History"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            ContentType = "",
+                            CourseId = 3,
+                            Order = 0,
+                            Title = "Session"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            ContentType = "",
+                            CourseId = 3,
+                            Order = 0,
+                            Title = "Quiz"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            ContentType = "",
+                            CourseId = 3,
+                            Order = 0,
+                            Title = "Final Activity"
+                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CourseProjectSubmission", b =>
@@ -759,6 +908,186 @@ namespace SkillBuilder.Migrations
                     b.ToTable("Enrollments");
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.ModuleContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CourseModuleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Duration")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MediaUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SessionLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseModuleId");
+
+                    b.ToTable("ModuleContents");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ContentText = "Pottery intro content something anything.",
+                            ContentType = "Video",
+                            CourseModuleId = 1,
+                            MediaUrl = "/assets/Videos/Pottery.mp4",
+                            Order = 0,
+                            Title = "Welcome to Pottery"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ContentText = "History content something anything.",
+                            ContentType = "Image + Text",
+                            CourseModuleId = 2,
+                            MediaUrl = "/assets/Courses Pics/Pottery.png",
+                            Order = 0,
+                            Title = "History of Pottery"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ContentType = "Session",
+                            CourseModuleId = 3,
+                            Order = 0,
+                            SessionLink = "https://live.pottery.com/session1",
+                            Title = "Live Pottery Session"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ContentText = "Create your own pottery something anything.",
+                            ContentType = "Activity",
+                            CourseModuleId = 5,
+                            Order = 0,
+                            Title = "Pottery Final Activity"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ContentText = "Woodcarving intro content something anything.",
+                            ContentType = "Video",
+                            CourseModuleId = 6,
+                            MediaUrl = "/assets/Videos/Wood Carving.mp4",
+                            Order = 0,
+                            Title = "Welcome to Woodcarving"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ContentText = "History content something anything.",
+                            ContentType = "Image + Text",
+                            CourseModuleId = 7,
+                            MediaUrl = "/assets/Courses Pics/Woodcarving.png",
+                            Order = 0,
+                            Title = "History of Woodcarving"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ContentType = "Session",
+                            CourseModuleId = 8,
+                            Order = 0,
+                            SessionLink = "https://live.woodcarving.com/session1",
+                            Title = "Live Woodcarving Session"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ContentText = "Carve a wooden spoon something anything.",
+                            ContentType = "Activity",
+                            CourseModuleId = 10,
+                            Order = 0,
+                            Title = "Woodcarving Final Activity"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            ContentText = "Weaving intro content something anything.",
+                            ContentType = "Video",
+                            CourseModuleId = 11,
+                            MediaUrl = "/assets/Videos/Weaving.mp4",
+                            Order = 0,
+                            Title = "Welcome to Weaving"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            ContentText = "History content something anything.",
+                            ContentType = "Image + Text",
+                            CourseModuleId = 12,
+                            MediaUrl = "/assets/Courses Pics/Weaving.png",
+                            Order = 0,
+                            Title = "History of Weaving"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            ContentType = "Session",
+                            CourseModuleId = 13,
+                            Order = 0,
+                            SessionLink = "https://live.weaving.com/session1",
+                            Title = "Live Weaving Session"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            ContentText = "Weave a basic pattern something anything.",
+                            ContentType = "Activity",
+                            CourseModuleId = 15,
+                            Order = 0,
+                            Title = "Weaving Final Activity"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            ContentType = "Quiz",
+                            CourseModuleId = 4,
+                            Order = 0,
+                            Title = "Pottery Quiz"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            ContentType = "Quiz",
+                            CourseModuleId = 9,
+                            Order = 0,
+                            Title = "Woodcarving Quiz"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            ContentType = "Quiz",
+                            CourseModuleId = 14,
+                            Order = 0,
+                            Title = "Weaving Quiz"
+                        });
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.ModuleProgress", b =>
                 {
                     b.Property<int>("Id")
@@ -792,6 +1121,215 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("CourseModuleId");
 
                     b.ToTable("ModuleProgress");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.QuizQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CorrectAnswer")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ModuleContentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OptionA")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OptionB")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OptionC")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OptionD")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Question")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModuleContentId");
+
+                    b.ToTable("QuizQuestions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CorrectAnswer = "Clay",
+                            ModuleContentId = 13,
+                            OptionA = "Wood",
+                            OptionB = "Metal",
+                            OptionC = "Clay",
+                            OptionD = "Plastic",
+                            Question = "What is the main material used in pottery?"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CorrectAnswer = "Wheel Throwing",
+                            ModuleContentId = 13,
+                            OptionA = "Sculpting",
+                            OptionB = "Weaving",
+                            OptionC = "Wheel Throwing",
+                            OptionD = "Casting",
+                            Question = "Which technique is used in pottery?"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CorrectAnswer = "1000°C",
+                            ModuleContentId = 13,
+                            OptionA = "100°C",
+                            OptionB = "400°C",
+                            OptionC = "1000°C",
+                            OptionD = "2000°C",
+                            Question = "What temperature does a kiln usually reach?"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CorrectAnswer = "Coating",
+                            ModuleContentId = 13,
+                            OptionA = "Painting",
+                            OptionB = "Coating",
+                            OptionC = "Mixing",
+                            OptionD = "Breaking",
+                            Question = "What is glazing in pottery?"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CorrectAnswer = "Remove air bubbles",
+                            ModuleContentId = 13,
+                            OptionA = "Decorate it",
+                            OptionB = "Remove air bubbles",
+                            OptionC = "Color it",
+                            OptionD = "Dry it faster",
+                            Question = "Why do we wedge clay?"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CorrectAnswer = "Chisel",
+                            ModuleContentId = 14,
+                            OptionA = "Pencil",
+                            OptionB = "Chisel",
+                            OptionC = "Brush",
+                            OptionD = "Hammer",
+                            Question = "What tool is essential in woodcarving?"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CorrectAnswer = "Basswood",
+                            ModuleContentId = 14,
+                            OptionA = "Oak",
+                            OptionB = "Basswood",
+                            OptionC = "Mahogany",
+                            OptionD = "Pine",
+                            Question = "Which wood is best for beginners?"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CorrectAnswer = "Cutting out small designs",
+                            ModuleContentId = 14,
+                            OptionA = "Removing chips",
+                            OptionB = "Cutting out small designs",
+                            OptionC = "Joining wood",
+                            OptionD = "Painting wood",
+                            Question = "What is chip carving?"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CorrectAnswer = "Both A and B",
+                            ModuleContentId = 14,
+                            OptionA = "Gloves",
+                            OptionB = "Mask",
+                            OptionC = "Both A and B",
+                            OptionD = "None",
+                            Question = "Safety gear includes?"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CorrectAnswer = "Sharp and clean",
+                            ModuleContentId = 14,
+                            OptionA = "Wet",
+                            OptionB = "Rusty",
+                            OptionC = "Sharp and clean",
+                            OptionD = "Scattered",
+                            Question = "How should tools be stored?"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CorrectAnswer = "Loom",
+                            ModuleContentId = 15,
+                            OptionA = "Hook",
+                            OptionB = "Loom",
+                            OptionC = "Needle",
+                            OptionD = "Stick",
+                            Question = "What tool is used to hold threads in weaving?"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            CorrectAnswer = "Horizontally",
+                            ModuleContentId = 15,
+                            OptionA = "Vertically",
+                            OptionB = "Diagonally",
+                            OptionC = "Horizontally",
+                            OptionD = "Randomly",
+                            Question = "Weft yarns go?"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            CorrectAnswer = "Twill",
+                            ModuleContentId = 15,
+                            OptionA = "Zigzag",
+                            OptionB = "Twill",
+                            OptionC = "Spin",
+                            OptionD = "Knot",
+                            Question = "Which is a basic weave pattern?"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            CorrectAnswer = "Design",
+                            ModuleContentId = 15,
+                            OptionA = "Sound",
+                            OptionB = "Texture",
+                            OptionC = "Design",
+                            OptionD = "Hardness",
+                            Question = "Color theory helps with?"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            CorrectAnswer = "Structure",
+                            ModuleContentId = 15,
+                            OptionA = "Decoration",
+                            OptionB = "Structure",
+                            OptionC = "Noise",
+                            OptionD = "Glazing",
+                            Question = "What is the purpose of warp threads?"
+                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.User", b =>
@@ -918,6 +1456,17 @@ namespace SkillBuilder.Migrations
                     b.Navigation("Artisan");
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.CourseMaterial", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.Course", "Course")
+                        .WithMany("Materials")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.CourseModule", b =>
                 {
                     b.HasOne("SkillBuilder.Models.Course", "Course")
@@ -986,6 +1535,17 @@ namespace SkillBuilder.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.ModuleContent", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.CourseModule", "CourseModule")
+                        .WithMany("Contents")
+                        .HasForeignKey("CourseModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CourseModule");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.ModuleProgress", b =>
                 {
                     b.HasOne("SkillBuilder.Models.CourseModule", "CourseModule")
@@ -995,6 +1555,17 @@ namespace SkillBuilder.Migrations
                         .IsRequired();
 
                     b.Navigation("CourseModule");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.QuizQuestion", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.ModuleContent", "ModuleContent")
+                        .WithMany("QuizQuestions")
+                        .HasForeignKey("ModuleContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ModuleContent");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.Artisan", b =>
@@ -1010,6 +1581,8 @@ namespace SkillBuilder.Migrations
 
                     b.Navigation("Enrollments");
 
+                    b.Navigation("Materials");
+
                     b.Navigation("ProjectSubmissions");
 
                     b.Navigation("Reviews");
@@ -1017,7 +1590,14 @@ namespace SkillBuilder.Migrations
 
             modelBuilder.Entity("SkillBuilder.Models.CourseModule", b =>
                 {
+                    b.Navigation("Contents");
+
                     b.Navigation("Progresses");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.ModuleContent", b =>
+                {
+                    b.Navigation("QuizQuestions");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.User", b =>
