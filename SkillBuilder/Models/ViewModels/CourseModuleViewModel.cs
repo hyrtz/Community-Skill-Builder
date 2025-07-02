@@ -3,6 +3,7 @@
     public class CourseModuleViewModel
     {
         public string Title { get; set; }
-        public List<ModuleContentViewModel> Contents { get; set; } = new();
+        public int Order { get; set; }
+        public List<LessonViewModel> Lessons { get; set; } = new();
     }
 }

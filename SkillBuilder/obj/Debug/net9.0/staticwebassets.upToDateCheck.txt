@@ -104,6 +104,20 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\uploads\images\0597f808136a2e44d4d1eff4049c46d1.jpg
+wwwroot\uploads\images\images.jpg
+wwwroot\uploads\images\maxresdefault.jpg
+wwwroot\uploads\images\Monster Hunter World Screenshot 2024.01.12 - 23.22.51.22.png
+wwwroot\uploads\images\Predator_Wallpaper_5000x2814.jpg
+wwwroot\uploads\lesson-images\images.jpg
+wwwroot\uploads\lesson-images\maxresdefault.jpg
+wwwroot\uploads\lesson-videos\cat explode [meme].mp4
+wwwroot\uploads\thumbnails\516076fd9fea9446f397eff9fc22f76e.jpg
+wwwroot\uploads\thumbnails\images.jpg
+wwwroot\uploads\thumbnails\maxresdefault.jpg
+wwwroot\uploads\thumbnails\Monster Hunter World Screenshot 2024.01.14 - 01.44.09.50.png
+wwwroot\uploads\thumbnails\Planet9_Wallpaper_5000x2813.jpg
+wwwroot\uploads\videos\cat explode [meme].mp4
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\LICENSE.txt
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\dist\jquery.slim.min.map
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\dist\jquery.slim.min.js

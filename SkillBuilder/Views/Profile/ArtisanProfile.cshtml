@@ -101,9 +101,9 @@
 
         <div class="artisan-tabs">
             <button class="artisan-tab active" data-tab="dashboard">Dashboard</button>
-            <button class="artisan-tab" data-tab="courses">My Courses</button>
-            <button class="artisan-tab" data-tab="projects">Submitted Projects</button>
-            <button class="artisan-tab" data-tab="reviews">Student Reviews</button>
+            <button class="artisan-tab" data-tab="courses">Courses</button>
+            <button class="artisan-tab" data-tab="projects">Support Sessions</button>
+            <button class="artisan-tab" data-tab="reviews">Project to Review</button>
         </div>
     </div>
 
@@ -117,6 +117,9 @@
         </div>
         <div class="artisan-panel" data-tab="projects">
             @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookSupportSessions", Model)
+        </div>
+        <div class="artisan-panel" data-tab="reviews">
+            @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookReviewProjects", Model)
         </div>
     </div>
 </div>

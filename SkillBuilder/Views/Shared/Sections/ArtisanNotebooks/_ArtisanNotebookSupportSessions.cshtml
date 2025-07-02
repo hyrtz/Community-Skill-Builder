@@ -1,5 +1,61 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿<style>
+    .artisan-support-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .artisan-support-heading {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .artisan-support-card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+    }
+
+    .artisan-support-user {
+        font-weight: bold;
+        color: #344AEA;
+        margin-bottom: 0.25rem;
+    }
+
+    .artisan-support-message {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+
+    .artisan-support-course {
+        font-size: 0.9rem;
+        color: #777;
+        font-style: italic;
+    }
+
+    .artisan-support-empty {
+        padding: 2rem;
+        background-color: #fdfdfd;
+        border: 1px dashed #ccc;
+        border-radius: 10px;
+        text-align: center;
+        color: #777;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+</style>
+
+<div class="artisan-support-section">
+    <div class="artisan-support-heading">Support Sessions</div>
+
+    <!-- Static fallback until dynamic list is ready -->
+    <div class="artisan-support-empty">
+        No support session requests at the moment.<br />
+        When learners request assistance from your course modules, they’ll appear here.
+    </div>
+</div>

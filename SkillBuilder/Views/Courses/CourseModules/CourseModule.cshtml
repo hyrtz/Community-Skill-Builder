@@ -1,7 +1,11 @@
 ﻿@model SkillBuilder.Models.Course
+@using System.Text.Json
+
 @{
     var progress = ViewData["CourseProgress"] != null ? (double)ViewData["CourseProgress"] : 0;
     ViewData["UseCourseNavbar"] = true;
+    var courseModules = Model.CourseModules.ToList();
+    var moduleDataIndex = 0;
 }
 
 <style>
@@ -112,6 +116,13 @@
             cursor: not-allowed;
         }
 
+            .module-tab.locked::after {
+                content: '🔒';
+                float: right;
+                margin-left: 8px;
+                color: #666;
+            }
+
         .module-tab:hover:not(.locked) {
             background-color: #cde7fa;
         }
@@ -154,6 +165,14 @@
             opacity: 0.6;
         }
 
+    .centered-module-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
 
     video {
         border-radius: 8px;
@@ -165,9 +184,216 @@
         font-weight: bold;
         position: relative;
     }
+
+    .time-option {
+        background-color: #eee;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+        .time-option.selected {
+            background-color: #344AEA;
+            color: white;
+            font-weight: bold;
+        }
+
+    .quiz-launch-btn, .session-launch-btn {
+        padding: 1rem 2rem;
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .quiz-launch-btn:hover, .session-launch-btn:hover {
+            background-color: #263ebf;
+        }
+
+    #quizModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+        #quizModal.show {
+            display: flex;
+        }
+
+    .quizModal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 600px;
+        max-width: 90%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        position: relative;
+    }
+
+    /* Progress Bar */
+    .quiz-progress-bar {
+        width: 100%;
+        height: 6px;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+        .quiz-progress-bar .filled {
+            height: 100%;
+            background-color: #344AEA;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+    /* Question Text */
+    #questionText {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+    }
+
+    /* Answer Grid */
+    #quizOptions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .quiz-option {
+        background-color: #f1f1f1;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        user-select: none;
+    }
+
+        .quiz-option:hover {
+            background-color: #e0e0e0;
+        }
+
+        .quiz-option.selected {
+            background-color: #d4e4ff;
+            font-weight: bold;
+        }
+
+    /* Submit Button */
+    #submitAnswerBtn {
+        padding: 0.75rem 1.5rem;
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1rem;
+        align-self: flex-end;
+    }
+
+        #submitAnswerBtn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+    /* Feedback Popup */
+    #feedbackPopup {
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #344AEA;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        animation: fadeInUp 0.4s ease;
+    }
+
+        #feedbackPopup.wrong {
+            background-color: #e74c3c;
+        }
+
+        #feedbackPopup button {
+            background-color: white;
+            color: #344AEA;
+            padding: 0.5rem 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #feedbackPopup.wrong button {
+            color: #e74c3c;
+        }
+
+    #feedbackBox {
+        display: flex;
+        flex-direction: column; /* ✅ Stack vertically */
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-top: 2rem;
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 500px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-box {
+        animation: popUp 0.3s ease-out;
+    }
+
 </style>
 
 <div class="course-module-container">
+    <button id="resetBtn">Reset Progress</button>
     <!-- Header -->
     <div class="course-module-header progress-header">
         <span class="course-title">@Model.Title</span>
@@ -179,472 +405,545 @@
 
     <!-- Body -->
     <div class="course-module-body">
-        <!-- Sidebar (Left) -->
+        <!-- Sidebar -->
         <div class="module-sidebar">
             <h2>Course Content</h2>
-
-            <!-- Chapters -->
-            <div class="module-chapter">
-                <h3>C1: Introduction to @Model.Title</h3>
-                <div class="module-tab active" data-tab="0">Watch Introduction</div>
-            </div>
-
-            <div class="module-chapter">
-                <h3>C2: History of @Model.Title</h3>
-                <div class="module-tab locked" data-tab="1">Explore History</div>
-            </div>
-
-            <div class="module-chapter">
-                <h3>C3: Short Quiz</h3>
-                <div class="module-tab locked" data-tab="2">Take Quiz</div>
-            </div>
-
-            <div class="module-chapter">
-                <h3>C4: Final Activity</h3>
-                <div class="module-tab locked" data-tab="3">Real-Time Session with Artisan</div>
-                <div class="module-tab locked" data-tab="4">Submit Activity</div>
-            </div>
-        </div>
-
-        <!-- Content Area (Right) -->
-        <div class="module-content" id="moduleContent">
-            <!-- Dynamic Content loaded here -->
-        </div>
-    </div>
-</div>
-
-<!-- QUIZ MODAL -->
-<div id="quizModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
-    <div style="background:#fff; border-radius:12px; width:600px; max-width:90%; padding:2rem; position:relative; display:flex; flex-direction:column; align-items:center;">
-        <!-- Progress Bar -->
-        <div style="width:100%; height:10px; background:#eee; border-radius:6px; margin-bottom:1rem;">
-            <div id="quizProgress" style="height:100%; width:0%; background:#364BE9; border-radius:6px;"></div>
-        </div>
-
-        <!-- Question -->
-        <div id="quizBox" style="margin-top:1.5rem; text-align:center;">
-            <p id="questionText">Loading...</p>
-            <div id="quizOptions" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;"></div>
-            <button id="submitAnswerBtn" disabled onclick="submitAnswer()" style="margin-top:1.5rem; background:#364BE9; color:#fff; padding:0.6rem 1.5rem; border:none; border-radius:8px; cursor:pointer;">Submit Answer</button>
-        </div>
-
-        <!-- Feedback Modal Layer -->
-        <div id="feedbackBox" style="display:none; margin-top:2rem; text-align:center;">
-            <p id="feedbackMsg"></p>
-            <div style="margin-top:1rem;">
-                <button id="tryAgainBtn" onclick="tryAgain()" style="margin-right:1rem;">Try Again</button>
-                <button onclick="nextQuestion()">Continue</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Quiz Completion Celebration -->
-<div id="quizCompleteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10000; justify-content:center; align-items:center;">
-    <div style="background:#fff; padding:3rem; border-radius:16px; text-align:center; width:90%; max-width:600px;">
-        <h1 style="font-size:2rem; color:#364BE9;">Quiz Complete!</h1>
-        <p style="font-size:1.2rem; margin-top:0.5rem;">You're on a roll for completing this quiz!</p>
-        <div style="background:#f0f8ff; margin:2rem auto; padding:1rem 2rem; border-radius:12px; display:inline-block; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
-            <h3 style="color:#28a745; font-size:1.5rem;">You got <span id="quizScore"></span> out of 5 correct!</h3>
-        </div>
-        <button onclick="exitQuizModal()" style="background:#364BE9; color:white; padding:0.7rem 1.8rem; font-weight:bold; border:none; border-radius:8px;">Continue Course</button>
-    </div>
-</div>
-
-<script>
-    const moduleTabs = document.querySelectorAll(".module-tab");
-    const moduleContent = document.getElementById("moduleContent");
-    let completedModules = JSON.parse(localStorage.getItem("progress_course_@Model.Id")) || [];
-    let nextBtn = null;
-
-    const moduleData = [
-        {
-            title: "Introduction to @Model.Title",
-            video: "@Url.Content(Model.Video)",
-            poster: "@Model.Thumbnail",
-            learn: `@Model.WhatToLearn`,
-            desc: `@Model.FullDescription`,
-            project: `@Model.ProjectDetails`,
-            requirements: `@Model.Requirements`,
-            showDetails: true
-        },
-        {
-            title: "History of @Model.Title",
-            custom: `
-                <h1 style="color:#344AEA; margin-bottom:1rem;">What is Pottery?</h1>
-                <p style="font-size:1rem; line-height:1.6;">
-                    Pottery in the Philippines is one of the oldest surviving art forms dating back to the Neolithic age.
-                    Early Filipinos used pottery for ceremonial and domestic purposes — from cooking to storing grains and liquids.
-                    The Manunggul Jar, discovered in Palawan and dated to around 890–710 B.C., is a striking example of burial jar artistry.
-                    Across regions, each community developed its own techniques. In Ilocos, the *burnay* jar uses clay mixed with sand for durability.
-                    In the Visayas and Mindanao, earthenware traditions still persist with indigenous motifs and firing styles.
-                    Pottery remains not only a utilitarian craft, but also a vital part of Filipino cultural identity.
-                </p>
-            `
-        },
-        {
-            title: "Short Quiz",
-            custom: `
-                <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
-                    <h1 style="font-size:2rem; color:#344AEA;">Quiz Activity</h1>
-                    <h3 style="font-weight:400; margin-top:0.5rem;">Before proceeding with next chapter, Are you ready for a short Quiz?</h3>
-                    <button onclick="openQuizModal()" style="margin-top:2rem; background:#364BE9; color:white; padding:0.75rem 2rem; border:none; border-radius:8px; font-size:1rem;">Start Quiz</button>
+            @for (int i = 0; i < courseModules.Count; i++)
+            {
+                var mod = courseModules[i];
+                var contents = mod.Contents.ToList();
+                    <div class="module-chapter">
+                    <h3>Module @(@i + 1): @mod.Title</h3>
+                    @for (int j = 0; j < contents.Count; j++)
+                    {
+                        var lesson = contents[j];
+                        <div class="module-tab @(i == 0 && j == 0 ? "active" : "locked")" data-tab="@(moduleDataIndex++)">
+                            @lesson.Title
+                        </div>
+                    }
                 </div>
-            `
-        },
-        {
-            title: "Real-Time Session",
-            custom: `
-                <h1>Join the Live Session</h1>
-                <p>A Zoom link will be available here on your scheduled date.</p>
-            `
-        },
-        {
-            title: "Final Activity Submission",
-            custom: `
-                <h1>Submit Your Work</h1>
-                <p>Upload photos/videos of your final project here.</p>
-                <input type="file" />
-            `
-        }
-    ];
-
-    function updateModuleTabs() {
-        completedModules.forEach(i => {
-            const tab = moduleTabs[i];
-            if (tab) {
-                tab.classList.remove("locked");
-                tab.classList.add("completed");
             }
-        });
+        </div>
 
-        const maxCompleted = Math.max(...completedModules, 0);
-        if (moduleTabs[maxCompleted + 1]) {
-            moduleTabs[maxCompleted + 1].classList.remove("locked");
+        <!-- Right Content Area -->
+        <div class="module-content" id="moduleContent">
+            <!-- dynamic content goes here -->
+        </div>
+    </div>
+
+    <div id="sessionModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 500px;">
+            <h1 style="color:#344AEA; margin-bottom: 1.5rem;">Schedule a Live Session</h1>
+
+            <!-- Date Selection -->
+            <label for="sessionDate" style="display:block; margin-bottom: 0.5rem; text-align:left;">Date</label>
+            <input type="date" id="sessionDate" style="width: 100%; padding: 0.5rem; margin-bottom: 1.2rem;" />
+
+            <!-- Time Input -->
+            <label for="customTime" style="display:block; margin-bottom: 0.5rem; text-align:left;">Time</label>
+            <input type="time" id="customTime" style="width: 100%; padding: 0.5rem; margin-bottom: 1.2rem;" />
+
+            <!-- Message -->
+            <label for="sessionMessage" style="display:block; margin-bottom: 0.5rem; text-align:left;">Message</label>
+            <textarea id="sessionMessage" placeholder="Write your message here..." style="width: 100%; padding: 0.5rem; height: 100px; margin-bottom: 1.5rem;"></textarea>
+
+            <!-- Buttons -->
+            <div style="text-align: right;">
+                <button onclick="closeSessionModal()" style="padding: 0.75rem 1.5rem; margin-right: 1rem;">Cancel</button>
+                <button onclick="sendSessionRequest()" class="quiz-launch-btn">Send Request</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="quizModal">
+        <div class="quizModal-content">
+            <div class="quiz-progress-bar">
+                <div class="filled" id="quizProgressFilled"></div>
+            </div>
+
+            <div id="quizBox">
+                <h2 id="questionText">Question</h2>
+                <div id="quizOptions" style="margin-top:1rem;"></div>
+                <button id="submitAnswerBtn" onclick="submitAnswer()" style="margin-top:1rem;" disabled>Submit</button>
+            </div>
+
+            <div id="feedbackBox" style="display:none;">
+                <p id="feedbackMsg" style="font-size: 1.1rem; text-align: center;"></p>
+                <div style="display: flex; gap: 1rem;">
+                    <button onclick="tryAgain()">Try Again</button>
+                    <button onclick="nextQuestion()">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quizCompleteModal" class="modal-overlay">
+        <div class="modal-box">
+            <h1 style="color:#344AEA; margin-bottom:1rem;">Quiz Complete!</h1>
+            <p style="font-size:1.2rem; color:#333;">You've finished the quiz.</p>
+            <p style="font-size:1.1rem; margin: 1.5rem 0; color:#444;">
+                Your Score: <strong id="quizScore" style="color:#344AEA; font-size:1.3rem;">0</strong>
+            </p>
+            <button id="continueNextBtn" onclick="exitQuizModal()" class="quiz-launch-btn" style="margin-top:1rem;" disabled>
+                Continue Course
+            </button>
+        </div>
+    </div>
+</div>
+
+@{
+    moduleDataIndex = 0; // reset for accurate index
+}
+
+<!-- Full Logic Script -->
+<script>
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const moduleData = [];
+        @for (int i = 0; i < courseModules.Count; i++)
+        {
+                var contents = courseModules[i].Contents.ToList();
+                for (int j = 0; j < contents.Count; j++)
+                {
+                        var content = contents[j];
+                        var quizList = (content.QuizQuestions ?? new List<SkillBuilder.Models.QuizQuestion>())
+                                .Select(q => new
+                                {
+                                        question = q.Question,
+                                        options = new[] { q.OptionA, q.OptionB, q.OptionC, q.OptionD },
+                                        correctAnswer = q.CorrectAnswer
+                                });
+
+                        <text>
+                            moduleData.push({
+                                title: @Html.Raw(JsonSerializer.Serialize(content.Title)),
+                                type: @Html.Raw(JsonSerializer.Serialize(content.ContentType ?? "Text")),
+                                contentText: @Html.Raw(JsonSerializer.Serialize(content.ContentText ?? "")),
+                                mediaUrl: @Html.Raw(JsonSerializer.Serialize(content.MediaUrl ?? "")),
+                                sessionLink: @Html.Raw(JsonSerializer.Serialize(content.SessionLink ?? "")),
+                                quizQuestions: @Html.Raw(JsonSerializer.Serialize(quizList)),
+                                showDetails: @Html.Raw(JsonSerializer.Serialize(i == 0 && j == 0))
+                            });
+                        </text>
+                }
         }
-    }
 
-    // Unlock next tab if not already completed
-    const maxCompleted = Math.max(...completedModules, 0);
-    if (moduleTabs[maxCompleted + 1]) {
-        moduleTabs[maxCompleted + 1].classList.remove("locked");
-    }
+        console.log("moduleData:", moduleData);
+        console.log("questionText:", document.getElementById("questionText"));
+        console.log("quizOptions:", document.getElementById("quizOptions"));
 
-    // Set correct tab as active
-    const lastTab = moduleTabs[maxCompleted];
-    if (lastTab) {
-        lastTab.classList.add("active");
-        loadTab(maxCompleted);
-    }
-    updateProgressDisplay();
+        const moduleTabs = document.querySelectorAll(".module-tab");
+        const moduleContent = document.getElementById("moduleContent");
+        let completedModules = JSON.parse(localStorage.getItem("progress_course_@Model.Id")) || [];
+        let dynamicQuizQuestions = [];
+        let nextBtn = null;
+        const resetBtn = document.getElementById("resetBtn");
+        if (resetBtn) {
+            resetBtn.addEventListener("click", resetProgress);
+        }
 
-    function updateProgressDisplay() {
-        const percentage = Math.round((completedModules.length / moduleTabs.length) * 100);
-        document.querySelector(".course-progress-label").innerText = `${percentage}%`;
-        document.querySelector(".course-progress-bar .filled").style.width = `${percentage}%`;
-    }
+        try {
+            const stored = JSON.parse(localStorage.getItem("progress_course_@Model.Id"));
+            if (Array.isArray(stored)) {
+                completedModules = stored;
+            }
+        } catch (err) {
+            completedModules = [];
+        }
 
-    function syncProgressWithServer() {
-        fetch('/Courses/UpdateProgress', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                courseId: '@Model.Id',
-                completedModules: completedModules
-            })
-        });
-    }
+        console.log("completedModules:", completedModules);
 
-    loadTab(completedModules.includes(0) ? completedModules.at(-1) : 0);
+        function updateModuleTabs() {
+            moduleTabs.forEach((tab, idx) => {
+                tab.classList.remove("active", "completed", "locked");
 
-    function loadTab(index) {
-        const data = moduleData[index];
-        moduleContent.innerHTML = `<div id="moduleInnerContent" style="flex:1 1 auto;"></div>`;
-        const inner = document.getElementById("moduleInnerContent");
-
-        if (data.video) {
-            const videoEl = document.createElement('video');
-            videoEl.controls = true;
-            videoEl.poster = data.poster;
-            videoEl.style.width = "100%";
-            videoEl.innerHTML = `<source src="${data.video}" type="video/mp4">Your browser does not support the video tag.`;
-
-            inner.appendChild(videoEl);
-
-            const nextBtnWrapper = document.createElement("div");
-            nextBtnWrapper.style.position = "absolute";
-            nextBtnWrapper.style.bottom = "2rem";
-            nextBtnWrapper.style.right = "2rem";
-
-            nextBtn = document.createElement("button");
-            nextBtn.innerText = "Next";
-            nextBtn.onclick = () => goToNextTab(index);
-            nextBtn.style.background = "#364BE9";
-            nextBtn.style.color = "#fff";
-            nextBtn.style.padding = "0.7rem 2rem";
-            nextBtn.style.fontSize = "1rem";
-            nextBtn.style.fontWeight = "500";
-            nextBtn.style.border = "none";
-            nextBtn.style.borderRadius = "8px";
-            nextBtn.style.cursor = "pointer";
-            nextBtn.disabled = true;
-
-            videoEl.addEventListener("ended", () => {
-                nextBtn.disabled = false;
+                if (completedModules.includes(idx)) {
+                    tab.classList.add("completed");
+                } else if (idx === 0 || completedModules.includes(idx - 1)) {
+                    // Unlock first or next module in sequence
+                    tab.classList.remove("locked");
+                } else {
+                    tab.classList.add("locked");
+                }
             });
 
-            nextBtnWrapper.appendChild(nextBtn);
-            moduleContent.appendChild(nextBtnWrapper);
+            // Reset active tab
+            const activeIndex = completedModules.length > 0 ? Math.max(...completedModules) + 1 : 0;
+            const activeTab = moduleTabs[activeIndex];
+            if (activeTab && !activeTab.classList.contains("locked")) {
+                moduleTabs.forEach(t => t.classList.remove("active"));
+                activeTab.classList.add("active");
+                loadTab(activeIndex);
+            }
         }
 
-        if (data.showDetails) {
-            inner.innerHTML += `
-                <div class="course-information-learn">
-                    <h1>What You'll Learn</h1>
-                    <p>${data.learn || "..."}</p>
-                </div>
-
-                <div class="course-information-description" style="margin-top: 2rem;">
-                    <h1>Course Description</h1>
-                    <p>${data.desc || "..."}</p>
-                </div>
-
-                <div class="course-information-project" style="margin-top: 2rem;">
-                    <h1>What is this course's project?</h1>
-                    <p>${data.project || "..."}</p>
-                </div>
-
-                <div class="course-information-requirements" style="margin-top: 2rem;">
-                    <h1>Requirements and Materials</h1>
-                    <p>${data.requirements || "..."}</p>
-                </div>
-            `;
+        function updateProgressDisplay() {
+            const percentage = Math.round((completedModules.length / moduleTabs.length) * 100);
+            document.querySelector(".course-progress-label").innerText = `${percentage}%`;
+            document.querySelector(".course-progress-bar .filled").style.width = `${percentage}%`;
         }
 
-        if (data.custom) {
-            inner.innerHTML += data.custom;
-        }
+        function resetProgress() {
+            if (!confirm("Are you sure you want to reset your course progress?")) return;
 
-        const nextBtnWrapper = document.createElement("div");
-        nextBtnWrapper.style.position = "absolute";
-        nextBtnWrapper.style.bottom = "2rem";
-        nextBtnWrapper.style.right = "2rem";
-
-        nextBtn = document.createElement("button");
-        nextBtn.innerText = "Next";
-        nextBtn.onclick = () => goToNextTab(index);
-        nextBtn.style.background = "#364BE9";
-        nextBtn.style.color = "#fff";
-        nextBtn.style.padding = "0.7rem 2rem";
-        nextBtn.style.fontSize = "1rem";
-        nextBtn.style.fontWeight = "500";
-        nextBtn.style.border = "none";
-        nextBtn.style.borderRadius = "8px";
-        nextBtn.style.cursor = "pointer";
-
-        if (index === 2 && !completedModules.includes(2)) {
-            nextBtn.disabled = true;
-        }
-
-        nextBtnWrapper.appendChild(nextBtn);
-        moduleContent.appendChild(nextBtnWrapper);
-
-        if (nextBtn) nextBtn.disabled = false;
-    }
-
-    function updateModuleProgressToServer(courseId, moduleIndex) {
-        fetch('/api/ModuleProgress/CompleteModule', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                courseId: courseId,
-                moduleIndex: moduleIndex
+            fetch("/Courses/ResetProgress", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ courseId: @Model.Id })
             })
-        });
-    }
+            .then(response => {
+                if (!response.ok) throw new Error("Failed to reset progress");
+                return response.json();
+            })
+            .then(() => {
+                // ✅ Step 1: Remove local storage
+                localStorage.removeItem(`progress_course_@Model.Id`);
 
-    function goToNextTab(currentIndex) {
+                // ✅ Step 2: Clear progress state in JS before reload
+                completedModules = [];
 
-        const currentTab = moduleTabs[currentIndex];
-        if (currentTab) currentTab.classList.add("completed");
+                // ✅ Step 3: Reset UI immediately
+                updateModuleTabs();
+                updateProgressDisplay();
 
-        if (!completedModules.includes(currentIndex)) {
-            completedModules.push(currentIndex);
-            localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
-            updateProgressDisplay();
-            syncProgressWithServer();
+                // ✅ Step 4: Reload to reinitialize clean state
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
+            })
+            .catch(err => {
+                alert("An error occurred while resetting progress.");
+                console.error(err);
+            });
         }
 
-        const nextTab = moduleTabs[currentIndex + 1];
-        if (nextTab) {
-            nextTab.classList.remove("locked");
-            nextTab.click();
+
+        function syncProgressWithServer() {
+            fetch('/Courses/UpdateProgress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId: '@Model.Id', completedModules })
+            });
         }
 
-        completedModules.forEach(i => {
-        const tab = moduleTabs[i];
-        if (tab) {
-            tab.classList.remove("locked");
-            tab.classList.add("completed");
+        function showNextButton(index) {
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("next-btn-wrapper");
+            wrapper.style.marginTop = "2rem";
+            wrapper.style.textAlign = "right";
+
+            const btn = document.createElement("button");
+            btn.innerText = "Next";
+            btn.className = "quiz-launch-btn";
+            btn.onclick = () => goToNextTab(index);
+
+            wrapper.appendChild(btn);
+            moduleContent.appendChild(wrapper);
         }
-    });
-    }
 
-    moduleTabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-            if (tab.classList.contains("locked")) return;
-            // Only allow current or previously completed tabs
-            const index = parseInt(tab.dataset.tab);
+        function loadTab(index) {
+            const data = moduleData[index];
+            moduleContent.innerHTML = `<div id="moduleInnerContent" class="centered-module-content"></div>`;
+            const inner = document.getElementById("moduleInnerContent");
 
-            moduleTabs.forEach(t => t.classList.remove("active"));
-            tab.classList.add("active");
-            loadTab(index);
-        });
-    });
+            if (!data || !data.type) {
+                moduleContent.innerHTML = `
+                    <div style="text-align:center; padding: 3rem;">
+                        <h1>No content found for this lesson.</h1>
+                    </div>`;
+                return;
+            }
 
-    // Quiz Modal
-    const quizQuestions = [
-        {
-            q: "What is the traditional Filipino term for pottery?",
-            a: ["Palayok", "Tapayan", "Almires", "Kalan"],
-            correct: 0
-        },
-        {
-            q: "Which region in the Philippines is known for its burnay pottery?",
-            a: ["Pampanga", "Ilocos", "Bicol", "Cebu"],
-            correct: 1
-        },
-        {
-            q: "What is the primary material used in pottery?",
-            a: ["Stone", "Wood", "Clay", "Sand"],
-            correct: 2
-        },
-        {
-            q: "Pottery in the Philippines dates back to which era?",
-            a: ["Spanish Colonial", "Pre-Colonial", "American Era", "Post-War"],
-            correct: 1
-        },
-        {
-            q: "Which artifact proves ancient pottery in PH?",
-            a: ["Manunggul Jar", "Balangay Boat", "Laguna Copperplate", "Gold Death Mask"],
-            correct: 0
-        }
-    ];
+            // TEXT CONTENT
+            if (data.type === "Text" || data.type === "Activity") {
+                inner.innerHTML = `
+                    <h1>${data.title}</h1>
+                    <p>${data.contentText}</p>
+                `;
+                showNextButton(index);
+            }
 
-    let currentQ = 0;
-    let selected = null;
-    let score = 0;
+            // IMAGE + TEXT
+            else if (data.type === "Image + Text") {
+                inner.innerHTML = `
+                    <h1>${data.title}</h1>
+                    <img src="${data.mediaUrl}" alt="Image content" style="max-width:100%; border-radius:8px; margin-bottom:1rem;" />
+                    <p>${data.contentText}</p>
+                `;
+                showNextButton(index);
+            }
 
-    function openQuizModal() {
-        document.getElementById("quizModal").style.display = "flex";
-        loadQuestion();
-    }
+            // VIDEO
+            else if (data.type === "Video") {
+                const videoEl = document.createElement('video');
+                videoEl.controls = true;
+                videoEl.style.width = "100%";
+                videoEl.innerHTML = `<source src="${data.mediaUrl}" type="video/mp4">Your browser does not support the video tag.`;
+                inner.appendChild(videoEl);
 
-    function loadQuestion() {
-        const q = quizQuestions[currentQ];
-        selected = null;
+                const nextBtnWrapper = document.createElement("div");
+                nextBtnWrapper.style.marginTop = "2rem";
+                nextBtnWrapper.style.textAlign = "right";
 
-        document.getElementById("questionText").innerText = q.q;
-        document.getElementById("questionText").style.fontSize = "1.3rem";
-        document.getElementById("questionText").style.fontWeight = "600";
-        document.getElementById("questionText").style.marginBottom = "1rem";
-        document.getElementById("quizOptions").innerHTML = "";
-        document.getElementById("submitAnswerBtn").disabled = true;
-        document.getElementById("feedbackBox").style.display = "none";
-        document.getElementById("quizBox").style.display = "block";
+                nextBtn = document.createElement("button");
+                nextBtn.innerText = "Next";
+                nextBtn.className = "quiz-launch-btn";
+                nextBtn.disabled = true;
+                nextBtn.onclick = () => goToNextTab(index);
 
-        q.a.forEach((option, i) => {
-            const btn = document.createElement("div");
-            btn.innerText = option;
-            btn.className = "quiz-option";
-            btn.style.padding = "1rem";
-            btn.style.border = "2px solid #ccc";
-            btn.style.borderRadius = "12px";
-            btn.style.cursor = "pointer";
-            btn.style.backgroundColor = "#f1f5ff";
-            btn.style.fontSize = "1.1rem";
-            btn.style.fontWeight = "500";
-            btn.style.boxShadow = "0 2px 6px rgba(0,0,0,0.05)";
-            btn.style.transition = "0.2s all";
+                nextBtnWrapper.appendChild(nextBtn);
+                moduleContent.appendChild(nextBtnWrapper);
 
-            btn.onmouseover = () => {
-                if (!btn.classList.contains("selected")) btn.style.backgroundColor = "#e0eaff";
-            };
-            btn.onmouseout = () => {
-                if (!btn.classList.contains("selected")) btn.style.backgroundColor = "#f1f5ff";
-            };
-            btn.onclick = () => {
-                document.querySelectorAll(".quiz-option").forEach(el => {
-                    el.style.backgroundColor = "#f1f5ff";
-                    el.classList.remove("selected");
+                videoEl.addEventListener("ended", () => {
+                    nextBtn.disabled = false;
                 });
-                btn.style.backgroundColor = "#d0e0ff";
-                btn.classList.add("selected");
-                selected = i;
-                document.getElementById("submitAnswerBtn").disabled = false;
-            };
-            document.getElementById("quizOptions").appendChild(btn);
+            }
+
+            // QUIZ
+            else if (data.type === "Quiz") {
+                inner.innerHTML = `
+                    <div>
+                        <h1>${data.title}</h1>
+                        <p style="margin-bottom: 2rem; color: #555;">Take this quiz to continue.</p>
+                        <button onclick="startDynamicQuizByIndex(${index})" class="quiz-launch-btn">Start Quiz</button>
+                    </div>
+                `;
+
+                // Create a separate Next button wrapper just like in other modules
+                const nextBtnWrapper = document.createElement("div");
+                nextBtnWrapper.style.marginTop = "2rem";
+                nextBtnWrapper.style.textAlign = "right";
+
+                nextBtn = document.createElement("button");
+                nextBtn.innerText = "Next";
+                nextBtn.className = "quiz-launch-btn";
+                nextBtn.disabled = true;
+                nextBtn.onclick = () => goToNextTab(index);
+
+                nextBtnWrapper.appendChild(nextBtn);
+                moduleContent.appendChild(nextBtnWrapper);  // 👈 append outside the centered content
+            }
+
+            // SESSION
+            else if (data.type === "Session") {
+                inner.innerHTML = `
+                    <div>
+                        <h1>${data.title}</h1>
+                        <p style="margin-bottom: 2rem; color: #555;">Request a live session to complete for a guided instruction for the course.</p>
+                        <button onclick="openSessionModal()" class="session-launch-btn">Request Session</button>
+                    </div>
+                `;
+                showNextButton(index); // ✅ allow proceeding even if not requesting
+            }
+        }
+
+        function requestLiveSession(title) {
+            alert(`A live session request has been sent for: ${title}`);
+        }
+
+        function goToNextTab(currentIndex) {
+            if (!completedModules.includes(currentIndex)) {
+                completedModules.push(currentIndex);
+                localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
+                updateProgressDisplay();
+                syncProgressWithServer();
+            }
+
+            updateModuleTabs(); // Make sure this runs before
+
+            const nextTab = moduleTabs[currentIndex + 1];
+            if (nextTab) {
+                nextTab.classList.remove("locked");
+                nextTab.click();
+            }
+            else {
+                alert("🎉 You've completed all modules!");
+            }
+        }
+
+        moduleTabs.forEach(tab => {
+            tab.addEventListener("click", function () {
+                // Always check latest state from DOM (not stale classList)
+                if (this.classList.contains("locked")) {
+                    console.warn("This tab is locked.");
+                    return;
+                }
+
+                const index = parseInt(this.dataset.tab);
+                moduleTabs.forEach(t => t.classList.remove("active"));
+                this.classList.add("active");
+                loadTab(index);
+            });
         });
 
-        document.getElementById("quizProgress").style.width = `${(currentQ / quizQuestions.length) * 100}%`;
-    }
+        let currentQ = 0, selected = null, score = 0;
 
-    function submitAnswer() {
-        const q = quizQuestions[currentQ];
-        const isCorrect = selected === q.correct;
+        function startDynamicQuiz(quizData) {
+            console.log("Quiz Started with:", quizData);
+            currentQ = 0;
+            selected = null;
+            score = 0;
+            dynamicQuizQuestions = quizData;
 
-        if (isCorrect) score++;
+            document.getElementById("quizModal").classList.add("show");
+            loadDynamicQuestion();
 
-        document.getElementById("quizBox").style.display = "none";
-        document.getElementById("feedbackBox").style.display = "block";
-        document.getElementById("feedbackMsg").innerText = isCorrect ? "✅ Correct! Great job." : "❌ Wrong answer.";
-
-        document.getElementById("tryAgainBtn").style.display = isCorrect ? "none" : "inline-block";
-    }
-
-    function tryAgain() {
-        loadQuestion();
-    }
-
-    function nextQuestion() {
-        currentQ++;
-        if (currentQ < quizQuestions.length) {
-            loadQuestion();
-        } else {
-            showQuizComplete();
-        }
-    }
-
-    function showQuizComplete() {
-        document.getElementById("quizModal").style.display = "none";
-        document.getElementById("quizCompleteModal").style.display = "flex";
-        document.getElementById("quizScore").innerText = `${score}`;
-    }
-
-    function exitQuizModal() {
-        document.getElementById("quizCompleteModal").style.display = "none";
-        const realTimeTab = moduleTabs[3];
-        if (realTimeTab.classList.contains("locked")) {
-            realTimeTab.classList.remove("locked");
+            const nextBtn = document.getElementById("continueNextBtn");
+            if (nextBtn) {
+                nextBtn.disabled = true;
+            }
         }
 
-        if (!completedModules.includes(2)) {
-            completedModules.push(2);
+        window.startDynamicQuizByIndex = function (index) {
+            const quizData = moduleData[index]?.quizQuestions || [];
+            if (!quizData.length) {
+                alert("No quiz data found for this module.");
+                return;
+            }
+            startDynamicQuiz(quizData);
+        };
+
+        function exitQuizModal() {
+            document.getElementById("quizModal").classList.remove("show");
+
+            const currentIndex = parseInt(document.querySelector(".module-tab.active")?.dataset.tab ?? -1);
+            const nextTab = moduleTabs[currentIndex + 1];
+            if (nextTab?.classList.contains("locked")) nextTab.classList.remove("locked");
+
+            if (!completedModules.includes(currentIndex)) {
+                completedModules.push(currentIndex);
+                localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
+                updateProgressDisplay();
+                syncProgressWithServer();
+            }
+
+            if (nextBtn) nextBtn.disabled = false;
+
+            document.getElementById("quizCompleteModal").style.display = "none";
+        }
+
+        function loadDynamicQuestion() {
+            const q = dynamicQuizQuestions[currentQ];
+            selected = null;
+            document.getElementById("questionText").innerText = q.question;
+            document.getElementById("quizOptions").innerHTML = "";
+            document.getElementById("submitAnswerBtn").disabled = true;
+            document.getElementById("feedbackBox").style.display = "none";
+            document.getElementById("quizBox").style.display = "block";
+
+            const progress = Math.round((currentQ / dynamicQuizQuestions.length) * 100);
+            document.getElementById("quizProgressFilled").style.width = `${progress}%`;
+
+            q.options.forEach((option, i) => {
+                const btn = document.createElement("div");
+                btn.innerText = option;
+                btn.className = "quiz-option";
+                btn.onclick = () => {
+                    document.querySelectorAll(".quiz-option").forEach(el => el.classList.remove("selected"));
+                    btn.classList.add("selected");
+                    selected = i;
+                    document.getElementById("submitAnswerBtn").disabled = false;
+                };
+                document.getElementById("quizOptions").appendChild(btn);
+            });
+        }
+
+        function showFeedback(correct) {
+            const box = document.getElementById("feedbackBox");
+            const msg = document.getElementById("feedbackMsg");
+
+            if (!box || !msg) {
+                console.error("⚠️ Missing #feedbackBox or #feedbackMsg in DOM.");
+                return;
+            }
+
+            box.classList.remove("wrong", "correct");
+
+            if (correct) {
+                msg.innerText = "✅ Correct! Well done!";
+            } else {
+                msg.innerText = "❌ Wrong! Please try again.";
+                box.classList.add("wrong");
+            }
+
+            box.style.display = "flex";
+            document.getElementById("quizBox").style.display = "none";
+        }
+
+        function submitAnswer() {
+            const q = dynamicQuizQuestions[currentQ];
+            const isCorrect = q.options[selected] === q.correctAnswer;
+
+            if (isCorrect) score++;
+            showFeedback(isCorrect);
+        }
+
+        function tryAgain() {
+            loadDynamicQuestion();
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if (currentQ < dynamicQuizQuestions.length) loadDynamicQuestion();
+            else showQuizComplete();
+        }
+
+        function showQuizComplete() {
+            document.getElementById("quizModal").classList.remove("show");
+            document.getElementById("quizCompleteModal").style.display = "flex";
+            document.getElementById("quizScore").innerText = `${score} / ${dynamicQuizQuestions.length} (${Math.round((score / dynamicQuizQuestions.length) * 100)}%)`;
+            
+            document.getElementById("quizProgressFilled").style.width = `100%`;
+
+            const nextBtn = document.getElementById("continueNextBtn");
+            if (nextBtn) {
+                nextBtn.disabled = false;
+            }
+        }
+
+        window.openSessionModal = function () {
+            document.getElementById("sessionModal").style.display = "flex";
+        };
+
+        window.closeSessionModal = function () {
+            document.getElementById("sessionModal").style.display = "none";
+        };
+
+        window.selectTime = function (button) {
+            button.classList.add("selected");
+            document.getElementById("customTime").value = "";
+        };
+
+        window.sendSessionRequest = function () {
+            const date = document.getElementById("sessionDate").value;
+            const customTime = document.getElementById("customTime").value;
+            const time = document.getElementById("customTime").value;
+            const platform = document.getElementById("sessionPlatform").value;
+            const message = document.getElementById("sessionMessage").value;
+
+            if (!date || !time || !platform) {
+                alert("Please select a date, time, and platform.");
+                return;
+            }
+
+            console.log("Sending session request:", { date, time, platform, message });
+            alert("✅ Session request sent!");
+            window.closeSessionModal();
+        };
+
+        window.addEventListener("beforeunload", () => {
             localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
-            updateProgressDisplay();
-            syncProgressWithServer();
-        }
+        });
+        
+        updateModuleTabs();
 
-        // ✅ Enable Next button now
-        if (nextBtn) nextBtn.disabled = false;
-    }
+        console.log("Module Data:", moduleData);
 
-    window.addEventListener("beforeunload", () => {
-        localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
+        window.submitAnswer = submitAnswer;
+        window.tryAgain = tryAgain;
+        window.nextQuestion = nextQuestion;
+        window.exitQuizModal = exitQuizModal;
+        window.openSessionModal = openSessionModal;
+        window.closeSessionModal = closeSessionModal;
     });
-
 </script>

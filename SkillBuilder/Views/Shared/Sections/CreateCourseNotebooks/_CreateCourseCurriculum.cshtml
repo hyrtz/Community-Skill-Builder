@@ -1,0 +1,368 @@
+﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
+@using System.Text.Json
+
+<style>
+    .curriculum-container {
+        margin-bottom: 2rem;
+    }
+
+    .curriculum-module {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .curriculum-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .curriculum-form-group {
+        margin-bottom: 1rem;
+    }
+
+        .curriculum-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+    .curriculum-form-control,
+    .curriculum-form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .curriculum-form-row {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .curriculum-form-col {
+        flex: 1;
+    }
+
+    .curriculum-delete-btn {
+        background: none;
+        border: none;
+        color: #888;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+    .curriculum-lesson-block {
+        border-top: 1px dashed #ccc;
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+
+    .curriculum-add-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #344AEA;
+        background-color: transparent;
+        border: 1.5px solid #344AEA;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+        .curriculum-add-btn:hover {
+            background-color: #344AEA;
+            color: white;
+        }
+
+    .curriculum-add-module-wrapper {
+        text-align: right;
+        margin-top: 1rem;
+    }
+</style>
+
+<div class="curriculum-container" id="curriculum-modules"></div>
+
+<div class="curriculum-add-module-wrapper">
+    <button type="button" class="curriculum-add-btn" onclick="addCurriculumModule()">+ Add Module</button>
+</div>
+
+<script>
+    let curriculumModuleIndex = 0;
+
+    function addCurriculumModule() {
+        const container = document.getElementById("curriculum-modules");
+        const moduleIndex = curriculumModuleIndex++;
+
+        const moduleDiv = document.createElement("div");
+        moduleDiv.className = "curriculum-module";
+        moduleDiv.setAttribute("data-index", moduleIndex);
+
+        moduleDiv.innerHTML = `
+            <div class="curriculum-header">
+                <strong class="module-label">Module ${moduleIndex + 1}</strong>
+                <button type="button" class="curriculum-delete-btn" onclick="removeCurriculumModule(${moduleIndex})">🗑️</button>
+            </div>
+
+            <div class="curriculum-form-row">
+                <div class="curriculum-form-col curriculum-form-group">
+                    <label>Module Title *</label>
+                    <input type="text" class="curriculum-form-control" name="Modules[${moduleIndex}].Title" placeholder="Module title" required />
+                </div>
+            </div>
+
+            <div class="curriculum-lessons" id="curriculum-lessons-${moduleIndex}"></div>
+
+            <button type="button" class="curriculum-add-btn" onclick="addCurriculumLesson(${moduleIndex})">+ Add Lesson</button>
+        `;
+
+        container.appendChild(moduleDiv);
+        renumberModules();
+        checkRequiredFields();
+    }
+
+    function addCurriculumLesson(moduleIndex) {
+        const lessonsContainer = document.getElementById(`curriculum-lessons-${moduleIndex}`);
+        const lessonIndex = lessonsContainer.children.length;
+
+        const lessonDiv = document.createElement("div");
+        lessonDiv.className = "curriculum-lesson-block";
+
+        lessonDiv.innerHTML = `
+            <div class="curriculum-form-row">
+                <div class="curriculum-form-col curriculum-form-group">
+                    <label>Lesson Title *</label>
+                    <input type="text" class="curriculum-form-control" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].Title" placeholder="Lesson title" required />
+                </div>
+                <div class="curriculum-form-col curriculum-form-group">
+                    <label>Lesson Type *</label>
+                    <select class="curriculum-form-select" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].LessonType"
+                        onchange="handleLessonTypeChange(this, ${moduleIndex}, ${lessonIndex})" required>
+                        <option value="">-- Select Type --</option>
+                        <option value="Text">Text</option>
+                        <option value="Image + Text">Image + Text</option>
+                        <option value="Video">Video</option>
+                        <option value="Quiz">Quiz</option>
+                        <option value="Session">Session</option>
+                        <option value="Activity">Activity</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="curriculum-form-row">
+                <div class="curriculum-form-col curriculum-form-group">
+                    <label>Duration *</label>
+                    <input type="text" class="curriculum-form-control" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].Duration" placeholder="e.g. 30 mins" required />
+                </div>
+            </div>
+
+            <div class="lesson-config-container"></div>
+
+            <button type="button" class="curriculum-delete-btn lesson-delete-btn" onclick="removeCurriculumLesson(${moduleIndex}, this)">🗑️ Remove Lesson</button>
+        `;
+
+        lessonsContainer.appendChild(lessonDiv);
+        renumberModules();
+        checkRequiredFields();
+    }
+
+    function removeCurriculumModule(index) {
+        const item = document.querySelector(`.curriculum-module[data-index='${index}']`);
+        if (item) item.remove();
+        renumberModules();
+        checkRequiredFields();
+    }
+
+    function removeCurriculumLesson(moduleIndex, btn) {
+        const lessonDiv = btn.closest(".curriculum-lesson-block");
+        if (lessonDiv) lessonDiv.remove();
+        renumberModules();
+        checkRequiredFields();
+    }
+
+    function renumberModules() {
+        const modules = document.querySelectorAll('.curriculum-module');
+        modules.forEach((module, newIndex) => {
+            module.setAttribute("data-index", newIndex);
+            module.querySelector(".module-label").textContent = `Module ${newIndex + 1}`;
+
+            const title = module.querySelector("input[name$='.Title']");
+            if (title) title.name = `Modules[${newIndex}].Title`;
+
+            const desc = module.querySelector("input[name$='.Description']");
+            if (desc) desc.name = `Modules[${newIndex}].Description`;
+
+            const lessonsContainer = module.querySelector(".curriculum-lessons");
+            if (lessonsContainer) lessonsContainer.id = `curriculum-lessons-${newIndex}`;
+
+            const addLessonBtn = module.querySelector("button[onclick^='addCurriculumLesson']");
+            if (addLessonBtn) addLessonBtn.setAttribute("onclick", `addCurriculumLesson(${newIndex})`);
+
+            const removeModuleBtn = module.querySelector("button[onclick^='removeCurriculumModule']");
+            if (removeModuleBtn) removeModuleBtn.setAttribute("onclick", `removeCurriculumModule(${newIndex})`);
+
+            const lessons = module.querySelectorAll(".curriculum-lesson-block");
+            lessons.forEach((lesson, lessonIndex) => {
+                const title = lesson.querySelector("input[name$='.Title']");
+                if (title) title.name = `Modules[${newIndex}].Lessons[${lessonIndex}].Title`;
+
+                const type = lesson.querySelector("select[name$='.LessonType']");
+                if (type) type.name = `Modules[${newIndex}].Lessons[${lessonIndex}].LessonType`;
+
+                const duration = lesson.querySelector("input[name$='.Duration']");
+                if (duration) duration.name = `Modules[${newIndex}].Lessons[${lessonIndex}].Duration`;
+
+                const desc = lesson.querySelector("textarea[name$='.Description']");
+                if (desc) desc.name = `Modules[${newIndex}].Lessons[${lessonIndex}].Description`;
+
+                const deleteBtn = lesson.querySelector(".lesson-delete-btn");
+                if (deleteBtn) deleteBtn.setAttribute("onclick", `removeCurriculumLesson(${newIndex}, this)`);
+
+                const typeValue = type?.value ?? "";
+                const configContainer = lesson.querySelector(".lesson-config-container");
+                if (configContainer && !configContainer.innerHTML.trim()) {
+                    configContainer.innerHTML = getLessonConfigBlock(newIndex, lessonIndex, typeValue);
+                }
+            });
+        });
+
+        curriculumModuleIndex = modules.length;
+    }
+
+    function handleLessonTypeChange(selectEl, moduleIndex, lessonIndex) {
+        const configContainer = selectEl.closest(".curriculum-lesson-block").querySelector(".lesson-config-container");
+        configContainer.innerHTML = getLessonConfigBlock(moduleIndex, lessonIndex, selectEl.value);
+    }
+
+    function getLessonConfigBlock(moduleIndex, lessonIndex, type) {
+        const nameBase = `Modules[${moduleIndex}].Lessons[${lessonIndex}]`;
+
+        switch (type) {
+            case "Text":
+                return `<div class="curriculum-form-group"><label>Lesson Content</label><textarea class="curriculum-form-control" name="${nameBase}.ContentText" rows="4" required></textarea></div>`;
+            case "Image + Text":
+                return `<div class="curriculum-form-group"><label>Lesson Content</label><textarea class="curriculum-form-control" name="${nameBase}.ContentText" rows="4" required></textarea></div>
+                        <div class="curriculum-form-group"><label>Upload Image</label><input type="file" name="${nameBase}.ImageFile" accept="image/*" class="curriculum-form-control" required /></div>`;
+            case "Video":
+                return `<div class="curriculum-form-group"><label>Upload Video</label><input type="file" name="${nameBase}.VideoFile" accept="video/*" class="curriculum-form-control" required /></div>`;
+            case "Quiz":
+                return `
+                    <div class="quiz-builder" data-namebase="${nameBase}">
+                        <div class="quiz-questions"></div>
+                        <button type="button" class="curriculum-add-btn" onclick="addQuizQuestion(this)">+ Add Question</button>
+                    </div>`;
+            case "Session":
+                return `<div class="curriculum-form-group"><label>Meeting Link *</label><input type="text" name="${nameBase}.SessionLink" class="curriculum-form-control" placeholder="https://..." required /></div>`;
+            case "Activity":
+                return `<div class="curriculum-form-group"><label>Activity Instructions</label><textarea class="curriculum-form-control" name="${nameBase}.ContentText" rows="4" required></textarea></div>`;
+            default:
+                return ``;
+        }
+    }
+
+    function addQuizQuestion(button) {
+        const container = button.closest(".quiz-builder").querySelector(".quiz-questions");
+        const nameBase = button.closest(".quiz-builder").getAttribute("data-namebase");
+        const index = container.children.length;
+
+        const questionBlock = document.createElement("div");
+        questionBlock.className = "quiz-question";
+        questionBlock.style.marginTop = "1rem";
+
+        questionBlock.innerHTML = `
+            <div class="curriculum-form-group">
+                <label>Question ${index + 1} *</label>
+                <input type="text" name="${nameBase}.QuizQuestions[${index}].QuestionText" class="curriculum-form-control" required />
+            </div>
+            <div class="curriculum-form-group">
+                <label>Options *</label>
+                <div class="curriculum-form-row">
+                    ${["A", "B", "C", "D"].map((letter, optIndex) => `
+                        <div style="flex:1;">
+                            <input type="text"
+                                name="${nameBase}.QuizQuestions[${index}].Option${letter}"
+                                class="curriculum-form-control quiz-option-input"
+                                placeholder="Option ${letter}" required
+                                oninput="updateCorrectAnswerValues(this)" />
+                            <label>
+                                <input type="radio"
+                                    name="${nameBase}.QuizQuestions[${index}].CorrectAnswer"
+                                    class="correct-answer-radio"
+                                    value="" required />
+                                Correct
+                            </label>
+                        </div>
+                    `).join("")}
+                </div>
+            </div>
+        `;
+
+        container.appendChild(questionBlock);
+        container.appendChild(button);
+    }
+
+    function updateCorrectAnswerValues(input) {
+        const container = input.closest("div");
+        const radio = container.querySelector("input.correct-answer-radio");
+        if (radio) {
+            radio.value = input.value;
+        }
+    }
+
+    function checkRequiredFields() {
+        const form = document.getElementById("create-course-form");
+        if (!form) return;
+
+        const submitBtn = form.querySelector(".create-course-btn-publish");
+        const requiredInputs = form.querySelectorAll("input[required], textarea[required], select[required]");
+
+        let allValid = true;
+
+        requiredInputs.forEach(input => {
+            if (input.type === "radio") {
+                const name = input.name;
+                const group = form.querySelectorAll(`input[type="radio"][name="${name}"]`);
+                const anyChecked = Array.from(group).some(radio => radio.checked);
+                if (!anyChecked) allValid = false;
+            } else {
+                if (input.value.trim() === "") allValid = false;
+            }
+        });
+
+        if (submitBtn) submitBtn.disabled = !allValid;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("create-course-form");
+        if (form) {
+            form.addEventListener("input", checkRequiredFields);
+            form.addEventListener("change", checkRequiredFields);
+        }
+
+        const preloadModules = @Html.Raw(JsonSerializer.Serialize(Model.Modules ?? new List<SkillBuilder.Models.ViewModels.CourseModuleViewModel>()));
+        preloadModules.forEach((module, i) => {
+            addCurriculumModule();
+            const moduleDiv = document.querySelector(`.curriculum-module[data-index='${i}']`);
+            if (!moduleDiv) return;
+            moduleDiv.querySelector(`input[name='Modules[${i}].Title']`).value = module.title ?? "";
+            moduleDiv.querySelector(`input[name='Modules[${i}].Description']`).value = module.description ?? "";
+
+            if (Array.isArray(module.lessons)) {
+                module.lessons.forEach((lesson, j) => {
+                    addCurriculumLesson(i);
+                    const lessonBlock = moduleDiv.querySelectorAll(".curriculum-lesson-block")[j];
+                    if (!lessonBlock) return;
+                    lessonBlock.querySelector(`input[name='Modules[${i}].Lessons[${j}].Title']`).value = lesson.title ?? "";
+                    lessonBlock.querySelector(`input[name='Modules[${i}].Lessons[${j}].Duration']`).value = lesson.duration ?? "";
+                    lessonBlock.querySelector(`textarea[name='Modules[${i}].Lessons[${j}].Description']`).value = lesson.description ?? "";
+                    lessonBlock.querySelector(`select[name='Modules[${i}].Lessons[${j}].LessonType']`).value = lesson.type ?? "";
+                    handleLessonTypeChange(lessonBlock.querySelector("select"), i, j);
+                });
+            }
+        });
+    });
+</script>

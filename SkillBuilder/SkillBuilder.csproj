@@ -18,4 +18,13 @@
     <PackageReference Include="MimeKit" Version="4.12.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\images\" />
+    <Folder Include="wwwroot\uploads\materials\" />
+    <Folder Include="wwwroot\uploads\lesson-videos\" />
+    <Folder Include="wwwroot\uploads\lesson-images\" />
+    <Folder Include="wwwroot\uploads\thumbnails\" />
+    <Folder Include="wwwroot\uploads\videos\" />
+  </ItemGroup>
+
 </Project>

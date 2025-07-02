@@ -17,6 +17,9 @@ namespace SkillBuilder.Data
         public DbSet<Course> Courses { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
         public DbSet<CourseModule> CourseModules { get; set; }
+        public DbSet<CourseMaterial> CourseMaterials { get; set; }
+        public DbSet<ModuleContent> ModuleContents { get; set; }
+        public DbSet<QuizQuestion> QuizQuestions { get; set; }
         public DbSet<ModuleProgress> ModuleProgress { get; set; }
         public DbSet<CourseReview> CourseReviews { get; set; }
         public DbSet<CommunityTestimonial> CommunityTestimonials { get; set; }
@@ -102,10 +105,10 @@ namespace SkillBuilder.Data
                     Title = "Pottery",
                     Link = "pottery",
                     ImageUrl = "/assets/Courses Pics/Pottery.png",
-                    Description = "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.",
+                    Overview = "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.",
                     Duration = "15 hours",
-                    Classes = "Pottery",
-                    Level = "Beginner",
+                    Category = "Pottery",
+                    Difficulty = "Beginner",
                     Video = "/assets/Videos/Pottery.mp4",
                     Thumbnail = "/assets/Courses Pics/Pottery.png",
                     WhatToLearn = "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques.",
@@ -121,10 +124,10 @@ namespace SkillBuilder.Data
                     Title = "Woodcarving",
                     Link = "woodcarving",
                     ImageUrl = "/assets/Courses Pics/Woodcarving.png",
-                    Description = "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.",
+                    Overview = "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.",
                     Duration = "29 hours",
-                    Classes = "Wood Carving",
-                    Level = "Intermediate",
+                    Category = "Wood Carving",
+                    Difficulty = "Intermediate",
                     Video = "/assets/Videos/Wood Carving.mp4",
                     Thumbnail = "/assets/Courses Pics/Woodcarving.png",
                     WhatToLearn = "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing.",
@@ -140,10 +143,10 @@ namespace SkillBuilder.Data
                     Title = "Weaving",
                     Link = "weaving",
                     ImageUrl = "/assets/Courses Pics/Weaving.png",
-                    Description = "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.",
+                    Overview = "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.",
                     Duration = "18 hours",
-                    Classes = "Weaving",
-                    Level = "Professional",
+                    Category = "Weaving",
+                    Difficulty = "Professional",
                     Video = "/assets/Videos/Weaving.mp4",
                     Thumbnail = "/assets/Courses Pics/Weaving.png",
                     WhatToLearn = "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation.",
@@ -368,11 +371,97 @@ namespace SkillBuilder.Data
                 .WithMany(c => c.CourseModules)
                 .HasForeignKey(cm => cm.CourseId);
 
+            // COURSE MATERIAL ⇄ COURSE (M:1)
+            modelBuilder.Entity<CourseMaterial>()
+                .HasOne(cm => cm.Course)
+                .WithMany(c => c.Materials)
+                .HasForeignKey(cm => cm.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Seed CourseModules and ModuleContents for each Course
+            modelBuilder.Entity<CourseModule>().HasData(
+                new CourseModule { Id = 1, CourseId = 1, Title = "Introduction" },
+                new CourseModule { Id = 2, CourseId = 1, Title = "History" },
+                new CourseModule { Id = 3, CourseId = 1, Title = "Session" },
+                new CourseModule { Id = 4, CourseId = 1, Title = "Quiz" },
+                new CourseModule { Id = 5, CourseId = 1, Title = "Final Activity" },
+
+                new CourseModule { Id = 6, CourseId = 2, Title = "Introduction" },
+                new CourseModule { Id = 7, CourseId = 2, Title = "History" },
+                new CourseModule { Id = 8, CourseId = 2, Title = "Session" },
+                new CourseModule { Id = 9, CourseId = 2, Title = "Quiz" },
+                new CourseModule { Id = 10, CourseId = 2, Title = "Final Activity" },
+
+                new CourseModule { Id = 11, CourseId = 3, Title = "Introduction" },
+                new CourseModule { Id = 12, CourseId = 3, Title = "History" },
+                new CourseModule { Id = 13, CourseId = 3, Title = "Session" },
+                new CourseModule { Id = 14, CourseId = 3, Title = "Quiz" },
+                new CourseModule { Id = 15, CourseId = 3, Title = "Final Activity" }
+            );
+
+            modelBuilder.Entity<ModuleContent>().HasData(
+                // Pottery Modules
+                new ModuleContent { Id = 1, CourseModuleId = 1, Title = "Welcome to Pottery", ContentType = "Video", ContentText = "Pottery intro content something anything.", MediaUrl = "/assets/Videos/Pottery.mp4" },
+                new ModuleContent { Id = 2, CourseModuleId = 2, Title = "History of Pottery", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Pottery.png" },
+                new ModuleContent { Id = 3, CourseModuleId = 3, Title = "Live Pottery Session", ContentType = "Session", SessionLink = "https://live.pottery.com/session1" },
+                new ModuleContent { Id = 4, CourseModuleId = 5, Title = "Pottery Final Activity", ContentType = "Activity", ContentText = "Create your own pottery something anything." },
+
+                // Woodcarving Modules
+                new ModuleContent { Id = 5, CourseModuleId = 6, Title = "Welcome to Woodcarving", ContentType = "Video", ContentText = "Woodcarving intro content something anything.", MediaUrl = "/assets/Videos/Wood Carving.mp4" },
+                new ModuleContent { Id = 6, CourseModuleId = 7, Title = "History of Woodcarving", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Woodcarving.png" },
+                new ModuleContent { Id = 7, CourseModuleId = 8, Title = "Live Woodcarving Session", ContentType = "Session", SessionLink = "https://live.woodcarving.com/session1" },
+                new ModuleContent { Id = 8, CourseModuleId = 10, Title = "Woodcarving Final Activity", ContentType = "Activity", ContentText = "Carve a wooden spoon something anything." },
+
+                // Weaving Modules
+                new ModuleContent { Id = 9, CourseModuleId = 11, Title = "Welcome to Weaving", ContentType = "Video", ContentText = "Weaving intro content something anything.", MediaUrl = "/assets/Videos/Weaving.mp4" },
+                new ModuleContent { Id = 10, CourseModuleId = 12, Title = "History of Weaving", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Weaving.png" },
+                new ModuleContent { Id = 11, CourseModuleId = 13, Title = "Live Weaving Session", ContentType = "Session", SessionLink = "https://live.weaving.com/session1" },
+                new ModuleContent { Id = 12, CourseModuleId = 15, Title = "Weaving Final Activity", ContentType = "Activity", ContentText = "Weave a basic pattern something anything." }
+            );
+
+            // QUIZ ModuleContent (shared pattern)
+            modelBuilder.Entity<ModuleContent>().HasData(
+                new ModuleContent { Id = 13, CourseModuleId = 4, Title = "Pottery Quiz", ContentType = "Quiz" },
+                new ModuleContent { Id = 14, CourseModuleId = 9, Title = "Woodcarving Quiz", ContentType = "Quiz" },
+                new ModuleContent { Id = 15, CourseModuleId = 14, Title = "Weaving Quiz", ContentType = "Quiz" }
+            );
+
+            // QUIZ Questions
+            modelBuilder.Entity<QuizQuestion>().HasData(
+                // Pottery Quiz (ModuleContentId = 13)
+                new QuizQuestion { Id = 1, ModuleContentId = 13, Question = "What is the main material used in pottery?", OptionA = "Wood", OptionB = "Metal", OptionC = "Clay", OptionD = "Plastic", CorrectAnswer = "Clay" },
+                new QuizQuestion { Id = 2, ModuleContentId = 13, Question = "Which technique is used in pottery?", OptionA = "Sculpting", OptionB = "Weaving", OptionC = "Wheel Throwing", OptionD = "Casting", CorrectAnswer = "Wheel Throwing" },
+                new QuizQuestion { Id = 3, ModuleContentId = 13, Question = "What temperature does a kiln usually reach?", OptionA = "100°C", OptionB = "400°C", OptionC = "1000°C", OptionD = "2000°C", CorrectAnswer = "1000°C" },
+                new QuizQuestion { Id = 4, ModuleContentId = 13, Question = "What is glazing in pottery?", OptionA = "Painting", OptionB = "Coating", OptionC = "Mixing", OptionD = "Breaking", CorrectAnswer = "Coating" },
+                new QuizQuestion { Id = 5, ModuleContentId = 13, Question = "Why do we wedge clay?", OptionA = "Decorate it", OptionB = "Remove air bubbles", OptionC = "Color it", OptionD = "Dry it faster", CorrectAnswer = "Remove air bubbles" },
+
+                // Woodcarving Quiz (ModuleContentId = 14)
+                new QuizQuestion { Id = 6, ModuleContentId = 14, Question = "What tool is essential in woodcarving?", OptionA = "Pencil", OptionB = "Chisel", OptionC = "Brush", OptionD = "Hammer", CorrectAnswer = "Chisel" },
+                new QuizQuestion { Id = 7, ModuleContentId = 14, Question = "Which wood is best for beginners?", OptionA = "Oak", OptionB = "Basswood", OptionC = "Mahogany", OptionD = "Pine", CorrectAnswer = "Basswood" },
+                new QuizQuestion { Id = 8, ModuleContentId = 14, Question = "What is chip carving?", OptionA = "Removing chips", OptionB = "Cutting out small designs", OptionC = "Joining wood", OptionD = "Painting wood", CorrectAnswer = "Cutting out small designs" },
+                new QuizQuestion { Id = 9, ModuleContentId = 14, Question = "Safety gear includes?", OptionA = "Gloves", OptionB = "Mask", OptionC = "Both A and B", OptionD = "None", CorrectAnswer = "Both A and B" },
+                new QuizQuestion { Id = 10, ModuleContentId = 14, Question = "How should tools be stored?", OptionA = "Wet", OptionB = "Rusty", OptionC = "Sharp and clean", OptionD = "Scattered", CorrectAnswer = "Sharp and clean" },
+
+                // Weaving Quiz (ModuleContentId = 15)
+                new QuizQuestion { Id = 11, ModuleContentId = 15, Question = "What tool is used to hold threads in weaving?", OptionA = "Hook", OptionB = "Loom", OptionC = "Needle", OptionD = "Stick", CorrectAnswer = "Loom" },
+                new QuizQuestion { Id = 12, ModuleContentId = 15, Question = "Weft yarns go?", OptionA = "Vertically", OptionB = "Diagonally", OptionC = "Horizontally", OptionD = "Randomly", CorrectAnswer = "Horizontally" },
+                new QuizQuestion { Id = 13, ModuleContentId = 15, Question = "Which is a basic weave pattern?", OptionA = "Zigzag", OptionB = "Twill", OptionC = "Spin", OptionD = "Knot", CorrectAnswer = "Twill" },
+                new QuizQuestion { Id = 14, ModuleContentId = 15, Question = "Color theory helps with?", OptionA = "Sound", OptionB = "Texture", OptionC = "Design", OptionD = "Hardness", CorrectAnswer = "Design" },
+                new QuizQuestion { Id = 15, ModuleContentId = 15, Question = "What is the purpose of warp threads?", OptionA = "Decoration", OptionB = "Structure", OptionC = "Noise", OptionD = "Glazing", CorrectAnswer = "Structure" }
+            );
+
             // MODULE PROGRESS ⇄ COURSE MODULE (M:1)
             modelBuilder.Entity<ModuleProgress>()
                 .HasOne(mp => mp.CourseModule)
                 .WithMany(cm => cm.Progresses)
                 .HasForeignKey(mp => mp.CourseModuleId);
+
+            // QUIZ QUESTION ⇄ COURSE MODULE (M:1)
+            modelBuilder.Entity<QuizQuestion>()
+                .HasOne(q => q.ModuleContent)
+                .WithMany(mc => mc.QuizQuestions)
+                .HasForeignKey(q => q.ModuleContentId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }
