@@ -241,7 +241,7 @@ html {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     display: none;
     flex-direction: column;
-    min-width: 190px;
+    min-width: 130px;
     z-index: 999;
 }
 

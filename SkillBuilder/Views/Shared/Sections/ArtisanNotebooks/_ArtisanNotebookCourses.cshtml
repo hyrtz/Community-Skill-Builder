@@ -78,7 +78,7 @@
         <div class="artisan-courses-grid">
             @foreach (var course in Model.Courses)
             {
-                <a href="/Courses/@course.Link" class="artisan-course-card">
+                <a href="/Courses?selectedCourse=@course.Link" class="artisan-course-card">
                     <img src="@course.ImageUrl" alt="Course Image" class="artisan-course-image" />
                     <div class="artisan-course-title">@course.Title</div>
                     <div class="artisan-course-desc">@course.Overview</div>

@@ -67,6 +67,7 @@
         }
 
         <a asp-controller="Courses" asp-action="CourseCatalog" class="navbar-item @(currentController == "Courses" ? "active-nav" : "")">Courses</a>
+        <a asp-controller="Leaderboard" asp-action="UserLeaderboard" class="navbar-item @(currentController == "Leaderboard" ? "active-nav" : "")">Leaderboards</a>
         <a asp-controller="Artisans" asp-action="ArtisanList" class="navbar-item @(currentController == "Artisans" ? "active-nav" : "")">Artisans</a>
         <a asp-controller="Community" asp-action="CommunityHub" class="navbar-item @(currentController == "Community" ? "active-nav" : "")">Community</a>
         
@@ -74,6 +75,10 @@
 
     <!-- Right: Login/Signup -->
     <div class="navbar-right">
+        @if (User.Identity.IsAuthenticated && userRole == "Artisan")
+        {
+            <a href="/ArtisanActions/CreateCourse" class="navbar-item create-course-btn">Create Course</a>
+        }
         <div class="notification-wrapper">
             <a href="javascript:void(0);" class="navbar-item nav-notification-icon" onclick="toggleNotificationDropdown()" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none")">
                 <img src="/assets/icons/Bell.ico" style="width: 2rem;" />

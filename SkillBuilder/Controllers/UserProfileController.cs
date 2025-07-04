@@ -109,6 +109,48 @@ namespace SkillBuilder.Controllers
             return View("~/Views/Profile/UserProfile.cshtml", viewModel);
         }
 
+        [HttpPost("/api/UserProfile/UploadActivity")]
+        public async Task<IActionResult> UploadActivity([FromForm] string courseId, [FromForm] IFormFile activityImage)
+        {
+            if (activityImage == null || activityImage.Length == 0)
+                return BadRequest("No image uploaded.");
+
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // Optional: validate course exists
+            if (!int.TryParse(courseId, out int parsedCourseId))
+                return BadRequest("Invalid course ID.");
+
+            var course = await _context.Courses.FindAsync(parsedCourseId);
+            if (course == null) return NotFound("Course not found.");
+
+            // Save image to /uploads/projects/
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/projects");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(activityImage.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await activityImage.CopyToAsync(stream);
+            }
+
+            var newSubmission = new CourseProjectSubmission
+            {
+                UserId = userId,
+                CourseId = course.Id,
+                ImageUrl = $"/uploads/projects/{fileName}",
+                SubmittedAt = DateTime.Now
+            };
+
+            _context.CourseProjectSubmissions.Add(newSubmission);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Activity submitted!", imageUrl = newSubmission.ImageUrl });
+        }
+
         [HttpGet("")]
         public IActionResult Index()
         {

@@ -1,0 +1,105 @@
+﻿@model List<SkillBuilder.Models.User>
+
+@{
+    ViewData["Title"] = "User Leaderboard";
+    ViewData["UseCourseNavbar"] = true;
+}
+
+<style>
+    .leaderboard-container {
+        padding: 4rem 20rem;
+    }
+
+    .leaderboard-header {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #344AEA;
+        margin-top: 4rem;
+        margin-bottom: 2rem;
+    }
+
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.8rem;
+    }
+
+        .leaderboard-table td,
+        .leaderboard-table th {
+            vertical-align: middle;
+        }
+
+    .leaderboard-row {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .leaderboard-cell {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .leaderboard-user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .leaderboard-user-info img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+    .leaderboard-user-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .leaderboard-user-name a {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #333;
+        text-decoration: none;
+    }
+
+        .leaderboard-user-name a:hover {
+            text-decoration: underline;
+        }
+
+    .leaderboard-points {
+        font-weight: bold;
+        color: #344AEA;
+    }
+</style>
+
+<div class="leaderboard-container">
+    <div class="leaderboard-header">Top Learners Leaderboard</div>
+
+    <table class="leaderboard-table">
+        <tbody>
+            @foreach (var user in Model.OrderByDescending(u => u.Points))
+            {
+                <tr class="leaderboard-row">
+                    <td class="leaderboard-cell">
+                        <div class="leaderboard-user-info">
+                            <img src="@user.UserAvatar" alt="User Avatar" />
+                            <div class="leaderboard-user-details">
+                                <div class="leaderboard-user-name">
+                                    <a href="/UserProfile/@user.Id">
+                                        @user.FirstName @user.LastName
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="leaderboard-cell">enrolled course: @((user.Enrollments?.Count() ?? 0))</td>
+                    <td class="leaderboard-cell leaderboard-points">@user.Points pts</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

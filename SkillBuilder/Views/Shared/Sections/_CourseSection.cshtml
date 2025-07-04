@@ -31,17 +31,19 @@
 
     .courses-container {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: space-between;
         gap: 1.5rem;
         margin: 4rem 10rem 4rem 10rem;
+        overflow-x: auto;
     }
 
     .course-card-link {
         display: block;
         text-decoration: none;
         color: inherit;
-        width: 28%;
+        width: 23%;
+        min-width: 250px; 
     }
 
         .course-card-link:hover .course-card {
@@ -136,7 +138,7 @@
     }
 
     <div class="courses-container @(ViewData["IsUserProfile"] as bool? == true ? "profile-layout" : "")">
-        @foreach (var course in Model)
+        @foreach (var course in Model.Take(4))
         {
             <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="course-card-link">
                 <div class="course-card">

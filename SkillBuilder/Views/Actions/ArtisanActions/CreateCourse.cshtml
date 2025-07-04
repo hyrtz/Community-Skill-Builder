@@ -112,7 +112,6 @@
 
 @using (Html.BeginForm("CreateCourse", "ArtisanCourse", FormMethod.Post, new { enctype = "multipart/form-data", id = "create-course-form" }))
 {
-    @Html.AntiForgeryToken()
 
     <div class="create-course-container">
         <a href="javascript:history.back()" class="create-course-back-link">&larr; Back</a>

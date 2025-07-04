@@ -12,8 +12,8 @@ using SkillBuilder.Data;
 namespace SkillBuilder.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250704065157_InitialCreat")]
-    partial class InitialCreat
+    [Migration("20250704165741_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
