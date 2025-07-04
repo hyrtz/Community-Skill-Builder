@@ -272,7 +272,13 @@ namespace SkillBuilder.Controllers
 
             await HttpContext.SignInAsync("TahiAuth", principal);
 
-            return Ok(new { message = "Login successful." });
+            return Ok(new
+            {
+                success = true,
+                message = "Login successful.",
+                role = user.Role,
+                userId = user.Id
+            });
         }
 
         [HttpPost("/logout")]

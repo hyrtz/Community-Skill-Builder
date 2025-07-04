@@ -1,8 +1,10 @@
 ﻿@model SkillBuilder.Models.Course
 @{
     var userId = User.FindFirst("UserId")?.Value;
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
     var isEnrolled = Model.Enrollments?.Any(e => e.UserId == userId) ?? false;
 }
+
 
 <style>
     .course-detail-section {
@@ -188,19 +190,22 @@
                 </div>
             </div>
 
-            <div class="course-detail-right">
-                <h1 class="course-detail-free-label">FREE COURSE</h1>
-                @if (!isEnrolled)
-                {
-                    <button class="course-detail-enroll-btn" onclick="enrollCourse(@Model.Id)">Enroll Now</button>
-                }
-                else
-                {
-                    <form method="get" action="/Courses/CourseModule/@Model.Id">
-                        <button type="submit" class="course-detail-enroll-btn">Start Course</button>
-                    </form>
-                }
-            </div>
+            @if (!User.Identity.IsAuthenticated && userRole != "Artisan")
+            {
+                <div class="course-detail-right">
+                    <h1 class="course-detail-free-label">FREE COURSE</h1>
+                    @if (!isEnrolled)
+                    {
+                        <button class="course-detail-enroll-btn" onclick="enrollCourse(@Model.Id)">Enroll Now</button>
+                    }
+                    else
+                    {
+                        <form method="get" action="/Courses/CourseModule/@Model.Id">
+                            <button type="submit" class="course-detail-enroll-btn">Start Course</button>
+                        </form>
+                    }
+                </div>
+             }
         </div>
     </div>
 

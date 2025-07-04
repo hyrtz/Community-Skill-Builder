@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -453,11 +453,11 @@ namespace SkillBuilder.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Question = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OptionA = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OptionB = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OptionC = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OptionD = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CorrectAnswer = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OptionA = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OptionB = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OptionC = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OptionD = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CorrectAnswer = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ModuleContentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

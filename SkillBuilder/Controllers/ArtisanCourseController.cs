@@ -33,7 +33,6 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpPost("CreateCourse")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCourse(CourseBuilderViewModel model)
         {
             if (!ModelState.IsValid)

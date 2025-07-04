@@ -23,6 +23,7 @@
     <Folder Include="wwwroot\uploads\materials\" />
     <Folder Include="wwwroot\uploads\lesson-videos\" />
     <Folder Include="wwwroot\uploads\lesson-images\" />
+    <Folder Include="wwwroot\uploads\projects\" />
     <Folder Include="wwwroot\uploads\thumbnails\" />
     <Folder Include="wwwroot\uploads\videos\" />
   </ItemGroup>
