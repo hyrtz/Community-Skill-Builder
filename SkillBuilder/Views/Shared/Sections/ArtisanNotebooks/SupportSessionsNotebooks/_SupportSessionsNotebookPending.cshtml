@@ -1,0 +1,91 @@
+﻿@model List<SkillBuilder.Models.SupportSessionRequest>
+
+@if (!Model.Any())
+{
+    <div class="artisan-support-empty">
+        No support session requests at the moment.<br />
+        When learners request assistance from your course modules, they’ll appear here.
+    </div>
+}
+else
+{
+    foreach (var request in Model)
+    {
+        <div class="artisan-support-card" id="support-@request.Id">
+            <div class="artisan-support-user">
+                <img src="@request.User.UserAvatar" alt="Avatar" class="artisan-support-user-avatar" />
+                <div class="artisan-support-user-info">
+                    <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
+                    <div class="artisan-support-user-course">@request.Course.Title</div>
+                </div>
+            </div>
+
+            <div class="artisan-support-title">@request.Title</div>
+            <div class="artisan-support-message">@request.Message</div>
+
+            <div class="artisan-support-schedule">
+                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
+                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
+            </div>
+
+            <div class="artisan-support-actions">
+                <button class="artisan-btn-confirm" onclick="respondToSession(@request.Id, true)">Confirm Session</button>
+                <button class="artisan-btn-decline" onclick="respondToSession(@request.Id, false)">Decline</button>
+            </div>
+        </div>
+    }
+}
+
+<div id="sessionLinkModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h3>Select Platform and Add Link</h3>
+        <label>Platform</label>
+        <select id="meetingPlatform" class="curriculum-form-control">
+            <option value="Zoom">Zoom</option>
+            <option value="Google Meet">Google Meet</option>
+            <option value="Messenger">Messenger</option>
+            <option value="Others">Others</option>
+        </select>
+        <label>Meeting Link</label>
+        <input type="text" id="meetingLink" class="curriculum-form-control" placeholder="https://..." />
+        <input type="hidden" id="confirmSessionId" />
+        <div style="margin-top: 1rem;">
+            <button onclick="submitSessionLink()" class="artisan-btn-confirm">Submit</button>
+            <button onclick="closeModal()" class="artisan-btn-decline">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function respondToSession(id, confirm) {
+        if (confirm) {
+            document.getElementById("sessionLinkModal").style.display = "block";
+            document.getElementById("confirmSessionId").value = id;
+        } else {
+            fetch(`/SupportSession/Decline?id=${id}`, { method: 'POST' }).then(res => {
+                if (res.ok) document.getElementById(`support-${id}`).remove();
+            });
+        }
+    }
+
+    function closeModal() {
+        document.getElementById("sessionLinkModal").style.display = "none";
+    }
+
+    function submitSessionLink() {
+        const sessionId = document.getElementById("confirmSessionId").value;
+        const platform = document.getElementById("meetingPlatform").value;
+        const link = document.getElementById("meetingLink").value;
+
+        fetch('/SupportSession/Confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: sessionId, platform, link })
+        }).then(res => {
+            if (res.ok) {
+                document.getElementById(`support-${sessionId}`).remove();
+                closeModal();
+            }
+        });
+    }
+</script>

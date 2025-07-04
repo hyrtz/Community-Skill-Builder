@@ -20,6 +20,14 @@
     });
 });
 
+function obfuscateEmail(email) {
+    const [user, domain] = email.split("@");
+    const maskedUser = user.length > 2
+        ? user[0] + "*".repeat(user.length - 2) + user[user.length - 1]
+        : "*".repeat(user.length);
+    return `${maskedUser}@${domain}`;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     // Element references
     const overlay = document.getElementById("modal-overlay");
@@ -275,15 +283,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (closeBtn) closeBtn.style.display = "none";
         if (backBtn) backBtn.style.display = "none";
         if (redirectLogin) redirectLogin.style.display = "none";
-    }
-
-    // Optional helper to hide part of the email address
-    function obfuscateEmail(email) {
-        const [user, domain] = email.split("@");
-        const maskedUser = user.length > 2
-            ? user[0] + "*".repeat(user.length - 2) + user[user.length - 1]
-            : "*".repeat(user.length);
-        return `${maskedUser}@${domain}`;
     }
 
     ["signup-firstname", "signup-lastname", "signup-email", "signup-password", "signup-confirm"].forEach(id => {

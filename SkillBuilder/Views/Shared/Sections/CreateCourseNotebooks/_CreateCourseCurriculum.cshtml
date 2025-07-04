@@ -1,6 +1,10 @@
 ﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
 @using System.Text.Json
 
+@{
+    var safeModules = Model.Modules ?? new List<SkillBuilder.Models.ViewModels.CourseModuleViewModel>();
+}
+
 <style>
     .curriculum-container {
         margin-bottom: 2rem;
@@ -83,6 +87,11 @@
         text-align: right;
         margin-top: 1rem;
     }
+
+    .input-invalid {
+        border: 1.5px solid red !important;
+    }
+
 </style>
 
 <div class="curriculum-container" id="curriculum-modules"></div>
@@ -234,8 +243,22 @@
     }
 
     function handleLessonTypeChange(selectEl, moduleIndex, lessonIndex) {
-        const configContainer = selectEl.closest(".curriculum-lesson-block").querySelector(".lesson-config-container");
-        configContainer.innerHTML = getLessonConfigBlock(moduleIndex, lessonIndex, selectEl.value);
+        const lessonBlock = selectEl.closest(".curriculum-lesson-block");
+        const configContainer = lessonBlock.querySelector(".lesson-config-container");
+
+        // Clear any existing input values in lesson-config-container (e.g., file inputs)
+        const oldInputs = configContainer.querySelectorAll("input, textarea, select");
+        oldInputs.forEach(input => {
+            // Explicitly remove input from the form
+            input.remove();
+        });
+
+        // Clear entire config HTML
+        configContainer.innerHTML = "";
+
+        // Now render the new inputs
+        const newConfig = getLessonConfigBlock(moduleIndex, lessonIndex, selectEl.value);
+        configContainer.innerHTML = newConfig;
     }
 
     function getLessonConfigBlock(moduleIndex, lessonIndex, type) {
@@ -256,7 +279,7 @@
                         <button type="button" class="curriculum-add-btn" onclick="addQuizQuestion(this)">+ Add Question</button>
                     </div>`;
             case "Session":
-                return `<div class="curriculum-form-group"><label>Meeting Link *</label><input type="text" name="${nameBase}.SessionLink" class="curriculum-form-control" placeholder="https://..." required /></div>`;
+                return `<div class="curriculum-form-group"><label>This will be a live session learners can request.</label></div>`;
             case "Activity":
                 return `<div class="curriculum-form-group"><label>Activity Instructions</label><textarea class="curriculum-form-control" name="${nameBase}.ContentText" rows="4" required></textarea></div>`;
             default:
@@ -286,13 +309,12 @@
                             <input type="text"
                                 name="${nameBase}.QuizQuestions[${index}].Option${letter}"
                                 class="curriculum-form-control quiz-option-input"
-                                placeholder="Option ${letter}" required
-                                oninput="updateCorrectAnswerValues(this)" />
+                                placeholder="Option ${letter}" required />
                             <label>
                                 <input type="radio"
                                     name="${nameBase}.QuizQuestions[${index}].CorrectAnswer"
                                     class="correct-answer-radio"
-                                    value="" required />
+                                    value="Option${letter}" required />
                                 Correct
                             </label>
                         </div>
@@ -302,7 +324,6 @@
         `;
 
         container.appendChild(questionBlock);
-        container.appendChild(button);
     }
 
     function updateCorrectAnswerValues(input) {
@@ -313,29 +334,6 @@
         }
     }
 
-    function checkRequiredFields() {
-        const form = document.getElementById("create-course-form");
-        if (!form) return;
-
-        const submitBtn = form.querySelector(".create-course-btn-publish");
-        const requiredInputs = form.querySelectorAll("input[required], textarea[required], select[required]");
-
-        let allValid = true;
-
-        requiredInputs.forEach(input => {
-            if (input.type === "radio") {
-                const name = input.name;
-                const group = form.querySelectorAll(`input[type="radio"][name="${name}"]`);
-                const anyChecked = Array.from(group).some(radio => radio.checked);
-                if (!anyChecked) allValid = false;
-            } else {
-                if (input.value.trim() === "") allValid = false;
-            }
-        });
-
-        if (submitBtn) submitBtn.disabled = !allValid;
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById("create-course-form");
         if (form) {
@@ -343,13 +341,12 @@
             form.addEventListener("change", checkRequiredFields);
         }
 
-        const preloadModules = @Html.Raw(JsonSerializer.Serialize(Model.Modules ?? new List<SkillBuilder.Models.ViewModels.CourseModuleViewModel>()));
+        const preloadModules = JSON.parse(`@Html.Raw(JsonSerializer.Serialize(Model.Modules ?? new List<SkillBuilder.Models.ViewModels.CourseModuleViewModel>()))`);
         preloadModules.forEach((module, i) => {
             addCurriculumModule();
             const moduleDiv = document.querySelector(`.curriculum-module[data-index='${i}']`);
             if (!moduleDiv) return;
             moduleDiv.querySelector(`input[name='Modules[${i}].Title']`).value = module.title ?? "";
-            moduleDiv.querySelector(`input[name='Modules[${i}].Description']`).value = module.description ?? "";
 
             if (Array.isArray(module.lessons)) {
                 module.lessons.forEach((lesson, j) => {
@@ -358,11 +355,45 @@
                     if (!lessonBlock) return;
                     lessonBlock.querySelector(`input[name='Modules[${i}].Lessons[${j}].Title']`).value = lesson.title ?? "";
                     lessonBlock.querySelector(`input[name='Modules[${i}].Lessons[${j}].Duration']`).value = lesson.duration ?? "";
-                    lessonBlock.querySelector(`textarea[name='Modules[${i}].Lessons[${j}].Description']`).value = lesson.description ?? "";
                     lessonBlock.querySelector(`select[name='Modules[${i}].Lessons[${j}].LessonType']`).value = lesson.type ?? "";
                     handleLessonTypeChange(lessonBlock.querySelector("select"), i, j);
+
+                    setTimeout(() => {
+                        const type = lesson.type ?? "";
+                        if (type === "Text" || type === "Activity" || type === "Image + Text") {
+                            const contentTextEl = lessonBlock.querySelector(`[name='Modules[${i}].Lessons[${j}].ContentText']`);
+                            if (contentTextEl) contentTextEl.value = lesson.contentText ?? "";
+                        }
+                        if (type === "Quiz" && Array.isArray(lesson.quizQuestions)) {
+                            const builder = lessonBlock.querySelector(".quiz-builder");
+                            lesson.quizQuestions.forEach((q, qIndex) => {
+                                addQuizQuestion(builder.querySelector("button"));
+                                const questionBlock = builder.querySelectorAll(".quiz-question")[qIndex];
+                                if (!questionBlock) return;
+
+                                questionBlock.querySelector(`input[name$='QuizQuestions[${qIndex}].QuestionText']`).value = q.questionText ?? "";
+                                ["A", "B", "C", "D"].forEach(letter => {
+                                    const optInput = questionBlock.querySelector(`input[name$='Option${letter}']`);
+                                    if (optInput) optInput.value = q[`option${letter}`] ?? "";
+
+                                    const radio = questionBlock.querySelector(`input[value='Option${letter}']`);
+                                    if (radio && q.correctAnswer === `Option${letter}`) {
+                                        radio.checked = true;
+                                    }
+                                });
+                            });
+                        }
+                    }, 0);
+
+                    const type = lesson.type ?? "";
+                    if (type === "Text" || type === "Activity" || type === "Image + Text") {
+                        const contentTextEl = lessonBlock.querySelector(`[name='Modules[${i}].Lessons[${j}].ContentText']`);
+                        if (contentTextEl) contentTextEl.value = lesson.contentText ?? "";
+                    }
                 });
             }
         });
+
+        checkRequiredFields();
     });
 </script>

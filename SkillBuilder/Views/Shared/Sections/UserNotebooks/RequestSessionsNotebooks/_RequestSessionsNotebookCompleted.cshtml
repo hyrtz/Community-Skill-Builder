@@ -1,4 +1,35 @@
-﻿<div style="text-align: center; padding: 4rem;">
-    <h3 style="font-size: 1.5rem; color: #444;">You haven’t completed any sessions yet.</h3>
-    <p style="color: #777;">Completed sessions will be listed here with a summary or feedback.</p>
-</div>
+﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
+
+@{
+    var completed = Model.SupportRequests
+        .Where(r => r.Status == "Confirmed" && r.SessionDate < DateTime.Today)
+        .OrderByDescending(r => r.SessionDate)
+        .ToList();
+}
+
+@if (!completed.Any())
+{
+    <div class="user-support-empty">
+        You haven’t completed any sessions yet.<br />
+        Completed sessions will be listed here with a summary or feedback.
+    </div>
+}
+else
+{
+    foreach (var request in completed)
+    {
+        <div class="user-support-card">
+            <div class="user-support-title">@request.Title</div>
+            <div class="user-support-message">@request.Message</div>
+            <div class="user-support-schedule">
+                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
+                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
+            </div>
+            <span class="support-status-badge status-confirmed">Completed</span>
+            <div class="user-support-confirm-details">
+                Platform: <strong>@request.MeetingPlatform</strong><br />
+                <a href="@request.MeetingLink" target="_blank">Join Link</a>
+            </div>
+        </div>
+    }
+}

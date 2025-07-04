@@ -13,6 +13,7 @@ namespace SkillBuilder.Models
         public string UserAvatar { get; set; } = "/assets/Avatar/Sample10.svg";
         public string Introduction { get; set; } = string.Empty;
         public string Role { get; set; } = "Artisan";
+        public bool IsApproved { get; set; }
 
         public User? User { get; set; }
 

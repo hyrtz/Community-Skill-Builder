@@ -21,6 +21,7 @@ namespace SkillBuilder.Data
         public DbSet<ModuleContent> ModuleContents { get; set; }
         public DbSet<QuizQuestion> QuizQuestions { get; set; }
         public DbSet<ModuleProgress> ModuleProgress { get; set; }
+        public DbSet<SupportSessionRequest> SupportSessionRequests { get; set; }
         public DbSet<CourseReview> CourseReviews { get; set; }
         public DbSet<CommunityTestimonial> CommunityTestimonials { get; set; }
         public DbSet<CommunityHighlight> CommunityHighlights { get; set; }
@@ -403,19 +404,20 @@ namespace SkillBuilder.Data
                 // Pottery Modules
                 new ModuleContent { Id = 1, CourseModuleId = 1, Title = "Welcome to Pottery", ContentType = "Video", ContentText = "Pottery intro content something anything.", MediaUrl = "/assets/Videos/Pottery.mp4" },
                 new ModuleContent { Id = 2, CourseModuleId = 2, Title = "History of Pottery", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Pottery.png" },
-                new ModuleContent { Id = 3, CourseModuleId = 3, Title = "Live Pottery Session", ContentType = "Session", SessionLink = "https://live.pottery.com/session1" },
+                new ModuleContent { Id = 3, CourseModuleId = 3, Title = "Live Pottery Session", ContentType = "Session"},
                 new ModuleContent { Id = 4, CourseModuleId = 5, Title = "Pottery Final Activity", ContentType = "Activity", ContentText = "Create your own pottery something anything." },
 
                 // Woodcarving Modules
                 new ModuleContent { Id = 5, CourseModuleId = 6, Title = "Welcome to Woodcarving", ContentType = "Video", ContentText = "Woodcarving intro content something anything.", MediaUrl = "/assets/Videos/Wood Carving.mp4" },
                 new ModuleContent { Id = 6, CourseModuleId = 7, Title = "History of Woodcarving", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Woodcarving.png" },
-                new ModuleContent { Id = 7, CourseModuleId = 8, Title = "Live Woodcarving Session", ContentType = "Session", SessionLink = "https://live.woodcarving.com/session1" },
+                new ModuleContent { Id = 7, CourseModuleId = 8, Title = "Live Woodcarving Session", ContentType = "Session"},
                 new ModuleContent { Id = 8, CourseModuleId = 10, Title = "Woodcarving Final Activity", ContentType = "Activity", ContentText = "Carve a wooden spoon something anything." },
+
 
                 // Weaving Modules
                 new ModuleContent { Id = 9, CourseModuleId = 11, Title = "Welcome to Weaving", ContentType = "Video", ContentText = "Weaving intro content something anything.", MediaUrl = "/assets/Videos/Weaving.mp4" },
                 new ModuleContent { Id = 10, CourseModuleId = 12, Title = "History of Weaving", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Weaving.png" },
-                new ModuleContent { Id = 11, CourseModuleId = 13, Title = "Live Weaving Session", ContentType = "Session", SessionLink = "https://live.weaving.com/session1" },
+                new ModuleContent { Id = 11, CourseModuleId = 13, Title = "Live Weaving Session", ContentType = "Session"},
                 new ModuleContent { Id = 12, CourseModuleId = 15, Title = "Weaving Final Activity", ContentType = "Activity", ContentText = "Weave a basic pattern something anything." }
             );
 

@@ -116,7 +116,7 @@
             @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookCourses", Model)
         </div>
         <div class="artisan-panel" data-tab="projects">
-            @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookSupportSessions", Model)
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/_ArtisanNotebookSupportSessions", new List<SupportSessionRequest>())
         </div>
         <div class="artisan-panel" data-tab="reviews">
             @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookReviewProjects", Model)

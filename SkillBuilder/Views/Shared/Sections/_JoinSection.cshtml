@@ -66,8 +66,17 @@
         Whether you're an artisan looking to share your skills or a learner eager to discover traditional arts, there's a place for you in our community.
     </p>
     <div class="join-buttons">
-        <a href="#" class="btn-signup">Sign Up Now</a>
-        <a href="#" class="btn-browse">Browse Course</a>
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <a href="#" class="btn-signup" onclick="openModal('signup-modal')">Sign Up Now</a>
+        }
+        <a asp-controller="Courses" asp-action="CourseCatalog" class="btn-browse">Browse Course</a>
     </div>
 </section>
 
+<script>
+    function openModal(modalId) {
+        document.getElementById('modal-overlay').style.display = 'block';
+        document.getElementById(modalId).style.display = 'block';
+    }
+</script>

@@ -1,4 +1,35 @@
-﻿<div style="text-align: center; padding: 4rem;">
-    <h3 style="font-size: 1.5rem; color: #444;">No upcoming sessions scheduled yet.</h3>
-    <p style="color: #777;">Confirmed sessions will show here with their date and time.</p>
-</div>
+﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
+
+@{
+    var upcoming = Model.SupportRequests
+        .Where(r => r.Status == "Confirmed" && r.SessionDate >= DateTime.Today)
+        .OrderBy(r => r.SessionDate)
+        .ToList();
+}
+
+@if (!upcoming.Any())
+{
+    <div class="user-support-empty">
+        No upcoming sessions scheduled yet.<br />
+        Confirmed sessions will show here with their date and time.
+    </div>
+}
+else
+{
+    foreach (var request in upcoming)
+    {
+        <div class="user-support-card">
+            <div class="user-support-title">@request.Title</div>
+            <div class="user-support-message">@request.Message</div>
+            <div class="user-support-schedule">
+                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
+                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
+            </div>
+            <span class="support-status-badge status-confirmed">Confirmed</span>
+            <div class="user-support-confirm-details">
+                Platform: <strong>@request.MeetingPlatform</strong><br />
+                <a href="@request.MeetingLink" target="_blank">Join Link</a>
+            </div>
+        </div>
+    }
+}

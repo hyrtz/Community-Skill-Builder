@@ -1,0 +1,115 @@
+﻿@model List<SkillBuilder.Models.Artisan>
+
+@{
+    ViewData["Title"] = "List of Artisans";
+    ViewData["UseCourseNavbar"] = true;
+}
+
+<style>
+    .artisan-list-container {
+        padding: 4rem 20rem;
+    }
+
+    .artisan-list-header {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #344AEA;
+        margin-top: 4rem;
+        margin-bottom: 2rem;
+    }
+
+    .artisan-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.8rem;
+    }
+
+        .artisan-table td,
+        .artisan-table th {
+            vertical-align: middle;
+        }
+
+    .artisan-row {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .artisan-cell {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .artisan-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .artisan-info img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+    .artisan-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+    }
+
+    .artisan-name a {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #333;
+        text-decoration: none;
+    }
+
+        .artisan-name a:hover {
+            text-decoration: underline;
+        }
+
+    .artisan-profession {
+        font-size: 0.85rem;
+        color: #666;
+    }
+</style>
+
+<div class="artisan-list-container">
+    <div class="artisan-list-header">All Artisans</div>
+
+    <table class="artisan-table">
+        <tbody>
+            @foreach (var artisan in Model)
+            {
+                <tr class="artisan-row">
+                    <td class="artisan-cell">
+                        <div class="artisan-info">
+                            <img src="@artisan.User.UserAvatar"/>
+                            <div class="artisan-details">
+                                <div class="artisan-name">
+                                    <a href="/ArtisanViewAsMentor/@artisan.UserId">
+                                        @artisan.User.FirstName @artisan.User.LastName
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="artisan-cell">@artisan.Profession</td>
+                    <td class="artisan-cell">@artisan.Hometown</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    window.addEventListener('load', () => {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('search')) {
+            url.searchParams.delete('search');
+            window.history.replaceState({}, document.title, url.pathname); // Removes ?search=...
+        }
+    });
+</script>

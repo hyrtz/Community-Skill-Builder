@@ -37,7 +37,6 @@
     {
         <div class="materials-lesson-item">
             <div class="module-title">Module @moduleIndex: @module.Title</div>
-            <div class="module-description">@module.Description</div>
 
             @if (module.Contents != null && module.Contents.Any())
             {
@@ -57,8 +56,6 @@
         </div>
 
         moduleIndex++;
-
-        <!-- ✅ increment AFTER each module render -->
     }
 }
 else

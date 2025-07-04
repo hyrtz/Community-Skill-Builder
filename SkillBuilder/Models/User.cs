@@ -10,6 +10,7 @@
         public string Role { get; set; } = "Learner";
         public bool IsVerified { get; set; } = false;
         public string? UserAvatar { get; set; } = "/assets/Avatar/Sample10.svg";
+        public int Points { get; set; } = 0;
         public string? SelectedInterests { get; set; }
         public DateTime CreatedAt { get; set; }
 

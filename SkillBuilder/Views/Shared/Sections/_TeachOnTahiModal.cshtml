@@ -1,0 +1,519 @@
+﻿<style>
+    .teach-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        width: 100%;
+        margin: 0 auto;
+        margin-bottom: 1rem;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1rem 0;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ccc;
+            margin: 0 0.5rem;
+        }
+
+        .separator span {
+            font-size: 0.75rem;
+            color: gray;
+        }
+
+    .teach-email-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        padding: 0.75rem 1rem;
+        color: #364BE9;
+        background-color: #fff;
+        border: 1px solid #364BE9;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .teach-description {
+        font-size: 0.7rem;
+        text-align: center;
+        margin-top: 2rem;
+        color: gray;
+    }
+
+    .teach-modal-btn {
+        width: 100%;
+        background-color: #364BE9;
+        color: white;
+        padding: 0.6rem;
+        border-radius: 6px;
+        border: none;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease, cursor 0.3s ease;
+    }
+
+        .teach-modal-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            color: #666;
+            border: none;
+        }
+
+    .teach-error {
+        color: red;
+        font-size: 0.75rem;
+        margin-top: -0.5rem;
+        margin-bottom: 0.8rem;
+        display: block;
+        font-weight: 500;
+    }
+
+    .teach-form-wrapper {
+        display: none;
+        flex-direction: column;
+        gap: 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .teach-verification-message {
+        display: none;
+        padding: 2rem 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    .teach-verification-message h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .teach-verification-message p {
+        font-size: 0.85rem;
+        color: #555;
+    }
+
+    .teach-back-btn {
+        position: absolute;
+        top: 1rem;
+        left: 22rem;
+        background: #eee;
+        border: none;
+        border-radius: 50%;
+        font-weight: bold;
+        padding: 0.4rem 0.7rem;
+        cursor: pointer;
+    }
+
+    .teach-password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+        .teach-password-wrapper input {
+            width: 100%;
+            padding-right: 2.5rem;
+            margin-bottom: 0 !important;
+        }
+
+        .teach-password-wrapper .toggle-password {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+    .password-checklist {
+        font-size: 0.7rem;
+        margin: 0.5rem 0;
+        line-height: 1.2rem;
+    }
+
+        .password-checklist p {
+            margin: 0;
+            color: orange;
+        }
+
+            .password-checklist p.valid {
+                color: green;
+            }
+
+    .teach-verification-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        max-width: 28rem;
+        margin: 0 auto;
+        color: #333;
+        font-family: 'Poppins', sans-serif;
+    }
+
+        .teach-verification-message h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .teach-verification-message p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 0.7rem;
+        }
+</style>
+
+<div id="teach-modal-overlay" style="z-index: 1001;" class="modal-overlay"></div>
+
+<div id="teach-modal" class="auth-modal">
+    <div class="auth-modal-content auth-modal-container">
+        <span class="auth-close-btn" id="teach-close-btn">&times;</span>
+
+        <!-- Left Panel -->
+        <div class="auth-modal-left">
+            <img src="~/assets/Background Pics/LogInBG.png" />
+        </div>
+
+        <!-- Right Panel -->
+        <div class="auth-modal-right">
+            <h2 class="teach-header">Teach on <span style="color: #364BE9">Tahi</span></h2>
+
+            <!-- Social login -->
+            <div class="social-login">
+                <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
+                <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+            </div>
+
+            <div class="separator"><span>or</span></div>
+
+            <button class="teach-email-btn" onclick="showTeachForm()">Continue with Email</button>
+
+            <form id="teach-form" class="teach-form-wrapper">
+                <button type="button" class="teach-back-btn" onclick="hideTeachForm()" style="margin-top: 0.5rem;">←</button>
+                
+                <label for="teach-firstname">First Name</label>
+                <input type="text" id="teach-firstname" required />
+                <p id="teach-fn-error" class="teach-error" style="display: none;">⚠️ Only letters are allowed.</p>
+
+                <label for="teach-lastname">Last Name</label>
+                <input type="text" id="teach-lastname" required />
+                <p id="teach-ln-error" class="teach-error" style="display: none;">⚠️ Only letters are allowed.</p>
+
+                <label for="teach-email">Email</label>
+                <input type="email" id="teach-email" required />
+
+                <label for="teach-profession">Profession</label>
+                <input type="text" id="teach-profession" required />
+
+                <label for="teach-hometown">Hometown</label>
+                <input type="text" id="teach-hometown" required />
+
+                <label for="teach-password">Password</label>
+                <div class="teach-password-wrapper">
+                    <input type="password" id="teach-password" name="Password" required />
+                    <span class="toggle-password" onclick="togglePasswordVisibility('teach-password', this)">👁️‍🗨️</span>
+                </div>
+
+                <div id="teach-password-checklist" class="password-checklist" style="display: none;">
+                    <p id="teach-check-length" data-text="At least 8 characters">❌ At least 8 characters</p>
+                    <p id="teach-check-uppercase" data-text="At least one uppercase letter">❌ At least one uppercase letter</p>
+                    <p id="teach-check-number" data-text="At least one number">❌ At least one number</p>
+                    <p id="teach-check-symbol" data-text="At least one symbol">❌ At least one symbol</p>
+                </div>
+
+                <label for="teach-confirm">Confirm Password</label>
+                <div class="teach-password-wrapper">
+                    <input type="password" id="teach-confirm" name="ConfirmPassword" required />
+                    <span class="toggle-password" onclick="togglePasswordVisibility('teach-confirm', this)">👁️‍🗨️</span>
+                </div>
+
+                <p id="teach-confirm-warning" class="teach-error" style="display: none;">⚠️ Passwords do not match.</p>
+
+                <div class="checkbox-signup">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="teach-agree" />
+                        <span class="checkmark"></span>
+                    </label>
+                    <p>
+                        By creating an account you agree with our
+                        <a href="#">Terms of Service</a>,
+                        <a href="#">Privacy Policy</a>, and our default
+                        <a href="#">Notification Settings</a>.
+                    </p>
+                </div>
+
+                <p class="teach-error" id="teach-error-msg"></p>
+                <button type="submit" class="teach-modal-btn" id="teach-submit-btn" disabled>Create Instructor Account</button>
+            </form>
+
+            <div class="teach-verification-message" id="teach-verification">
+                <h3>Verify your email to continue</h3>
+                <p>A link has been sent to <strong id="teach-ob-email"></strong></p>
+                <p>Check your inbox or spam folder.</p>
+
+                <button class="teach-modal-btn" style="margin-top: 1.5rem;" onclick="handleTeachSkipVerification()">Do it later</button>
+            </div>
+
+            <p class="teach-description">Share your cultural knowledge with the community by becoming a mentor on Tahi.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const teachPassword = document.getElementById("teach-password");
+        const passwordChecklist = document.getElementById("teach-password-checklist");
+        const teachConfirm = document.getElementById("teach-confirm");
+        const confirmWarn = document.getElementById("teach-confirm-warning");
+        const closeBtn = document.getElementById("teach-close-btn");
+        if (closeBtn) {
+            closeBtn.addEventListener("click", () => {
+                closeModal("teach-modal", true);
+            });
+        }
+
+        // When 'Teach on Tahi' is clicked
+        document.querySelectorAll(".nav-teach-btn").forEach(btn => {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                openModal("teach-modal");
+
+                // Show social login and hide form
+                document.querySelector("#teach-form").style.display = "none";
+                document.querySelector(".teach-verification-message").style.display = "none";
+                document.querySelector(".social-login").style.display = "flex";
+                document.querySelector(".teach-email-btn").style.display = "flex";
+                document.querySelector(".separator").style.display = "flex";
+                document.querySelector(".teach-back-btn").style.display = "none";
+                document.querySelector(".auth-close-btn").style.display = "flex";
+            });
+        });
+
+        function openModal(modalId) {
+            document.getElementById("teach-modal-overlay").style.display = "block";
+            document.getElementById(modalId).style.display = "block";
+            document.addEventListener("keydown", escListener);
+        }
+
+        function closeModal(modalId, removeOverlay = false) {
+            document.getElementById(modalId).style.display = "none";
+            if (removeOverlay) {
+                document.getElementById("teach-modal-overlay").style.display = "none";
+            }
+            document.removeEventListener("keydown", escListener);
+        }
+
+        function escListener(e) {
+            if (e.key === "Escape") {
+                closeModal("teach-modal", true);
+            }
+        }
+
+        function showTeachForm() {
+            document.querySelector("#teach-form").style.display = "flex";
+            document.querySelector(".teach-back-btn").style.display = "flex";
+            document.querySelector(".social-login").style.display = "none";
+            document.querySelector(".teach-email-btn").style.display = "none";
+            document.querySelector(".separator").style.display = "none";
+        }
+
+        window.showTeachForm = showTeachForm;
+
+        function hideTeachForm() {
+            document.querySelector("#teach-form").style.display = "none";
+            document.querySelector(".teach-back-btn").style.display = "none";
+            document.querySelector(".social-login").style.display = "flex";
+            document.querySelector(".teach-email-btn").style.display = "flex";
+            document.querySelector(".separator").style.display = "flex";
+        }
+
+        window.hideTeachForm = hideTeachForm;
+
+         function validateTeachFormInputs() {
+            const fn = document.getElementById("teach-firstname").value.trim();
+            const ln = document.getElementById("teach-lastname").value.trim();
+            const email = document.getElementById("teach-email").value.trim();
+            const profession = document.getElementById("teach-profession").value.trim();
+            const hometown = document.getElementById("teach-hometown").value.trim();
+            const pass = teachPassword.value;
+            const confirm = teachConfirm.value;
+            const agree = document.getElementById("teach-agree")?.checked;
+
+            const namePattern = /^[A-Za-z\s]*$/;
+            const firstNameValid = namePattern.test(fn);
+            const lastNameValid = namePattern.test(ln);
+
+            const allFilled = fn && ln && email && profession && hometown && pass && confirm;
+            const passwordsMatch = pass === confirm;
+
+            const checklistValid =
+                pass.length >= 8 &&
+                /[A-Z]/.test(pass) &&
+                /\d/.test(pass) &&
+                /[^A-Za-z0-9]/.test(pass);
+
+            const valid = allFilled &&
+                passwordsMatch &&
+                checklistValid &&
+                agree &&
+                firstNameValid &&
+                lastNameValid;
+
+            document.getElementById("teach-submit-btn").disabled = !valid;
+        }
+
+        [
+            "teach-password", "teach-confirm",
+            "teach-firstname", "teach-lastname",
+            "teach-email", "teach-profession",
+            "teach-hometown", "teach-agree"
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener("input", validateTeachFormInputs);
+                el.addEventListener("change", validateTeachFormInputs);
+            }
+        });
+
+        // Validate names
+        function validateTeachNameInput(inputId, errorId) {
+            const input = document.getElementById(inputId);
+            const error = document.getElementById(errorId);
+
+            input.addEventListener("input", () => {
+                const isValid = /^[A-Za-z\s]*$/.test(input.value);
+                error.style.display = input.value && !isValid ? "block" : "none";
+            });
+        }
+
+        validateTeachNameInput("teach-firstname", "teach-fn-error");
+        validateTeachNameInput("teach-lastname", "teach-ln-error");
+
+        function updateTeachRequirement(id, valid) {
+            const el = document.getElementById(id);
+            const baseText = el.dataset.text || el.textContent.replace(/^✔️|❌/, "").trim();
+            el.textContent = (valid ? "✔️ " : "❌ ") + baseText;
+            el.classList.toggle("valid", valid);
+            el.style.color = valid ? "green" : "orange";
+        }
+
+        teachPassword.addEventListener("input", function () {
+            const val = this.value;
+
+            // Show checklist if not empty
+            passwordChecklist.style.display = val.length > 0 ? "block" : "none";
+
+            // Update checklist items
+            updateTeachRequirement("teach-check-length", val.length >= 8);
+            updateTeachRequirement("teach-check-uppercase", /[A-Z]/.test(val));
+            updateTeachRequirement("teach-check-number", /\d/.test(val));
+            updateTeachRequirement("teach-check-symbol", /[^A-Za-z0-9]/.test(val));
+
+            validateTeachPasswordMatch();
+            validateTeachFormInputs();
+        });
+
+        function validateTeachPasswordMatch() {
+            if (!teachConfirm.value) {
+                confirmWarn.style.display = "none";
+            } else if (teachPassword.value !== teachConfirm.value) {
+                confirmWarn.style.display = "block";
+            } else {
+                confirmWarn.style.display = "none";
+            }
+        }
+
+        teachPassword.addEventListener("input", validateTeachPasswordMatch);
+        teachConfirm.addEventListener("input", validateTeachPasswordMatch);
+
+        // Submit form
+        async function submitTeachForm(event) {
+            event.preventDefault();
+            const error = document.getElementById("teach-error-msg");
+            const submitBtn = document.getElementById("teach-submit-btn");
+
+            error.textContent = "";
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Submitting...";
+
+            const data = {
+                FirstName: document.getElementById("teach-firstname").value.trim(),
+                LastName: document.getElementById("teach-lastname").value.trim(),
+                Email: document.getElementById("teach-email").value.trim(),
+                Profession: document.getElementById("teach-profession").value.trim(),
+                Hometown: document.getElementById("teach-hometown").value.trim(),
+                Password: document.getElementById("teach-password").value,
+                ConfirmPassword: document.getElementById("teach-confirm").value,
+                introduction: "Hello I am an Artisan",
+                Role: "Artisan"
+            };
+
+            if (data.Password !== data.ConfirmPassword) {
+                error.textContent = "⚠️ Passwords do not match.";
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Create Instructor Account";
+                return;
+            }
+
+            try {
+                const response = await fetch("/signup-artisan", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json().catch(() => ({ message: "Unexpected response" }));
+
+                if (response.ok) {
+                    document.getElementById("teach-form").style.display = "none";
+                    document.getElementById("teach-verification").style.display = "flex";
+                    document.getElementById("teach-ob-email").textContent = obfuscateEmail(data.Email);
+                    document.querySelector(".auth-close-btn").style.display = "none";
+                } else {
+                    error.textContent = result.message || "Submission failed.";
+                }
+
+            } catch (err) {
+                error.textContent = "An error occurred. Please try again later.";
+                console.error(err);
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Create Instructor Account";
+        }
+
+        window.handleTeachSkipVerification = function () {
+            closeModal("teach-modal", true);
+            location.reload();
+        };
+
+        document.getElementById("teach-form").addEventListener("submit", submitTeachForm);
+
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.type = input.type === "password" ? "text" : "password";
+            icon.textContent = input.type === "text" ? "👁️" : "👁️‍🗨️";
+        }
+
+        // Hook up back button
+        document.querySelector(".teach-back-btn").addEventListener("click", hideTeachForm);
+    });
+</script>

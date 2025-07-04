@@ -1,5 +1,9 @@
 ﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
 
+@{
+    var learningObjectives = Model.LearningObjectives ?? new List<string> { "" };
+}
+
 <style>
     .basicinfo-form-group {
         margin-bottom: 1.5rem;
@@ -135,6 +139,9 @@
                 <option>Pottery</option>
                 <option>Weaving</option>
                 <option>Woodcarving</option>
+                <option>Paper Crafts</option>
+                <option>Shoemaking</option>
+                <option>Embroidery</option>
             </select>
         </div>
     </div>
@@ -172,10 +179,10 @@
     <div class="basicinfo-form-group">
         <label>Learning Objectives *</label>
         <div id="objectives-container" class="basicinfo-objectives-container">
-            @for (int i = 0; i < Model.LearningObjectives.Count; i++)
+            @for (int i = 0; i < learningObjectives.Count; i++)
             {
                 <div class="basicinfo-objective-item">
-                    <input type="text" name="LearningObjectives[@i]" value="@Model.LearningObjectives[i]" class="basicinfo-form-control" placeholder="Objective" required />
+                    <input type="text" name="LearningObjectives[@i]" value="@learningObjectives[i]" class="basicinfo-form-control" placeholder="Objective" required />
                     <button type="button" class="basicinfo-delete-btn" onclick="this.parentElement.remove()">🗑️</button>
                 </div>
             }
@@ -350,4 +357,4 @@
         form.addEventListener("change", checkRequiredFields);
         checkRequiredFields(); // initial check
     });
-</script>>
+</script>

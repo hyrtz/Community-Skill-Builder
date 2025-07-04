@@ -76,6 +76,75 @@ namespace SkillBuilder.Controllers
             return Ok(new { message = "Account created. Please check your email to verify." });
         }
 
+        [HttpPost("/signup-artisan")]
+        public async Task<IActionResult> SignupArtisan([FromBody] ArtisanSignupRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(new { message = string.Join(" ", errors) });
+            }
+
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (existingUser != null)
+                return BadRequest(new { message = "Email already exists." });
+
+            var newUserId = await GenerateUserId("Artisan");
+
+            var newUser = new User
+            {
+                Id = newUserId,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Email = model.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                Role = "Artisan",
+                CreatedAt = DateTime.UtcNow,
+                IsVerified = false,
+                UserAvatar = "/assets/Avatar/Sample10.svg"
+            };
+
+            var artisan = new Artisan
+            {
+                ArtisanId = newUserId, // Use same ID convention
+                UserId = newUserId,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Profession = model.Profession,
+                Hometown = model.Hometown,
+                Introduction = model.Introduction,
+                Role = "Artisan",
+                UserAvatar = newUser.UserAvatar
+            };
+
+            _context.Users.Add(newUser);
+            _context.Artisans.Add(artisan);
+
+            await _context.SaveChangesAsync();
+
+            await SendVerificationEmail(newUser.Email, newUser.Id);
+
+            var claims = new List<Claim>
+            {
+                new Claim("UserId", newUser.Id),
+                new Claim(ClaimTypes.NameIdentifier, newUser.Id),
+                new Claim(ClaimTypes.Name, newUser.FirstName + " " + newUser.LastName),
+                new Claim(ClaimTypes.Email, newUser.Email),
+                new Claim(ClaimTypes.Role, newUser.Role)
+            };
+
+            var identity = new ClaimsIdentity(claims, "TahiAuth");
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync("TahiAuth", principal);
+
+            return Ok(new { message = "Artisan account created. Please check your email to verify." });
+        }
+
         private async Task SendVerificationEmail(string email, string userId)
         {
             var message = new MimeMessage();
@@ -161,36 +230,6 @@ namespace SkillBuilder.Controllers
             await HttpContext.SignInAsync("TahiAuth", principal);
 
             return Redirect("/?verified=true");
-        }
-
-        [HttpPost("/promote-to-artisan")]
-        public async Task<IActionResult> PromoteToArtisan()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
-                return Unauthorized();
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
-                return NotFound("User not found.");
-
-            // Only allow if they’re still a learner
-            if (user.Role != "Learner")
-                return BadRequest("Only learners can be promoted.");
-
-            // Generate new Artisan ID
-            var newId = await GenerateUserId("Artisan");
-
-            // Optional: Check if user has dependent records before changing ID
-
-            user.Id = newId;
-            user.Role = "Artisan";
-
-            // Update claims if needed (like forcing re-login or reissue cookie)
-            await _context.SaveChangesAsync();
-
-            await HttpContext.SignOutAsync("TahiAuth");
-            return Redirect("/login?promoted=true");
         }
 
         [HttpGet("/force-logout")]

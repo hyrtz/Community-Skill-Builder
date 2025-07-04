@@ -1,5 +1,9 @@
 ﻿@model List<SkillBuilder.Models.Course>
 
+@{
+    var filterQuery = Context.Request.Query["filter"].ToString().ToLower();
+}
+
 <style>
     .course-section {
         display: flex;
@@ -8,120 +12,6 @@
         padding: 6.5rem 0;
         background-color: #f9f9f9;
         min-height: 100vh;
-    }
-
-    .course-top-bar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 2rem;
-        width: 100%;
-        padding: 0 4rem;
-        box-sizing: border-box;
-    }
-
-    .course-filter-btn {
-        background-color: #e53e3e;
-        color: white;
-        border: none;
-        padding: 10px 18px;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        min-width: 100px;
-        user-select: none;
-        transition: background-color 0.2s ease-in-out;
-    }
-
-        .course-filter-btn:hover {
-            background-color: #c53030;
-        }
-
-    .course-search-bar {
-        flex-grow: 1;
-        display: flex;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        overflow: hidden;
-        background: white;
-    }
-
-        .course-search-bar input[type="text"] {
-            border: none;
-            padding: 10px 14px;
-            flex-grow: 1;
-            font-size: 14px;
-            outline-offset: -2px;
-        }
-
-        .course-search-bar button {
-            background-color: #2b6cb0;
-            border: none;
-            padding: 0 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-            .course-search-bar button:hover {
-                background-color: #2c5282;
-            }
-
-        .course-search-bar img {
-            width: 18px;
-            height: 18px;
-        }
-
-    .course-dropdown {
-        position: relative;
-        user-select: none;
-    }
-
-        .course-dropdown button {
-            background-color: #3182ce;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            min-width: 130px;
-        }
-
-            .course-dropdown button:hover {
-                background-color: #2c5282;
-            }
-
-    .course-dropdown-menu {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-        width: 150px;
-        z-index: 10;
-        flex-direction: column;
-    }
-
-        .course-dropdown-menu a {
-            padding: 10px 14px;
-            font-size: 14px;
-            color: #333;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-            .course-dropdown-menu a:hover {
-                background-color: #f0f0f0;
-            }
-
-    .course-dropdown.active .course-dropdown-menu {
-        display: flex;
     }
 
     .course-content-row {
@@ -258,26 +148,6 @@
 </style>
 
 <section class="course-section">
-    <div class="course-top-bar">
-        <button id="clearFiltersBtn" class="course-filter-btn" type="button">Clear Filters</button>
-
-        <div class="course-search-bar">
-            <input type="text" id="searchInput" placeholder="What do you want to learn?" />
-            <button type="button" id="searchBtn">
-                <img src="/assets/icons/Search.ico" alt="Search" />
-            </button>
-        </div>
-
-        <div class="course-dropdown" id="featuredDropdown">
-            <button type="button" id="featuredToggleBtn">Featured ▾</button>
-            <div class="course-dropdown-menu">
-                <a href="#" data-feature="mostPopular">Most Popular</a>
-                <a href="#" data-feature="newest">Newest</a>
-                <a href="#" data-feature="topRated">Top Rated</a>
-            </div>
-        </div>
-    </div>
-
     <div class="course-content-row">
         <aside class="course-sidebar">
             <h1>Filter by</h1>
@@ -288,9 +158,8 @@
                 <label><input type="checkbox" value="Pottery" /> Pottery</label>
                 <label><input type="checkbox" value="Paper Crafts" /> Paper Crafts</label>
                 <label><input type="checkbox" value="Wood Carving" /> Wood Carving</label>
+                <label><input type="checkbox" value="Shoemaking" /> Shoemaking</label>
                 <label><input type="checkbox" value="Embroidery" /> Embroidery</label>
-                <label><input type="checkbox" value="Traditional Music" /> Traditional Music</label>
-                <label><input type="checkbox" value="Traditional Dance" /> Traditional Dance</label>
             </div>
 
             <h5>Level</h5>
@@ -326,26 +195,59 @@
 </section>
 
 <script>
-    const featuredDropdown = document.getElementById('featuredDropdown');
-    const featuredToggleBtn = document.getElementById('featuredToggleBtn');
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    // Helper to get checked values from a filter group
+    function getCheckedValues(groupId) {
+        return Array.from(document.querySelectorAll(`#${groupId} input[type="checkbox"]:checked`))
+            .map(cb => cb.value.toLowerCase());
+    }
 
-    if (featuredToggleBtn && featuredDropdown) {
-        featuredToggleBtn.addEventListener('click', () => {
-            featuredDropdown.classList.toggle('active');
-        });
+    function filterCourses() {
+        const selectedClasses = getCheckedValues("classes-filter");
+        const selectedLevels = getCheckedValues("level-filter");
 
-        document.addEventListener('click', (e) => {
-            if (!featuredDropdown.contains(e.target)) {
-                featuredDropdown.classList.remove('active');
-            }
+        const courseCards = document.querySelectorAll(".course-card");
+
+        courseCards.forEach(card => {
+            const courseCategory = card.getAttribute("data-classes")?.toLowerCase() || "";
+            const courseLevel = card.getAttribute("data-level")?.toLowerCase() || "";
+            const courseTitle = card.querySelector(".course-card-title").textContent.toLowerCase();
+
+            const matchesClass = selectedClasses.length === 0 || selectedClasses.some(c =>
+                courseCategory.includes(c) || courseTitle.includes(c)
+            );
+
+            const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(courseLevel);
+
+            card.parentElement.style.display = (matchesClass && matchesLevel) ? "block" : "none";
         });
     }
 
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', () => {
-            const checkboxes = document.querySelectorAll('.course-checkbox-group input[type="checkbox"]');
-            checkboxes.forEach(cb => cb.checked = false);
-        });
-    }
+    // Auto-check box based on query string
+    window.addEventListener("DOMContentLoaded", () => {
+        const filterFromQuery = "@filterQuery";
+
+        if (filterFromQuery) {
+            document.querySelectorAll('#classes-filter input[type="checkbox"]').forEach(cb => {
+                if (cb.value.toLowerCase() === filterFromQuery) {
+                    cb.checked = true;
+                }
+            });
+        }
+
+        // Run initial filtering
+        filterCourses();
+    });
+
+    // Bind filter logic on checkbox changes
+    document.querySelectorAll('.course-checkbox-group input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', filterCourses);
+    });
+
+    window.addEventListener('load', () => {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('search')) {
+            url.searchParams.delete('search');
+            window.history.replaceState({}, document.title, url.pathname); // Removes ?search=...
+        }
+    });
 </script>

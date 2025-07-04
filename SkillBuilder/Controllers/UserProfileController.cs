@@ -29,30 +29,6 @@ namespace SkillBuilder.Controllers
             if (user == null)
                 return NotFound();
 
-            var courseProgresses = user.Enrollments?.Select(e =>
-            {
-                var courseId = e.Course.Id;
-
-                var completedModules = _context.ModuleProgress
-                    .Include(mp => mp.CourseModule)
-                    .Where(mp => mp.UserId == user.Id && mp.CourseModule.CourseId == courseId && mp.IsCompleted)
-                    .Count();
-
-                var totalModules = _context.CourseModules
-                    .Count(cm => cm.CourseId == courseId);
-
-                var percentage = totalModules > 0 ? (double)completedModules / totalModules * 100 : 0;
-
-                return new CourseProgressViewModel
-                {
-                    CourseId = courseId,
-                    CourseTitle = e.Course.Title,
-                    CourseDescription = e.Course.Overview,
-                    Link = e.Course.Link,
-                    ProgressPercentage = Math.Round(percentage, 0)
-                };
-            }).ToList() ?? new();
-
             var moduleProgress = _context.ModuleProgress
                 .Include(mp => mp.CourseModule)
                 .Where(mp => mp.UserId == user.Id)
@@ -62,11 +38,35 @@ namespace SkillBuilder.Controllers
 
             var inProgressCourses = enrolledCourses.Select(course =>
             {
-                var totalModules = _context.CourseModules.Count(cm => cm.CourseId == course.Id);
-                var completed = moduleProgress
+                var courseModulesOrdered = _context.CourseModules
+                    .Where(cm => cm.CourseId == course.Id)
+                    .OrderBy(cm => cm.Order)
+                    .Include(cm => cm.Contents)
+                    .ToList();
+
+                var completedSet = moduleProgress
                     .Where(mp => mp.IsCompleted && mp.CourseModule.CourseId == course.Id)
-                    .Count();
-                var progress = totalModules == 0 ? 0 : (double)completed / totalModules * 100;
+                    .Select(mp => mp.CourseModuleId)
+                    .ToHashSet();
+
+                int validCompletions = 0;
+                for (int i = 0; i < courseModulesOrdered.Count; i++)
+                {
+                    var module = courseModulesOrdered[i];
+                    if (i == 0 || completedSet.Contains(courseModulesOrdered[i - 1].Id))
+                    {
+                        if (completedSet.Contains(module.Id))
+                        {
+                            validCompletions++;
+                        }
+                        else break;
+                    }
+                    else break;
+                }
+
+                int totalModules = courseModulesOrdered.SelectMany(cm => cm.Contents).Count();
+
+                var progress = totalModules == 0 ? 0 : (double)validCompletions / totalModules * 100;
 
                 return new CourseProgressViewModel
                 {
@@ -87,6 +87,12 @@ namespace SkillBuilder.Controllers
                 .Where(p => p.UserId == user.Id)
                 .ToList();
 
+            var supportRequests = _context.SupportSessionRequests
+                .Where(r => r.UserId == user.Id)
+                .Include(r => r.Course)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+
             var achievements = GetAchievementsForUser(user);
 
             var viewModel = new UserProfileViewModel
@@ -96,7 +102,8 @@ namespace SkillBuilder.Controllers
                 AllCourses = allCourses,
                 SubmittedProjects = submittedProjects,
                 Achievements = achievements,
-                CourseProgresses = inProgressCourses
+                CourseProgresses = inProgressCourses,
+                SupportRequests = supportRequests
             };
 
             return View("~/Views/Profile/UserProfile.cshtml", viewModel);

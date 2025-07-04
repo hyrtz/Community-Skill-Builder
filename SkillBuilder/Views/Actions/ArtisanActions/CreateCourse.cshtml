@@ -112,6 +112,8 @@
 
 @using (Html.BeginForm("CreateCourse", "ArtisanCourse", FormMethod.Post, new { enctype = "multipart/form-data", id = "create-course-form" }))
 {
+    @Html.AntiForgeryToken()
+
     <div class="create-course-container">
         <a href="javascript:history.back()" class="create-course-back-link">&larr; Back</a>
 
@@ -146,7 +148,6 @@
         const tabs = document.querySelectorAll(".create-course-tab");
         const panels = document.querySelectorAll(".create-course-tab-panel");
 
-        // Tab switching logic
         function activateTab(tabName) {
             localStorage.setItem("createCourseSelectedTab", tabName);
             tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
@@ -160,33 +161,23 @@
             tab.addEventListener("click", () => activateTab(tab.dataset.tab));
         });
 
-        // Form validation logic
         const form = document.getElementById("create-course-form");
         const submitBtn = document.getElementById("createBtn");
-
         const requiredFields = form.querySelectorAll("input[required], textarea[required], select[required]");
 
-        function validateFormFields() {
-            let allValid = true;
+        form.addEventListener("input", checkRequiredFields);
+        form.addEventListener("change", checkRequiredFields);
+        checkRequiredFields();
 
-            requiredFields.forEach(field => {
-                // Check if field is visible
-                const isVisible = field.offsetParent !== null;
-                if (!field.value.trim() || !isVisible) {
-                    allValid = false;
-                }
+        // 👁️ Observe module container for DOM changes
+        const moduleList = document.getElementById("curriculum-modules");
+        if (moduleList) {
+            const observer = new MutationObserver(() => {
+                checkRequiredFields();
             });
 
-            submitBtn.disabled = !allValid;
+            observer.observe(moduleList, { childList: true, subtree: true });
         }
-
-        requiredFields.forEach(field => {
-            field.addEventListener("input", validateFormFields);
-            field.addEventListener("change", validateFormFields);
-        });
-
-        // Initial check on load
-        validateFormFields();
 
         form.addEventListener("submit", function () {
             console.log("🕐 Form is submitting now...");
@@ -195,4 +186,38 @@
             submitBtn.innerText = "Submitting...";
         });
     });
+
+    function checkRequiredFields() {
+        const form = document.getElementById("create-course-form");
+        const requiredInputs = form.querySelectorAll("[required]");
+        let allValid = true;
+
+        // Validate required inputs (text, selects, etc.)
+        requiredInputs.forEach(input => {
+            const isVisible = input.offsetParent !== null;
+            if (isVisible && input.value.trim() === "") {
+                input.classList.add("input-invalid");
+                allValid = false;
+            } else {
+                input.classList.remove("input-invalid");
+            }
+        });
+
+        // Check at least 1 module exists
+        const modules = document.querySelectorAll(".curriculum-module");
+        if (modules.length === 0) {
+            allValid = false;
+        } else {
+            // Check that each module has at least 1 lesson
+            modules.forEach(module => {
+                const lessons = module.querySelectorAll(".curriculum-lesson-block");
+                if (lessons.length === 0) {
+                    allValid = false;
+                }
+            });
+        }
+
+        const createBtn = document.getElementById("createBtn");
+        if (createBtn) createBtn.disabled = !allValid;
+    }
 </script>

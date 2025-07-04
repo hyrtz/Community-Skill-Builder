@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SkillBuilder")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5a7702d323341b5ae33d82ee9b15fb9a3768a006")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+884f4ecc70574ce88a79f0276b40d9393e9b7a32")]
 [assembly: System.Reflection.AssemblyProductAttribute("SkillBuilder")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SkillBuilder")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

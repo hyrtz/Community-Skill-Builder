@@ -4,308 +4,328 @@
 }
 
 <style>
-    .community-wrapper {
-        margin: 5.5rem 10%;
+    .community-container {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        align-items: center;
+        gap: 3rem;
     }
 
-    .community-header h1 {
-        font-size: 2rem;
-        margin-bottom: 0.25rem;
-        font-weight: bold;
+    /* Section 1: Header + Search */
+    .community-header {
+        text-align: center;
+        margin-top: 7rem;
+        margin-bottom: 3rem;
     }
 
-    .community-header h5 {
-        color: #555;
-        font-size: 1rem;
+    .community-hub-content {
+        width: 100%;
     }
 
-    .community-top-row {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 1rem;
-    }
+
+        .community-header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .community-header h5 {
+            font-size: 1rem;
+            color: #555;
+            max-width: 60%;
+            margin: 0 auto 2rem;
+        }
 
     .community-search {
-        width: 85%;
         display: flex;
-        gap: 0.5rem;
+        width: 100%;
+        max-width: 70%;
+        margin: 0 auto;
+        border-radius: 6px;
     }
 
         .community-search input {
             flex: 1;
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1rem;
             border: 1px solid #ccc;
-            border-radius: 6px;
+            font-size: 1rem;
         }
 
         .community-search button {
+            padding: 0.6rem 1rem;
             background-color: #3182ce;
             color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
             font-weight: 600;
+            border: none;
             cursor: pointer;
         }
 
-    .create-post-btn {
-        width: 15%;
-        background-color: white;
-        color: black;
-        font-weight: 600;
-        border: solid 1px;
-        border-radius: 6px;
-        cursor: pointer;
-        padding: 0.5rem;
-    }
-
-    .community-body {
-        display: flex;
-        gap: 2rem;
-        margin-top: 1rem;
-    }
-
-    .left-section {
-        width: 80%;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .community-card {
-        background: #fff;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .community-card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .community-card-header-left {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: #ccc;
-    }
-
-    .community-info h5 {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: bold;
-    }
-
-    .community-info h6 {
-        margin: 0;
-        font-size: 0.9rem;
-        color: #777;
-    }
-
-    .join-btn {
-        background-color: #38a169;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 0.5rem 1rem;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .community-card-content {
-        margin-top: 1rem;
-        color: #444;
-    }
-
-    .community-card img {
-        margin-top: 0.5rem;
-        max-width: 100%;
-        border-radius: 6px;
-    }
-
-    .community-meta {
-        display: flex;
-        gap: 1rem;
-        font-size: 0.9rem;
-        color: #666;
-        margin-top: 0.75rem;
-        border-top: 1px solid #eee;
-        padding-top: 0.5rem;
-    }
-
-    .right-section {
-        width: 20%;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .right-card {
-        background: #fff;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .popular-community {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-        .popular-community .avatar {
-            width: 40px;
-            height: 40px;
+        .community-search img {
+            width: 1rem;
+            height: 1rem;
         }
 
-    .popular-info h5 {
-        margin: 0;
+    /* Section 2: Banner Image */
+    .community-banner {
+        text-align: center;
+        background-color: #faf9ff;
+        margin-bottom: 3rem;
+    }
+
+        .community-banner img {
+            max-width: 100%;
+            height: 25rem;
+        }
+
+    /* Section 3: Art Skill Topics */
+    .topic-section {
+        text-align: center;
+        margin-bottom: 6rem;
+    }
+
+        .topic-section h1 {
+            margin-bottom: 1.5rem;
+        }
+
+    .topic-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+    }
+
+    .topic-tag {
+        border: 1px solid #333;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        background-color: transparent;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .topic-more {
+        margin-top: 2rem;
+        display: inline-block;
+        font-size: 0.9rem;
+        cursor: pointer;
+        color: #333;
+    }
+
+    /* Section 4: Discussions */
+    .discussion-section {
+        max-width: 40%;
+        margin: 0 auto 3rem;
+    }
+
+        .discussion-section h1 {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .discussion-section h6 {
+            text-align: center;
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+    .discussion-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+        .discussion-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-4px);
+            transition: all 0.2s ease-in-out;
+        }
+
+    .discussion-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+        .discussion-header img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+        }
+
+    .discussion-name {
+        font-weight: bold;
         font-size: 1rem;
     }
 
-    .popular-info h6 {
-        margin: 0;
-        font-size: 0.85rem;
-        color: #888;
-    }
-
-    .see-more-btn {
-        margin-top: 1rem;
-        width: 100%;
-        padding: 0.5rem;
-        border-radius: 6px;
-        background-color: #edf2f7;
-        color: #333;
+    .discussion-title {
+        font-size: 1.1rem;
         font-weight: 600;
-        cursor: pointer;
-        border: none;
+        margin-top: 0.5rem;
     }
 
-    .create-community-card {
+    .discussion-content {
+        margin-top: 0.5rem;
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    .discussion-actions {
         display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: #f9fafb;
-        padding: 1rem;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: 600;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #777;
+        margin-top: 0.75rem;
     }
 
-        .create-community-card .plus-icon {
-            font-size: 1.5rem;
-            color: #3182ce;
+    .see-all-discussions {
+        display: block;
+        text-align: center;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1rem;
+        color: #333;
+    }
+
+    /* Section 5: CTA */
+    .join-community-section {
+        background-color: #344AEA;
+        color: white;
+        text-align: center;
+        padding: 3rem 1rem;
+        width: 100%;
+    }
+
+        .join-community-section h1 {
+            font-weight: bold;
+            margin-bottom: 1rem;
         }
+
+        .join-community-section h5 {
+            font-weight: 400;
+            margin: 0 auto 2rem;
+            max-width: 25%;
+        }
+
+        .join-community-section button {
+            background-color: white;
+            color: #344AEA;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+    a.topic-more:hover,
+    a.see-all-discussions:hover {
+        color: #3182ce;
+    }
+
 </style>
 
-<div class="community-wrapper">
-    <div class="community-header">
-        <h1>Community Hub</h1>
-        <h5>Connect with fellow artisans, students, and enthusiasts to share experiences, showcase your work, and learn together.</h5>
-    </div>
-
-    <div class="community-top-row">
-        <div class="community-search">
-            <input type="text" placeholder="Search communities..." />
-            <button>Search</button>
-        </div>
-        <button class="create-post-btn">Create Post</button>
-    </div>
-
-    <div class="community-body">
-        <!-- Left section -->
-        <div class="left-section">
-            <div class="community-card">
-                <div class="community-card-header">
-                    <div class="community-card-header-left">
-                        <div class="avatar"></div>
-                        <div class="community-info">
-                            <h5>Filipino Potters Guild</h5>
-                            <h6>by Maria Dela Cruz</h6>
-                        </div>
-                    </div>
-                    <button class="join-btn">Join</button>
-                </div>
-                <div class="community-card-content">
-                    Welcome to the official space for local potters! Share tips, progress shots, and anything ceramic.
-                    <img src="/assets/community/sample-pottery.jpg" alt="Community Post Image" />
-                    <div class="community-meta">
-                        <span>👍 24</span>
-                        <span>💬 6</span>
-                    </div>
-                </div>
+<div class="community-container">
+    <div class="community-hub-content">
+        <!-- Section 1 -->
+        <div class="community-header">
+            <h1>Tahi Community</h1>
+            <h5>Connect with fellow artisans, students, and enthusiasts to share experiences, showcase your work, and learn together.</h5>
+            <div class="community-search">
+                <input type="text" placeholder="Search topics..." />
+                <button><img src="/assets/Icons/Search.ico" /></button>
             </div>
         </div>
 
-        <!-- Right section -->
-        <div class="right-section">
-            <div class="right-card">
-                <h4>Popular Communities</h4>
-                <div class="popular-community">
-                    <div class="avatar"></div>
-                    <div class="popular-info">
-                        <h5>Weave Masters</h5>
-                        <h6>1.2k members</h6>
-                    </div>
+        <!-- Section 2 -->
+        <div class="community-banner">
+            <img src="/assets/Background Pics/CommunityBanner.png" />
+        </div>
+
+        <!-- Section 3 -->
+        <div class="topic-section">
+            <h1>Select art skill to find related topics</h1>
+            <div class="topic-tags">
+                <div class="topic-tag">Pottery</div>
+                <div class="topic-tag">Weaving</div>
+                <div class="topic-tag">Wood Carving</div>
+                <div class="topic-tag">Paper Crafts</div>
+                <div class="topic-tag">Shoemaking</div>
+            </div>
+            <a class="topic-more">See more topics</a>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="discussion-section">
+            <h1>Featured Discussions</h1>
+            <h6>Get insights from experienced community members.</h6>
+
+            <!-- Example 1 -->
+            <div class="discussion-card">
+                <div class="discussion-header">
+                    <img src="/assets/Avatar/Sample8.ico" />
+                    <div class="discussion-name">Lola Reyes</div>
                 </div>
-                <div class="popular-community">
-                    <div class="avatar"></div>
-                    <div class="popular-info">
-                        <h5>Carvers' Den</h5>
-                        <h6>980 members</h6>
-                    </div>
+                <div class="discussion-title">Community Forum Title</div>
+                <div class="discussion-content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur deleniti perspiciatis rem ex adipisci facilis.</div>
+                <div class="discussion-actions">
+                    <span>❤️ 12</span>
+                    <span>💬 8</span>
                 </div>
-                <div class="popular-community">
-                    <div class="avatar"></div>
-                    <div class="popular-info">
-                        <h5>Embroidery Circle</h5>
-                        <h6>780 members</h6>
-                    </div>
-                </div>
-                <div class="popular-community">
-                    <div class="avatar"></div>
-                    <div class="popular-info">
-                        <h5>Dance Traditions</h5>
-                        <h6>620 members</h6>
-                    </div>
-                </div>
-                <button class="see-more-btn">See more communities</button>
             </div>
 
-            <div class="create-community-card">
-                <span class="plus-icon">➕</span>
-                Create Community
+            <!-- Example 2 -->
+            <div class="discussion-card">
+                <div class="discussion-header">
+                    <img src="/assets/Avatar/Sample7.ico" />
+                    <div class="discussion-name">Arturo Mendoza</div>
+                </div>
+                <div class="discussion-title">Traditional Techniques in Weaving</div>
+                <div class="discussion-content">Sharing my grandma's pattern passed down through generations. Anyone else using abaca fiber?</div>
+                <div class="discussion-actions">
+                    <span>❤️ 32</span>
+                    <span>💬 15</span>
+                </div>
             </div>
 
-            <div class="right-card">
-                <h4>Your Communities</h4>
-                <div class="popular-community">
-                    <div class="avatar"></div>
-                    <div class="popular-info">
-                        <h5>Paper Crafters</h5>
-                        <h6>Joined</h6>
-                    </div>
+            <!-- Example 3 -->
+            <div class="discussion-card">
+                <div class="discussion-header">
+                    <img src="/assets/Avatar/Sample6.ico" />
+                    <div class="discussion-name">Mel Dizon</div>
                 </div>
-                <div class="popular-community">
-                    <div class="avatar"></div>
-                    <div class="popular-info">
-                        <h5>Musika ng Bayan</h5>
-                        <h6>Joined</h6>
-                    </div>
+                <div class="discussion-title">Where do you source your materials?</div>
+                <div class="discussion-content">I'm based in Mindoro and finding it hard to get decent carving tools. Any local suppliers to recommend?</div>
+                <div class="discussion-actions">
+                    <span>❤️ 9</span>
+                    <span>💬 3</span>
                 </div>
             </div>
+
+            <a class="see-all-discussions">See all discussions &gt;</a>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="join-community-section">
+            <h1>New to the Community?</h1>
+            <h5>Start your journey with fellow artisans and students—learn, share, and grow in a space made for Filipino creativity and culture.</h5>
+            <button>Join Now</button>
         </div>
     </div>
 </div>
+
+<script>
+    window.addEventListener('load', () => {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('search')) {
+            url.searchParams.delete('search');
+            window.history.replaceState({}, document.title, url.pathname); // Removes ?search=...
+        }
+    });
+</script>
