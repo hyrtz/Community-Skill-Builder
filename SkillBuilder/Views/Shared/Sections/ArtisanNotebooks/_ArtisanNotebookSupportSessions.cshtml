@@ -1,4 +1,8 @@
-﻿<style>
+﻿@{
+    var activeSessionTab = ViewData["ActiveSupportTab"] as string ?? "pending";
+}
+
+<style>
     .artisan-support-section {
         display: flex;
         flex-direction: column;
@@ -11,12 +15,47 @@
         color: #333;
     }
 
+    .artisan-session-tabs {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .artisan-session-tab {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+        color: #333;
+    }
+
+        .artisan-session-tab.active {
+            border-bottom: 3px solid #344AEA;
+            color: #344AEA;
+        }
+
+        .artisan-session-tab:hover {
+            color: #344AEA;
+        }
+
+    .artisan-session-tab-content .artisan-session-panel {
+        display: none;
+    }
+
+        .artisan-session-tab-content .artisan-session-panel.active {
+            display: block;
+        }
+
     .artisan-support-card {
         background-color: #fff;
         border: 1px solid #ddd;
         border-radius: 10px;
         padding: 1.5rem;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
         margin-bottom: 1rem;
     }
 
@@ -53,9 +92,43 @@
 <div class="artisan-support-section">
     <div class="artisan-support-heading">Support Sessions</div>
 
-    <!-- Static fallback until dynamic list is ready -->
-    <div class="artisan-support-empty">
-        No support session requests at the moment.<br />
-        When learners request assistance from your course modules, they’ll appear here.
+    <div class="artisan-session-tabs">
+        <button class="artisan-session-tab @(activeSessionTab == "pending" ? "active" : "")" data-tab="pending">Pending</button>
+        <button class="artisan-session-tab @(activeSessionTab == "upcoming" ? "active" : "")" data-tab="upcoming">Upcoming</button>
+        <button class="artisan-session-tab @(activeSessionTab == "completed" ? "active" : "")" data-tab="completed">Completed</button>
+        <button class="artisan-session-tab @(activeSessionTab == "declined" ? "active" : "")" data-tab="declined">Declined</button>
+    </div>
+
+    <div class="artisan-session-tab-content">
+        <div class="artisan-session-panel @(activeSessionTab == "pending" ? "active" : "")" data-tab="pending">
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookPending")
+        </div>
+        <div class="artisan-session-panel @(activeSessionTab == "upcoming" ? "active" : "")" data-tab="upcoming">
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookUpcoming")
+        </div>
+        <div class="artisan-session-panel @(activeSessionTab == "completed" ? "active" : "")" data-tab="completed">
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookCompleted")
+        </div>
+        <div class="artisan-session-panel @(activeSessionTab == "declined" ? "active" : "")" data-tab="declined">
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookDeclined")
+        </div>
     </div>
 </div>
+
+<script>
+    const artisanSessionTabs = document.querySelectorAll('.artisan-session-tab');
+    const artisanSessionPanels = document.querySelectorAll('.artisan-session-panel');
+
+    artisanSessionTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const selected = tab.dataset.tab;
+
+            artisanSessionTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            artisanSessionPanels.forEach(panel => {
+                panel.classList.toggle('active', panel.dataset.tab === selected);
+            });
+        });
+    });
+</script>

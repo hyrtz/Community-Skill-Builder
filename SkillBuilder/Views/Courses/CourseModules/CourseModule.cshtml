@@ -390,6 +390,27 @@
         animation: popUp 0.3s ease-out;
     }
 
+    .points-popup {
+        display: none;
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        animation: popUpFade 3s ease forwards;
+    }
+
+    .points-popup-content {
+        background-color: #344AEA;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+
 </style>
 
 <div class="course-module-container">
@@ -440,8 +461,8 @@
             <input type="date" id="sessionDate" style="width: 100%; padding: 0.5rem; margin-bottom: 1.2rem;" />
 
             <!-- Time Input -->
-            <label for="customTime" style="display:block; margin-bottom: 0.5rem; text-align:left;">Time</label>
-            <input type="time" id="customTime" style="width: 100%; padding: 0.5rem; margin-bottom: 1.2rem;" />
+            <label for="sessionTime" style="display:block; margin-bottom: 0.5rem; text-align:left;">Time</label>
+            <input type="time" id="sessionTime" style="width: 100%; padding: 0.5rem; margin-bottom: 1.2rem;" />
 
             <!-- Message -->
             <label for="sessionMessage" style="display:block; margin-bottom: 0.5rem; text-align:left;">Message</label>
@@ -489,6 +510,12 @@
             </button>
         </div>
     </div>
+
+    <div id="pointsPopup" class="points-popup">
+        <div class="points-popup-content">
+            <span id="pointsMessage">+10 Points!</span>
+        </div>
+    </div>
 </div>
 
 @{
@@ -520,7 +547,6 @@
                                 type: @Html.Raw(JsonSerializer.Serialize(content.ContentType ?? "Text")),
                                 contentText: @Html.Raw(JsonSerializer.Serialize(content.ContentText ?? "")),
                                 mediaUrl: @Html.Raw(JsonSerializer.Serialize(content.MediaUrl ?? "")),
-                                sessionLink: @Html.Raw(JsonSerializer.Serialize(content.SessionLink ?? "")),
                                 quizQuestions: @Html.Raw(JsonSerializer.Serialize(quizList)),
                                 showDetails: @Html.Raw(JsonSerializer.Serialize(i == 0 && j == 0))
                             });
@@ -528,15 +554,12 @@
                 }
         }
 
-        console.log("moduleData:", moduleData);
-        console.log("questionText:", document.getElementById("questionText"));
-        console.log("quizOptions:", document.getElementById("quizOptions"));
-
         const moduleTabs = document.querySelectorAll(".module-tab");
         const moduleContent = document.getElementById("moduleContent");
         let completedModules = JSON.parse(localStorage.getItem("progress_course_@Model.Id")) || [];
         let dynamicQuizQuestions = [];
         let nextBtn = null;
+        let quizCompleted = false;
         const resetBtn = document.getElementById("resetBtn");
         if (resetBtn) {
             resetBtn.addEventListener("click", resetProgress);
@@ -551,6 +574,13 @@
             completedModules = [];
         }
 
+        function validateCompletedModules() {
+            completedModules = completedModules.filter((idx, i) => {
+                if (idx === 0) return true;
+                return completedModules.includes(idx - 1);
+            });
+        }
+
         console.log("completedModules:", completedModules);
 
         function updateModuleTabs() {
@@ -559,26 +589,54 @@
 
                 if (completedModules.includes(idx)) {
                     tab.classList.add("completed");
-                } else if (idx === 0 || completedModules.includes(idx - 1)) {
-                    // Unlock first or next module in sequence
+                }
+
+                if (idx === 0 || completedModules.includes(idx - 1)) {
                     tab.classList.remove("locked");
                 } else {
                     tab.classList.add("locked");
                 }
             });
 
-            // Reset active tab
-            const activeIndex = completedModules.length > 0 ? Math.max(...completedModules) + 1 : 0;
-            const activeTab = moduleTabs[activeIndex];
-            if (activeTab && !activeTab.classList.contains("locked")) {
-                moduleTabs.forEach(t => t.classList.remove("active"));
-                activeTab.classList.add("active");
-                loadTab(activeIndex);
+            const savedActiveIndex = parseInt(localStorage.getItem("active_tab_@Model.Id"));
+            let targetIndex = !isNaN(savedActiveIndex) ? savedActiveIndex : 0;
+
+            if (targetIndex !== 0 && !completedModules.includes(targetIndex - 1)) {
+                targetIndex = completedModules.length > 0 ? Math.max(...completedModules) : 0;
             }
+
+            moduleTabs.forEach(t => t.classList.remove("active"));
+
+            if (moduleTabs[targetIndex]) {
+                moduleTabs[targetIndex].classList.add("active");
+                loadTab(targetIndex);
+            }
+
+            updateProgressDisplay();
+        }
+
+        function showPointsPopup(points) {
+            const popup = document.getElementById("pointsPopup");
+            const msg = document.getElementById("pointsMessage");
+
+            msg.innerText = `+${points} Points!`;
+            popup.style.display = "flex";
+
+            // Update the visible points counter (UI only)
+            const display = document.getElementById("pointsDisplay");
+            if (display) {
+                const current = parseInt(display.innerText) || 0;
+                display.innerText = current + points;
+            }
+
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 3000);
         }
 
         function updateProgressDisplay() {
-            const percentage = Math.round((completedModules.length / moduleTabs.length) * 100);
+            if (moduleTabs.length === 0) return;
+            const percentage = Math.round((new Set(completedModules).size / moduleTabs.length) * 100);
             document.querySelector(".course-progress-label").innerText = `${percentage}%`;
             document.querySelector(".course-progress-bar .filled").style.width = `${percentage}%`;
         }
@@ -596,17 +654,14 @@
                 return response.json();
             })
             .then(() => {
-                // ✅ Step 1: Remove local storage
                 localStorage.removeItem(`progress_course_@Model.Id`);
+                localStorage.removeItem(`active_tab_@Model.Id`);
 
-                // ✅ Step 2: Clear progress state in JS before reload
                 completedModules = [];
-
-                // ✅ Step 3: Reset UI immediately
+                validateCompletedModules();
                 updateModuleTabs();
                 updateProgressDisplay();
 
-                // ✅ Step 4: Reload to reinitialize clean state
                 setTimeout(() => {
                     location.reload();
                 }, 500);
@@ -619,11 +674,14 @@
 
 
         function syncProgressWithServer() {
+            console.log("⏳ Syncing to server:", completedModules);
             fetch('/Courses/UpdateProgress', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ courseId: '@Model.Id', completedModules })
-            });
+            })
+            .then(res => res.ok ? console.log("✅ Progress synced") : console.error("❌ Sync failed"))
+            .catch(err => console.error("❌ Error syncing:", err));
         }
 
         function showNextButton(index) {
@@ -741,35 +799,78 @@
             alert(`A live session request has been sent for: ${title}`);
         }
 
+        function saveProgress() {
+            completedModules = [...new Set(completedModules)];
+
+            const activeIndex = parseInt(localStorage.getItem("active_tab_@Model.Id"));
+            const maxAllowed = Math.max(...completedModules, 0);
+
+            if (activeIndex > maxAllowed + 1) {
+                return;
+            }
+
+            localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
+            syncProgressWithServer();
+        }
+
         function goToNextTab(currentIndex) {
+            if (currentIndex >= moduleTabs.length) return;
+
             if (!completedModules.includes(currentIndex)) {
                 completedModules.push(currentIndex);
-                localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
-                updateProgressDisplay();
-                syncProgressWithServer();
+                saveProgress();
+                const lessonType = moduleData[currentIndex]?.type || "Text";
+
+                const points = {
+                    "Text": 10,
+                    "Image + Text": 15,
+                    "Video": 20,
+                    "Quiz": 10,
+                    "Session": 60,
+                    "Activity": 100,
+                }[lessonType] || 5;
+
+                showPointsPopup(points);
             }
 
-            updateModuleTabs(); // Make sure this runs before
+            const nextIndex = currentIndex + 1;
 
-            const nextTab = moduleTabs[currentIndex + 1];
+            fetch('/api/ModuleProgress/CompleteModule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    courseId: @Model.Id,
+                    moduleIndex: currentIndex,
+                    lessonType: moduleData[currentIndex]?.type || "Text"
+                })
+            });
+
+            validateCompletedModules();
+            updateModuleTabs();
+
+            const nextTab = moduleTabs[nextIndex];
+
             if (nextTab) {
                 nextTab.classList.remove("locked");
-                nextTab.click();
-            }
-            else {
+
+                localStorage.setItem("active_tab_@Model.Id", nextIndex);
+                moduleTabs.forEach(t => t.classList.remove("active"));
+                nextTab.classList.add("active");
+                loadTab(nextIndex);
+                quizCompleted = false;
+            } else {
                 alert("🎉 You've completed all modules!");
             }
         }
 
         moduleTabs.forEach(tab => {
             tab.addEventListener("click", function () {
-                // Always check latest state from DOM (not stale classList)
-                if (this.classList.contains("locked")) {
-                    console.warn("This tab is locked.");
-                    return;
-                }
-
                 const index = parseInt(this.dataset.tab);
+
+                if (this.classList.contains("locked")) return;
+
+                localStorage.setItem("active_tab_@Model.Id", index);
+
                 moduleTabs.forEach(t => t.classList.remove("active"));
                 this.classList.add("active");
                 loadTab(index);
@@ -805,21 +906,9 @@
 
         function exitQuizModal() {
             document.getElementById("quizModal").classList.remove("show");
-
-            const currentIndex = parseInt(document.querySelector(".module-tab.active")?.dataset.tab ?? -1);
-            const nextTab = moduleTabs[currentIndex + 1];
-            if (nextTab?.classList.contains("locked")) nextTab.classList.remove("locked");
-
-            if (!completedModules.includes(currentIndex)) {
-                completedModules.push(currentIndex);
-                localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
-                updateProgressDisplay();
-                syncProgressWithServer();
-            }
+            document.getElementById("quizCompleteModal").style.display = "none";
 
             if (nextBtn) nextBtn.disabled = false;
-
-            document.getElementById("quizCompleteModal").style.display = "none";
         }
 
         function loadDynamicQuestion() {
@@ -891,14 +980,19 @@
         function showQuizComplete() {
             document.getElementById("quizModal").classList.remove("show");
             document.getElementById("quizCompleteModal").style.display = "flex";
-            document.getElementById("quizScore").innerText = `${score} / ${dynamicQuizQuestions.length} (${Math.round((score / dynamicQuizQuestions.length) * 100)}%)`;
-            
+
+            if (!quizCompleted) {
+                showPointsPopup(80);
+                quizCompleted = true;
+            }
+
+            document.getElementById("quizScore").innerText =
+                `${score} / ${dynamicQuizQuestions.length} (${Math.round((score / dynamicQuizQuestions.length) * 100)}%)`;
+
             document.getElementById("quizProgressFilled").style.width = `100%`;
 
             const nextBtn = document.getElementById("continueNextBtn");
-            if (nextBtn) {
-                nextBtn.disabled = false;
-            }
+            if (nextBtn) nextBtn.disabled = false;
         }
 
         window.openSessionModal = function () {
@@ -916,25 +1010,48 @@
 
         window.sendSessionRequest = function () {
             const date = document.getElementById("sessionDate").value;
-            const customTime = document.getElementById("customTime").value;
-            const time = document.getElementById("customTime").value;
-            const platform = document.getElementById("sessionPlatform").value;
+            const time = document.getElementById("sessionTime").value;
             const message = document.getElementById("sessionMessage").value;
 
-            if (!date || !time || !platform) {
-                alert("Please select a date, time, and platform.");
+            if (!date || !time || !message.trim()) {
+                alert("Please fill out all fields.");
                 return;
             }
 
-            console.log("Sending session request:", { date, time, platform, message });
-            alert("✅ Session request sent!");
-            window.closeSessionModal();
+            const selectedTabIndex = parseInt(localStorage.getItem("active_tab_@Model.Id")) || 0;
+            const currentModule = moduleData[selectedTabIndex];
+            const courseId = @Model.Id;
+            const courseTitle = @Html.Raw(JsonSerializer.Serialize(Model.Title));
+            const lessonTitle = currentModule?.title || "Untitled";
+
+            const payload = {
+                CourseId: courseId,
+                Title: `Live Session Request - ${lessonTitle}`,
+                Message: message,
+                SessionDate: date,
+                SessionTime: time
+            };
+
+            fetch('/SupportSession/CreateRequest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to send session request.");
+                return res.json();
+            })
+            .then(data => {
+                alert("✅ Session request sent!");
+                closeSessionModal();
+            })
+            .catch(err => {
+                alert("❌ An error occurred while sending your request.");
+                console.error(err);
+            });
         };
 
-        window.addEventListener("beforeunload", () => {
-            localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
-        });
-        
+        validateCompletedModules();
         updateModuleTabs();
 
         console.log("Module Data:", moduleData);

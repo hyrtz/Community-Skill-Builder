@@ -23,6 +23,7 @@ namespace SkillBuilder.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsPublished { get; set; } = false;
 
+        [ForeignKey("CreatedBy")]
         public Artisan? Artisan { get; set; }
 
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();

@@ -1,0 +1,41 @@
+﻿@model List<SkillBuilder.Models.SupportSessionRequest>
+
+@{
+    var completedSessions = Model
+        .Where(r => r.Status == "Confirmed" && r.SessionDate < DateTime.Today)
+        .OrderByDescending(r => r.SessionDate)
+        .ToList();
+}
+
+@if (!completedSessions.Any())
+{
+    <div class="artisan-support-empty">
+        You haven’t completed any support sessions yet.<br />
+        Sessions you confirmed and have already taken place will be listed here.
+    </div>
+}
+else
+{
+    foreach (var request in completedSessions)
+    {
+        <div class="artisan-support-card">
+            <div class="artisan-support-user">
+                <img src="@request.User.UserAvatar" alt="Avatar" class="artisan-support-user-avatar" />
+                <div class="artisan-support-user-info">
+                    <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
+                    <div class="artisan-support-user-course">@request.Course.Title</div>
+                </div>
+            </div>
+
+            <div class="artisan-support-title">@request.Title</div>
+            <div class="artisan-support-message">@request.Message</div>
+
+            <div class="artisan-support-schedule">
+                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
+                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
+            </div>
+
+            <span class="support-status-badge status-confirmed">Completed</span>
+        </div>
+    }
+}

@@ -1,4 +1,39 @@
-﻿<div style="text-align: center; padding: 4rem;">
-    <h3 style="font-size: 1.5rem; color: #444;">You have no pending session requests at the moment.</h3>
-    <p style="color: #777;">Once you request a real-time session with an artisan, it will appear here.</p>
-</div>
+﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
+
+@{
+    var pendingRequests = Model.SupportRequests
+        .Where(r => r.Status == "Pending")
+        .OrderByDescending(r => r.CreatedAt)
+        .ToList();
+}
+
+@if (!pendingRequests.Any())
+{
+    <div class="user-support-empty">
+        You haven't requested any support sessions yet.
+    </div>
+}
+else
+{
+    foreach (var request in pendingRequests)
+    {
+        <div class="user-support-card">
+            <div class="user-support-title">@request.Title</div>
+            <div class="user-support-message">@request.Message</div>
+
+            <div class="user-support-schedule">
+                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
+                <div>
+                    <i class="fas fa-clock"></i>
+                    @(request.SessionTime != null
+                                ? (DateTime.Today + (TimeSpan)request.SessionTime).ToString("h:mm tt")
+                                : "N/A")
+                </div>
+            </div>
+
+            <div>
+                <span class="support-status-badge status-pending">Pending</span>
+            </div>
+        </div>
+    }
+}

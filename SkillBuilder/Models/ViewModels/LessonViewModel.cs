@@ -2,13 +2,12 @@
 {
     public class LessonViewModel
     {
-        public string Title { get; set; }
-        public string LessonType { get; set; }
-        public string? Duration { get; set; }
-        public string? ContentText { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string LessonType { get; set; } = string.Empty;
+        public string Duration { get; set; } = string.Empty;
+        public string ContentText { get; set; } = string.Empty;
         public IFormFile? ImageFile { get; set; }
         public IFormFile? VideoFile { get; set; }
-        public string? SessionLink { get; set; }
-        public List<QuizQuestionViewModel>? QuizQuestions { get; set; }
+        public List<QuizQuestionViewModel> QuizQuestions { get; set; } = new();
     }
 }

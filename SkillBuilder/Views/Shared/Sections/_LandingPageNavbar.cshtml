@@ -11,6 +11,58 @@
     };
 }
 
+<style>
+    .search-bar-wrapper {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        overflow: hidden;
+        background: white;
+        width: 100%;
+    }
+
+    .search-category-select {
+        padding: 0.5rem;
+        font-size: 0.95rem;
+        border: none;
+        background-color: #f0f0f0;
+        height: 100%;
+        outline: none;
+        border-right: 1px solid #ccc;
+        flex-shrink: 0;
+    }
+
+    .search-bar-input {
+        border: none;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+        width: 100%;
+        outline: none;
+    }
+
+    .search-bar-button {
+        background-color: #3b44f6;
+        border: none;
+        padding: 10px 1rem;
+        height: 100%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-left: 1px solid #ccc;
+    }
+
+        .search-bar-button:hover {
+            background-color: #2c5282;
+        }
+
+    .search-icon {
+        width: 18px;
+        height: 18px;
+    }
+</style>
+
 <nav class="custom-navbar">
     <!-- Left: Logo and nav links -->
     <div class="navbar-left">
@@ -20,10 +72,12 @@
             <button class="dropbtn" onclick="toggleDropdown()">Explore ▾</button>
             <div id="exploreDropdown" class="dropdown-content">
                 <h5>Explore Courses</h5>
-                <a href="#">Paper Crafts</a>
-                <a href="#">Pottery</a>
-                <a href="#">Weaving</a>
-                <a href="#">Shoe Stitching</a>
+                <a href="/Courses?filter=Weaving">Weaving</a>
+                <a href="/Courses?filter=Pottery">Pottery</a>
+                <a href="/Courses?filter=Paper Crafts">Paper Crafts</a>
+                <a href="/Courses?filter=Wood Carving">Wood Carving</a>
+                <a href="/Courses?filter=Shoemaking">Shoemaking</a>
+                <a href="/Courses?filter=Embroidery">Embroidery</a>
             </div>
         </div>
 
@@ -32,8 +86,18 @@
 
     <!-- Center: Search -->
     <div class="navbar-center">
-        <input type="text" class="search-bar-input" placeholder="Search courses" />
-        <button class="search-bar-button"><img src="/assets/icons/Search.ico" class="search-icon" /></button>
+        <div class="search-bar-wrapper">
+            <select id="searchCategory" class="search-category-select">
+                <option value="" disabled selected>Search in...</option>
+                <option value="Courses">Courses</option>
+                <option value="Artisans">Artisans</option>
+                <option value="Community">Community</option>
+            </select>
+            <input type="text" id="searchInput" class="search-bar-input" placeholder="Search..." disabled />
+            <button class="search-bar-button" onclick="handleSearch()">
+                <img src="/assets/icons/Search.ico" class="search-icon" />
+            </button>
+        </div>
     </div>
 
     <!-- Right: Actions -->
@@ -54,14 +118,42 @@
 
         @if (!string.IsNullOrEmpty(userId))
         {
-            <a href="@profileUrl" class="navbar-item nav-profile-icon"
-               style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none")">
-                <img src="/assets/icons/Profile.ico" alt="Profile" style="width: 2.7rem; border-radius: 50%;" />
-            </a>
+            <div class="profile-menu-wrapper">
+                <a href="javascript:void(0);" class="profile-menu-trigger">
+                    <img src="/assets/icons/Profile.ico" alt="Profile" class="profile-menu-avatar" />
+                </a>
+
+                <div class="profile-menu-dropdown">
+                    <a href="@profileUrl" class="profile-menu-item">Profile</a>
+
+                    <button onclick="toggleProfileNotifMenu()" class="profile-menu-item profile-menu-toggle">
+                        Notification
+                        <span class="profile-menu-arrow">▸</span>
+                    </button>
+
+                    <div id="profileNotificationToggle" class="profile-menu-sub">
+                        <label class="profile-menu-sub-option">
+                            <input type="radio" name="notifSetting" checked onchange="setProfileNotif(true)" />
+                            On
+                        </label>
+                        <label class="profile-menu-sub-option">
+                            <input type="radio" name="notifSetting" onchange="setProfileNotif(false)" />
+                            Off
+                        </label>
+                    </div>
+
+                    <form method="post" action="/Account/Logout">
+                        <button type="button" class="profile-menu-item profile-menu-logout" onclick="window.location.href='/force-logout'">
+                            Log Out
+                        </button>
+                    </form>
+                </div>
+            </div>
         }
 
         @if (!User.Identity.IsAuthenticated)
         {
+            <a href="#" class="nav-teach-btn">Teach on Tahi</a>
             <a href="#" class="nav-login-btn">Log in</a>
             <a href="#" class="nav-signup-btn">Sign up</a>
         }
@@ -69,8 +161,58 @@
 </nav>
 
 <script>
-        function toggleNotificationDropdown() {
+    function toggleNotificationDropdown() {
         const dropdown = document.getElementById("notificationDropdown");
         dropdown.style.display = dropdown.style.display === "none" || dropdown.style.display === "" ? "block" : "none";
+    }
+
+    function toggleProfileNotifMenu() {
+        const menu = document.getElementById("profileNotificationToggle");
+        menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+
+    function setProfileNotif(isOn) {
+        console.log("Notification setting changed to:", isOn ? "On" : "Off");
+    }
+
+    const searchInput = document.getElementById("searchInput");
+    const searchCategory = document.getElementById("searchCategory");
+
+    searchCategory.addEventListener("change", () => {
+        searchInput.disabled = false;
+        searchInput.focus();
+    });
+
+    searchInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleSearch();
+        }
+    });
+
+    function handleSearch() {
+        const category = searchCategory.value;
+        const query = searchInput.value.trim();
+
+        if (!category || !query) {
+            alert("Please select a category and enter a search term.");
+            return;
+        }
+
+        let url = "";
+
+        switch (category) {
+            case "Courses":
+                url = `/Courses?search=${encodeURIComponent(query)}`;
+                break;
+            case "Artisans":
+                url = `/Artisans/ArtisanList?search=${encodeURIComponent(query)}`;
+                break;
+            case "Community":
+                url = `/Community/CommunityHub?search=${encodeURIComponent(query)}`;
+                break;
+        }
+
+        window.location.href = url;
     }
 </script>

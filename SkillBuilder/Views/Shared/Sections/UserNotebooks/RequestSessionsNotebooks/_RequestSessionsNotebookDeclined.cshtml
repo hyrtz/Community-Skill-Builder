@@ -1,4 +1,31 @@
-﻿<div style="text-align: center; padding: 4rem;">
-    <h3 style="font-size: 1.5rem; color: #444;">No declined requests found.</h3>
-    <p style="color: #777;">If an artisan declines your request, it will appear in this section.</p>
-</div>
+﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
+
+@{
+    var declined = Model.SupportRequests
+        .Where(r => r.Status == "Declined")
+        .OrderByDescending(r => r.CreatedAt)
+        .ToList();
+}
+
+@if (!declined.Any())
+{
+    <div class="user-support-empty">
+        No declined requests found.<br />
+        If an artisan declines your request, it will appear in this section.
+    </div>
+}
+else
+{
+    foreach (var request in declined)
+    {
+        <div class="user-support-card">
+            <div class="user-support-title">@request.Title</div>
+            <div class="user-support-message">@request.Message</div>
+            <div class="user-support-schedule">
+                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
+                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
+            </div>
+            <span class="support-status-badge status-declined">Declined</span>
+        </div>
+    }
+}

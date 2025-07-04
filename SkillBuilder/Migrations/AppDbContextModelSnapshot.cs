@@ -118,6 +118,9 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -152,6 +155,7 @@ namespace SkillBuilder.Migrations
                             FirstName = "Juan",
                             Hometown = "Vigan, Ilocos Sur",
                             Introduction = "Juan is a 3rd-generation artisan teaching pottery for 15 years.",
+                            IsApproved = false,
                             LastName = "Dela Cruz",
                             Profession = "Pottery Artisan",
                             Role = "Artisan",
@@ -638,24 +642,14 @@ namespace SkillBuilder.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("VideoUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -668,7 +662,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 1,
-                            ContentType = "",
                             CourseId = 1,
                             Order = 0,
                             Title = "Introduction"
@@ -676,7 +669,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 2,
-                            ContentType = "",
                             CourseId = 1,
                             Order = 0,
                             Title = "History"
@@ -684,7 +676,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 3,
-                            ContentType = "",
                             CourseId = 1,
                             Order = 0,
                             Title = "Session"
@@ -692,7 +683,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 4,
-                            ContentType = "",
                             CourseId = 1,
                             Order = 0,
                             Title = "Quiz"
@@ -700,7 +690,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 5,
-                            ContentType = "",
                             CourseId = 1,
                             Order = 0,
                             Title = "Final Activity"
@@ -708,7 +697,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 6,
-                            ContentType = "",
                             CourseId = 2,
                             Order = 0,
                             Title = "Introduction"
@@ -716,7 +704,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 7,
-                            ContentType = "",
                             CourseId = 2,
                             Order = 0,
                             Title = "History"
@@ -724,7 +711,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 8,
-                            ContentType = "",
                             CourseId = 2,
                             Order = 0,
                             Title = "Session"
@@ -732,7 +718,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 9,
-                            ContentType = "",
                             CourseId = 2,
                             Order = 0,
                             Title = "Quiz"
@@ -740,7 +725,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 10,
-                            ContentType = "",
                             CourseId = 2,
                             Order = 0,
                             Title = "Final Activity"
@@ -748,7 +732,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 11,
-                            ContentType = "",
                             CourseId = 3,
                             Order = 0,
                             Title = "Introduction"
@@ -756,7 +739,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 12,
-                            ContentType = "",
                             CourseId = 3,
                             Order = 0,
                             Title = "History"
@@ -764,7 +746,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 13,
-                            ContentType = "",
                             CourseId = 3,
                             Order = 0,
                             Title = "Session"
@@ -772,7 +753,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 14,
-                            ContentType = "",
                             CourseId = 3,
                             Order = 0,
                             Title = "Quiz"
@@ -780,7 +760,6 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             Id = 15,
-                            ContentType = "",
                             CourseId = 3,
                             Order = 0,
                             Title = "Final Activity"
@@ -935,9 +914,6 @@ namespace SkillBuilder.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<string>("SessionLink")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
@@ -974,7 +950,6 @@ namespace SkillBuilder.Migrations
                             ContentType = "Session",
                             CourseModuleId = 3,
                             Order = 0,
-                            SessionLink = "https://live.pottery.com/session1",
                             Title = "Live Pottery Session"
                         },
                         new
@@ -1012,7 +987,6 @@ namespace SkillBuilder.Migrations
                             ContentType = "Session",
                             CourseModuleId = 8,
                             Order = 0,
-                            SessionLink = "https://live.woodcarving.com/session1",
                             Title = "Live Woodcarving Session"
                         },
                         new
@@ -1050,7 +1024,6 @@ namespace SkillBuilder.Migrations
                             ContentType = "Session",
                             CourseModuleId = 13,
                             Order = 0,
-                            SessionLink = "https://live.weaving.com/session1",
                             Title = "Live Weaving Session"
                         },
                         new
@@ -1132,26 +1105,21 @@ namespace SkillBuilder.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CorrectAnswer")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ModuleContentId")
                         .HasColumnType("int");
 
                     b.Property<string>("OptionA")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OptionB")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OptionC")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OptionD")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Question")
@@ -1332,6 +1300,60 @@ namespace SkillBuilder.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.SupportSessionRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ConfirmedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MeetingLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MeetingPlatform")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SessionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("SessionTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SupportSessionRequests");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -1359,6 +1381,9 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1385,6 +1410,7 @@ namespace SkillBuilder.Migrations
                             IsVerified = true,
                             LastName = "Dela Cruz",
                             PasswordHash = "hashedpw",
+                            Points = 0,
                             Role = "Learner",
                             UserAvatar = "/assets/Avatar/Sample10.svg"
                         });
@@ -1566,6 +1592,25 @@ namespace SkillBuilder.Migrations
                         .IsRequired();
 
                     b.Navigation("ModuleContent");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.SupportSessionRequest", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SkillBuilder.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.Artisan", b =>

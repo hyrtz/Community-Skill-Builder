@@ -18,7 +18,7 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpGet("")]
-        public IActionResult CourseCatalog(string? selectedCourse = null)
+        public IActionResult CourseCatalog(string? selectedCourse = null, string? search = null)
         {
             ViewData["UseCourseNavbar"] = true;
 
@@ -27,18 +27,26 @@ namespace SkillBuilder.Controllers
                 .Include(c => c.Enrollments)
                 .Include(c => c.Reviews).ThenInclude(r => r.User)
                 .Include(c => c.CourseModules).ThenInclude(m => m.Contents)
-                .ToList();
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
+                courses = courses.Where(c => c.Title.ToLower().Contains(search));
+            }
+
+            var courseList = courses.ToList();
 
             if (!string.IsNullOrEmpty(selectedCourse))
             {
-                var course = courses.FirstOrDefault(c => c.Link == selectedCourse);
+                var course = courseList.FirstOrDefault(c => c.Link == selectedCourse);
                 if (course == null)
                     return NotFound();
 
                 ViewData["ShowCourseDetails"] = true;
                 return View("CourseCatalog", new CourseCatalogViewModel
                 {
-                    Courses = courses,
+                    Courses = courseList,
                     SelectedCourse = course
                 });
             }
@@ -47,7 +55,7 @@ namespace SkillBuilder.Controllers
 
             return View("CourseCatalog", new CourseCatalogViewModel
             {
-                Courses = courses,
+                Courses = courseList,
                 SelectedCourse = null
             });
         }
@@ -130,11 +138,30 @@ namespace SkillBuilder.Controllers
                 .SelectMany(m => m.Contents)
                 .Count();
 
-            int completedModules = _context.ModuleProgress
-                .Include(p => p.CourseModule)
-                .Count(p => p.UserId == userId && p.CourseModule.CourseId == course.Id && p.IsCompleted);
+            var completedSet = _context.ModuleProgress
+                .Where(mp => mp.UserId == userId && mp.CourseModule.CourseId == course.Id && mp.IsCompleted)
+                .Select(mp => mp.CourseModuleId)
+                .ToHashSet();
 
-            double progress = totalModules == 0 ? 0 : (double)completedModules / totalModules * 100;
+            var orderedModules = course.CourseModules
+                .OrderBy(cm => cm.Order)
+                .ToList();
+
+            int validCompletions = 0;
+            for (int i = 0; i < orderedModules.Count; i++)
+            {
+                if (i == 0 || completedSet.Contains(orderedModules[i - 1].Id))
+                {
+                    if (completedSet.Contains(orderedModules[i].Id))
+                    {
+                        validCompletions++;
+                    }
+                    else break;
+                }
+                else break;
+            }
+
+            double progress = totalModules == 0 ? 0 : (double)validCompletions / totalModules * 100;
             ViewData["CourseProgress"] = Math.Round(progress, 0);
 
             return View("CourseModules/CourseModule", course);

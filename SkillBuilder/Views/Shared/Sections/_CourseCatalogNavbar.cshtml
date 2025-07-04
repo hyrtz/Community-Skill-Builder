@@ -66,9 +66,10 @@
             <a href="@homeLink" class="navbar-item @(currentController == "UserProfile" || currentController == "ArtisanProfile" || currentController == "AdminProfile" ? "active-nav" : "")">Home</a>
         }
 
-        <a asp-controller="Courses" asp-action="CourseCatalog" class="navbar-item @(currentController == "Courses" ? "active-nav" : "")">Courses ▾</a>
+        <a asp-controller="Courses" asp-action="CourseCatalog" class="navbar-item @(currentController == "Courses" ? "active-nav" : "")">Courses</a>
+        <a asp-controller="Artisans" asp-action="ArtisanList" class="navbar-item @(currentController == "Artisans" ? "active-nav" : "")">Artisans</a>
         <a asp-controller="Community" asp-action="CommunityHub" class="navbar-item @(currentController == "Community" ? "active-nav" : "")">Community</a>
-        <a href="#resources" class="navbar-item">Resources</a>
+        
     </div>
 
     <!-- Right: Login/Signup -->
@@ -85,10 +86,38 @@
 
         @if (!string.IsNullOrEmpty(userId))
         {
-            <a href="@profileUrl" class="navbar-item nav-profile-icon"
-               style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none")">
-                <img src="/assets/icons/Profile.ico" alt="Profile" style="width: 2.7rem; border-radius: 50%;" />
-            </a>
+            <div class="profile-menu-wrapper">
+                <a href="javascript:void(0);" class="profile-menu-trigger">
+                    <img src="/assets/icons/Profile.ico" alt="Profile" class="profile-menu-avatar" />
+                </a>
+
+                <div class="profile-menu-dropdown">
+
+                    <a href="@profileUrl" class="profile-menu-item">Profile</a>
+
+                    <button onclick="toggleProfileNotifMenu()" class="profile-menu-item profile-menu-toggle">
+                        Notification
+                        <span class="profile-menu-arrow">▸</span>
+                    </button>
+
+                    <div id="profileNotificationToggle" class="profile-menu-sub">
+                        <label class="profile-menu-sub-option">
+                            <input type="radio" name="notifSetting" checked onchange="setProfileNotif(true)" />
+                            On
+                        </label>
+                        <label class="profile-menu-sub-option">
+                            <input type="radio" name="notifSetting" onchange="setProfileNotif(false)" />
+                            Off
+                        </label>
+                    </div>
+
+                    <form method="post" action="/Account/Logout">
+                        <button type="button" class="profile-menu-item profile-menu-logout" onclick="window.location.href='/force-logout'">
+                            Log Out
+                        </button>
+                    </form>
+                </div>
+            </div>
         }
 
         @if (!User.Identity.IsAuthenticated)
@@ -100,8 +129,17 @@
 </nav>
 
 <script>
-        function toggleNotificationDropdown() {
+    function toggleNotificationDropdown() {
         const dropdown = document.getElementById("notificationDropdown");
         dropdown.style.display = dropdown.style.display === "none" || dropdown.style.display === "" ? "block" : "none";
+    }
+
+    function toggleProfileNotifMenu() {
+        const menu = document.getElementById("profileNotificationToggle");
+        menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+
+    function setProfileNotif(isOn) {
+        console.log("Notification setting changed to:", isOn ? "On" : "Off");
     }
 </script>

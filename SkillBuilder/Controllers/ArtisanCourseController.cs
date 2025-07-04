@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
 using SkillBuilder.Models.ViewModels;
-using System.IO;
 
 namespace SkillBuilder.Controllers
 {
@@ -19,224 +18,165 @@ namespace SkillBuilder.Controllers
             _env = env;
         }
 
-        private string GetCorrectAnswerText(int index, string a, string b, string c, string d)
-        {
-            return index switch
-            {
-                1 => a,
-                2 => b,
-                3 => c,
-                4 => d,
-                _ => ""
-            };
-        }
-
         [HttpGet("CreateCourse")]
         public IActionResult CreateCourse()
         {
-            return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", new CourseBuilderViewModel());
+            var viewModel = new CourseBuilderViewModel
+            {
+                Course = new Course(),
+                LearningObjectives = new List<string> { "" },
+                Modules = new List<CourseModuleViewModel>(),
+                Materials = new List<CourseMaterialViewModel>() 
+            };
+
+            return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", viewModel);
         }
 
         [HttpPost("CreateCourse")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCourse(CourseBuilderViewModel model)
         {
-            Console.WriteLine("🔥 POST method hit");
-
             if (!ModelState.IsValid)
             {
-                foreach (var entry in ModelState)
-                {
-                    if (entry.Value.Errors.Count > 0)
-                        Console.WriteLine($"{entry.Key}: {entry.Value.Errors[0].ErrorMessage}");
-                }
-
-                return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
+                return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model); // ✅ Use the correct view path
             }
 
-            var artisanId = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(artisanId))
-                return Unauthorized();
+            var userId = User.FindFirst("UserId")?.Value;
+            var artisan = await _context.Artisans.FirstOrDefaultAsync(a => a.UserId == userId);
+            if (artisan == null) return Unauthorized();
 
-            var course = model.Course;
+            // Step 1: Save the Course
+            var course = model.Course!;
+            course.CreatedBy = artisan.ArtisanId;
+            course.CreatedAt = DateTime.UtcNow;
+
+            if (model.ImageFile != null)
+                course.ImageUrl = await SaveFileAsync(model.ImageFile, "course-images");
+
+            if (model.VideoFile != null)
+                course.Video = await SaveFileAsync(model.VideoFile, "course-videos");
+
+            if (model.ThumbnailFile != null)
+                course.Thumbnail = await SaveFileAsync(model.ThumbnailFile, "course-thumbnails");
+
             course.Link = string.IsNullOrWhiteSpace(course.Link)
-                ? course.Title.Replace(" ", "-").ToLower() + "-" + Guid.NewGuid().ToString().Substring(0, 8)
+                ? System.Text.RegularExpressions.Regex.Replace(
+                    course.Title.ToLower(), @"[^a-z0-9]+", "-"
+                  ).Trim('-') + "-" + Guid.NewGuid().ToString("N")[..8]
                 : course.Link;
+
+            // Save WhatToLearn as joined string
             course.WhatToLearn = model.LearningObjectives != null
                 ? string.Join("||", model.LearningObjectives.Where(o => !string.IsNullOrWhiteSpace(o)))
                 : null;
-            course.CreatedBy = artisanId;
-            course.CreatedAt = DateTime.UtcNow;
-
-            // Upload Image
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
-            {
-                var fileName = Path.GetFileName(model.ImageFile.FileName);
-                var imagePath = Path.Combine(_env.WebRootPath, "uploads/images", fileName);
-                using var stream = new FileStream(imagePath, FileMode.Create);
-                await model.ImageFile.CopyToAsync(stream);
-                course.ImageUrl = "/uploads/images/" + fileName;
-            }
-
-            // Upload Video
-            if (model.VideoFile != null && model.VideoFile.Length > 0)
-            {
-                var fileName = Path.GetFileName(model.VideoFile.FileName);
-                var videoPath = Path.Combine(_env.WebRootPath, "uploads/videos", fileName);
-                using var stream = new FileStream(videoPath, FileMode.Create);
-                await model.VideoFile.CopyToAsync(stream);
-                course.Video = "/uploads/videos/" + fileName;
-            }
-
-            // Upload Thumbnail
-            if (model.ThumbnailFile != null && model.ThumbnailFile.Length > 0)
-            {
-                var fileName = Path.GetFileName(model.ThumbnailFile.FileName);
-                var thumbPath = Path.Combine(_env.WebRootPath, "uploads/thumbnails", fileName);
-                using var stream = new FileStream(thumbPath, FileMode.Create);
-                await model.ThumbnailFile.CopyToAsync(stream);
-                course.Thumbnail = "/uploads/thumbnails/" + fileName;
-            }
 
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
 
-            // Save Modules
+            // Step 2: Modules + Lessons
             if (model.Modules != null)
             {
-                foreach (var moduleVm in model.Modules)
+                for (int i = 0; i < model.Modules.Count; i++)
                 {
+                    var moduleVm = model.Modules[i];
                     var courseModule = new CourseModule
                     {
                         CourseId = course.Id,
-                        Title = moduleVm.Title ?? string.Empty,
-                        Order = model.Modules.IndexOf(moduleVm)
+                        Title = moduleVm.Title,
+                        Order = i
                     };
 
                     _context.CourseModules.Add(courseModule);
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(); // Get CourseModule.Id
 
-                    if (moduleVm.Lessons != null)
+                    for (int j = 0; j < moduleVm.Lessons.Count; j++)
                     {
-                        foreach (var lesson in moduleVm.Lessons)
+                        var lesson = moduleVm.Lessons[j];
+                        var moduleContent = new ModuleContent
                         {
-                            var moduleContent = new ModuleContent
-                            {
-                                CourseModuleId = courseModule.Id,
-                                Title = lesson.Title ?? string.Empty,
-                                ContentType = lesson.LessonType ?? "Text",
-                                Order = moduleVm.Lessons.IndexOf(lesson),
-                                Duration = lesson.Duration,
-                                SessionLink = lesson.SessionLink,
-                                MediaUrl = null
-                            };
+                            CourseModuleId = courseModule.Id,
+                            Title = lesson.Title,
+                            ContentType = lesson.LessonType ?? "Text",
+                            Order = j,
+                            Duration = lesson.Duration,
+                            ContentText = lesson.ContentText
+                        };
 
-                            // Upload Image or Video based on type
-                            var fileKeyPrefix = $"Modules[{model.Modules.IndexOf(moduleVm)}].Lessons[{moduleVm.Lessons.IndexOf(lesson)}]";
+                        // Uploads (image/video depending on type)
+                        if (lesson.ImageFile != null)
+                            moduleContent.MediaUrl = await SaveFileAsync(lesson.ImageFile, "lesson-images");
 
-                            if (lesson.LessonType == "Image + Text")
+                        if (lesson.VideoFile != null)
+                            moduleContent.MediaUrl = await SaveFileAsync(lesson.VideoFile, "lesson-videos");
+
+                        _context.ModuleContents.Add(moduleContent);
+                        await _context.SaveChangesAsync(); // Get ModuleContent.Id
+
+                        // Quiz (if applicable)
+                        if (lesson.LessonType == "Quiz" && lesson.QuizQuestions.Any())
+                        {
+                            foreach (var q in lesson.QuizQuestions)
                             {
-                                var imageFile = Request.Form.Files.FirstOrDefault(f => f.Name == $"{fileKeyPrefix}.ImageFile");
-                                if (imageFile != null && imageFile.Length > 0)
+                                var quiz = new QuizQuestion
                                 {
-                                    var imageName = Path.GetFileName(imageFile.FileName);
-                                    var imagePath = Path.Combine(_env.WebRootPath, "uploads/lesson-images", imageName);
-                                    using var stream = new FileStream(imagePath, FileMode.Create);
-                                    await imageFile.CopyToAsync(stream);
-                                    moduleContent.MediaUrl = "/uploads/lesson-images/" + imageName;
-                                }
-                            }
-
-                            if (lesson.LessonType == "Video")
-                            {
-                                var videoFile = Request.Form.Files.FirstOrDefault(f => f.Name == $"{fileKeyPrefix}.VideoFile");
-                                if (videoFile != null && videoFile.Length > 0)
-                                {
-                                    var videoName = Path.GetFileName(videoFile.FileName);
-                                    var videoPath = Path.Combine(_env.WebRootPath, "uploads/lesson-videos", videoName);
-                                    using var stream = new FileStream(videoPath, FileMode.Create);
-                                    await videoFile.CopyToAsync(stream);
-                                    moduleContent.MediaUrl = "/uploads/lesson-videos/" + videoName;
-                                }
-                            }
-
-                            _context.ModuleContents.Add(moduleContent);
-                            await _context.SaveChangesAsync();
-
-                            // Save quiz if present
-                            if (lesson.LessonType == "Quiz" && lesson.QuizQuestions != null)
-                            {
-                                foreach (var quizVm in lesson.QuizQuestions)
-                                {
-                                    var correctAnswerText = GetCorrectAnswerText(
-                                        quizVm.CorrectIndex,
-                                        quizVm.OptionA,
-                                        quizVm.OptionB,
-                                        quizVm.OptionC,
-                                        quizVm.OptionD
-                                    );
-
-                                    var quiz = new QuizQuestion
-                                    {
-                                        ModuleContentId = moduleContent.Id,
-                                        Question = quizVm.QuestionText,
-                                        OptionA = quizVm.OptionA,
-                                        OptionB = quizVm.OptionB,
-                                        OptionC = quizVm.OptionC,
-                                        OptionD = quizVm.OptionD,
-                                        CorrectAnswer = correctAnswerText
-                                    };
-
-                                    _context.QuizQuestions.Add(quiz);
-                                }
-                                await _context.SaveChangesAsync();
+                                    ModuleContentId = moduleContent.Id,
+                                    Question = q.QuestionText,
+                                    OptionA = q.OptionA,
+                                    OptionB = q.OptionB,
+                                    OptionC = q.OptionC,
+                                    OptionD = q.OptionD,
+                                    CorrectAnswer = q.CorrectAnswer
+                                };
+                                _context.QuizQuestions.Add(quiz);
                             }
                         }
                     }
                 }
             }
 
-            // Save Materials
+            // Step 3: Materials (optional)
             if (model.Materials != null)
             {
-                foreach (var materialVm in model.Materials)
+                foreach (var mat in model.Materials)
                 {
-                    string? fileName = null;
-                    string? filePath = null;
-                    long fileSize = 0;
-
-                    if (materialVm.UploadFile != null && materialVm.UploadFile.Length > 0)
+                    if (mat.UploadFile != null)
                     {
-                        fileName = Path.GetFileName(materialVm.UploadFile.FileName);
-                        var savePath = Path.Combine(_env.WebRootPath, "uploads/materials", fileName);
-
-                        using var stream = new FileStream(savePath, FileMode.Create);
-                        await materialVm.UploadFile.CopyToAsync(stream);
-
-                        filePath = "/uploads/materials/" + fileName;
-                        fileSize = materialVm.UploadFile.Length;
+                        var filePath = await SaveFileAsync(mat.UploadFile, "course-materials");
+                        var courseMaterial = new CourseMaterial
+                        {
+                            CourseId = course.Id,
+                            Title = mat.Title,
+                            Description = mat.Description,
+                            FilePath = filePath,
+                            FileSize = mat.UploadFile.Length
+                        };
+                        _context.CourseMaterials.Add(courseMaterial);
                     }
-
-                    var material = new CourseMaterial
-                    {
-                        CourseId = course.Id,
-                        Title = materialVm.Title ?? "Untitled",
-                        FileName = fileName,
-                        FilePath = filePath,
-                        FileSize = fileSize,
-                        Description = materialVm.Description
-                    };
-
-                    _context.CourseMaterials.Add(material);
                 }
-
-                await _context.SaveChangesAsync();
             }
 
-            var redirectUrl = Url.Action("ArtisanProfile", "ArtisanProfile", new { id = artisanId });
-            if (redirectUrl == null)
+            await _context.SaveChangesAsync();
+
+            var redirectUrl = Url.Action("ArtisanProfile", "ArtisanProfile", new { id = artisan.ArtisanId });
+            if (string.IsNullOrEmpty(redirectUrl))
                 return BadRequest("Redirect URL failed to generate.");
 
-            return Redirect(redirectUrl);
+            return Redirect($"/ArtisanProfile/{artisan.ArtisanId}");
+        }
+
+        private async Task<string> SaveFileAsync(IFormFile file, string folderName)
+        {
+            var uploadsRoot = Path.Combine(_env.WebRootPath, "uploads", folderName);
+            if (!Directory.Exists(uploadsRoot))
+                Directory.CreateDirectory(uploadsRoot);
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(uploadsRoot, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+                await file.CopyToAsync(stream);
+
+            return $"/uploads/{folderName}/{fileName}";
         }
     }
 }
