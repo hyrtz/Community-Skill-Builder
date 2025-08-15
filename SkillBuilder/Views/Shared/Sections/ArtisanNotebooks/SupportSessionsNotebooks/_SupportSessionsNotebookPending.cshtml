@@ -1,55 +1,180 @@
 ﻿@model List<SkillBuilder.Models.SupportSessionRequest>
 
-@if (!Model.Any())
-{
-    <div class="artisan-support-empty">
-        No support session requests at the moment.<br />
-        When learners request assistance from your course modules, they’ll appear here.
-    </div>
-}
-else
-{
-    foreach (var request in Model)
+<style>
+    .artisan-support-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .artisan-support-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .artisan-support-user {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .artisan-support-user-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .artisan-support-user-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .artisan-support-user-name {
+        font-weight: bold;
+    }
+
+    .artisan-support-user-course {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .artisan-support-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-top: 0.75rem;
+    }
+
+    .artisan-support-message {
+        font-size: 0.9rem;
+        margin: 0.5rem 0;
+        color: #444;
+    }
+
+    .artisan-support-schedule {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #555;
+        border-top: 1px solid #eee;
+        margin-top: 0.75rem;
+        padding-top: 0.5rem;
+    }
+
+    .artisan-support-actions {
+        margin-top: 0.75rem;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .artisan-btn-confirm {
+        background: #28a745;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .artisan-btn-decline {
+        background: #dc3545;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        width: 300px;
+    }
+
+    .modal-actions {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+</style>
+
+<div id="pendingSupportContainer">
+    @if (!Model.Any())
     {
-        <div class="artisan-support-card" id="support-@request.Id">
-            <div class="artisan-support-user">
-                <img src="@request.User.UserAvatar" alt="Avatar" class="artisan-support-user-avatar" />
-                <div class="artisan-support-user-info">
-                    <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
-                    <div class="artisan-support-user-course">@request.Course.Title</div>
-                </div>
-            </div>
-
-            <div class="artisan-support-title">@request.Title</div>
-            <div class="artisan-support-message">@request.Message</div>
-
-            <div class="artisan-support-schedule">
-                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
-                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
-            </div>
-
-            <div class="artisan-support-actions">
-                <button class="artisan-btn-confirm" onclick="respondToSession(@request.Id, true)">Confirm Session</button>
-                <button class="artisan-btn-decline" onclick="respondToSession(@request.Id, false)">Decline</button>
-            </div>
+        <div class="artisan-support-empty">
+            No support session requests at the moment.<br />
+            When learners request assistance, they’ll appear here.
         </div>
     }
-}
+    else
+    {
+        <div class="artisan-support-list">
+            @foreach (var request in Model)
+            {
+                <div class="artisan-support-card" id="support-@request.Id">
+                    <div class="artisan-support-user">
+                        <img src="@request.User.UserAvatar" class="artisan-support-user-avatar" />
+                        <div class="artisan-support-user-info">
+                            <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
+                            <div class="artisan-support-user-course">@request.Course.Title</div>
+                        </div>
+                    </div>
 
+                    <div class="artisan-support-title">@request.Title</div>
+                    <div class="artisan-support-message">@request.Message</div>
+
+                    <div class="artisan-support-schedule">
+                        <span><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("MMMM d, yyyy")</span>
+                        <span><i class="fas fa-clock"></i> @request.SessionTime.ToString(@"hh\:mm")</span>
+                    </div>
+
+                    <div class="artisan-support-actions">
+                        <button class="artisan-btn-confirm" onclick="respondToSession(@request.Id, true)">
+                            <i class="fas fa-check"></i> Confirm
+                        </button>
+                        <button class="artisan-btn-decline" onclick="respondToSession(@request.Id, false)">
+                            <i class="fas fa-times"></i> Decline
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal for Confirm -->
 <div id="sessionLinkModal" class="modal" style="display:none;">
     <div class="modal-content">
-        <h3>Select Platform and Add Link</h3>
-        <label>Platform</label>
+        <h3>Add Meeting Details</h3>
+        <label for="meetingPlatform">Platform</label>
         <select id="meetingPlatform" class="curriculum-form-control">
             <option value="Zoom">Zoom</option>
             <option value="Google Meet">Google Meet</option>
             <option value="Messenger">Messenger</option>
             <option value="Others">Others</option>
         </select>
-        <label>Meeting Link</label>
+
+        <label for="meetingLink">Meeting Link</label>
         <input type="text" id="meetingLink" class="curriculum-form-control" placeholder="https://..." />
         <input type="hidden" id="confirmSessionId" />
-        <div style="margin-top: 1rem;">
+
+        <div class="modal-actions">
             <button onclick="submitSessionLink()" class="artisan-btn-confirm">Submit</button>
             <button onclick="closeModal()" class="artisan-btn-decline">Cancel</button>
         </div>
@@ -57,21 +182,32 @@ else
 </div>
 
 <script>
+    // Respond to Confirm or Decline
     function respondToSession(id, confirm) {
+        if (!id) return;
+
         if (confirm) {
-            document.getElementById("sessionLinkModal").style.display = "block";
+            document.getElementById("sessionLinkModal").style.display = "flex";
             document.getElementById("confirmSessionId").value = id;
         } else {
-            fetch(`/SupportSession/Decline?id=${id}`, { method: 'POST' }).then(res => {
-                if (res.ok) document.getElementById(`support-${id}`).remove();
-            });
+            fetch('/SupportSession/Decline', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ id })
+            })
+            .then(res => {
+                if (res.ok) removeCard(id);
+            })
+            .catch(err => console.error("Decline failed:", err));
         }
     }
 
+    // Close modal
     function closeModal() {
         document.getElementById("sessionLinkModal").style.display = "none";
     }
 
+    // Submit confirmed session with meeting details
     function submitSessionLink() {
         const sessionId = document.getElementById("confirmSessionId").value;
         const platform = document.getElementById("meetingPlatform").value;
@@ -79,13 +215,64 @@ else
 
         fetch('/SupportSession/Confirm', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type':'application/json'},
             body: JSON.stringify({ id: sessionId, platform, link })
-        }).then(res => {
-            if (res.ok) {
-                document.getElementById(`support-${sessionId}`).remove();
-                closeModal();
-            }
+        })
+        .then(res => {
+            if (res.ok) removeCard(sessionId);
+            closeModal();
+        })
+        .catch(err => console.error("Confirm failed:", err));
+    }
+
+    // Remove card and show empty if no cards left
+    function removeCard(id) {
+        const card = document.getElementById(`support-${id}`);
+        if (card) card.remove();
+
+        const container = document.getElementById("pendingSupportContainer");
+        if (container && container.querySelectorAll('.artisan-support-card').length === 0) {
+            container.innerHTML = `<div class="artisan-support-empty">
+                No support session requests at the moment.<br />
+                When learners request assistance, they’ll appear here.
+            </div>`;
+        }
+    }
+
+    // Attach click handlers (for auto-refresh)
+    function attachRespondButtons() {
+        document.querySelectorAll('.artisan-btn-confirm').forEach(btn => {
+            btn.onclick = function() {
+                const id = this.closest('.artisan-support-card').id.replace('support-', '');
+                respondToSession(id, true);
+            };
+        });
+
+        document.querySelectorAll('.artisan-btn-decline').forEach(btn => {
+            btn.onclick = function() {
+                const id = this.closest('.artisan-support-card').id.replace('support-', '');
+                respondToSession(id, false);
+            };
         });
     }
+
+    attachRespondButtons();
+
+    // Auto-refresh every 10 seconds
+    async function refreshPendingRequests() {
+        const container = document.getElementById("pendingSupportContainer");
+        if (!container) return;
+
+        try {
+            const res = await fetch("/SupportSession/PendingRequestsPartial");
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            container.innerHTML = await res.text();
+
+            // Reattach handlers after refresh
+            attachRespondButtons();
+        } catch(err) {
+            console.error("Failed to refresh pending requests:", err);
+        }
+    }
+    setInterval(refreshPendingRequests, 10000);
 </script>

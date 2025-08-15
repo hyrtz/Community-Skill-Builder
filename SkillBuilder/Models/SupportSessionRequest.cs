@@ -21,5 +21,6 @@
         public string? MeetingLink { get; set; }
         public string? MeetingPlatform { get; set; }
         public DateTime? ConfirmedAt { get; set; }
+        public DateTime? CompletedAt { get; set; }
     }
 }

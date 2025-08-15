@@ -1,41 +1,20 @@
 ﻿@model List<SkillBuilder.Models.SupportSessionRequest>
 
-@{
-    var declinedRequests = Model
-        .Where(r => r.Status == "Declined")
-        .OrderByDescending(r => r.CreatedAt)
-        .ToList();
-}
-
-@if (!declinedRequests.Any())
+@if (!Model.Any())
 {
-    <div class="artisan-support-empty">
-        No declined requests found.<br />
-        Requests you've declined will appear here for your record.
+    <div class="artisan-support-empty declined-empty">
+        No declined sessions at the moment.
     </div>
 }
 else
 {
-    foreach (var request in declinedRequests)
+    @foreach (var request in Model)
     {
-        <div class="artisan-support-card">
-            <div class="artisan-support-user">
-                <img src="@request.User.UserAvatar" alt="Avatar" class="artisan-support-user-avatar" />
-                <div class="artisan-support-user-info">
-                    <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
-                    <div class="artisan-support-user-course">@request.Course.Title</div>
-                </div>
-            </div>
-
-            <div class="artisan-support-title">@request.Title</div>
+        <div class="artisan-support-card" id="session-@request.Id">
+            <div class="artisan-support-user">@request.User.FirstName @request.User.LastName</div>
             <div class="artisan-support-message">@request.Message</div>
-
-            <div class="artisan-support-schedule">
-                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
-                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
-            </div>
-
-            <span class="support-status-badge status-declined">Declined</span>
+            <div class="artisan-support-course">@request.Course.Title</div>
+            <div class="support-status-badge status-declined" style="margin-top:0.5rem;">Declined</div>
         </div>
     }
 }

@@ -48,10 +48,10 @@
 
 <div class="course-tab-content">
     <div class="course-panel @(activeTab == "in-progress" ? "active" : "")" data-tab="in-progress">
-        @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookInProgress")
+        @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookInProgress", (List<SkillBuilder.Models.Course>)Model.EnrolledCourses)
     </div>
     <div class="course-panel @(activeTab == "completed" ? "active" : "")" data-tab="completed">
-        @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookCompleted")
+        @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookCompleted", (List<SkillBuilder.Models.Course>)Model.EnrolledCourses)
     </div>
 </div>
 

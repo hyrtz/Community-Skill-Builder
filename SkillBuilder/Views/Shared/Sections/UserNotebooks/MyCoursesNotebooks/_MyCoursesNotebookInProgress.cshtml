@@ -1,26 +1,75 @@
 ﻿@using SkillBuilder.Models.ViewModels
-@model UserProfileViewModel
+@model List<SkillBuilder.Models.Course>
 
-@if (Model.Courses == null || !Model.Courses.Any())
+<style>
+    .user-courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .user-course-card-link {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .user-course-card {
+        background-color: #E6EEFF;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .user-course-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    .user-course-image {
+        width: 100%;
+        height: 180px;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .user-course-content {
+        padding: 1.25rem;
+    }
+
+    .user-course-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #344AEA;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-course-description {
+        font-size: 0.95rem;
+        color: #444;
+        margin-bottom: 1rem;
+    }
+</style>
+
+@if (Model == null || !Model.Any())
 {
     <p>No courses in progress yet.</p>
 }
 else
 {
-    <div class="course-tab-grid">
-        @foreach (var course in Model.Courses)
+    <div class="user-courses-grid">
+        @foreach (var course in Model)
         {
-            <!-- Later, filter by progress when implemented -->
-            <div class="course-card-link">
-                <div class="course-card">
-                    <div class="course-image" style="background-image: url('@course.ImageUrl');"></div>
-                    <h3 class="course-title">@course.Title</h3>
-                    <p class="course-description">@course.Overview</p>
-                    <div class="course-details">
-                        <p>Progress: 0%</p> <!-- Placeholder for progress -->
+            <a href="/Courses?selectedCourse=@course.Link" class="user-course-card-link">
+                <div class="user-course-card">
+                    <div class="user-course-image" style="background-image: url('@course.ImageUrl');"></div>
+                    <div class="user-course-content">
+                        <div class="user-course-title">@course.Title</div>
+                        <div class="user-course-description">@course.Overview</div>
                     </div>
                 </div>
-            </div>
+            </a>
         }
     </div>
 }

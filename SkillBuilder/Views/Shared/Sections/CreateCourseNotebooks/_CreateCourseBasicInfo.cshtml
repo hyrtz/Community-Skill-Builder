@@ -9,12 +9,12 @@
         margin-bottom: 1.5rem;
     }
 
-    .basicinfo-form-group label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #333;
-    }
+        .basicinfo-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
 
     .basicinfo-form-control,
     .basicinfo-form-select {
@@ -250,7 +250,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        
+
         // Image Preview
         const imageInput = document.getElementById("ImageFile");
         const imagePreview = document.getElementById("imagePreview");
@@ -295,7 +295,7 @@
                 reader.readAsDataURL(file);
             }
         });
-        
+
         const container = document.getElementById("objectives-container");
         const addBtn = document.getElementById("add-objective");
         let objectiveIndex = container.children.length; // initial count

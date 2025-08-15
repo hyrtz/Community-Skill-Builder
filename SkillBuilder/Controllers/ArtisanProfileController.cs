@@ -35,11 +35,19 @@ namespace SkillBuilder.Controllers
                 .Where(w => w.ArtisanId == id)
                 .ToList();
 
+            // NEW: Get support session requests for this artisan's courses
+            var artisanSupportRequests = _context.SupportSessionRequests
+                .Include(r => r.User)   // learner who requested
+                .Include(r => r.Course) // course info
+                .Where(r => r.Course.CreatedBy == id)
+                .ToList();
+
             var viewModel = new ArtisanProfileViewModel
             {
                 Artisan = artisan,
                 Courses = courses,
-                ArtisanWorks = works
+                ArtisanWorks = works,
+                ArtisanSupportRequests = artisanSupportRequests
             };
 
             return View("~/Views/Profile/ArtisanProfile.cshtml", viewModel);
@@ -69,6 +77,7 @@ namespace SkillBuilder.Controllers
                 Artisan = artisan,
                 Courses = courses,
                 ArtisanWorks = works
+                // No support requests here — this is a public view
             };
 
             return View("~/Views/Profile/ArtisanViewAsMentor.cshtml", viewModel);

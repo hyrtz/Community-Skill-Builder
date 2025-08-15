@@ -411,61 +411,6 @@
         text-align: center;
     }
 
-    .activity-upload-form {
-        margin-top: 2rem;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .upload-group {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .activity-upload-form {
-        margin-top: 2rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .activity-upload-label {
-        font-weight: 500;
-        color: #333;
-        margin-bottom: 0.25rem;
-    }
-
-    .activity-upload-input {
-        padding: 0.4rem;
-        text-align: center;
-    }
-
-    .activity-preview {
-        max-width: 100%;
-        max-height: 300px;
-        border-radius: 8px;
-        display: none;
-    }
-
-    .activity-upload-btn {
-        background-color: #344AEA;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-        .activity-upload-btn:hover {
-            background-color: #2A3EC1;
-            color: #FFFF00;
-        }
-
 </style>
 
 <div class="course-module-container">
@@ -488,7 +433,7 @@
             {
                 var mod = courseModules[i];
                 var contents = mod.Contents.ToList();
-                    <div class="module-chapter">
+                <div class="module-chapter">
                     <h3>Module @(@i + 1): @mod.Title</h3>
                     @for (int j = 0; j < contents.Count; j++)
                     {
@@ -546,7 +491,7 @@
             <div id="feedbackBox" style="display:none;">
                 <p id="feedbackMsg" style="font-size: 1.1rem; text-align: center;"></p>
                 <div style="display: flex; gap: 1rem;">
-                    <button onclick="tryAgain()">Try Again</button>
+                    <button id="tryAgainBtn" onclick="tryAgain()">Try Again</button>
                     <button onclick="nextQuestion()">Continue</button>
                 </div>
             </div>
@@ -584,29 +529,29 @@
         const moduleData = [];
         @for (int i = 0; i < courseModules.Count; i++)
         {
-                var contents = courseModules[i].Contents.ToList();
-                for (int j = 0; j < contents.Count; j++)
-                {
-                        var content = contents[j];
-                        var quizList = (content.QuizQuestions ?? new List<SkillBuilder.Models.QuizQuestion>())
-                                .Select(q => new
-                                {
-                                        question = q.Question,
-                                        options = new[] { q.OptionA, q.OptionB, q.OptionC, q.OptionD },
-                                        correctAnswer = q.CorrectAnswer
-                                });
+            var contents = courseModules[i].Contents.ToList();
+            for (int j = 0; j < contents.Count; j++)
+            {
+                var content = contents[j];
+                var quizList = (content.QuizQuestions ?? new List<SkillBuilder.Models.QuizQuestion>())
+                    .Select(q => new
+                    {
+                                question = q.Question,
+                                options = new[] { q.OptionA, q.OptionB, q.OptionC, q.OptionD },
+                                correctAnswer = q.CorrectAnswer
+                    });
 
-                        <text>
-                            moduleData.push({
-                                title: @Html.Raw(JsonSerializer.Serialize(content.Title)),
-                                type: @Html.Raw(JsonSerializer.Serialize(content.ContentType ?? "Text")),
-                                contentText: @Html.Raw(JsonSerializer.Serialize(content.ContentText ?? "")),
-                                mediaUrl: @Html.Raw(JsonSerializer.Serialize(content.MediaUrl ?? "")),
-                                quizQuestions: @Html.Raw(JsonSerializer.Serialize(quizList)),
-                                showDetails: @Html.Raw(JsonSerializer.Serialize(i == 0 && j == 0))
-                            });
-                        </text>
-                }
+                <text>
+                    moduleData.push({
+                        title: @Html.Raw(JsonSerializer.Serialize(content.Title)),
+                        type: @Html.Raw(JsonSerializer.Serialize(content.ContentType ?? "Text")),
+                        contentText: @Html.Raw(JsonSerializer.Serialize(content.ContentText ?? "")),
+                        mediaUrl: @Html.Raw(JsonSerializer.Serialize(content.MediaUrl ?? "")),
+                        quizQuestions: @Html.Raw(JsonSerializer.Serialize(quizList)),
+                        showDetails: @Html.Raw(JsonSerializer.Serialize(i == 0 && j == 0))
+                    });
+                </text>
+            }
         }
 
         const moduleTabs = document.querySelectorAll(".module-tab");
@@ -768,76 +713,12 @@
             }
 
             // TEXT CONTENT
-            if (data.type === "Text") {
+            if (data.type === "Text" || data.type === "Activity") {
                 inner.innerHTML = `
                     <h1>${data.title}</h1>
                     <p>${data.contentText}</p>
                 `;
                 showNextButton(index);
-            }
-
-            else if (data.type === "Activity") {
-                inner.innerHTML = `
-                    <h1 style="text-align:center;">${data.title}</h1>
-                    <p style="text-align:center;">${data.contentText}</p>
-                    <form id="activityUploadForm" class="activity-upload-form" style="display:flex; flex-direction:column; align-items:center; gap:1rem; margin-top:2rem;">
-                        <label for="activityImage" class="activity-upload-label" style="font-weight:bold;">Upload your finished activity:</label>
-                        <input type="file" id="activityImage" name="activityImage" accept="image/*" class="activity-upload-input" required style="padding:0.5rem;" />
-                        <img id="activityPreview" class="activity-preview" src="" alt="Preview" style="max-width:300px; display:none; border-radius:8px;" />
-                        <button type="submit" class="activity-upload-btn quiz-launch-btn" style="padding:0.75rem 1.5rem;">Submit Activity</button>
-                    </form>
-                `;
-
-                const activityInput = document.getElementById("activityImage");
-                const activityPreview = document.getElementById("activityPreview");
-                const uploadForm = document.getElementById("activityUploadForm");
-
-                // Preview image on upload
-                activityInput.addEventListener("change", function () {
-                    const file = this.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            activityPreview.src = e.target.result;
-                            activityPreview.style.display = "block";
-                        };
-                        reader.readAsDataURL(file);
-                    } else {
-                        activityPreview.src = "";
-                        activityPreview.style.display = "none";
-                    }
-                });
-
-                // Submit image to server
-                uploadForm.addEventListener("submit", function (e) {
-                    e.preventDefault();
-
-                    const file = activityInput.files[0];
-                    if (!file) return alert("Please choose an image to upload.");
-
-                    const formData = new FormData();
-                    formData.append("courseId", "@Model.Id");
-                    formData.append("activityImage", file);
-                    formData.append("ModuleIndex", index);
-                    formData.append("LessonTitle", data.title);
-
-                    fetch("/api/UserProfile/UploadActivity", {
-                        method: "POST",
-                        body: formData
-                    })
-                    .then(res => {
-                        if (!res.ok) throw new Error("Upload failed.");
-                        return res.json();
-                    })
-                    .then(data => {
-                        alert("✅ Activity uploaded successfully!");
-                        showNextButton(index);
-                    })
-                    .catch(err => {
-                        alert("❌ Failed to upload activity.");
-                        console.error(err);
-                    });
-                });
             }
 
             // IMAGE + TEXT
@@ -1069,9 +950,11 @@
 
             if (correct) {
                 msg.innerText = "✅ Correct! Well done!";
+                tryAgainBtn.style.display = "none"; // Hide the Try Again button
             } else {
                 msg.innerText = "❌ Wrong! Please try again.";
                 box.classList.add("wrong");
+                tryAgainBtn.style.display = "inline-block"; // Show the Try Again button
             }
 
             box.style.display = "flex";
@@ -1140,7 +1023,6 @@
             const selectedTabIndex = parseInt(localStorage.getItem("active_tab_@Model.Id")) || 0;
             const currentModule = moduleData[selectedTabIndex];
             const courseId = @Model.Id;
-            const courseTitle = @Html.Raw(JsonSerializer.Serialize(Model.Title));
             const lessonTitle = currentModule?.title || "Untitled";
 
             const payload = {
@@ -1163,6 +1045,11 @@
             .then(data => {
                 alert("✅ Session request sent!");
                 closeSessionModal();
+
+                // Trigger artisan pending requests refresh (if artisan is viewing)
+                if (window.opener && window.opener.refreshPendingRequests) {
+                    window.opener.refreshPendingRequests();
+                }
             })
             .catch(err => {
                 alert("❌ An error occurred while sending your request.");

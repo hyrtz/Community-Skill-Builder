@@ -103,3 +103,13 @@
         </tbody>
     </table>
 </div>
+
+<script>
+    window.addEventListener('load', () => {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('search')) {
+            url.searchParams.delete('search');
+            window.history.replaceState({}, document.title, url.pathname); // Removes ?search=...
+        }
+    });
+</script>

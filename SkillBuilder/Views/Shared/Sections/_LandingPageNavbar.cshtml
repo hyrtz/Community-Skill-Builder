@@ -90,6 +90,7 @@
             <select id="searchCategory" class="search-category-select">
                 <option value="" disabled selected>Search in...</option>
                 <option value="Courses">Courses</option>
+                <option value="Leaderboard">Leaderboard</option>
                 <option value="Artisans">Artisans</option>
                 <option value="Community">Community</option>
             </select>
@@ -204,6 +205,9 @@
         switch (category) {
             case "Courses":
                 url = `/Courses?search=${encodeURIComponent(query)}`;
+                break;
+            case "Leaderboard":
+                url = `/UserLeaderboard?search=${encodeURIComponent(query)}`;
                 break;
             case "Artisans":
                 url = `/Artisans/ArtisanList?search=${encodeURIComponent(query)}`;

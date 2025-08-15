@@ -17,8 +17,8 @@ builder.Services.AddAuthentication("TahiAuth")
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.HttpOnly = true;
-        options.LoginPath = "/login";
-        options.LogoutPath = "/logout";
+        options.LoginPath = "";
+        options.LogoutPath = "";
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
     });
 
@@ -37,6 +37,7 @@ app.UseRouting();
 
 app.UseAuthentication();         
 app.UseAuthorization();
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",

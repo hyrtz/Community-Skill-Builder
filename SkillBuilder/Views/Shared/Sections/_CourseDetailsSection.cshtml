@@ -2,6 +2,7 @@
 @{
     var userId = User.FindFirst("UserId")?.Value;
     var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    var isVerified = User.FindFirst("IsVerified")?.Value == "True";
     var isEnrolled = Model.Enrollments?.Any(e => e.UserId == userId) ?? false;
 }
 
@@ -190,22 +191,40 @@
                 </div>
             </div>
 
-            @if (!User.Identity.IsAuthenticated && userRole != "Artisan")
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (userRole != "Artisan")
+                {
+                    <div class="course-detail-right">
+                        <h1 class="course-detail-free-label">FREE COURSE</h1>
+
+                        @if (!isVerified)
+                        {
+                            <button class="course-detail-enroll-btn" disabled title="Please verify your email to enroll.">Verify Email First</button>
+                            <p style="color: #d00; font-size: 0.85rem; margin-top: 0.5rem;">
+                                You need to verify your email before enrolling in this course.
+                            </p>
+                        }
+                        else if (!isEnrolled)
+                        {
+                            <button class="course-detail-enroll-btn" onclick="enrollCourse(@Model.Id)">Enroll Now</button>
+                        }
+                        else
+                        {
+                            <form method="get" action="/Courses/CourseModule/@Model.Id">
+                                <button type="submit" class="course-detail-enroll-btn">Start Course</button>
+                            </form>
+                        }
+                    </div>
+                }
+            }
+            else
             {
                 <div class="course-detail-right">
                     <h1 class="course-detail-free-label">FREE COURSE</h1>
-                    @if (!isEnrolled)
-                    {
-                        <button class="course-detail-enroll-btn" onclick="enrollCourse(@Model.Id)">Enroll Now</button>
-                    }
-                    else
-                    {
-                        <form method="get" action="/Courses/CourseModule/@Model.Id">
-                            <button type="submit" class="course-detail-enroll-btn">Start Course</button>
-                        </form>
-                    }
+                    <button class="course-detail-enroll-btn" onclick="showLoginReminder()">Enroll Now</button>
                 </div>
-             }
+            }
         </div>
     </div>
 
@@ -240,6 +259,9 @@
 </section>
 
 <script>
+    function showLoginReminder() {
+        openModal("login-modal");
+    }
     const tabs = document.querySelectorAll(".notebook-tab");
     const contents = document.querySelectorAll(".tab-content");
 

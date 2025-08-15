@@ -26,7 +26,7 @@ namespace SkillBuilder.Controllers
                 Course = new Course(),
                 LearningObjectives = new List<string> { "" },
                 Modules = new List<CourseModuleViewModel>(),
-                Materials = new List<CourseMaterialViewModel>() 
+                Materials = new List<CourseMaterialViewModel>()
             };
 
             return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", viewModel);
@@ -128,6 +128,8 @@ namespace SkillBuilder.Controllers
                                 };
                                 _context.QuizQuestions.Add(quiz);
                             }
+
+                            await _context.SaveChangesAsync();
                         }
                     }
                 }

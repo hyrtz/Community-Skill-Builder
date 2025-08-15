@@ -87,11 +87,25 @@ namespace SkillBuilder.Controllers
                 .Where(p => p.UserId == user.Id)
                 .ToList();
 
+            // Support requests created BY this user
             var supportRequests = _context.SupportSessionRequests
                 .Where(r => r.UserId == user.Id)
                 .Include(r => r.Course)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToList();
+
+            // Support requests created FOR this artisan's courses
+            List<SupportSessionRequest> artisanSupportRequests = new List<SupportSessionRequest>();
+            if (user.Artisan != null)
+            {
+                var artisanId = user.Artisan.ArtisanId;
+                artisanSupportRequests = _context.SupportSessionRequests
+                    .Include(r => r.User)
+                    .Include(r => r.Course)
+                    .Where(r => r.Course.CreatedBy == artisanId)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToList();
+            }
 
             var achievements = GetAchievementsForUser(user);
 
@@ -103,7 +117,8 @@ namespace SkillBuilder.Controllers
                 SubmittedProjects = submittedProjects,
                 Achievements = achievements,
                 CourseProgresses = inProgressCourses,
-                SupportRequests = supportRequests
+                SupportRequests = supportRequests,
+                ArtisanSupportRequests = artisanSupportRequests // <-- NEW property for artisan's incoming requests
             };
 
             return View("~/Views/Profile/UserProfile.cshtml", viewModel);
@@ -118,14 +133,12 @@ namespace SkillBuilder.Controllers
             var userId = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            // Optional: validate course exists
             if (!int.TryParse(courseId, out int parsedCourseId))
                 return BadRequest("Invalid course ID.");
 
             var course = await _context.Courses.FindAsync(parsedCourseId);
             if (course == null) return NotFound("Course not found.");
 
-            // Save image to /uploads/projects/
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/projects");
             Directory.CreateDirectory(uploadsFolder);
 
@@ -163,7 +176,6 @@ namespace SkillBuilder.Controllers
         {
             var achievements = new List<AchievementViewModel>();
 
-            // Achievement 1: First Course
             achievements.Add(new AchievementViewModel
             {
                 Title = "Welcome to Tahi!",
@@ -171,7 +183,6 @@ namespace SkillBuilder.Controllers
                 IsAchieved = user.Enrollments != null && user.Enrollments.Any()
             });
 
-            // Achievement 2: Enroll in 3 Courses
             achievements.Add(new AchievementViewModel
             {
                 Title = "Lifelong Learner",
@@ -211,7 +222,6 @@ namespace SkillBuilder.Controllers
             if (user == null)
                 return NotFound("User not found.");
 
-            // Remove all module progress
             var progressToRemove = _context.ModuleProgress
                 .Where(mp => mp.UserId == userId)
                 .ToList();
@@ -219,11 +229,9 @@ namespace SkillBuilder.Controllers
             if (progressToRemove.Any())
                 _context.ModuleProgress.RemoveRange(progressToRemove);
 
-            // Remove all enrollments
             if (user.Enrollments != null && user.Enrollments.Any())
                 _context.Enrollments.RemoveRange(user.Enrollments);
 
-            // Optionally remove submitted projects
             var submissions = _context.CourseProjectSubmissions
                 .Where(s => s.UserId == userId)
                 .ToList();

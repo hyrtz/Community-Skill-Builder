@@ -1,45 +1,24 @@
 ﻿@model List<SkillBuilder.Models.SupportSessionRequest>
 
-@{
-    var upcomingRequests = Model
-        .Where(r => r.Status == "Confirmed" && r.SessionDate >= DateTime.Today)
-        .OrderBy(r => r.SessionDate)
-        .ToList();
-}
-
-@if (!upcomingRequests.Any())
+@if (!Model.Any())
 {
-    <div class="artisan-support-empty">
-        No upcoming sessions scheduled yet.<br />
-        Confirmed sessions will show here with their date and time.
+    <div class="artisan-support-empty upcoming-empty">
+        No upcoming sessions scheduled yet.<br />Confirmed sessions will show here.
     </div>
 }
 else
 {
-    foreach (var request in upcomingRequests)
+    @foreach (var request in Model)
     {
-        <div class="artisan-support-card">
-            <div class="artisan-support-user">
-                <img src="@request.User.UserAvatar" alt="Avatar" class="artisan-support-user-avatar" />
-                <div class="artisan-support-user-info">
-                    <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
-                    <div class="artisan-support-user-course">@request.Course.Title</div>
-                </div>
-            </div>
-
-            <div class="artisan-support-title">@request.Title</div>
+        <div class="artisan-support-card" id="session-@request.Id">
+            <div class="artisan-support-user">@request.User.FirstName @request.User.LastName</div>
             <div class="artisan-support-message">@request.Message</div>
-
-            <div class="artisan-support-schedule">
-                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
-                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
-            </div>
-
-            <div class="support-status-badge status-confirmed">Confirmed</div>
-
-            <div class="user-support-confirm-details" style="margin-top: 0.75rem;">
-                Platform: <strong>@request.MeetingPlatform</strong><br />
-                <a href="@request.MeetingLink" target="_blank">Join Link</a>
+            <div class="artisan-support-course">@request.Course.Title</div>
+            <div class="support-status-badge status-confirmed" style="margin-top:0.5rem;">Confirmed</div>
+            <div style="margin-top:1rem;">
+                <button class="btn btn-success btn-sm complete-session-btn" data-id="@request.Id">
+                    <i class="fas fa-check"></i> Mark as Completed
+                </button>
             </div>
         </div>
     }

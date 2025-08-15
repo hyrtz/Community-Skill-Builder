@@ -309,7 +309,8 @@
                             <input type="text"
                                 name="${nameBase}.QuizQuestions[${index}].Option${letter}"
                                 class="curriculum-form-control quiz-option-input"
-                                placeholder="Option ${letter}" required />
+                                placeholder="Option ${letter}"
+                                oninput="updateRadioValue(this)" required />
                             <label>
                                 <input type="radio"
                                     name="${nameBase}.QuizQuestions[${index}].CorrectAnswer"
@@ -331,6 +332,14 @@
         const radio = container.querySelector("input.correct-answer-radio");
         if (radio) {
             radio.value = input.value;
+        }
+    }
+
+    function updateRadioValue(textInput) {
+        const container = textInput.closest("div");
+        const radio = container.querySelector("input.correct-answer-radio");
+        if (radio) {
+            radio.value = textInput.value;
         }
     }
 

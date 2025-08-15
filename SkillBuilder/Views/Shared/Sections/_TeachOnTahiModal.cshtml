@@ -196,8 +196,8 @@
 
             <!-- Social login -->
             <div class="social-login">
-                <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
-                <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+                <button id="btn-google-teach"><img src="~/assets/Logos/Google.svg">Continue with Google</button>
+                <button id="btn-facebook-teach"><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
             </div>
 
             <div class="separator"><span>or</span></div>
@@ -276,7 +276,37 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", () => {
+        // ---------- Initialize Appwrite once ----------
+        if (!window.appwriteClient) {
+            window.appwriteClient = new Appwrite.Client()
+                .setEndpoint("https://fra.cloud.appwrite.io/v1")
+                .setProject("689ad4040030d8902c02");
+            window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
+        }
+
+        const googleBtn = document.getElementById("btn-google-teach");
+        const facebookBtn = document.getElementById("btn-facebook-teach");
+        const SUCCESS_URL = "https://localhost:7049/oauth/success";
+
+        // ---------- OAuth Buttons ----------
+        googleBtn?.addEventListener("click", () => {
+            window.appwriteAccount.createOAuth2Session(
+                "google",
+                SUCCESS_URL,
+                "https://localhost:7049/?error=OAuthFailed",
+                ["openid", "email", "profile"] // <-- correct Google scopes
+            );
+        });
+
+        facebookBtn?.addEventListener("click", () => {
+            window.appwriteAccount.createOAuth2Session(
+                "facebook",
+                SUCCESS_URL,
+                "https://localhost:7049/?error=OAuthFailed"
+            );
+        });
+
         const teachPassword = document.getElementById("teach-password");
         const passwordChecklist = document.getElementById("teach-password-checklist");
         const teachConfirm = document.getElementById("teach-confirm");

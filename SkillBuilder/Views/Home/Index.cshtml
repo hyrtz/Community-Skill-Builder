@@ -4,41 +4,41 @@
 @{
     ViewData["Title"] = "Home";
     ViewData["IsCatalogPage"] = false;
+    ViewData["RequireLogin"] = false;
 }
 
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Skillbuilder</title>
-    </head>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skillbuilder</title>
+</head>
 
-        <body>
+<body>
 
+    <!-- Home Section -->
+    @Html.Partial("Sections/_HomeSection")
 
-            <!-- Home Section -->
-            @Html.Partial("Sections/_HomeSection")
+    <!-- About Section -->
+    @Html.Partial("Sections/_AboutSection", Model.Features)
 
-            <!-- About Section -->
-            @Html.Partial("Sections/_AboutSection", Model.Features)
+    <!-- Course Section -->
+    @Html.Partial("Sections/_CourseSection", Model.Courses)
 
-            <!-- Course Section -->
-            @Html.Partial("Sections/_CourseSection", Model.Courses)
+    <!-- Mission Section -->
+    @Html.Partial("Sections/_MissionSection")
 
-            <!-- Mission Section -->
-            @Html.Partial("Sections/_MissionSection")
+    <!-- Community Section -->
+    @Html.Partial("Sections/_CommunitySection", Model.Testimonials)
 
-            <!-- Community Section -->
-            @Html.Partial("Sections/_CommunitySection", Model.Testimonials)
+    <!-- Community Highlight Section -->
+    @Html.Partial("Sections/_CommunityHighlightSection", Model.Highlights)
 
-            <!-- Community Highlight Section -->
-            @Html.Partial("Sections/_CommunityHighlightSection", Model.Highlights)
+    <!-- Join Section -->
+    @Html.Partial("Sections/_JoinSection")
 
-            <!-- Join Section -->
-            @Html.Partial("Sections/_JoinSection")
-
-        </body>
+</body>
 
 </html>

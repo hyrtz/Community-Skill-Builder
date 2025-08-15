@@ -216,8 +216,8 @@
 
             <!-- Social login buttons -->
             <div class="social-login">
-                <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
-                <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+                <button id="btn-google-signup"><img src="~/assets/Logos/Google.svg">Continue with Google</button>
+                <button id="btn-facebook-signup"><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
             </div>
 
             <!-- Separator -->
@@ -309,6 +309,66 @@
                 Already have an account? <a href="#" onclick="switchToLogin()">Log In</a>
             </p>
 
+            <div id="reset-password-section" style="display:none;">
+                <h3>Reset Password</h3>
+                <p>If the email address is valid you will have a One Time Password (OTP), via email. Please type it below.</p>
+
+                <div class="input-group">
+                    <label for="new-password">Password</label>
+                    <input type="password" id="new-password" placeholder="New Password" />
+                    <span class="toggle-password" data-target="new-password">👁️</span>
+                </div>
+
+                <div id="password-requirements" class="password-requirements">
+                    <p id="req-uppercase" class="requirement-text">❌ At least one upper case letter</p>
+                    <p id="req-number" class="requirement-text">❌ At least one numeral (0–9)</p>
+                    <p id="req-symbol" class="requirement-text">❌ At least one symbol (!#^*_- etc.)</p>
+                    <p id="req-length" class="requirement-text">❌ Minimum 8 characters</p>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" />
+                    <span class="toggle-password" data-target="confirm-password">👁️</span>
+                </div>
+
+                <button id="reset-password-btn" disabled>Reset Password</button>
+            </div>
+
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // ---------- Initialize Appwrite once ----------
+        if (!window.appwriteClient) {
+            window.appwriteClient = new Appwrite.Client()
+                .setEndpoint("https://fra.cloud.appwrite.io/v1")
+                .setProject("689ad4040030d8902c02");
+            window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
+        }
+
+        const googleBtn = document.getElementById("btn-google-signup");
+        const facebookBtn = document.getElementById("btn-facebook-signup");
+        const SUCCESS_URL = "https://localhost:7049/oauth/success";
+
+        // ---------- OAuth Buttons ----------
+        googleBtn?.addEventListener("click", () => {
+            window.appwriteAccount.createOAuth2Session(
+                "google",
+                SUCCESS_URL,
+                "https://localhost:7049/?error=OAuthFailed",
+                ["openid", "email", "profile"] // <-- correct Google scopes
+            );
+        });
+
+        facebookBtn?.addEventListener("click", () => {
+            window.appwriteAccount.createOAuth2Session(
+                "facebook",
+                SUCCESS_URL,
+                "https://localhost:7049/?error=OAuthFailed"
+            );
+        });
+    });
+</script>

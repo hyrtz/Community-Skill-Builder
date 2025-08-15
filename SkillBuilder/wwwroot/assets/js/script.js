@@ -170,9 +170,20 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     window.checkLoginInputs = function () {
-        const email = document.getElementById("login-email").value;
-        const password = document.getElementById("login-password").value;
-        loginSubmitBtn.disabled = !(email && password);
+        // Skip while login is being submitted
+        if (window.loginInProgress) return;
+
+        try {
+            const emailInput = document.getElementById("login-email");
+            const passwordInput = document.getElementById("login-password");
+            const loginSubmitBtn = document.querySelector("#login-form button[type='submit']");
+
+            if (!loginSubmitBtn || !emailInput || !passwordInput) return;
+
+            loginSubmitBtn.disabled = !(emailInput.value && passwordInput.value);
+        } catch (e) {
+            console.warn("checkLoginInputs skipped due to missing elements");
+        }
     };
 
     function checkSignupInputs() {
@@ -394,6 +405,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (loginInProgress) return;
         loginInProgress = true;
 
+        // Temporarily remove input listeners to prevent "flash" errors
+        document.getElementById("login-email").removeEventListener("input", checkLoginInputs);
+        document.getElementById("login-password").removeEventListener("input", checkLoginInputs);
+
         loginError.textContent = "";
 
         const email = document.getElementById("login-email").value.trim();
@@ -413,24 +428,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (response.ok) {
                 document.body.classList.add("user-logged-in");
-
-                const loginBtn = document.querySelector(".nav-login-btn");
-                const signupBtn = document.querySelector(".nav-signup-btn");
-                const notificationIcon = document.querySelector(".nav-notification-icon");
-                const profileIcon = document.querySelector(".nav-profile-icon");
-
-                if (loginBtn) loginBtn.style.display = "none";
-                if (signupBtn) signupBtn.style.display = "none";
-                if (notificationIcon) notificationIcon.style.display = "inline-block";
-                if (profileIcon) profileIcon.style.display = "inline-block";
+                document.querySelector(".nav-login-btn")?.style.setProperty("display", "none", "important");
+                document.querySelector(".nav-signup-btn")?.style.setProperty("display", "none", "important");
+                document.querySelector(".nav-notification-icon")?.style.setProperty("display", "inline-block", "important");
+                document.querySelector(".nav-profile-icon")?.style.setProperty("display", "inline-block", "important");
 
                 closeModal("login-modal");
                 window.location.reload();
-
             } else {
                 loginError.textContent = data.message || "Invalid login credentials.";
             }
-
         } catch (error) {
             console.error("Login error:", error);
             loginError.textContent = "An error occurred. Please try again later.";
@@ -438,6 +445,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         loginSubmitBtn.disabled = false;
         loginSubmitBtn.textContent = "Log In";
+
+        // Re-add input listeners
+        document.getElementById("login-email").addEventListener("input", checkLoginInputs);
+        document.getElementById("login-password").addEventListener("input", checkLoginInputs);
+
         loginInProgress = false;
     });
 
@@ -524,3 +536,94 @@ document.addEventListener("keydown", function (e) {
         window.closeModal("signup-modal");
     }
 });
+
+function showResetPasswordStage(email) {
+    // Store email for reset request
+    window.currentResetEmail = email;
+
+    // Hide other stages
+    document.getElementById('forgot-email-stage').style.display = 'none';
+    document.getElementById('otp-stage').style.display = 'none';
+
+    // Show reset password stage
+    const resetStage = document.getElementById('reset-password-stage');
+    resetStage.style.display = 'block';
+
+    // Inputs and button
+    const resetPasswordInput = document.getElementById('reset-password');
+    const confirmResetInput = document.getElementById('reset-confirm');
+    const resetBtn = document.getElementById('reset-password-btn');
+
+    // Update requirement indicators
+    function updateRequirement(id, isValid) {
+        const el = document.getElementById(id);
+        const text = el.getAttribute('data-text') || el.textContent.replace("❌", "").replace("✅", "").trim();
+        el.textContent = (isValid ? "✅ " : "❌ ") + text;
+    }
+
+    // Enable reset button only if requirements met
+    function checkResetPasswordInputs() {
+        const password = resetPasswordInput.value.trim();
+        const confirmPassword = confirmResetInput.value.trim();
+
+        updateRequirement("req-uppercase-reset", /[A-Z]/.test(password));
+        updateRequirement("req-number-reset", /\d/.test(password));
+        updateRequirement("req-symbol-reset", /[!#\^*_\-]/.test(password));
+        updateRequirement("req-length-reset", password.length >= 8);
+
+        resetBtn.disabled = !(
+            password === confirmPassword &&
+            /[A-Z]/.test(password) &&
+            /\d/.test(password) &&
+            /[!#\^*_\-]/.test(password) &&
+            password.length >= 8
+        );
+    }
+
+    resetPasswordInput.addEventListener("input", checkResetPasswordInputs);
+    confirmResetInput.addEventListener("input", checkResetPasswordInputs);
+
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(icon => {
+        icon.addEventListener('click', () => {
+            const targetId = icon.getAttribute('data-target');
+            const target = document.getElementById(targetId);
+            if (target.type === "password") {
+                target.type = "text";
+                icon.textContent = "🙈";
+            } else {
+                target.type = "password";
+                icon.textContent = "👁️";
+            }
+        });
+    });
+
+    // Handle Reset Password button click
+    resetBtn.addEventListener("click", async () => {
+        const newPassword = resetPasswordInput.value.trim();
+        const email = window.currentResetEmail;
+
+        try {
+            const res = await fetch("/reset-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, newPassword })
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                document.querySelector('.reset-success-message').textContent = "Password reset successful! You can now log in.";
+                document.querySelector('.reset-error-message').textContent = "";
+                // Optionally hide the reset stage or show login
+            } else {
+                document.querySelector('.reset-error-message').textContent = data.message || "Error resetting password.";
+                document.querySelector('.reset-success-message').textContent = "";
+            }
+        } catch (err) {
+            console.error(err);
+            document.querySelector('.reset-error-message').textContent = "Something went wrong. Try again.";
+            document.querySelector('.reset-success-message').textContent = "";
+        }
+    });
+}

@@ -253,23 +253,18 @@ namespace SkillBuilder.Controllers
                 return Unauthorized(new { message = "Invalid email or password." });
             }
 
-            if (!user.IsVerified)
-            {
-                return Unauthorized(new { message = "Please verify your email first." });
-            }
-
             var claims = new List<Claim>
             {
                 new Claim("UserId", user.Id),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim("IsVerified", user.IsVerified.ToString())
             };
 
             var identity = new ClaimsIdentity(claims, "TahiAuth");
             var principal = new ClaimsPrincipal(identity);
-
             await HttpContext.SignInAsync("TahiAuth", principal);
 
             return Ok(new
@@ -277,7 +272,8 @@ namespace SkillBuilder.Controllers
                 success = true,
                 message = "Login successful.",
                 role = user.Role,
-                userId = user.Id
+                userId = user.Id,
+                isVerified = user.IsVerified
             });
         }
 
@@ -286,6 +282,130 @@ namespace SkillBuilder.Controllers
         {
             await HttpContext.SignOutAsync("TahiAuth");
             return Redirect("/");
+        }
+
+        [HttpPost("/forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Invalid email." });
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (user == null)
+                return NotFound(new { message = "Email not found." });
+
+            // Generate OTP
+            var random = new Random();
+            var otp = random.Next(100000, 999999).ToString();
+
+            // Save OTP to user or database (with expiration)
+            user.PasswordResetOtp = otp;
+            user.OtpExpiry = DateTime.UtcNow.AddMinutes(10);
+            await _context.SaveChangesAsync();
+
+            // Send OTP via email
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Tahi Support", _config["Email:Sender"]));
+            message.To.Add(MailboxAddress.Parse(user.Email));
+            message.Subject = "Your Password Reset OTP";
+
+            var builder = new BodyBuilder
+            {
+                HtmlBody = $"<p>Your OTP for password reset is: <strong>{otp}</strong></p>" +
+                           $"<p>This code expires in 10 minutes.</p>"
+            };
+            message.Body = builder.ToMessageBody();
+
+            using var smtp = new SmtpClient();
+            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(_config["Email:Sender"], _config["Email:Password"]);
+            await smtp.SendAsync(message);
+            await smtp.DisconnectAsync(true);
+
+            return Ok(new { success = true, message = "OTP sent to your email." });
+        }
+
+        [HttpPost("/verify-otp")]
+        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Invalid input." });
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            if (user.PasswordResetOtp != model.Otp || user.OtpExpiry < DateTime.UtcNow)
+                return BadRequest(new { message = "Invalid or expired OTP." });
+
+            // Optionally, clear OTP after verification
+            user.PasswordResetOtp = null;
+            user.OtpExpiry = null;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "OTP verified." });
+        }
+
+        [HttpPost("/resend-otp")]
+        public async Task<IActionResult> ResendOtp([FromBody] ForgotPasswordRequest model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Invalid email." });
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            // Generate new OTP
+            var random = new Random();
+            var otp = random.Next(100000, 999999).ToString();
+            user.PasswordResetOtp = otp;
+            user.OtpExpiry = DateTime.UtcNow.AddMinutes(10);
+            await _context.SaveChangesAsync();
+
+            // Send OTP via email
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Tahi Support", _config["Email:Sender"]));
+            message.To.Add(MailboxAddress.Parse(user.Email));
+            message.Subject = "Your Password Reset OTP (Resent)";
+            var builder = new BodyBuilder
+            {
+                HtmlBody = $"<p>Your new OTP is: <strong>{otp}</strong></p>" +
+                           "<p>This code expires in 10 minutes.</p>"
+            };
+            message.Body = builder.ToMessageBody();
+
+            using var smtp = new SmtpClient();
+            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(_config["Email:Sender"], _config["Email:Password"]);
+            await smtp.SendAsync(message);
+            await smtp.DisconnectAsync(true);
+
+            return Ok(new { success = true, message = "OTP resent to your email." });
+        }
+
+        [HttpPost("/reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Invalid input." });
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            // Optionally, you can also check if OTP was verified before allowing reset
+
+            // Update password
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+
+            // Clear OTP after password reset
+            user.PasswordResetOtp = null;
+            user.OtpExpiry = null;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Password reset successful." });
         }
 
     }

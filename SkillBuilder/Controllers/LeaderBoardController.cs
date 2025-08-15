@@ -14,14 +14,26 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpGet("UserLeaderboard")]
-        public IActionResult UserLeaderboard()
+        public IActionResult UserLeaderboard(string? search)
         {
             var users = _context.Users
                 .Include(u => u.Enrollments)
-                .Where(u => u.Role == "Learner")
+                .Where(u => u.Role == "Learner");
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
+                users = users.Where(u =>
+                    u.FirstName.ToLower().Contains(search) ||
+                    u.LastName.ToLower().Contains(search));
+            }
+
+            var sortedUsers = users
+                .OrderByDescending(u => u.Points)
                 .ToList();
 
-            return View(users);
+            ViewBag.Search = search;
+            return View(sortedUsers);
         }
     }
 }

@@ -78,6 +78,11 @@ namespace SkillBuilder.Controllers
             if (user == null)
                 return NotFound();
 
+            if (!user.IsVerified)
+            {
+                return BadRequest(new { success = false, message = "Please verify your email before enrolling in a course." });
+            }
+
             // Track achievement conditions before enrollment
             int previousCount = user.Enrollments?.Count() ?? 0;
 

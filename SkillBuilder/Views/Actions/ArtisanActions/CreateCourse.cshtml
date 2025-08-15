@@ -112,7 +112,6 @@
 
 @using (Html.BeginForm("CreateCourse", "ArtisanCourse", FormMethod.Post, new { enctype = "multipart/form-data", id = "create-course-form" }))
 {
-
     <div class="create-course-container">
         <a href="javascript:history.back()" class="create-course-back-link">&larr; Back</a>
 
@@ -194,11 +193,34 @@
         // Validate required inputs (text, selects, etc.)
         requiredInputs.forEach(input => {
             const isVisible = input.offsetParent !== null;
+            const type = input.getAttribute("type");
+
+            if (type === "radio") return;
+
             if (isVisible && input.value.trim() === "") {
                 input.classList.add("input-invalid");
                 allValid = false;
             } else {
                 input.classList.remove("input-invalid");
+            }
+        });
+
+        const requiredRadioNames = new Set();
+        requiredInputs.forEach(input => {
+            if (input.type === "radio") {
+                requiredRadioNames.add(input.name);
+            }
+        });
+
+        requiredRadioNames.forEach(name => {
+            const radios = form.querySelectorAll(`input[name="${name}"]`);
+            const isVisible = Array.from(radios).some(r => r.offsetParent !== null);
+            const isChecked = Array.from(radios).some(r => r.checked);
+            if (isVisible && !isChecked) {
+                allValid = false;
+                radios.forEach(r => r.classList.add("input-invalid"));
+            } else {
+                radios.forEach(r => r.classList.remove("input-invalid"));
             }
         });
 

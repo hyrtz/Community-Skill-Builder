@@ -1,8 +1,6 @@
 ﻿<!-- Login Modal -->
-
 <style>
     /* ========== LOGIN MODAL ========== */
-
     .password-wrapper input {
         margin-bottom: 0 !important;
     }
@@ -42,36 +40,84 @@
         text-align: center;
         margin-top: 1rem;
     }
+</style>
 
+<!-- Login Modal -->
+<style>
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+        .password-wrapper input {
+            margin-bottom: 0 !important;
+        }
+
+    .toggle-password {
+        position: absolute;
+        right: 0.75rem;
+        cursor: pointer;
+        user-select: none;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
+
+    .forgot-password {
+        font-size: 0.7rem;
+        margin-bottom: 1.5rem;
+        text-align: right;
+    }
+
+    .login-btn:enabled {
+        background-color: #0056b3;
+        color: white;
+        cursor: pointer;
+    }
+
+    .signup-redirect {
+        font-size: 0.8rem;
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .reset-error {
+        color: red;
+        font-size: 0.75rem;
+        margin-top: -0.5rem;
+        margin-bottom: 0.8rem;
+        display: block;
+        font-weight: 500;
+    }
 </style>
 
 <div id="login-modal" class="auth-modal">
     <div class="auth-modal-container">
-        <!-- Left Side (Image) -->
+        <!-- Left Side -->
         <div class="auth-modal-left">
             <img src="~/assets/Background Pics/LogInBG.png" />
         </div>
 
-        <!-- Right Side (Form) -->
+        <!-- Right Side -->
         <div class="auth-modal-right">
             <span class="auth-close-btn" onclick="closeModal('login-modal', true)">&times;</span>
 
-            <!-- Container for login-related elements -->
             <div id="login-main-content">
                 <h2>Log in to <span style="color: #364BE9">Tahi</span></h2>
 
-                <!-- Social Login Buttons -->
+                <!-- Social Logins -->
                 <div class="social-login">
-                    <button><img src="~/assets/Logos/Google.svg">Continue with Google</button>
-                    <button><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
+                    <button id="btn-google-login"><img src="~/assets/Logos/Google.svg">Continue with Google</button>
+                    <button id="btn-facebook-login"><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
                 </div>
 
-                <!-- Separator -->
                 <div class="separator"><span>or</span></div>
 
-                <!-- Login Form -->
+                <!-- Email/Password Login -->
                 <form id="login-form">
-
                     <label for="login-email">Email</label>
                     <input type="email" id="login-email" required />
 
@@ -85,76 +131,344 @@
                         <a href="#" onclick="showForgotPasswordForm(event)">Forgot your password?</a>
                     </div>
 
-                    <button type="button" class="modal-btn login-btn" disabled onclick="handleLogin()">Log In</button>
-                    <p class="login-error-message" style="color: red; font-size: 0.8rem; margin-top: 0.5rem; text-align: center;"></p>
+                    <button type="button" class="modal-btn login-btn" disabled>Log In</button>
+                    <p class="login-error-message" style="color:red;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
 
                     <p class="signup-redirect">Don't have an account yet? <a href="#" onclick="switchToSignup()">Sign up</a></p>
                 </form>
             </div>
 
-            <!-- Forgot Password Form inserted here -->
-            <div id="forgot-password-form" style="display: none;">
-                <span class="auth-close-btn" onclick="closeModal('login-modal', true)">&times;</span>
-                <h2>Forgot Password</h2>
-                <p>Please enter your recovery email address below.</p>
+            <!-- Updated Forgot Password / OTP Flow -->
+            <div id="forgot-password-form" style="display:none; position:relative;">
+                <!-- Back Button -->
+                <button type="button" class="back-social-btn" onclick="showLoginForm(event)">←</button>
 
-                <form onsubmit="handleRecovery(event)">
-                    <label for="recovery-email">Email</label>
-                    <input type="email" id="recovery-email" required />
+                <!-- Email Stage -->
+                <div id="forgot-email-stage">
+                    <h2>Forgot Password</h2>
+                    <p>Enter your email and we'll send you instructions to reset your password.</p>
 
-                    <button type="submit" class="modal-btn">Confirm Recovery Email</button>
-                </form>
+                    <input type="email" id="forgot-email" placeholder="Email" />
+                    <button type="button" id="send-otp-btn" disabled style="background:#364BE9;color:white;margin-top:1rem;">Send Instruction</button>
 
-                <p class="signup-redirect">
-                    Remember your password? <a href="#" onclick="showLoginForm()">Back to Login</a>
-                </p>
+                    <p class="forgot-error-message" style="color:red;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
+                    <p class="forgot-success-message" style="color:green;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
+                </div>
+
+                <!-- OTP Stage -->
+                <div id="otp-stage" style="display:none;">
+                    <h2>Forgot Password</h2>
+                    <p>If the email is valid, you will receive a One Time Password (OTP) via email. Enter it below.</p>
+
+                    <input type="text" id="otp-input" placeholder="Enter 6-digit OTP" maxlength="6" />
+                    <button type="button" id="otp-submit-btn" style="background:#364BE9;color:white;margin-top:1rem;" disabled>Submit</button>
+
+                    <p style="text-align:center;margin-top:1rem;">
+                        Didn’t receive code? <a href="#" id="resend-otp">Resend</a>
+                    </p>
+
+                    <p class="otp-error-message" style="color:red;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
+                    <p class="otp-success-message" style="color:green;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
+                </div>
+
+                <!-- Reset Password Stage -->
+                <div id="reset-password-stage" style="display:none;">
+                    <h2>Reset Password</h2>
+                    <p>Enter your new password below.</p>
+
+                    <!-- New Password -->
+                    <div class="password-wrapper">
+                        <input type="password" id="reset-password" placeholder="New Password" />
+                        <span class="toggle-password" data-target="reset-password">👁️</span>
+                    </div>
+
+                    <!-- Password Requirements (under new password only) -->
+                    <div id="reset-password-requirements" class="password-requirements" style="display: none;">
+                        <p id="req-length-reset" data-text="Minimum 8 characters">❌ Minimum 8 characters</p>
+                        <p id="req-uppercase-reset" data-text="At least one uppercase letter">❌ At least one uppercase letter</p>
+                        <p id="req-number-reset" data-text="At least one number">❌ At least one number</p>
+                        <p id="req-symbol-reset" data-text="At least one symbol (!#^*_-)">❌ At least one symbol (!#^*-)</p>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="password-wrapper">
+                        <input type="password" id="reset-confirm" placeholder="Confirm New Password" />
+                        <span class="toggle-password" data-target="reset-confirm">👁️</span>
+                    </div>
+
+                    <!-- Warning for mismatch -->
+                    <p id="reset-confirm-warning" class="reset-error" style="display: none;">⚠️ Passwords do not match.</p>
+
+                    <button type="button" id="reset-password-btn" disabled>Reset Password</button>
+                    <p class="reset-error-message" style="color:red;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
+                    <p class="reset-success-message" style="color:green;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function checkLoginInputs() {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
-        const loginButton = document.querySelector('.login-btn');
+    document.addEventListener("DOMContentLoaded", () => {
+        // ---------- Initialize Appwrite ----------
+        if (!window.appwriteClient) {
+            window.appwriteClient = new Appwrite.Client()
+                .setEndpoint("https://fra.cloud.appwrite.io/v1")
+                .setProject("689ad4040030d8902c02");
+            window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
+        }
 
-        loginButton.disabled = !(email !== "" && password !== "");
-    }
+        const SUCCESS_URL = "https://localhost:7049/oauth/success";
 
-    // ✅ Add these lines to listen for input events
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('login-email').addEventListener('input', checkLoginInputs);
-        document.getElementById('login-password').addEventListener('input', checkLoginInputs);
-    });
+        // ---------- OAuth Buttons ----------
+        const googleBtn = document.getElementById("btn-google-login");
+        const facebookBtn = document.getElementById("btn-facebook-login");
 
-    async function handleLogin() {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
-
-        const response = await fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
+        googleBtn?.addEventListener("click", () => {
+            window.appwriteAccount.createOAuth2Session(
+                "google",
+                SUCCESS_URL,
+                "https://localhost:7049/?error=OAuthFailed",
+                ["openid", "email", "profile"]
+            );
         });
 
-        const data = await response.json();
+        facebookBtn?.addEventListener("click", () => {
+            window.appwriteAccount.createOAuth2Session(
+                "facebook",
+                SUCCESS_URL,
+                "https://localhost:7049/?error=OAuthFailed"
+            );
+        });
 
-        if (response.ok && data.success) {
-            const role = data.role;
-            const userId = data.userId;
+        // ---------- Login ----------
+        const emailInput = document.getElementById('login-email');
+        const passwordInput = document.getElementById('login-password');
+        const loginBtn = document.querySelector('.login-btn');
+        const loginErrorMsg = document.querySelector('.login-error-message');
 
-            if (role === 'Learner') {
-                window.location.href = `/UserProfile/${userId}`;
-            } else if (role === 'Artisan') {
-                window.location.href = `/ArtisanProfile/${userId}`;
-            } else if (role === 'Admin') {
-                window.location.href = `/AdminProfile/${userId}`;
-            }
-        } else {
-            document.querySelector('.login-error-message').textContent = data.message || "Login failed.";
+        function checkLoginInputs() {
+            loginBtn.disabled = !(emailInput.value.trim() && passwordInput.value);
         }
-    }
+        emailInput.addEventListener('input', checkLoginInputs);
+        passwordInput.addEventListener('input', checkLoginInputs);
+
+        loginBtn?.addEventListener('click', async () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    localStorage.setItem("userRole", data.role);
+                    localStorage.setItem("userId", data.userId);
+                    localStorage.setItem("isVerified", data.isVerified);
+
+                    const redirectMap = {
+                        "Learner": `/UserProfile/${data.userId}`,
+                        "Artisan": `/ArtisanProfile/${data.userId}`,
+                        "Admin": `/AdminProfile/${data.userId}`
+                    };
+                    window.location.href = redirectMap[data.role] || "/";
+                } else {
+                    loginErrorMsg.textContent = data.message || "Login failed.";
+                }
+            } catch (err) {
+                console.error(err);
+                loginErrorMsg.textContent = "Something went wrong. Try again.";
+            }
+        });
+
+        // ---------- Toggle Password ----------
+        window.togglePasswordVisibility = function(inputId, icon) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === "password" ? "text" : "password";
+            if(icon) icon.textContent = input.type === "password" ? "👁️‍🗨️" : "🙈";
+        };
+
+        // ---------- Forgot / OTP / Reset ----------
+        const forgotEmailInput = document.getElementById('forgot-email');
+        const sendOtpBtn = document.getElementById('send-otp-btn');
+        const otpInput = document.getElementById('otp-input');
+        const otpSubmitBtn = document.getElementById('otp-submit-btn');
+        const resendOtpLink = document.getElementById('resend-otp');
+
+        const otpErrorMsg = document.querySelector('.otp-error-message');
+        const otpSuccessMsg = document.querySelector('.otp-success-message');
+        const forgotErrorMsg = document.querySelector('.forgot-error-message');
+        const forgotSuccessMsg = document.querySelector('.forgot-success-message');
+
+        const resetStage = document.getElementById('reset-password-stage');
+        const resetPasswordInput = document.getElementById('reset-password');
+        const confirmResetInput = document.getElementById('reset-confirm');
+        const resetBtn = document.getElementById('reset-password-btn');
+        const resetErrorMsg = document.querySelector('.reset-error-message');
+        const resetSuccessMsg = document.querySelector('.reset-success-message');
+
+        // Enable Send OTP
+        forgotEmailInput?.addEventListener('input', () => {
+            sendOtpBtn.disabled = !forgotEmailInput.value.trim().match(/\S+\S+\.\S+/);
+        });
+
+        // Enable OTP submit
+        otpInput?.addEventListener('input', () => {
+            otpSubmitBtn.disabled = otpInput.value.trim().length !== 6 || !/^\d{6}$/.test(otpInput.value.trim());
+        });
+
+        // Send OTP
+        sendOtpBtn?.addEventListener('click', async () => {
+            const email = forgotEmailInput.value.trim();
+            forgotErrorMsg.textContent = '';
+            forgotSuccessMsg.textContent = '';
+
+            if (!email) return (forgotErrorMsg.textContent = 'Please enter your email.');
+
+            try {
+                const res = await fetch('/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    forgotSuccessMsg.textContent = data.message || 'Instructions sent. Check your email.';
+                    document.getElementById('forgot-email-stage').style.display = 'none';
+                    document.getElementById('otp-stage').style.display = 'block';
+                } else {
+                    forgotErrorMsg.textContent = data.message || 'Failed to send instructions.';
+                }
+            } catch (err) {
+                console.error(err);
+                forgotErrorMsg.textContent = 'Something went wrong. Try again.';
+            }
+        });
+
+        // Verify OTP
+        otpSubmitBtn?.addEventListener('click', async () => {
+            const email = forgotEmailInput.value.trim();
+            const otp = otpInput.value.trim();
+            otpErrorMsg.textContent = '';
+            otpSuccessMsg.textContent = '';
+
+            if (otp.length !== 6 || !/^\d{6}$/.test(otp)) return (otpErrorMsg.textContent = 'OTP must be 6 digits.');
+
+            try {
+                const res = await fetch('/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    otpSuccessMsg.textContent = 'OTP verified! Enter your new password below.';
+                    document.getElementById('otp-stage').style.display = 'none';
+                    resetStage.style.display = 'block';
+                    initializeResetPassword(email);
+                } else {
+                    otpErrorMsg.textContent = data.message || 'Invalid OTP. Please try again.';
+                }
+            } catch (err) {
+                console.error(err);
+                otpErrorMsg.textContent = 'Something went wrong. Try again.';
+            }
+        });
+
+        // ---------- Reset Password Logic ----------
+        function initializeResetPassword(email) {
+            const reqIds = ["req-length-reset","req-uppercase-reset","req-number-reset","req-symbol-reset"];
+            function updateRequirement(id, valid) {
+                const el = document.getElementById(id);
+                const text = el.getAttribute("data-text") || el.textContent.replace("❌","").replace("✅","").trim();
+                el.textContent = (valid ? "✅ " : "❌ ") + text;
+                el.style.color = valid ? "green" : "orange";
+            }
+
+            function validateResetInputs() {
+                const pw = resetPasswordInput.value.trim();
+                const confirm = confirmResetInput.value.trim();
+
+                // Show requirements under new password
+                document.getElementById("reset-password-requirements").style.display = "block";
+
+                updateRequirement("req-length-reset", pw.length >= 8);
+                updateRequirement("req-uppercase-reset", /[A-Z]/.test(pw));
+                updateRequirement("req-number-reset", /\d/.test(pw));
+                updateRequirement("req-symbol-reset", /[!#\^*_\-]/.test(pw));
+
+                // Show mismatch warning only if user typed something in confirm
+                const warning = document.getElementById("reset-confirm-warning");
+                if (confirm.length > 0 && pw !== confirm) {
+                    warning.style.display = "block";
+                } else {
+                    warning.style.display = "none";
+                }
+
+                // Enable reset button only if all requirements met AND passwords match
+                resetBtn.disabled = !(
+                    pw.length >= 8 &&
+                    /[A-Z]/.test(pw) &&
+                    /\d/.test(pw) &&
+                    /[!#\^*_\-]/.test(pw) &&
+                    pw === confirm
+                );
+            }
+
+            resetPasswordInput.addEventListener("input", validateResetInputs);
+            confirmResetInput.addEventListener("input", validateResetInputs);
+
+            // Toggle password visibility
+            document.querySelectorAll('.toggle-password').forEach(icon => {
+                icon.addEventListener('click', () => {
+                    const targetId = icon.getAttribute('data-target');
+                    const target = document.getElementById(targetId);
+                    target.type = target.type === "password" ? "text" : "password";
+                    icon.textContent = target.type === "text" ? "🙈" : "👁️";
+                });
+            });
+
+            // Reset Button Click
+            resetBtn.addEventListener('click', async () => {
+                const newPassword = resetPasswordInput.value.trim();
+                resetErrorMsg.textContent = '';
+                resetSuccessMsg.textContent = '';
+
+                try {
+                    const res = await fetch('/reset-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, newPassword })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        // Show success text
+                        resetSuccessMsg.innerHTML = `Password reset successful!<br><button id="reset-complete" style="margin-top: 0.5rem;">Great</button>`;
+                        resetErrorMsg.textContent = "";
+
+                        // Add click listener to refresh page when clicking "Great"
+                        const loginBtn = document.getElementById("reset-complete");
+                        loginBtn.addEventListener("click", (e) => {
+                            e.preventDefault();
+                            location.reload(); // refresh the page
+                        });
+                    } else {
+                        resetErrorMsg.textContent = data.message || "Error resetting password.";
+                        resetSuccessMsg.textContent = "";
+                    }
+                } catch (err) {
+                    console.error(err);
+                    resetErrorMsg.textContent = "Something went wrong. Try again.";
+                    resetSuccessMsg.textContent = "";
+                }
+            });
+        }
+    });
 </script>
