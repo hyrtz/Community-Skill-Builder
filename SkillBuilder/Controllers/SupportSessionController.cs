@@ -16,18 +16,14 @@ namespace SkillBuilder.Controllers
             _context = context;
         }
 
+        private string? GetUserId() => User.FindFirst("UserId")?.Value;
+
         // POST: Learner creates a request
         [HttpPost("CreateRequest")]
         public async Task<IActionResult> CreateRequest([FromBody] SupportSessionRequest data)
         {
-            var userId = User.FindFirst("UserId")?.Value;
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-            if (!TimeSpan.TryParse(data.SessionTime.ToString(), out _))
-            {
-                ModelState.AddModelError("SessionTime", "Invalid time format.");
-                return BadRequest(ModelState);
-            }
 
             var request = new SupportSessionRequest
             {
@@ -44,24 +40,26 @@ namespace SkillBuilder.Controllers
             _context.SupportSessionRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true });
+            // Include User and Course for JS rendering
+            var newRequest = await _context.SupportSessionRequests
+                .Include(r => r.User)
+                .Include(r => r.Course)
+                .FirstOrDefaultAsync(r => r.Id == request.Id);
+
+            return Ok(newRequest);
         }
 
         // GET: Artisan’s view of pending support requests
         [HttpGet("PendingRequests")]
         public async Task<IActionResult> PendingRequests()
         {
-            var artisanId = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(artisanId))
-                return Unauthorized();
+            var artisanId = GetUserId();
+            if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
 
             var requests = await _context.SupportSessionRequests
                 .Include(r => r.User)
                 .Include(r => r.Course)
-                .Where(r => r.Course != null &&
-                            r.Course.CreatedBy != null &&
-                            r.Course.CreatedBy == artisanId &&
-                            r.Status == "Pending")
+                .Where(r => r.Course.CreatedBy == artisanId && r.Status == "Pending")
                 .OrderByDescending(r => r.CreatedAt)
                 .AsNoTracking()
                 .ToListAsync();
@@ -74,31 +72,28 @@ namespace SkillBuilder.Controllers
         {
             try
             {
-                var artisanId = User.FindFirst("UserId")?.Value;
-                if (string.IsNullOrEmpty(artisanId))
-                    return Unauthorized();
+                var artisanId = GetUserId();
+                if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
 
                 var requests = await _context.SupportSessionRequests
                     .Include(r => r.User)
                     .Include(r => r.Course)
                     .Where(r => r.Course != null &&
-                                r.Course.CreatedBy != null &&
                                 r.Course.CreatedBy == artisanId &&
                                 r.Status == "Pending")
                     .OrderByDescending(r => r.CreatedAt)
                     .AsNoTracking()
-                    .ToListAsync() ?? new List<SupportSessionRequest>();
+                    .ToListAsync();
 
                 return PartialView("~/Views/Shared/Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookPending.cshtml", requests);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex); // log in output window
+                Console.WriteLine(ex);
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
 
-        // POST: Confirm a session
         public class ConfirmSessionRequest
         {
             public int Id { get; set; }
@@ -109,12 +104,13 @@ namespace SkillBuilder.Controllers
         [HttpPost("Confirm")]
         public async Task<IActionResult> ConfirmSession([FromBody] ConfirmSessionRequest data)
         {
-            var artisanId = User.FindFirst("UserId")?.Value;
+            var artisanId = GetUserId();
             if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
 
             var request = await _context.SupportSessionRequests
+                .Include(r => r.User)
                 .Include(r => r.Course)
-                .FirstOrDefaultAsync(r => r.Id == data.Id && r.Course != null && r.Course.CreatedBy == artisanId);
+                .FirstOrDefaultAsync(r => r.Id == data.Id && r.Course.CreatedBy == artisanId);
 
             if (request == null) return NotFound();
 
@@ -124,10 +120,11 @@ namespace SkillBuilder.Controllers
             request.ConfirmedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-            return Ok(new { success = true });
+
+            // Return the full updated object
+            return Json(request);
         }
 
-        // POST: Decline a session
         public class DeclineSessionRequest
         {
             public int Id { get; set; }
@@ -136,30 +133,52 @@ namespace SkillBuilder.Controllers
         [HttpPost("Decline")]
         public async Task<IActionResult> DeclineSession([FromBody] DeclineSessionRequest data)
         {
-            var artisanId = User.FindFirst("UserId")?.Value;
+            var artisanId = GetUserId();
             if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
 
             var request = await _context.SupportSessionRequests
                 .Include(r => r.Course)
-                .FirstOrDefaultAsync(r => r.Id == data.Id && r.Course != null && r.Course.CreatedBy == artisanId);
+                .Include(r => r.User) // include User for JS
+                .FirstOrDefaultAsync(r => r.Id == data.Id && r.Course.CreatedBy == artisanId);
 
             if (request == null) return NotFound();
 
             request.Status = "Declined";
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true });
+            // return the updated request
+            return Ok(new
+            {
+                Id = request.Id,
+                Title = request.Title,
+                Message = request.Message,
+                User = new
+                {
+                    UserAvatar = request.User?.UserAvatar,
+                    FirstName = request.User?.FirstName,
+                    LastName = request.User?.LastName
+                },
+                Course = new
+                {
+                    Title = request.Course?.Title
+                }
+            });
+        }
+
+        public class CompleteSessionRequest
+        {
+            public int Id { get; set; }
         }
 
         [HttpPost("Complete")]
         public async Task<IActionResult> CompleteSession([FromBody] CompleteSessionRequest data)
         {
-            var artisanId = User.FindFirst("UserId")?.Value;
+            var artisanId = GetUserId();
             if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
 
             var request = await _context.SupportSessionRequests
                 .Include(r => r.Course)
-                .FirstOrDefaultAsync(r => r.Id == data.Id && r.Course != null && r.Course.CreatedBy == artisanId);
+                .FirstOrDefaultAsync(r => r.Id == data.Id && r.Course.CreatedBy == artisanId);
 
             if (request == null) return NotFound();
 
@@ -170,10 +189,10 @@ namespace SkillBuilder.Controllers
             return Ok(new { success = true });
         }
 
-        [HttpGet("CompletedRequests")]
-        public async Task<IActionResult> CompletedRequests()
+        [HttpGet("CompletedRequestsPartial")]
+        public async Task<IActionResult> CompletedRequestsPartial()
         {
-            var artisanId = User.FindFirst("UserId")?.Value;
+            var artisanId = GetUserId();
             if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
 
             var requests = await _context.SupportSessionRequests
@@ -184,18 +203,19 @@ namespace SkillBuilder.Controllers
                 .AsNoTracking()
                 .ToListAsync();
 
-            return View("~/Views/Sections/ArtisanNotebooks/_ArtisanNotebookSupportSessionsCompleted.cshtml", requests);
+            return PartialView("~/Views/Shared/Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookCompleted.cshtml", requests);
         }
+
 
         [HttpPost("Complete/{id}")]
         public async Task<IActionResult> CompleteSession(int id)
         {
-            var artisanId = User.FindFirst("UserId")?.Value;
+            var artisanId = GetUserId();
             if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
 
             var request = await _context.SupportSessionRequests
                 .Include(r => r.Course)
-                .FirstOrDefaultAsync(r => r.Id == id && r.Course != null && r.Course.CreatedBy == artisanId);
+                .FirstOrDefaultAsync(r => r.Id == id && r.Course.CreatedBy == artisanId);
 
             if (request == null) return NotFound();
 
@@ -209,12 +229,12 @@ namespace SkillBuilder.Controllers
         [HttpPost("Revert/{id}")]
         public async Task<IActionResult> RevertSession(int id)
         {
-            var artisanId = User.FindFirst("UserId")?.Value;
+            var artisanId = GetUserId();
             if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
 
             var request = await _context.SupportSessionRequests
                 .Include(r => r.Course)
-                .FirstOrDefaultAsync(r => r.Id == id && r.Course != null && r.Course.CreatedBy == artisanId);
+                .FirstOrDefaultAsync(r => r.Id == id && r.Course.CreatedBy == artisanId);
 
             if (request == null) return NotFound();
 
@@ -223,6 +243,43 @@ namespace SkillBuilder.Controllers
 
             await _context.SaveChangesAsync();
             return Ok(new { success = true });
+        }
+
+        [HttpGet("DeclinedPartial")]
+        public IActionResult DeclinedPartial()
+        {
+            var artisanId = GetUserId();
+            if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
+
+            var declinedSessions = _context.SupportSessionRequests
+                .Include(s => s.User)
+                .Include(s => s.Course)
+                .Where(s => s.Course != null &&
+                            s.Course.CreatedBy == artisanId &&
+                            s.Status == "Declined")
+                .OrderByDescending(s => s.SessionDate)
+                .ToList();
+
+            return PartialView("~/Views/Shared/Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookDeclined.cshtml", declinedSessions);
+        }
+
+        [HttpGet("UpcomingPartial")]
+        public IActionResult UpcomingPartial()
+        {
+            var artisanId = GetUserId();
+            if (string.IsNullOrEmpty(artisanId)) return Unauthorized();
+
+            var upcomingSessions = _context.SupportSessionRequests
+                .Include(s => s.User)
+                .Include(s => s.Course)
+                .Where(s => s.Course != null &&
+                            s.Course.CreatedBy == artisanId &&
+                            s.Status == "Confirmed" &&
+                            s.SessionDate >= DateTime.Today)
+                .OrderBy(s => s.SessionDate)
+                .ToList();
+
+            return PartialView("~/Views/Shared/Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookUpcoming.cshtml", upcomingSessions);
         }
     }
 }

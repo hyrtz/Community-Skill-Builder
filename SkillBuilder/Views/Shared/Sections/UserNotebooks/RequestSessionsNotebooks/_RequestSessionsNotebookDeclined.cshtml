@@ -7,6 +7,26 @@
         .ToList();
 }
 
+<style>
+    .declined-card {
+        background-color: #f4f4f4;
+        opacity: 0.7;
+        border: 1px solid #ccc;
+        position: relative;
+    }
+
+    .status-declined {
+        background-color: #ccc;
+        color: #333;
+        font-weight: bold;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+</style>
+
 @if (!declined.Any())
 {
     <div class="user-support-empty">
@@ -18,12 +38,38 @@ else
 {
     foreach (var request in declined)
     {
-        <div class="user-support-card">
+        <div class="user-support-card declined-card">
             <div class="user-support-title">@request.Title</div>
             <div class="user-support-message">@request.Message</div>
             <div class="user-support-schedule">
-                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
-                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
+                <div>
+                    <i class="fas fa-calendar-alt"></i>
+                    @{
+                        string dateText = "No date scheduled";
+                        if (request.SessionDate != null)
+                        {
+                            if (DateTime.TryParse(request.SessionDate.ToString(), out var parsedDate))
+                            {
+                                dateText = parsedDate.ToString("M/d/yyyy");
+                            }
+                        }
+                        @dateText
+                    }
+                </div>
+                <div>
+                    <i class="fas fa-clock"></i>
+                    @{
+                        string timeText = "No time scheduled";
+                        if (request.SessionTime != null)
+                        {
+                            if (DateTime.TryParse(request.SessionTime.ToString(), out var parsedTime))
+                            {
+                                timeText = parsedTime.ToString("h:mm tt");
+                            }
+                        }
+                        @timeText
+                    }
+                </div>
             </div>
             <span class="support-status-badge status-declined">Declined</span>
         </div>

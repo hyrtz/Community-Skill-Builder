@@ -8,13 +8,25 @@
 }
 else
 {
-    @foreach (var request in Model)
-    {
-        <div class="artisan-support-card" id="session-@request.Id">
-            <div class="artisan-support-user">@request.User.FirstName @request.User.LastName</div>
-            <div class="artisan-support-message">@request.Message</div>
-            <div class="artisan-support-course">@request.Course.Title</div>
-            <div class="support-status-badge status-declined" style="margin-top:0.5rem;">Declined</div>
-        </div>
-    }
+    <div class="artisan-support-list">
+        @foreach (var request in Model)
+        {
+            <div class="artisan-support-card" id="support-@request.Id">
+                <div class="artisan-support-user">
+                    <img src="@request.User.UserAvatar" class="artisan-support-user-avatar" />
+                    <div class="artisan-support-user-info">
+                        <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
+                        <div class="artisan-support-user-course">@request.Course.Title</div>
+                    </div>
+                </div>
+
+                <div class="artisan-support-title">@request.Title</div>
+                <div class="artisan-support-message">@request.Message</div>
+
+                <div class="support-status-badge status-declined" style="margin-top:0.5rem;">
+                    Declined
+                </div>
+            </div>
+        }
+    </div>
 }

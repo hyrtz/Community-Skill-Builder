@@ -2,24 +2,115 @@
 
 @if (!Model.Any())
 {
-    <div class="artisan-support-empty upcoming-empty">
-        No upcoming sessions scheduled yet.<br />Confirmed sessions will show here.
+    <div class="artisan-support-empty">
+        No upcoming sessions yet.
     </div>
 }
 else
 {
-    @foreach (var request in Model)
-    {
-        <div class="artisan-support-card" id="session-@request.Id">
-            <div class="artisan-support-user">@request.User.FirstName @request.User.LastName</div>
-            <div class="artisan-support-message">@request.Message</div>
-            <div class="artisan-support-course">@request.Course.Title</div>
-            <div class="support-status-badge status-confirmed" style="margin-top:0.5rem;">Confirmed</div>
-            <div style="margin-top:1rem;">
-                <button class="btn btn-success btn-sm complete-session-btn" data-id="@request.Id">
-                    <i class="fas fa-check"></i> Mark as Completed
-                </button>
+    <div class="artisan-support-list">
+        @foreach (var request in Model)
+        {
+            <div class="artisan-support-card" id="support-@request.Id">
+                <div class="artisan-support-user">
+                    <img src="@request.User.UserAvatar" class="artisan-support-user-avatar" />
+                    <div class="artisan-support-user-info">
+                        <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
+                        <div class="artisan-support-user-course">@request.Course.Title</div>
+                    </div>
+                </div>
+
+                <div class="artisan-support-title">@request.Title</div>
+                <div class="artisan-support-message">@request.Message</div>
+
+                <div class="support-status-badge status-confirmed" style="margin-top:0.5rem;">
+                    Confirmed
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(request.MeetingLink))
+                {
+                    <div style="margin-top:0.5rem;">
+                        <a href="@request.MeetingLink" target="_blank" class="btn btn-primary btn-sm">
+                            <i class="fas fa-link"></i> Join Session
+                        </a>
+                    </div>
+                }
+
+                <div style="margin-top:1rem;">
+                    <button class="btn btn-success btn-sm complete-session-btn" data-id="@request.Id">
+                        <i class="fas fa-check"></i> Mark as Completed
+                    </button>
+                </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 }
+
+<script>
+    async function completeSession(id) {
+        try {
+            const card = document.getElementById('support-' + id);
+            if (!card) return;
+
+            // Grab info BEFORE removing
+            const userAvatar = card.querySelector('.artisan-support-user-avatar').src;
+            const userName = card.querySelector('.artisan-support-user-name').textContent;
+            const userCourse = card.querySelector('.artisan-support-user-course').textContent;
+            const title = card.querySelector('.artisan-support-title').textContent;
+            const message = card.querySelector('.artisan-support-message').textContent;
+
+            const res = await fetch(`/SupportSession/Complete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Id: id })
+            });
+
+            if (!res.ok) throw new Error('Failed to complete session');
+
+            // Remove from upcoming
+            card.remove();
+
+            // Add to completed
+            const completedContainer = document.getElementById('completedSupportContainer');
+            let completedList = completedContainer.querySelector('.artisan-support-list');
+            if (!completedList) {
+                completedList = document.createElement('div');
+                completedList.classList.add('artisan-support-list');
+                completedContainer.innerHTML = '';
+                completedContainer.appendChild(completedList);
+            }
+
+            const completedCard = document.createElement('div');
+            completedCard.classList.add('artisan-support-card');
+            completedCard.id = 'session-' + id;
+            completedCard.innerHTML = `
+                <div class="artisan-support-user">
+                    <img src="${userAvatar}" class="artisan-support-user-avatar" />
+                    <div class="artisan-support-user-info">
+                        <div class="artisan-support-user-name">${userName}</div>
+                        <div class="artisan-support-user-course">${userCourse}</div>
+                    </div>
+                </div>
+                <div class="artisan-support-title">${title}</div>
+                <div class="artisan-support-message">${message}</div>
+                <div class="support-status-badge status-completed" style="margin-top:0.5rem;">
+                    Completed
+                </div>
+            `;
+            completedList.prepend(completedCard);
+
+        } catch (err) {
+            console.error(err);
+            alert('Something went wrong while completing the session.');
+        }
+    }
+
+    // Use event delegation for dynamically rendered buttons
+    document.addEventListener('click', e => {
+        if (e.target.closest('.complete-session-btn')) {
+            const btn = e.target.closest('.complete-session-btn');
+            const id = btn.dataset.id;
+            completeSession(id);
+        }
+    });
+</script>

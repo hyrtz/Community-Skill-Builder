@@ -105,13 +105,13 @@
         <div id="pendingSupportContainer" class="artisan-session-panel @(activeSessionTab == "pending" ? "active" : "")" data-tab="pending">
             @await Html.PartialAsync("Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookPending")
         </div>
-        <div class="artisan-session-panel @(activeSessionTab == "upcoming" ? "active" : "")" data-tab="upcoming">
+        <div id="upcomingSessionsContainer" class="artisan-session-panel @(activeSessionTab == "upcoming" ? "active" : "")" data-tab="upcoming">
             @await Html.PartialAsync("Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookUpcoming")
         </div>
-        <div class="artisan-session-panel @(activeSessionTab == "completed" ? "active" : "")" data-tab="completed">
+        <div id="completedSupportContainer" class="artisan-session-panel @(activeSessionTab == "completed" ? "active" : "")" data-tab="completed">
             @await Html.PartialAsync("Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookCompleted")
         </div>
-        <div class="artisan-session-panel @(activeSessionTab == "declined" ? "active" : "")" data-tab="declined">
+        <div id="declinedSessionsContainer" class="artisan-session-panel @(activeSessionTab == "declined" ? "active" : "")" data-tab="declined">
             @await Html.PartialAsync("Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookDeclined")
         </div>
     </div>
@@ -134,75 +134,3 @@
         });
     });
 </script>
-
-@section Scripts {
-    <script>
-        function moveCard(cardId, targetContainerSelector, emptyMsgSelector, emptyMsgText) {
-            const card = document.getElementById(cardId);
-            if (!card) return;
-
-            const targetContainer = document.querySelector(targetContainerSelector);
-            const emptyMsg = document.querySelector(emptyMsgSelector);
-
-            // Remove empty state if exists
-            if (emptyMsg) emptyMsg.remove();
-
-            // Move card
-            targetContainer.appendChild(card);
-
-            // If old section becomes empty, add placeholder
-            const oldSectionCards = card.parentElement.querySelectorAll('.artisan-support-card');
-            if (oldSectionCards.length === 0) {
-                const div = document.createElement('div');
-                div.className = 'artisan-support-empty';
-                div.innerHTML = emptyMsgText;
-                card.parentElement.appendChild(div);
-            }
-        }
-
-        // Mark Complete
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.complete-session-btn')) {
-                const id = e.target.closest('.complete-session-btn').dataset.id;
-                fetch(`/SupportSession/Complete/${id}`, { method: 'POST' })
-                    .then(res => res.ok ? res.json() : Promise.reject())
-                    .then(() => {
-                        moveCard(`session-${id}`, '#completedSection', '.upcoming-empty',
-                            'No upcoming sessions scheduled yet.<br />Confirmed sessions will show here.');
-                        document.querySelector(`#session-${id} .support-status-badge`).textContent = 'Completed';
-                        document.querySelector(`#session-${id} .support-status-badge`).className = 'support-status-badge status-confirmed';
-                        e.target.closest('.complete-session-btn').remove();
-                        document.querySelector(`#session-${id}`).innerHTML += `
-                            <div style="margin-top: 1rem;">
-                                <button class="btn btn-warning btn-sm revert-session-btn" data-id="${id}">
-                                    <i class="fas fa-undo"></i> Revert to Confirmed
-                                </button>
-                            </div>`;
-                    })
-                    .catch(() => alert('Error marking complete.'));
-            }
-        });
-
-        // Revert
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.revert-session-btn')) {
-                const id = e.target.closest('.revert-session-btn').dataset.id;
-                fetch(`/SupportSession/Revert/${id}`, { method: 'POST' })
-                    .then(res => res.ok ? res.json() : Promise.reject())
-                    .then(() => {
-                        moveCard(`session-${id}`, '#upcomingSection', '.completed-empty',
-                            'You haven’t completed any support sessions yet.<br />Manually completed sessions will appear here.');
-                        document.querySelector(`#session-${id} .support-status-badge`).textContent = 'Confirmed';
-                        e.target.closest('.revert-session-btn').remove();
-                        document.querySelector(`#session-${id}`).innerHTML += `
-                            <div style="margin-top: 1rem;">
-                                <button class="btn btn-success btn-sm complete-session-btn" data-id="${id}">
-                                    <i class="fas fa-check"></i> Mark as Completed
-                                </button>
-                            </div>`;
-                    })
-                    .catch(() => alert('Error reverting session.'));
-            }
-        });
-    </script>
-}

@@ -1,25 +1,35 @@
 ﻿@model List<SkillBuilder.Models.SupportSessionRequest>
 
-@if (!Model.Any())
-{
-    <div class="artisan-support-empty completed-empty">
-        You haven’t completed any support sessions yet.<br />Manually completed sessions will appear here.
-    </div>
-}
-else
-{
-    @foreach (var request in Model)
+<div id="completedSupportContainer">
+    @if (!Model.Any())
     {
-        <div class="artisan-support-card" id="session-@request.Id">
-            <div class="artisan-support-user">@request.User.FirstName @request.User.LastName</div>
-            <div class="artisan-support-message">@request.Message</div>
-            <div class="artisan-support-course">@request.Course.Title</div>
-            <div class="support-status-badge status-confirmed" style="margin-top:0.5rem;">Completed</div>
-            <div style="margin-top:1rem;">
-                <button class="btn btn-warning btn-sm revert-session-btn" data-id="@request.Id">
-                    <i class="fas fa-undo"></i> Revert to Confirmed
-                </button>
-            </div>
+        <div class="artisan-support-empty completed-empty">
+            You haven’t completed any support sessions yet.<br />
+            Manually completed sessions will appear here.
         </div>
     }
-}
+    else
+    {
+        <div class="artisan-support-list">
+            @foreach (var request in Model)
+            {
+                <div class="artisan-support-card" id="session-@request.Id">
+                    <div class="artisan-support-user">
+                        <img src="@request.User.UserAvatar" class="artisan-support-user-avatar" />
+                        <div class="artisan-support-user-info">
+                            <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
+                            <div class="artisan-support-user-course">@request.Course.Title</div>
+                        </div>
+                    </div>
+
+                    <div class="artisan-support-title">@request.Title</div>
+                    <div class="artisan-support-message">@request.Message</div>
+
+                    <div class="support-status-badge status-completed" style="margin-top:0.5rem;">
+                        Completed
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -93,25 +93,101 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0,0,0,0.4);
+        background: rgba(0, 0, 0, 0.3);
         display: flex;
         align-items: center;
         justify-content: center;
+        z-index: 1001;
     }
 
+    /* Modal content */
     .modal-content {
         background: #fff;
-        padding: 1.5rem;
-        border-radius: 10px;
-        width: 300px;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 360px;
+        max-width: 90%;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+        .modal-content h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111;
+        }
+
+        .modal-content p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        /* Form controls */
+        .modal-content label {
+            font-size: 0.85rem;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .modal-content select,
+        .modal-content input[type="text"] {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+            .modal-content select:focus,
+            .modal-content input[type="text"]:focus {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            }
+
+    /* Buttons */
     .modal-actions {
-        margin-top: 1rem;
         display: flex;
         justify-content: flex-end;
         gap: 0.5rem;
+        margin-top: 1rem;
     }
+
+        .modal-actions .btn-cancel {
+            background: #f3f3f3;
+            color: #555;
+            border: none;
+            padding: 0.55rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+            .modal-actions .btn-cancel:hover {
+                background: #e5e5e5;
+            }
+
+        .modal-actions .btn-confirm {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            padding: 0.55rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+            .modal-actions .btn-confirm:hover {
+                background: #2563eb;
+            }
 </style>
 
 <div id="pendingSupportContainer">
@@ -145,10 +221,10 @@
                     </div>
 
                     <div class="artisan-support-actions">
-                        <button class="artisan-btn-confirm" onclick="respondToSession(@request.Id, true)">
+                        <button class="artisan-btn-confirm" onclick="openConfirmModal(@request.Id)">
                             <i class="fas fa-check"></i> Confirm
                         </button>
-                        <button class="artisan-btn-decline" onclick="respondToSession(@request.Id, false)">
+                        <button class="artisan-btn-decline" onclick="declineSession(@request.Id)">
                             <i class="fas fa-times"></i> Decline
                         </button>
                     </div>
@@ -175,104 +251,209 @@
         <input type="hidden" id="confirmSessionId" />
 
         <div class="modal-actions">
-            <button onclick="submitSessionLink()" class="artisan-btn-confirm">Submit</button>
-            <button onclick="closeModal()" class="artisan-btn-decline">Cancel</button>
+            <button id="modalCancelBtn" class="btn-cancel">Cancel</button>
+            <button onclick="submitSessionLink()" class="btn-confirm">Confirm Session</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Respond to Confirm or Decline
-    function respondToSession(id, confirm) {
-        if (!id) return;
+    let currentSessionId = null;
+    let isModalOpen = false;
 
-        if (confirm) {
-            document.getElementById("sessionLinkModal").style.display = "flex";
-            document.getElementById("confirmSessionId").value = id;
-        } else {
-            fetch('/SupportSession/Decline', {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ id })
-            })
-            .then(res => {
-                if (res.ok) removeCard(id);
-            })
-            .catch(err => console.error("Decline failed:", err));
-        }
+    // ===== MODAL FUNCTIONS =====
+    function openConfirmModal(id) {
+        currentSessionId = id;
+        document.getElementById('confirmSessionId').value = id;
+        document.getElementById('sessionLinkModal').style.display = 'flex';
+        isModalOpen = true;
+        document.getElementById('meetingLink').focus();
     }
 
-    // Close modal
-    function closeModal() {
-        document.getElementById("sessionLinkModal").style.display = "none";
+    function closeSessionModal() {
+        const modal = document.getElementById('sessionLinkModal');
+        if (!modal) return;
+
+        modal.style.display = 'none';
+        currentSessionId = null;
+        document.getElementById('meetingLink').value = '';
+        document.getElementById('meetingPlatform').value = 'Zoom';
+        isModalOpen = false;
     }
 
-    // Submit confirmed session with meeting details
-    function submitSessionLink() {
-        const sessionId = document.getElementById("confirmSessionId").value;
-        const platform = document.getElementById("meetingPlatform").value;
-        const link = document.getElementById("meetingLink").value;
-
-        fetch('/SupportSession/Confirm', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ id: sessionId, platform, link })
-        })
-        .then(res => {
-            if (res.ok) removeCard(sessionId);
-            closeModal();
-        })
-        .catch(err => console.error("Confirm failed:", err));
-    }
-
-    // Remove card and show empty if no cards left
-    function removeCard(id) {
-        const card = document.getElementById(`support-${id}`);
-        if (card) card.remove();
-
-        const container = document.getElementById("pendingSupportContainer");
-        if (container && container.querySelectorAll('.artisan-support-card').length === 0) {
-            container.innerHTML = `<div class="artisan-support-empty">
-                No support session requests at the moment.<br />
-                When learners request assistance, they’ll appear here.
-            </div>`;
-        }
-    }
-
-    // Attach click handlers (for auto-refresh)
-    function attachRespondButtons() {
-        document.querySelectorAll('.artisan-btn-confirm').forEach(btn => {
-            btn.onclick = function() {
-                const id = this.closest('.artisan-support-card').id.replace('support-', '');
-                respondToSession(id, true);
-            };
-        });
-
-        document.querySelectorAll('.artisan-btn-decline').forEach(btn => {
-            btn.onclick = function() {
-                const id = this.closest('.artisan-support-card').id.replace('support-', '');
-                respondToSession(id, false);
-            };
-        });
-    }
-
-    attachRespondButtons();
-
-    // Auto-refresh every 10 seconds
-    async function refreshPendingRequests() {
-        const container = document.getElementById("pendingSupportContainer");
-        if (!container) return;
+    async function submitSessionLink() {
+        if (!currentSessionId) return;
+        const platform = document.getElementById('meetingPlatform').value;
+        const link = document.getElementById('meetingLink').value.trim();
+        if (!link) { alert('Please enter a meeting link.'); return; }
 
         try {
-            const res = await fetch("/SupportSession/PendingRequestsPartial");
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            container.innerHTML = await res.text();
+            const res = await fetch('/SupportSession/Confirm', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ Id: currentSessionId, Platform: platform, Link: link })
+            });
+            if (!res.ok) throw new Error('Failed to confirm session.');
 
-            // Reattach handlers after refresh
-            attachRespondButtons();
-        } catch(err) {
-            console.error("Failed to refresh pending requests:", err);
+            closeSessionModal();
+
+            // Refresh both pending and upcoming lists
+            await refreshPendingRequests();
+            await refreshUpcomingSessions();
+        } catch (err) {
+            console.error(err);
+            alert('Something went wrong. Please try again.');
         }
     }
-    setInterval(refreshPendingRequests, 10000);
+
+    // ===== DECLINE SESSION =====
+    async function declineSession(id) {
+        if (!confirm('Are you sure you want to decline this session?')) return;
+        try {
+            const res = await fetch('/SupportSession/Decline', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ Id: id })
+            });
+            if (!res.ok) throw new Error('Failed to decline session.');
+
+            await refreshPendingRequests();
+            await refreshDeclinedSessions();
+        } catch (err) {
+            console.error(err);
+            alert('Something went wrong. Please try again.');
+        }
+    }
+
+    // ===== COMPLETE SESSION =====
+    async function completeSession(id) {
+        try {
+            const res = await fetch('/SupportSession/Complete', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ Id: id })
+            });
+            if (!res.ok) throw new Error('Failed to complete session.');
+
+            await refreshUpcomingSessions();
+            await refreshCompletedSessions();
+        } catch (err) {
+            console.error(err);
+            alert('Something went wrong while completing the session.');
+        }
+    }
+
+    // ===== REFRESH FUNCTIONS =====
+    async function refreshPendingRequests() {
+        try {
+            const res = await fetch('/SupportSession/PendingRequestsPartial');
+            if (!res.ok) throw new Error('Failed to load pending requests');
+            const html = await res.text();
+            document.getElementById('pendingSupportContainer').innerHTML = html;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function refreshUpcomingSessions() {
+        try {
+            const res = await fetch('/SupportSession/UpcomingPartial');
+            if (!res.ok) throw new Error('Failed to load upcoming sessions');
+            const html = await res.text();
+            document.getElementById('upcomingSessionsContainer').innerHTML = html;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function refreshDeclinedSessions() {
+        try {
+            const res = await fetch('/SupportSession/DeclinedPartial');
+            if (!res.ok) throw new Error('Failed to load declined sessions');
+            const html = await res.text();
+            document.getElementById('declinedSessionsContainer').innerHTML = html;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function refreshCompletedSessions() {
+        try {
+            const res = await fetch('/SupportSession/CompletedRequestsPartial');
+            if (!res.ok) throw new Error('Failed to load completed sessions');
+            const html = await res.text();
+            document.getElementById('completedSupportContainer').innerHTML = html;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // ===== MODAL & CARD DELEGATION =====
+    document.addEventListener('click', function(e) {
+        // Confirm session card button
+        if (e.target.closest('.artisan-btn-confirm')) {
+            const id = e.target.closest('.artisan-support-card').id.replace('support-', '');
+            openConfirmModal(id);
+        }
+
+        // Decline session card button
+        if (e.target.closest('.artisan-btn-decline')) {
+            const id = e.target.closest('.artisan-support-card').id.replace('support-', '');
+            declineSession(id);
+        }
+
+        // Complete session button
+        if (e.target.closest('.complete-session-btn')) {
+            const id = e.target.closest('.artisan-support-card').id.replace('support-', '');
+            completeSession(id);
+        }
+
+        // Cancel button inside modal
+        if (e.target.closest('#modalCancelBtn')) {
+            closeSessionModal();
+        }
+
+        // Click outside modal content to close
+        if (e.target.id === 'sessionLinkModal') {
+            closeSessionModal();
+        }
+
+        // Confirm session inside modal
+        if (e.target.closest('.btn-confirm') && e.target.closest('#sessionLinkModal')) {
+            submitSessionLink();
+        }
+    });
+
+    // ===== MODAL LISTENER =====
+    function attachModalListeners() {
+        const cancelBtn = document.getElementById('modalCancelBtn');
+        if (cancelBtn) cancelBtn.addEventListener('click', closeSessionModal);
+
+        const modal = document.getElementById('sessionLinkModal');
+        if (modal) modal.onclick = e => { if (e.target === modal) closeSessionModal(); };
+    }
+
+    attachModalListeners();
+
+    // ===== AUTO REFRESH EVERY 10 SECONDS =====
+    setInterval(() => {
+        if (!isModalOpen) {
+            refreshPendingRequests();
+            refreshUpcomingSessions();
+            refreshDeclinedSessions();
+            refreshCompletedSessions();
+        }
+    }, 10000);
+
+    // ===== INITIAL LOAD =====
+    refreshPendingRequests();
+    refreshUpcomingSessions();
+    refreshDeclinedSessions();
+    refreshCompletedSessions();
+
+    // Expose globally if needed
+    window.refreshPendingRequests = refreshPendingRequests;
+    window.refreshUpcomingSessions = refreshUpcomingSessions;
+    window.refreshDeclinedSessions = refreshDeclinedSessions;
+    window.refreshCompletedSessions = refreshCompletedSessions;
 </script>

@@ -2,7 +2,7 @@
 
 @{
     var upcoming = Model.SupportRequests
-        .Where(r => r.Status == "Confirmed" && r.SessionDate >= DateTime.Today)
+        .Where(r => r.Status == "Confirmed" && r.SessionDate.Date >= DateTime.Today)
         .OrderBy(r => r.SessionDate)
         .ToList();
 }
@@ -23,12 +23,20 @@ else
             <div class="user-support-message">@request.Message</div>
             <div class="user-support-schedule">
                 <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
-                <div><i class="fas fa-clock"></i> @request.SessionTime.ToString("h:mm tt")</div>
-            </div>
-            <span class="support-status-badge status-confirmed">Confirmed</span>
-            <div class="user-support-confirm-details">
-                Platform: <strong>@request.MeetingPlatform</strong><br />
-                <a href="@request.MeetingLink" target="_blank">Join Link</a>
+                <div>
+                    <i class="fas fa-clock"></i>
+                    @(request.SessionTime != null
+                                ? (DateTime.Today + request.SessionTime).ToString("h:mm tt")
+                                : "TBD")
+        </div>
+    </div>
+    <span class="support-status-badge status-confirmed">Confirmed</span>
+    <div class="user-support-confirm-details">
+        Platform: <strong>@request.MeetingPlatform ?? "TBD"</strong><br />
+        @if (!string.IsNullOrWhiteSpace(request.MeetingLink))
+                {
+                    <a href="@request.MeetingLink" target="_blank">Join Link</a>
+                }
             </div>
         </div>
     }
