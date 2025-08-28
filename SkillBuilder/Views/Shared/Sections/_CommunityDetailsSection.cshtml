@@ -1,0 +1,129 @@
+﻿@model SkillBuilder.Models.Community
+
+<style>
+    .community-details {
+        background: #f5f8ff;
+        padding-bottom: 3rem;
+    }
+
+    /* Cover Image */
+    .community-cover {
+        width: 100%;
+        height: 280px;
+        background: url('@(string.IsNullOrEmpty(Model.CoverImageUrl) ? "/uploads/community-banner/default-banner.jpg" : Model.CoverImageUrl)') center/cover no-repeat;
+        position: relative;
+    }
+
+    /* Avatar */
+    .community-avatar {
+        position: absolute;
+        bottom: -60px;
+        left: 50px;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 5px solid #fff;
+        background: #ddd center/cover no-repeat;
+    }
+
+    /* Top Info Section */
+    .community-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding: 0 2rem;
+        margin-top: 80px; /* offset for avatar */
+    }
+
+    .community-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .create-post-btn {
+        padding: 0.8rem 1.5rem;
+        background: #224499;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .create-post-btn:hover {
+            background: #193677;
+        }
+
+    /* Main Layout */
+    .community-main {
+        display: flex;
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    .community-left {
+        width: 70%;
+    }
+
+    .community-right {
+        width: 30%;
+    }
+
+    /* Posts Placeholder */
+    .post-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Right Card */
+    .community-info-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .community-info-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.8rem;
+    }
+</style>
+
+<section class="community-details">
+    <!-- Cover Image -->
+    <div class="community-cover">
+        <div class="community-avatar" style="background-image:url('@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/uploads/community-profile/default-profile.jpg" : Model.AvatarUrl)');"></div>
+    </div>
+
+    <!-- Top Info -->
+    <div class="community-top">
+        <div>
+            <h1 class="community-title">@Model.Name</h1>
+        </div>
+        <button class="create-post-btn">Create Post</button>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="community-main">
+        <!-- Left: Posts -->
+        <div class="community-left">
+            <div class="post-card">Post 1 (placeholder)</div>
+            <div class="post-card">Post 2 (placeholder)</div>
+        </div>
+
+        <!-- Right: Info Card -->
+        <div class="community-right">
+            <div class="community-info-card">
+                <h2 class="community-info-title">@Model.Name</h2>
+                <p>@Model.Description</p>
+                <p><strong>Members:</strong> @Model.MembersCount</p>
+            </div>
+        </div>
+    </div>
+</section>

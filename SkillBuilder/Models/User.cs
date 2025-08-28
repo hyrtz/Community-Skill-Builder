@@ -21,5 +21,6 @@
         public List<Enrollment> Enrollments { get; set; }
         public List<CourseReview> Reviews { get; set; }
         public List<CourseProjectSubmission> ProjectSubmissions { get; set; }
+        public List<CommunityMembership> Memberships { get; set; }
     }
 }

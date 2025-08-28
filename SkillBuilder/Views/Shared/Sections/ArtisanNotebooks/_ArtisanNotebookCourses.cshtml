@@ -4,93 +4,185 @@
     .artisan-courses-section {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .artisan-courses-heading {
         font-size: 1.8rem;
         font-weight: bold;
-        color: #333;
+        color: #222;
     }
 
     .artisan-courses-grid {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 1.5rem;
     }
 
     .artisan-course-card {
-        width: 30%;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+        background: #fff;
+        border: 1px solid #d3d3d3;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
         overflow: hidden;
-        text-decoration: none;
-        color: inherit;
-        transition: transform 0.2s ease;
-        border: 1px solid #e5e5e5;
+        transition: box-shadow 0.2s ease;
+        min-height: 320px; /* makes the card taller */
     }
 
         .artisan-course-card:hover {
-            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
+
+    .artisan-course-image-wrapper {
+        background: #f0f0f5;
+        height: 180px; /* was 150px */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
     .artisan-course-image {
         width: 100%;
-        height: 150px;
+        height: 100%;
         object-fit: cover;
+    }
+
+    .artisan-course-content {
+        padding: 1rem;
     }
 
     .artisan-course-title {
         font-size: 1.1rem;
         font-weight: bold;
-        margin: 1rem;
-        color: #222;
+        margin-bottom: 0.5rem;
+        color: #000;
     }
 
     .artisan-course-desc {
-        font-size: 0.95rem;
-        margin: 0 1rem 1rem;
+        font-size: 0.9rem;
         color: #555;
+        line-height: 1.4;
     }
 
-    .artisan-courses-empty {
-        padding: 2rem;
-        background-color: #fdfdfd;
-        border: 1px dashed #ccc;
-        border-radius: 10px;
-        text-align: center;
-        color: #777;
-        font-size: 1rem;
-        line-height: 1.6;
+    .artisan-course-actions {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        gap: 0.5rem;
+        margin-top: auto;
     }
 
-        .artisan-courses-empty strong {
-            color: #344AEA;
+    /* Primary button */
+    .btn-primary {
+        padding: 0.4rem 1rem; /* slimmer height */
+        background: #344AEA;
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s ease;
+        display: inline-block; /* keeps button natural width */
+    }
+
+        .btn-primary:hover {
+            background: #2c3fcf;
         }
+
+    /* Outlined button */
+    .btn-outline {
+        padding: 0.4rem 1rem;
+        border: 1px solid #344AEA;
+        background: white;
+        color: #344AEA;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+        .btn-outline:hover {
+            background: #f3f4ff;
+        }
+
+    /* Remove the full-width override */
+    .btn-primary.full-width {
+        width: auto;
+    }
+
+    .create-card {
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem 1rem;
+        justify-content: center;
+        gap: 0.8rem;
+    }
+
+        .create-card .btn-primary {
+            margin-top: 0.5rem;
+        }
+
+    .create-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f0f0f5;
+        color: #344AEA;
+        font-size: 1.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
 </style>
 
 <div class="artisan-courses-section">
-    <div class="artisan-courses-heading">My Courses</div>
+    <div class="artisan-courses-heading">Courses</div>
 
-    @if (Model.Courses.Any())
-    {
-        <div class="artisan-courses-grid">
+    <div class="artisan-courses-grid">
+        @if (Model.Courses.Any())
+        {
             @foreach (var course in Model.Courses)
             {
-                <a href="/Courses?selectedCourse=@course.Link" class="artisan-course-card">
-                    <img src="@course.ImageUrl" alt="Course Image" class="artisan-course-image" />
-                    <div class="artisan-course-title">@course.Title</div>
-                    <div class="artisan-course-desc">@course.Overview</div>
-                </a>
+                <div class="artisan-course-card">
+                    <div class="artisan-course-image-wrapper">
+                        <img src="@course.ImageUrl" alt="@course.Title" class="artisan-course-image" />
+                    </div>
+                    <div class="artisan-course-content">
+                        <h3 class="artisan-course-title">@course.Title</h3>
+                        <p class="artisan-course-desc">@course.Overview</p>
+                    </div>
+                    <div class="artisan-course-actions">
+                        <button class="btn-outline">View Reviews</button>
+                        <button class="btn-primary">Edit</button>
+                    </div>
+                </div>
             }
-        </div>
-    }
-    else
-    {
-        <div class="artisan-courses-empty">
-            You haven't created any courses yet.<br />
-            To get started, click the <strong>"Create Course"</strong> button in the navigation bar.
-        </div>
-    }
+
+            <!-- Create New Course Card -->
+            <div class="artisan-course-card create-card">
+                <div class="create-icon">+</div>
+                <h3 class="artisan-course-title">Create new course</h3>
+                <p class="artisan-course-desc">
+                    Share your knowledge and skills with students around the world.
+                </p>
+                <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">+ Create course</a>
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="artisan-course-card create-card">
+                <div class="create-icon">+</div>
+                <h3 class="artisan-course-title">Create your first course</h3>
+                <p class="artisan-course-desc">
+                    Start sharing your expertise with learners worldwide.
+                </p>
+                <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">+ Create course</a>
+            </div>
+        }
+    </div>
 </div>

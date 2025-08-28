@@ -87,14 +87,7 @@
     <!-- Center: Search -->
     <div class="navbar-center">
         <div class="search-bar-wrapper">
-            <select id="searchCategory" class="search-category-select">
-                <option value="" disabled selected>Search in...</option>
-                <option value="Courses">Courses</option>
-                <option value="Leaderboard">Leaderboard</option>
-                <option value="Artisans">Artisans</option>
-                <option value="Community">Community</option>
-            </select>
-            <input type="text" id="searchInput" class="search-bar-input" placeholder="Search..." disabled />
+            <input type="text" id="searchInput" class="search-bar-input" placeholder="Search courses..." />
             <button class="search-bar-button" onclick="handleSearch()">
                 <img src="/assets/icons/Search.ico" class="search-icon" />
             </button>
@@ -176,13 +169,7 @@
         console.log("Notification setting changed to:", isOn ? "On" : "Off");
     }
 
-    const searchInput = document.getElementById("searchInput");
-    const searchCategory = document.getElementById("searchCategory");
-
-    searchCategory.addEventListener("change", () => {
-        searchInput.disabled = false;
-        searchInput.focus();
-    });
+        const searchInput = document.getElementById("searchInput");
 
     searchInput.addEventListener("keypress", function (e) {
         if (e.key === "Enter") {
@@ -192,31 +179,15 @@
     });
 
     function handleSearch() {
-        const category = searchCategory.value;
         const query = searchInput.value.trim();
 
-        if (!category || !query) {
-            alert("Please select a category and enter a search term.");
+        if (!query) {
+            alert("Please enter a search term.");
             return;
         }
 
-        let url = "";
-
-        switch (category) {
-            case "Courses":
-                url = `/Courses?search=${encodeURIComponent(query)}`;
-                break;
-            case "Leaderboard":
-                url = `/UserLeaderboard?search=${encodeURIComponent(query)}`;
-                break;
-            case "Artisans":
-                url = `/Artisans/ArtisanList?search=${encodeURIComponent(query)}`;
-                break;
-            case "Community":
-                url = `/Community/CommunityHub?search=${encodeURIComponent(query)}`;
-                break;
-        }
-
+        // Always search in Courses
+        const url = `/Courses?search=${encodeURIComponent(query)}`;
         window.location.href = url;
     }
 </script>

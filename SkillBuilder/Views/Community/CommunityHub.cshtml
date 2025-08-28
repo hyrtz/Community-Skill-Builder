@@ -1,331 +1,677 @@
-﻿@{
+﻿@model SkillBuilder.Models.ViewModels.CommunityHubViewModel
+
+@{
     ViewData["Title"] = "Community Hub";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
-    .community-container {
+    /* Wrapper for the page */
+    .community-page-wrapper {
+        margin: 5.5rem 10%;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        gap: 3rem;
+        gap: 1.5rem;
     }
 
-    /* Section 1: Header + Search */
-    .community-header {
-        text-align: center;
-        margin-top: 7rem;
-        margin-bottom: 3rem;
+    /* Header */
+    .community-header h1 {
+        font-size: 2rem;
+        margin-bottom: 0.25rem;
+        font-weight: bold;
     }
 
-    .community-hub-content {
-        width: 100%;
+    .community-header h5 {
+        color: #555;
+        font-size: 1rem;
     }
 
-
-        .community-header h1 {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .community-header h5 {
-            font-size: 1rem;
-            color: #555;
-            max-width: 60%;
-            margin: 0 auto 2rem;
-        }
+    /* Search + Create Post row */
+    .community-top-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+    }
 
     .community-search {
+        width: 85%;
         display: flex;
-        width: 100%;
-        max-width: 70%;
-        margin: 0 auto;
-        border-radius: 6px;
+        gap: 0.5rem;
     }
 
         .community-search input {
             flex: 1;
-            padding: 0.6rem 1rem;
+            padding: 0.5rem 1rem;
             border: 1px solid #ccc;
-            font-size: 1rem;
+            border-radius: 6px;
         }
 
         .community-search button {
-            padding: 0.6rem 1rem;
             background-color: #3182ce;
             color: white;
-            font-weight: 600;
             border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
             cursor: pointer;
         }
 
-        .community-search img {
-            width: 1rem;
-            height: 1rem;
-        }
-
-    /* Section 2: Banner Image */
-    .community-banner {
-        text-align: center;
-        background-color: #faf9ff;
-        margin-bottom: 3rem;
+    .create-post-btn {
+        width: 12%;
+        background-color: white;
+        color: black;
+        font-weight: 600;
+        border: 1px solid;
+        border-radius: 6px;
+        cursor: pointer;
+        padding: 0.5rem;
     }
 
-        .community-banner img {
-            max-width: 100%;
-            height: 25rem;
-        }
-
-    /* Section 3: Art Skill Topics */
-    .topic-section {
-        text-align: center;
-        margin-bottom: 6rem;
-    }
-
-        .topic-section h1 {
-            margin-bottom: 1.5rem;
-        }
-
-    .topic-tags {
+    /* Left + Right sections */
+    .community-body {
         display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        justify-content: center;
+        gap: 2rem;
     }
 
-    .topic-tag {
-        border: 1px solid #333;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        background-color: transparent;
-        font-size: 0.9rem;
-        font-weight: 500;
-        cursor: pointer;
+    .left-section {
+        width: 70%;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
     }
 
-    .topic-more {
-        margin-top: 2rem;
-        display: inline-block;
-        font-size: 0.9rem;
+    .right-section {
+        width: 30%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    /* Tabs */
+    .community-tabs {
+        display: flex;
+        gap: 2rem;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 1rem;
+    }
+
+    .community-tab {
+        padding: 0.6rem 1.25rem;
+        font-weight: 600;
+        font-size: 1rem;
         cursor: pointer;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
         color: #333;
     }
 
-    /* Section 4: Discussions */
-    .discussion-section {
-        max-width: 40%;
-        margin: 0 auto 3rem;
+        .community-tab.active {
+            border-bottom-color: #3182ce;
+            background-color: #e6f0ff;
+            color: #3182ce;
+        }
+
+    /* Tab panels */
+    .community-tab-panel {
+        display: none;
     }
 
-        .discussion-section h1 {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 1rem;
+        .community-tab-panel.active {
+            display: block;
         }
 
-        .discussion-section h6 {
-            text-align: center;
-            font-size: 1rem;
-            color: #666;
-            margin-bottom: 2rem;
-        }
-
-    .discussion-card {
-        background: #fff;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    /* Full-width community details */
+    .community-details-fullpage {
+        width: 100%;
+        margin: 0 auto;
+        padding: 1rem 10%;
     }
 
-        .discussion-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transform: translateY(-4px);
-            transition: all 0.2s ease-in-out;
-        }
-
-    .discussion-header {
+    /* Right section cards */
+    .right-card {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 1rem;
-        margin-bottom: 0.5rem;
     }
 
-        .discussion-header img {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
+    .popular-communities,
+    .user-communities {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+        .popular-communities li,
+        .user-communities li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-    .discussion-name {
-        font-weight: bold;
-        font-size: 1rem;
+    .community-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #d3d3e0;
     }
 
-    .discussion-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-top: 0.5rem;
-    }
-
-    .discussion-content {
-        margin-top: 0.5rem;
-        font-size: 0.95rem;
+    .members-count {
+        font-size: 0.85rem;
         color: #555;
     }
 
-    .discussion-actions {
-        display: flex;
-        gap: 1rem;
-        font-size: 0.9rem;
-        color: #777;
-        margin-top: 0.75rem;
+    .see-more-btn {
+        background: none;
+        border: 1px solid #4c6ef5;
+        color: #4c6ef5;
+        border-radius: 6px;
+        padding: 0.5rem;
+        cursor: pointer;
     }
 
-    .see-all-discussions {
-        display: block;
-        text-align: center;
+    /* Create community card */
+    .create-community-card {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border: 1px dashed #aaa;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0,0,0,0.4);
+        z-index: 1001;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .modal-content {
+        background: #fff;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 800px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        position: relative;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #555;
+    }
+
+    .modal h2 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+    }
+
+    .modal-subtitle {
+        margin-bottom: 1.5rem;
+        color: #555;
         font-size: 0.95rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+    }
+
+        .form-group label {
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+    .required {
+        color: red;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        width: 100%;
+        resize: none;
+        box-sizing: border-box;
+    }
+
+    textarea {
+        min-height: 120px;
+    }
+
+    .char-count {
+        text-align: right;
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 0.25rem;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .cancel-btn {
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 0.5rem 1.25rem;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .next-btn {
+        background: #3182ce;
+        border: none;
+        color: white;
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
-        margin-top: 1rem;
-        color: #333;
     }
 
-    /* Section 5: CTA */
-    .join-community-section {
-        background-color: #344AEA;
-        color: white;
+        .next-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    .category-card {
+        padding: 1rem 1.5rem;
+        background-color: #f1f1f1;
+        border-radius: 8px;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.2s ease;
+        flex: 1 0 18%; /* roughly 5 cards horizontally */
         text-align: center;
-        padding: 3rem 1rem;
-        width: 100%;
+        font-weight: 600;
     }
 
-        .join-community-section h1 {
-            font-weight: bold;
-            margin-bottom: 1rem;
+        .category-card.selected {
+            background-color: #3182ce;
+            color: white;
+            transform: scale(1.05);
         }
-
-        .join-community-section h5 {
-            font-weight: 400;
-            margin: 0 auto 2rem;
-            max-width: 25%;
-        }
-
-        .join-community-section button {
-            background-color: white;
-            color: #344AEA;
-            font-weight: bold;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-    a.topic-more:hover,
-    a.see-all-discussions:hover {
-        color: #3182ce;
-    }
-
 </style>
 
-<div class="community-container">
-    <div class="community-hub-content">
-        <!-- Section 1 -->
+<div class="community-page-wrapper">
+
+    @if (Model.SelectedCommunity != null)
+    {
+        <div class="community-details-fullpage">
+            @Html.Partial("~/Views/Shared/Sections/_CommunityDetailsSection.cshtml", Model.SelectedCommunity)
+        </div>
+    }
+    else
+    {
         <div class="community-header">
-            <h1>Tahi Community</h1>
+            <h1>Community Hub</h1>
             <h5>Connect with fellow artisans, students, and enthusiasts to share experiences, showcase your work, and learn together.</h5>
+        </div>
+
+        <div class="community-top-row">
             <div class="community-search">
-                <input type="text" placeholder="Search topics..." />
-                <button><img src="/assets/Icons/Search.ico" /></button>
+                <input type="text" placeholder="Search Tahi" />
+                <button><img src="/assets/Icons/Search.ico" width="20" height="20" /></button>
             </div>
+            <button class="create-post-btn">＋ Create Post</button>
         </div>
 
-        <!-- Section 2 -->
-        <div class="community-banner">
-            <img src="/assets/Background Pics/CommunityBanner.png" />
-        </div>
-
-        <!-- Section 3 -->
-        <div class="topic-section">
-            <h1>Select art skill to find related topics</h1>
-            <div class="topic-tags">
-                <div class="topic-tag">Pottery</div>
-                <div class="topic-tag">Weaving</div>
-                <div class="topic-tag">Wood Carving</div>
-                <div class="topic-tag">Paper Crafts</div>
-                <div class="topic-tag">Shoemaking</div>
-            </div>
-            <a class="topic-more">See more topics</a>
-        </div>
-
-        <!-- Section 4 -->
-        <div class="discussion-section">
-            <h1>Featured Discussions</h1>
-            <h6>Get insights from experienced community members.</h6>
-
-            <!-- Example 1 -->
-            <div class="discussion-card">
-                <div class="discussion-header">
-                    <img src="/assets/Avatar/Sample8.ico" />
-                    <div class="discussion-name">Lola Reyes</div>
+        <div class="community-body">
+            <div class="left-section">
+                <div class="community-tabs">
+                    <button type="button" class="community-tab active" data-tab="posts">Posts</button>
+                    <button type="button" class="community-tab" data-tab="communities">Communities</button>
                 </div>
-                <div class="discussion-title">Community Forum Title</div>
-                <div class="discussion-content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur deleniti perspiciatis rem ex adipisci facilis.</div>
-                <div class="discussion-actions">
-                    <span>❤️ 12</span>
-                    <span>💬 8</span>
+
+                <div class="community-tab-panel active" data-tab="posts">
+                    <partial name="Sections/CommunityNotebooks/_CommunityNotebookPosts" model="Model.Posts" />
+                </div>
+
+                <div class="community-tab-panel" data-tab="communities">
+                    <partial name="Sections/CommunityNotebooks/_CommunityNotebookCommunities" model="Model" />
                 </div>
             </div>
 
-            <!-- Example 2 -->
-            <div class="discussion-card">
-                <div class="discussion-header">
-                    <img src="/assets/Avatar/Sample7.ico" />
-                    <div class="discussion-name">Arturo Mendoza</div>
+            <div class="right-section">
+                <div class="right-card">
+                    <h4>Popular Communities</h4>
+                    <ul class="popular-communities">
+                        <li>
+                            <div class="community-avatar"></div>
+                            <div class="community-info">
+                                <span>Community name</span>
+                                <span class="members-count">100 members</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="community-avatar"></div>
+                            <div class="community-info">
+                                <span>Community name</span>
+                                <span class="members-count">100 members</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="community-avatar"></div>
+                            <div class="community-info">
+                                <span>Community name</span>
+                                <span class="members-count">100 members</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="community-avatar"></div>
+                            <div class="community-info">
+                                <span>Community name</span>
+                                <span class="members-count">100 members</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <button class="see-more-btn">See more communities</button>
                 </div>
-                <div class="discussion-title">Traditional Techniques in Weaving</div>
-                <div class="discussion-content">Sharing my grandma's pattern passed down through generations. Anyone else using abaca fiber?</div>
-                <div class="discussion-actions">
-                    <span>❤️ 32</span>
-                    <span>💬 15</span>
+
+                <div class="create-community-card" id="openCreateCommunityModal">
+                    <span class="plus-icon">＋</span>
+                    Create a community
+                </div>
+
+                <div class="right-card">
+                    <h4>Your Communities</h4>
+                    <ul class="user-communities">
+                        <li>
+                            <div class="community-avatar"></div>
+                            <span>Community name</span>
+                        </li>
+                        <li>
+                            <div class="community-avatar"></div>
+                            <span>Community name</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            <!-- Example 3 -->
-            <div class="discussion-card">
-                <div class="discussion-header">
-                    <img src="/assets/Avatar/Sample6.ico" />
-                    <div class="discussion-name">Mel Dizon</div>
-                </div>
-                <div class="discussion-title">Where do you source your materials?</div>
-                <div class="discussion-content">I'm based in Mindoro and finding it hard to get decent carving tools. Any local suppliers to recommend?</div>
-                <div class="discussion-actions">
-                    <span>❤️ 9</span>
-                    <span>💬 3</span>
+            <!-- Modal -->
+            <div id="createCommunityModal" class="modal">
+                <div class="modal-content">
+                    <span id="closeModal" class="modal-close">×</span>
+
+                    <form id="createCommunityForm" asp-action="Create" asp-controller="Community" method="post" enctype="multipart/form-data">
+
+                        <!-- Step 1: Community Info -->
+                        <div class="modal-step" id="step1">
+                            <h2>Tell us about your community</h2>
+                            <p class="modal-subtitle">A name and description help people understand what your community is all about.</p>
+
+                            <div class="form-group">
+                                <label for="communityName">Community name <span class="required">*</span></label>
+                                <input type="text" name="Name" id="communityName" maxlength="100" placeholder="Community name" required />
+                                <small class="char-count"><span id="nameCount">0</span>/100 maximum characters</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="communityDescription">Community description <span class="required">*</span></label>
+                                <textarea name="Description" id="communityDescription" maxlength="1000" placeholder="Community description" required></textarea>
+                                <small class="char-count"><span id="descCount">0</span>/1000 maximum characters</small>
+                            </div>
+
+                            <div class="modal-buttons">
+                                <button type="button" class="cancel-btn">Cancel</button>
+                                <button type="button" class="next-btn" disabled id="toStep2">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Style your community -->
+                        <div class="modal-step" id="step2" style="display:none;">
+                            <h2>Style your community</h2>
+                            <p class="modal-subtitle">Customize your community's look to make it stand out.</p>
+
+                            <div class="form-group">
+                                <label>Banner</label>
+                                <input type="file" name="Banner" id="bannerInput" accept="image/*" />
+                                <div id="bannerPreviewContainer" style="position: relative; margin-top:0.5rem;">
+                                    <img id="bannerPreview" style="max-width:100%; border-radius:8px; display:none;" />
+                                    <button id="bannerDeleteBtn" style="display:none; position:absolute; top:5px; right:5px; background:red; color:white; border:none; border-radius:50%; width:25px; height:25px; cursor:pointer;">×</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Profile</label>
+                                <input type="file" name="Avatar" id="profileInput" accept="image/*" />
+                                <div id="profilePreviewContainer" style="position: relative; margin-top:0.5rem;">
+                                    <img id="profilePreview" style="width:60px; height:60px; border-radius:50%; display:none;" />
+                                    <button id="profileDeleteBtn" style="display:none; position:absolute; top:0; right:0; background:red; color:white; border:none; border-radius:50%; width:25px; height:25px; cursor:pointer;">×</button>
+                                </div>
+                            </div>
+
+                            <div class="modal-buttons">
+                                <button type="button" class="cancel-btn">Cancel</button>
+                                <button type="button" class="next-btn" id="finishBtn">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Choose Category -->
+                        <div class="modal-step" id="step3" style="display:none;">
+                            <h2>Choose your category</h2>
+                            <p class="modal-subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+
+                            <div id="categoryCards" style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2rem;">
+                                <div class="category-card" data-category="Pottery">Pottery</div>
+                                <div class="category-card" data-category="Weaving">Weaving</div>
+                                <div class="category-card" data-category="Wood Crafts">Wood Crafts</div>
+                                <div class="category-card" data-category="Embroidery">Embroidery</div>
+                                <div class="category-card" data-category="Paper Crafts">Paper Crafts</div>
+                            </div>
+
+                            <input type="hidden" name="Category" id="selectedCategory" />
+
+                            <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+                                <button type="button" class="cancel-btn">Cancel</button>
+                                <button type="submit" class="next-btn" id="createCommunityBtn" disabled>Create Community</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-            <a class="see-all-discussions">See all discussions &gt;</a>
         </div>
-
-        <!-- Section 5 -->
-        <div class="join-community-section">
-            <h1>New to the Community?</h1>
-            <h5>Start your journey with fellow artisans and students—learn, share, and grow in a space made for Filipino creativity and culture.</h5>
-            <button>Join Now</button>
-        </div>
-    </div>
+    }
 </div>
 
 <script>
-    window.addEventListener('load', () => {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has('search')) {
-            url.searchParams.delete('search');
-            window.history.replaceState({}, document.title, url.pathname); // Removes ?search=...
+    document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("createCommunityModal");
+        const openModalBtn = document.getElementById("openCreateCommunityModal");
+        const closeModalBtn = document.querySelector(".modal-close");
+        const cancelBtns = document.querySelectorAll(".cancel-btn");
+
+        // Step elements
+        const step1 = document.getElementById("step1");
+        const step2 = document.getElementById("step2");
+        const step3 = document.getElementById("step3");
+        const toStep2 = document.getElementById("toStep2");
+
+        const nameInput = document.getElementById("communityName");
+        const descInput = document.getElementById("communityDescription");
+        const nameCount = document.getElementById("nameCount");
+        const descCount = document.getElementById("descCount");
+
+        const bannerInput = document.getElementById("bannerInput");
+        const profileInput = document.getElementById("profileInput");
+        const bannerPreview = document.getElementById("bannerPreview");
+        const profilePreview = document.getElementById("profilePreview");
+
+        const finishBtn = document.getElementById("finishBtn");
+        const finalCommunityName = document.getElementById("finalCommunityName");
+        const finalCommunityDescription = document.getElementById("finalCommunityDescription");
+        const finalBannerPreview = document.getElementById("finalBannerPreview");
+        const finalProfilePreview = document.getElementById("finalProfilePreview");
+
+        // ---- MODAL LOGIC ----
+        if (modal && openModalBtn && closeModalBtn && step1 && step2 && step3) {
+            // Open modal
+            openModalBtn.addEventListener("click", () => modal.style.display = "flex");
+
+            // Close modal function
+            const closeModal = () => {
+                modal.style.display = "none";
+                step1.style.display = "block";
+                step2.style.display = "none";
+                step3.style.display = "none";
+
+                // Reset form fields
+                if (nameInput) nameInput.value = "";
+                if (descInput) descInput.value = "";
+                if (bannerInput) bannerInput.value = "";
+                if (profileInput) profileInput.value = "";
+
+                if (bannerPreview) {
+                    bannerPreview.src = "";
+                    bannerPreview.style.display = "none";
+                }
+                if (profilePreview) {
+                    profilePreview.src = "";
+                    profilePreview.style.display = "none";
+                }
+                if (toStep2) toStep2.disabled = true;
+            };
+
+            // Attach close events
+            closeModalBtn.addEventListener("click", closeModal);
+            cancelBtns.forEach(btn => btn.addEventListener("click", closeModal));
+            window.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+            window.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+            // ---- STEP 1: Character counting ----
+            if (nameInput && descInput && nameCount && descCount && toStep2) {
+                const updateCharCount = () => {
+                    nameCount.textContent = nameInput.value.length;
+                    descCount.textContent = descInput.value.length;
+                    toStep2.disabled = !(nameInput.value.trim() && descInput.value.trim());
+                };
+                nameInput.addEventListener("input", updateCharCount);
+                descInput.addEventListener("input", updateCharCount);
+                updateCharCount();
+            }
+
+            // ---- STEP 1 -> STEP 2 ----
+            if (toStep2) {
+                toStep2.addEventListener("click", () => {
+                    step1.style.display = "none";
+                    step2.style.display = "block";
+                    checkStep2Ready();
+                });
+            }
+
+            // ---- STEP 2: Handle image upload ----
+            const handleImageUpload = (input, previewImg, deleteBtn) => {
+                if (!input || !previewImg || !deleteBtn) return;
+
+                input.addEventListener("change", e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    if (!file.type.startsWith("image/")) {
+                        alert("Only image files are allowed!");
+                        input.value = "";
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        previewImg.src = reader.result;
+                        previewImg.style.display = "block";
+                        deleteBtn.style.display = "block";
+                        checkStep2Ready();
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                deleteBtn.addEventListener("click", () => {
+                    input.value = "";
+                    previewImg.src = "";
+                    previewImg.style.display = "none";
+                    deleteBtn.style.display = "none";
+                    checkStep2Ready();
+                });
+            };
+
+            handleImageUpload(bannerInput, bannerPreview, document.getElementById("bannerDeleteBtn"));
+            handleImageUpload(profileInput, profilePreview, document.getElementById("profileDeleteBtn"));
+
+            // ---- STEP 2: Enable Finish only if both images selected ----
+            const checkStep2Ready = () => {
+                if (finishBtn) {
+                    finishBtn.disabled = !(bannerInput?.files?.length && profileInput?.files?.length);
+                }
+            };
+            checkStep2Ready();
+
+            // ---- STEP 2 -> STEP 3 ----
+            if (finishBtn) {
+                finishBtn.addEventListener("click", () => {
+                    if (!(bannerInput?.files?.length && profileInput?.files?.length)) return;
+
+                    step2.style.display = "none";
+                    step3.style.display = "block";
+                });
+            }
+
+            // ---- STEP 3: Category selection ----
+            const categoryCards = document.querySelectorAll(".category-card");
+            const createCommunityBtn = document.getElementById("createCommunityBtn");
+            const hiddenCategoryInput = document.getElementById("selectedCategory");
+
+            if (categoryCards.length && createCommunityBtn && hiddenCategoryInput) {
+                categoryCards.forEach(card => {
+                    card.addEventListener("click", () => {
+                        categoryCards.forEach(c => c.classList.remove("selected"));
+                        card.classList.add("selected");
+                        hiddenCategoryInput.value = card.dataset.category;
+                        createCommunityBtn.disabled = false;
+                    });
+                });
+            }
         }
     });
+
+    // ---- TAB SWITCHING LOGIC ----
+    const tabs = document.querySelectorAll(".community-tab");
+    const tabPanels = document.querySelectorAll(".community-tab-panel");
+
+    if (tabs.length && tabPanels.length) {
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                tabs.forEach(t => t.classList.remove("active"));
+                tabPanels.forEach(panel => panel.classList.remove("active"));
+
+                tab.classList.add("active");
+                const selectedTab = tab.getAttribute("data-tab");
+                const targetPanel = document.querySelector(`.community-tab-panel[data-tab="${selectedTab}"]`);
+                if (targetPanel) targetPanel.classList.add("active");
+            });
+        });
+    }
 </script>

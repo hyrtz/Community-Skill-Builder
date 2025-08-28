@@ -1,18 +1,18 @@
-﻿namespace SkillBuilder.Models
+﻿using SkillBuilder.Models;
+
+public class CommunityPost
 {
-    public class CommunityPost
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string Content { get; set; }
+    public int Id { get; set; }
+    public int CommunityId { get; set; }
+    public Community Community { get; set; }
 
-        public string AuthorId { get; set; }
-        public User Author { get; set; }
+    public string AuthorId { get; set; }
+    public User Author { get; set; }
 
-        public DateTime SubmittedAt { get; set; }
-        public bool IsPublished { get; set; } = false;
+    public string Title { get; set; }
+    public string Content { get; set; }
+    public string? ImageUrl { get; set; }
+    public DateTime SubmittedAt { get; set; } = DateTime.Now;
 
-        // Optional fields
-        public string ImageUrl { get; set; }
-    }
+    public bool IsPublished { get; set; } = true;  // ← add this
 }

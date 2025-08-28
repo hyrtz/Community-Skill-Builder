@@ -26,6 +26,8 @@ namespace SkillBuilder.Data
         public DbSet<CommunityTestimonial> CommunityTestimonials { get; set; }
         public DbSet<CommunityHighlight> CommunityHighlights { get; set; }
         public DbSet<CommunityPost> CommunityPosts { get; set; }
+        public DbSet<Community> Communities { get; set; }
+        public DbSet<CommunityMembership> CommunityMemberships { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -275,7 +277,7 @@ namespace SkillBuilder.Data
                     Role = "Learner",
                     Avatar = "/assets/Avatar/Sample1.ico",
                     Comment = "Lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet.",
-                    Image = "/assets/Community Pics/CompletePottery.png",
+                    Image = "/assets/Community Pics/Pottery.png",
                     Likes = 128,
                     Comments = 36
                 },
@@ -286,7 +288,7 @@ namespace SkillBuilder.Data
                     Role = "Artisan",
                     Avatar = "/assets/Avatar/Sample9.ico",
                     Comment = "Lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet.",
-                    Image = "/assets/Community Pics/CompleteWeaving.png",
+                    Image = "/assets/Community Pics/Weaving.png",
                     Likes = 89,
                     Comments = 18
                 },
@@ -297,9 +299,125 @@ namespace SkillBuilder.Data
                     Role = "Researcher",
                     Avatar = "/assets/Avatar/Sample5.ico",
                     Comment = "Lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet.",
-                    Image = "/assets/Community Pics/CompleteWoodcarving.png",
+                    Image = "/assets/Community Pics/Woodcarving.png",
                     Likes = 212,
                     Comments = 41
+                }
+            );
+
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = "user-1",
+                    FirstName = "Alice",
+                    LastName = "Artisan",
+                    Email = "alice@test.com",
+                    PasswordHash = "dummyhash1",
+                    Role = "Learner",
+                    IsVerified = true,
+                    UserAvatar = "/assets/Avatar/Sample3.ico",
+                    Points = 10,
+                    SelectedInterests = "Crafts, Sewing",
+                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new User
+                {
+                    Id = "user-2",
+                    FirstName = "Bob",
+                    LastName = "Builder",
+                    Email = "bob@test.com",
+                    PasswordHash = "dummyhash2",
+                    Role = "Learner",
+                    IsVerified = false,
+                    UserAvatar = "/assets/Avatar/Sample6.ico",
+                    Points = 5,
+                    SelectedInterests = "Woodwork, DIY",
+                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new User
+                {
+                    Id = "user-3",
+                    FirstName = "Charlie",
+                    LastName = "Craftsman",
+                    Email = "charlie@test.com",
+                    PasswordHash = "dummyhash3",
+                    Role = "Learner",
+                    IsVerified = true,
+                    UserAvatar = "/assets/Avatar/Sample9.ico",
+                    Points = 20,
+                    SelectedInterests = "Painting, Pottery",
+                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                }
+            );
+
+            // Seed Communities
+            modelBuilder.Entity<Community>().HasData(
+                new Community
+                {
+                    Id = 1,
+                    Name = "Pottery Enthusiasts",
+                    Description = "A community for learners and artisans passionate about pottery and ceramics.",
+                    AvatarUrl = "/assets/Community Pics/CompletePottery.png",
+                    MembersCount = 125,
+                    CreatorId = "user-1", // optional
+                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Community
+                {
+                    Id = 2,
+                    Name = "Weaving Circle",
+                    Description = "Connecting artisans and learners who love weaving traditional and modern textiles.",
+                    AvatarUrl = "/assets/Community Pics/CompleteWeaving.png",
+                    MembersCount = 98,
+                    CreatorId = "user-2", // optional
+                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new Community
+                {
+                    Id = 3,
+                    Name = "Woodcarving Masters",
+                    Description = "A space for woodcarvers to share projects, tips, and showcase craftsmanship.",
+                    AvatarUrl = "/assets/Community Pics/CompleteWoodcarving.png",
+                    MembersCount = 150,
+                    CreatorId = "user-3", // optional
+                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                }
+            );
+
+            // Seed CommunityPosts
+            modelBuilder.Entity<CommunityPost>().HasData(
+                new CommunityPost
+                {
+                    Id = 1,
+                    CommunityId = 1,
+                    Title = "First Pottery Creation",
+                    Content = "Just finished my first clay pot! Excited to share with everyone.",
+                    AuthorId = "user-1",
+                    SubmittedAt = new DateTime(2025, 1, 5, 0, 0, 0, DateTimeKind.Utc),
+                    ImageUrl = "/assets/Community Pics/CompletePottery.png",
+                    IsPublished = true  // ← explicitly added
+                },
+                new CommunityPost
+                {
+                    Id = 2,
+                    CommunityId = 3,
+                    Title = "Carving Progress",
+                    Content = "Making progress on a wooden sculpture. Any tips for fine detailing?",
+                    AuthorId = "user-3",
+                    SubmittedAt = new DateTime(2025, 1, 6, 0, 0, 0, DateTimeKind.Utc),
+                    ImageUrl = "/assets/Community Pics/CompleteWoodCarving.png",
+                    IsPublished = true
+                },
+                new CommunityPost
+                {
+                    Id = 3,
+                    CommunityId = 2,
+                    Title = "New to Weaving",
+                    Content = "Starting weaving for the first time. Happy to join this community!",
+                    AuthorId = "user-2",
+                    SubmittedAt = new DateTime(2025, 1, 7, 0, 0, 0, DateTimeKind.Utc),
+                    ImageUrl = "/assets/Community Pics/CompleteWeaving.png",
+                    IsPublished = true
                 }
             );
 
@@ -377,6 +495,24 @@ namespace SkillBuilder.Data
                 .HasOne(cm => cm.Course)
                 .WithMany(c => c.Materials)
                 .HasForeignKey(cm => cm.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CommunityPost>()
+                .HasOne(p => p.Author)
+                .WithMany()   // or .WithMany(u => u.Posts) if you track them
+                .HasForeignKey(p => p.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CommunityMembership>()
+                .HasOne(cm => cm.User)
+                .WithMany(u => u.Memberships)
+                .HasForeignKey(cm => cm.UserId)
+                .OnDelete(DeleteBehavior.Restrict);  // prevents cascade cycles
+
+            modelBuilder.Entity<CommunityMembership>()
+                .HasOne(cm => cm.Community)
+                .WithMany(c => c.Memberships)
+                .HasForeignKey(cm => cm.CommunityId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Seed CourseModules and ModuleContents for each Course

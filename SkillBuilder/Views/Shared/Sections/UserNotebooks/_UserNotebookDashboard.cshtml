@@ -10,7 +10,6 @@
     .user-dash-stats {
         display: flex;
         gap: 2rem;
-        margin: 3rem 0;
         justify-content: space-between;
         flex-wrap: wrap;
     }
@@ -47,7 +46,7 @@
 <div class="user-dash-stats">
     <div class="user-dash-card">
         <div class="user-dash-card-title">Total Enrollments</div>
-        <div class="user-dash-card-value">@((Model.Enrollments != null) ? Model.Enrollments.Count() : 0)</div>
+        <div class="user-dash-card-value">@((Model.EnrolledCourses != null) ? Model.EnrolledCourses.Count() : 0)</div>
     </div>
     <div class="user-dash-card">
         <div class="user-dash-card-title">Total Points</div>

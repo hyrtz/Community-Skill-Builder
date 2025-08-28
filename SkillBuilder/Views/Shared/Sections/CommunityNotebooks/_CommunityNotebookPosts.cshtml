@@ -1,0 +1,112 @@
+﻿@model List<SkillBuilder.Models.ViewModels.CommunityPostViewModel>
+
+<style>
+    /* Scope everything under .community-posts-list */
+    .community-posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+        .community-posts-list .no-posts {
+            text-align: center;
+            padding: 2rem;
+            background: #f9fafb;
+            border-radius: 10px;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .community-posts-list .post-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .community-posts-list .post-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .community-posts-list .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .community-posts-list .community-info h5 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .community-posts-list .community-info h6 {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .community-posts-list .post-card-content p {
+            margin: 0.5rem 0;
+            line-height: 1.5;
+        }
+
+        .community-posts-list .post-card-content img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .community-posts-list .community-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #555;
+            margin-top: 0.5rem;
+        }
+</style>
+
+<div class="community-posts-list">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="no-posts">
+            <p>No posts yet. Be the first to share something!</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var post in Model)
+        {
+            <div class="post-card">
+                <!-- Header -->
+                <div class="post-card-header">
+                    <div class="avatar" style="background-image:url('@post.AuthorAvatarUrl')"></div>
+                    <div class="community-info">
+                        <h5>@post.AuthorName</h5>
+                        <h6>@post.CommunityName • @post.SubmittedAt.ToString("MMM dd, yyyy")</h6>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="post-card-content">
+                    <p>@post.Content</p>
+
+                    @if (!string.IsNullOrEmpty(post.ImageUrl))
+                    {
+                        <img src="@post.ImageUrl" alt="Post image" />
+                    }
+
+                    <div class="community-meta">
+                        <span>❤️ @post.Likes</span>
+                        <span>💬 @post.CommentsCount</span>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

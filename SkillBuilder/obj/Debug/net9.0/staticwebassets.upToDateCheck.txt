@@ -15,6 +15,9 @@ wwwroot\assets\Background Pics\MissionPageBG.png
 wwwroot\assets\Community Pics\CompletePottery.png
 wwwroot\assets\Community Pics\CompleteWeaving.png
 wwwroot\assets\Community Pics\CompleteWoodcarving.png
+wwwroot\assets\Community Pics\Pottery.png
+wwwroot\assets\Community Pics\Weaving.png
+wwwroot\assets\Community Pics\Woodcarving.png
 wwwroot\assets\Courses Pics\Pottery.png
 wwwroot\assets\Courses Pics\Weaving.png
 wwwroot\assets\Courses Pics\Woodcarving.png
@@ -39,7 +42,6 @@ wwwroot\assets\Logos\Instagram.svg
 wwwroot\assets\Logos\Tahi.svg
 wwwroot\assets\Logos\Twitter.svg
 wwwroot\assets\Videos\Pottery.mp4
-wwwroot\assets\Videos\Shoemaking.mp4
 wwwroot\assets\Videos\Weaving.mp4
 wwwroot\assets\Videos\WoodCarving.mp4
 wwwroot\assets\Works\JuanWorks1.png
@@ -107,6 +109,16 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\uploads\community-banner\2f1b078b-6bb8-4c66-9bf7-29fcd16a23b8.jpg
+wwwroot\uploads\community-banner\b63d06c8-2011-4bd3-b619-69d8c0240db8.jpg
+wwwroot\uploads\community-profile\02fdf761-cdf8-41d6-adb4-1cc09a460eb1.jpg
+wwwroot\uploads\community-profile\b7d56f3c-f52d-4135-b4c7-82853eaebcba.jpg
+wwwroot\uploads\course-images\0e96adca-deaa-4f2d-9bae-5f02b1518de4.jpg
+wwwroot\uploads\course-images\b7fea0e6-cd4e-457e-ad46-16d553ce0b7b.jpg
+wwwroot\uploads\course-thumbnails\2096a02a-26be-402f-a356-e1d4e159cf69.jpg
+wwwroot\uploads\course-thumbnails\c397fa54-13a7-446a-bf9a-6a24f42119a4.jpg
+wwwroot\uploads\course-videos\256e1720-3d18-40e0-b9a7-7032a185fa2f.mp4
+wwwroot\uploads\course-videos\6480b02c-69ad-41ac-9fd5-b77b72e2ee77.mp4
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\dist\jquery.slim.min.map
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\dist\jquery.slim.min.js
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\dist\jquery.slim.js
@@ -165,7 +177,7 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\js\script.js
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\css\style.css
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\favicon.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\lib\jquery\LICENSE.txt
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Logos\Twitter.svg
@@ -185,7 +197,7 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\asse
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Icons\Course.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Icons\Community.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Icons\Bell.ico
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\css\style.css
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\js\script.js
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Avatar\Sample9.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Avatar\Sample8.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Avatar\Sample7.ico

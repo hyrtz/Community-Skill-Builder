@@ -411,6 +411,71 @@
         text-align: center;
     }
 
+    /* Overlay background */
+    .session-success-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1002;
+    }
+
+    /* Hidden state */
+    .hidden {
+        display: none;
+    }
+
+    /* Modal container */
+    .session-success-content {
+        background: white;
+        padding: 2rem 2.5rem;
+        border-radius: 1rem;
+        text-align: center;
+        width: 400px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Title styling */
+    .success-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.8rem;
+        text-align: left;
+    }
+
+    /* Message styling */
+    .success-message {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    .session-modal-buttons {
+        display: flex;
+        justify-content: left;
+    }
+
+    /* Button styling */
+    .btn-primary {
+        background: #3b5bff;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+        .btn-primary:hover {
+            background: #2f46cc;
+        }
 </style>
 
 <div class="course-module-container">
@@ -514,6 +579,19 @@
     <div id="pointsPopup" class="points-popup">
         <div class="points-popup-content">
             <span id="pointsMessage">+10 Points!</span>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="sessionSuccessModal" class="session-success-modal hidden">
+        <div class="session-success-content">
+            <h2 class="success-title">Your request has been sent!</h2>
+            <p class="success-message">
+                We will notify you about your request.<br>Stay tuned!
+            </p>
+            <div class="session-modal-buttons">
+                <button class="btn-primary" onclick="closeSuccessModal()">Back To Course</button>
+            </div>
         </div>
     </div>
 </div>
@@ -1010,6 +1088,14 @@
             document.getElementById("customTime").value = "";
         };
 
+        window.openSuccessModal = function () {
+            document.getElementById("sessionSuccessModal").classList.remove("hidden");
+        };
+
+        window.closeSuccessModal = function () {
+            document.getElementById("sessionSuccessModal").classList.add("hidden");
+        };
+
         window.sendSessionRequest = function () {
             const date = document.getElementById("sessionDate").value;
             const time = document.getElementById("sessionTime").value;
@@ -1043,10 +1129,10 @@
                 return res.json();
             })
             .then(data => {
-                alert("✅ Session request sent!");
+                // Show success modal instead of alert
+                openSuccessModal();
                 closeSessionModal();
 
-                // Trigger artisan pending requests refresh (if artisan is viewing)
                 if (window.opener && window.opener.refreshPendingRequests) {
                     window.opener.refreshPendingRequests();
                 }
