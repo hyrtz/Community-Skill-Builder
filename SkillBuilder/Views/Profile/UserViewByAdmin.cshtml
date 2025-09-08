@@ -1,0 +1,154 @@
+﻿@using SkillBuilder.Models.ViewModels
+@model UserProfileViewModel
+
+@{
+    ViewData["Title"] = "View User (Admin)";
+    ViewData["IsCatalogPage"] = false;
+}
+
+<style>
+    .admin-user-profile-section {
+        padding: 6rem 6rem;
+        background-color: #f9f9f9;
+    }
+
+    .admin-user-header {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        color: #344AEA;
+    }
+
+    .admin-user-wrapper {
+        display: flex;
+        gap: 2.5rem;
+        align-items: stretch;
+        height: 70vh; 
+    }
+
+    .admin-user-sidebar {
+        width: 50%;
+        background-color: #E0F2FF;
+        padding: 2rem 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .user-avatar {
+        width: 28rem;
+        height: 28rem;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+    }
+
+    .user-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .user-email {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 1rem;
+    }
+
+    .user-role {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #344AEA;
+        margin-bottom: 2rem;
+    }
+
+    .admin-user-main {
+        width: 50%;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* dashboard stats cards */
+    .user-dash-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        align-items: center; 
+    }
+
+    .user-dash-card {
+        width: 80%;
+        max-width: 600px;
+        min-height: 180px;
+        background-color: #E6EEFF;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+        text-align: center;
+    }
+
+        .user-dash-card:hover {
+            transform: translateY(-4px);
+        }
+
+    .user-dash-card-title {
+        font-size: 1.2rem;
+        color: #344AEA;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+    }
+
+    .user-dash-card-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #222;
+    }
+</style>
+
+<section class="admin-user-profile-section">
+    <div class="admin-user-header">User Profile (Admin View)</div>
+
+    <div class="admin-user-wrapper">
+        <!-- Sidebar -->
+        <div class="admin-user-sidebar">
+            <img src="@Model.User.UserAvatar" class="user-avatar" />
+            <div class="user-name">@Model.User.FirstName @Model.User.LastName</div>
+            <div class="user-email">@Model.User.Email</div>
+            <div class="user-role">Role: @Model.User.Role</div>
+        </div>
+
+        <!-- Main Panel -->
+        <div class="admin-user-main">
+            <div class="user-dash-stats">
+                <div class="user-dash-card">
+                    <div class="user-dash-card-title">Total Enrollments</div>
+                    <div class="user-dash-card-value">
+                        @((Model.EnrolledCourses != null) ? Model.EnrolledCourses.Count() : 0)
+                    </div>
+                </div>
+                <div class="user-dash-card">
+                    <div class="user-dash-card-title">Total Points</div>
+                    <div class="user-dash-card-value">@Model.User.Points</div>
+                </div>
+                <div class="user-dash-card">
+                    <div class="user-dash-card-title">Profile Status</div>
+                    <div class="user-dash-card-value">
+                        @(Model.User.IsVerified ? "Active" : "Inactive")
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

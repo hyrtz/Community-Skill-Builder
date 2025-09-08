@@ -122,6 +122,62 @@
         font-size: 2rem;
         color: #aaa;
     }
+
+    .artisan-work-item {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: #fafafa;
+        position: relative;
+    }
+
+    .artisan-work-preview {
+        width: 120px;
+        height: 120px;
+        background: #eee;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+        .artisan-work-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+    .artisan-work-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+        .artisan-work-fields input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+    .delete-work-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #666;
+    }
+
+        .delete-work-btn:hover {
+            color: #d00;
+        }
 </style>
 
 <div class="basicinfo-form-wrapper">
@@ -244,6 +300,13 @@
         </div>
     </div>
 
+    <!-- Artisan Works -->
+    <div class="basicinfo-form-group">
+        <label>Artisan Works *</label>
+        <div id="artisan-works-container"></div>
+
+        <button type="button" id="add-work" class="basicinfo-add-btn">+ Add Work</button>
+    </div>
 
 </div>
 
@@ -356,5 +419,92 @@
         form.addEventListener("input", checkRequiredFields);
         form.addEventListener("change", checkRequiredFields);
         checkRequiredFields(); // initial check
+
+        const worksContainer = document.getElementById("artisan-works-container");
+        const addWorkBtn = document.getElementById("add-work");
+        let workIndex = 0;
+
+        function createWorkItem(index) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "artisan-work-item";
+
+            wrapper.innerHTML = `
+                <button type="button" class="delete-work-btn" title="Remove Work">🗑️</button>
+
+                <div class="artisan-work-preview">
+                    <img id="workPreview_${index}" style="display:none;" />
+                </div>
+
+                <div class="artisan-work-fields">
+                    <input type="file" name="ArtisanWorks[${index}].ImageFile" 
+                           accept="image/*" required 
+                           onchange="previewWorkImage(event, ${index})" />
+
+                    <input type="text" name="ArtisanWorks[${index}].Title" 
+                           placeholder="Work Title" required />
+
+                    <input type="text" name="ArtisanWorks[${index}].Caption" 
+                           placeholder="Work Caption" required />
+                </div>
+            `;
+
+            wrapper.querySelector(".delete-work-btn").addEventListener("click", () => {
+                wrapper.remove();
+                renumberWorks();
+                checkRequiredWorks();
+            });
+
+            return wrapper;
+        }
+
+        addWorkBtn.addEventListener("click", () => {
+            const newItem = createWorkItem(workIndex++);
+            worksContainer.appendChild(newItem);
+            checkRequiredWorks();
+        });
+
+        window.previewWorkImage = function (event, index) {
+            const file = event.target.files[0];
+            const preview = document.getElementById(`workPreview_${index}`);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        function renumberWorks() {
+            const items = worksContainer.querySelectorAll(".artisan-work-item");
+            items.forEach((item, i) => {
+                const inputs = item.querySelectorAll("input");
+                inputs.forEach(input => {
+                    if (input.type === "file") {
+                        input.name = `ArtisanWorks[${i}].ImageFile`;
+                    }
+                    if (input.placeholder.includes("Title")) {
+                        input.name = `ArtisanWorks[${i}].Title`;
+                    }
+                    if (input.placeholder.includes("Caption")) {
+                        input.name = `ArtisanWorks[${i}].Caption`;
+                    }
+                });
+                item.querySelector("img").id = `workPreview_${i}`;
+            });
+            workIndex = items.length;
+        }
+
+        function checkRequiredWorks() {
+            const items = worksContainer.querySelectorAll(".artisan-work-item");
+            const createBtn = document.getElementById("createBtn");
+            if (createBtn) {
+                createBtn.disabled = items.length === 0;
+            }
+        }
+
+        checkRequiredWorks();
+
     });
 </script>

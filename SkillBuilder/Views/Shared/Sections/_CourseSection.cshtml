@@ -47,8 +47,6 @@
     }
 
         .course-card-link:hover .course-card {
-            transform: scale(1.02);
-            transition: transform 0.3s ease;
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
         }
 
@@ -61,7 +59,6 @@
     }
 
         .course-card:hover {
-            transform: scale(1.02);
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
         }
 
@@ -121,49 +118,54 @@
 
 </style>
 
-<section class="featured-courses-section @(ViewData["IsUserProfile"] as bool? == true ? "profile-layout" : "")" id="courses">
+@if (!User.IsInRole("Artisan"))
+{
+    <section class="featured-courses-section @(ViewData["IsUserProfile"] as bool? == true ? "profile-layout" : "")" id="courses">
 
-    @if (ViewData["IsUserProfile"] as bool? == true)
-    {
-        <h2 class="section-header">Recommended just for you</h2>
-    }
-    else if (!isCatalog)
-    {
-        <h2 class="section-header">Featured Courses</h2>
-        <p class="section-description">Discover our most popular courses taught by master artisans and skilled instructors.</p>
-    }
-    else
-    {
-        <h1 class="section-header">Courses you might be interested in</h1>
-    }
-
-    <div class="courses-container @(ViewData["IsUserProfile"] as bool? == true ? "profile-layout" : "")">
-        @foreach (var course in Model.Take(4))
+        @if (ViewData["IsUserProfile"] as bool? == true)
         {
-            <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="course-card-link">
-                <div class="course-card">
-                    <div class="course-image" style="background-image: url('@course.ImageUrl');"></div>
-                    <h3 class="course-title">@course.Title</h3>
-                    <p class="course-description">@course.Overview</p>
-                    <div class="course-details">
-                        <div class="course-detail">
-                            <img src="/assets/Icons/Time.ico" class="detail-icon" />
-                            <p>@course.Duration</p>
-                        </div>
-                        <div class="course-detail">
-                            <img src="/assets/Icons/Users.ico" class="detail-icon" />
-                            <span>@course.UserCount</span>
-                        </div>
-                        <div class="course-detail">
-                            <img src="/assets/Icons/Star.ico" class="detail-icon" />
-                            <span>@course.AverageRating.ToString("0.0")</span>
+            <h2 class="section-header">Recommended just for you</h2>
+        }
+        else if (!isCatalog)
+        {
+            <h2 class="section-header">Featured Courses</h2>
+            <p class="section-description">Discover our most popular courses taught by master artisans and skilled instructors.</p>
+        }
+        else
+        {
+            <h1 class="section-header">Courses you might be interested in</h1>
+        }
+
+        <div class="courses-container @(ViewData["IsUserProfile"] as bool? == true ? "profile-layout" : "")">
+            @foreach (var course in Model.Take(4))
+            {
+                <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="course-card-link">
+                    <div class="course-card">
+                        <div class="course-image" style="background-image: url('@course.ImageUrl');"></div>
+                        <h3 class="course-title">@course.Title</h3>
+                        <p class="course-description">@course.Overview</p>
+                        <div class="course-details">
+                            <div class="course-detail">
+                                <img src="/assets/Icons/Time.ico" class="detail-icon" />
+                                <p>@course.Duration</p>
+                            </div>
+                            <div class="course-detail">
+                                <img src="/assets/Icons/Users.ico" class="detail-icon" />
+                                <span>@course.UserCount</span>
+                            </div>
+                            <div class="course-detail">
+                                <img src="/assets/Icons/Star.ico" class="detail-icon" />
+                                <span>@course.AverageRating.ToString("0.0")</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </a>
-        }
-    </div>
+                </a>
+            }
+        </div>
 
-    <a asp-controller="Courses" asp-action="CourseCatalog" class="course-btn">Click Here To See All Tahi Courses</a>
+        <a asp-controller="Courses" asp-action="CourseCatalog" class="course-btn">Click Here To See All Tahi Courses</a>
+
+    </section>
+}
 
 </section>

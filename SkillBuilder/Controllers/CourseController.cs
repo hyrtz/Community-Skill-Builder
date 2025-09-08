@@ -60,28 +60,97 @@ namespace SkillBuilder.Controllers
             });
         }
 
+        [HttpGet("RecommendedCourses")]
+        public IActionResult RecommendedCourses()
+        {
+            var userId = User.FindFirstValue("UserId");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            // Get user's interests
+            var userInterests = _context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => u.SelectedInterests)
+                .FirstOrDefault();
+
+            // If user has no interests, just show 4 random courses
+            if (string.IsNullOrWhiteSpace(userInterests))
+            {
+                var randomCourses = _context.Courses
+                    .OrderBy(c => Guid.NewGuid())
+                    .Take(4)
+                    .ToList();
+
+                return PartialView("_RecommendedCourses", randomCourses);
+            }
+
+            var interestList = userInterests
+                .Split(',')
+                .Select(i => i.Trim().ToLower())
+                .ToList();
+
+            // Step 1: Get courses that match interests (partial matching)
+            var matchedCourses = _context.Courses
+                .Where(c => interestList.Any(interest =>
+                    c.Category.ToLower().Contains(interest) ||
+                    c.Title.ToLower().Contains(interest)))
+                .OrderBy(c => Guid.NewGuid()) // randomize
+                .Take(4)
+                .ToList();
+
+            // Step 2: If fewer than 4 matches, fill with random other courses
+            if (matchedCourses.Count < 4)
+            {
+                var remainingCount = 4 - matchedCourses.Count;
+                var remainingCourses = _context.Courses
+                    .Where(c => !matchedCourses.Select(m => m.Id).Contains(c.Id))
+                    .OrderBy(c => Guid.NewGuid())
+                    .Take(remainingCount)
+                    .ToList();
+
+                matchedCourses.AddRange(remainingCourses);
+            }
+
+            return PartialView("_RecommendedCourses", matchedCourses);
+        }
+
         [HttpPost("Enroll")]
         public IActionResult Enroll([FromBody] EnrollRequest request)
         {
             var userId = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            var alreadyEnrolled = _context.Enrollments.Any(e => e.UserId == userId && e.CourseId == request.CourseId);
-            if (alreadyEnrolled)
-                return Json(new { success = false, message = "Already enrolled." });
+                return Unauthorized(new { success = false, message = "Login required." });
 
             var user = _context.Users
                 .Include(u => u.Enrollments)
                 .FirstOrDefault(u => u.Id == userId);
 
             if (user == null)
-                return NotFound();
+                return NotFound(new { success = false, message = "User not found." });
 
+            // ✅ Check verification
             if (!user.IsVerified)
-            {
                 return BadRequest(new { success = false, message = "Please verify your email before enrolling in a course." });
-            }
+
+            // ✅ Check deactivation
+            if (user.IsDeactivated)
+                return BadRequest(new { success = false, message = "Your account is deactivated. Please contact support." });
+
+            // ✅ Prevent Artisan from enrolling in their own course
+            var course = _context.Courses
+                .Include(c => c.Artisan)
+                .FirstOrDefault(c => c.Id == request.CourseId);
+
+            if (course == null)
+                return NotFound(new { success = false, message = "Course not found." });
+
+            if (user.Role == "Artisan" && course.Artisan.UserId == userId)
+                return BadRequest(new { success = false, message = "You cannot enroll in your own course." });
+
+            // ✅ Prevent duplicate enrollments
+            var alreadyEnrolled = user.Enrollments.Any(e => e.CourseId == request.CourseId);
+            if (alreadyEnrolled)
+                return BadRequest(new { success = false, message = "Already enrolled." });
 
             // Track achievement conditions before enrollment
             int previousCount = user.Enrollments?.Count() ?? 0;
@@ -126,6 +195,15 @@ namespace SkillBuilder.Controllers
         {
             var userId = User.FindFirst("UserId")?.Value;
             if (userId == null) return Unauthorized();
+
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null) return Unauthorized();
+
+            if (user.IsDeactivated)
+            {
+                TempData["ErrorMessage"] = "Your account is deactivated. You cannot access courses.";
+                return RedirectToAction("CourseCatalog"); // or return Forbid();
+            }
 
             var course = _context.Courses
                 .Include(c => c.Artisan)

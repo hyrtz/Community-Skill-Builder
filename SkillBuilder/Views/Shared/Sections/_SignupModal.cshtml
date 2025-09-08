@@ -198,6 +198,64 @@
         display: block;
         font-weight: 500;
     }
+
+    /* Interest Modal Styles */
+
+    #interest-selection {
+        display: none;
+        flex-direction: column; /* stack vertically */
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 1rem;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+        #interest-selection h2.signup-header {
+            margin-bottom: 1rem;
+        }
+
+    .interest-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        margin: 1.5rem 0;
+    }
+
+    .interest-option {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+        .interest-option.selected {
+            background-color: #364BE9;
+            color: white;
+            border-color: #364BE9;
+        }
+
+    .interest-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    #continue-interest-btn:disabled {
+        background-color: #ccc;
+        color: #666;
+        cursor: not-allowed;
+    }
+
+    #continue-interest-btn:enabled {
+        background-color: #364BE9;
+        color: white;
+    }
     
 </style>
 
@@ -300,9 +358,19 @@
                 <p>
                     Didn’t receive it? Try checking your spam folder.
                 </p>
-                <button id="skip-verification-btn" class="modal-btn">
+                <button id="skip-verification-btn" class="modal-btn" type="button">
                     Do it later
                 </button>
+            </div>
+
+            <!-- Interest Selection Modal -->
+            <div id="interest-selection" style="display: none;">
+                <h2 class="signup-header">What cultural arts are you interested in?</h2>
+                <div id="interest-options" class="interest-options"></div>
+                <div class="interest-actions">
+                    <button id="skip-interest-btn" class="modal-btn">Skip</button>
+                    <button id="continue-interest-btn" class="modal-btn" disabled>Continue</button>
+                </div>
             </div>
 
             <p class="signup-redirect">
@@ -341,7 +409,9 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // ---------- Initialize Appwrite once ----------
+        /* ---------------------------
+         * Initialize Appwrite
+         * --------------------------- */
         if (!window.appwriteClient) {
             window.appwriteClient = new Appwrite.Client()
                 .setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -349,17 +419,16 @@
             window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
         }
 
+        const SUCCESS_URL = "https://localhost:7049/oauth/success";
         const googleBtn = document.getElementById("btn-google-signup");
         const facebookBtn = document.getElementById("btn-facebook-signup");
-        const SUCCESS_URL = "https://localhost:7049/oauth/success";
 
-        // ---------- OAuth Buttons ----------
         googleBtn?.addEventListener("click", () => {
             window.appwriteAccount.createOAuth2Session(
                 "google",
                 SUCCESS_URL,
                 "https://localhost:7049/?error=OAuthFailed",
-                ["openid", "email", "profile"] // <-- correct Google scopes
+                ["openid", "email", "profile"]
             );
         });
 
@@ -369,6 +438,121 @@
                 SUCCESS_URL,
                 "https://localhost:7049/?error=OAuthFailed"
             );
+        });
+
+        /* ---------------------------
+         * Interest Selection Modal
+         * --------------------------- */
+        const MAX_SELECTION = 3;
+        const interestList = ["Pottery","Weaving","Shoemaking","Embroidery","Paper Crafts","Wood Carving"];
+
+        const interestModal = document.getElementById("interest-selection");
+        const interestContainer = document.getElementById("interest-options");
+        const continueBtn = document.getElementById("continue-interest-btn");
+        const skipBtn = document.getElementById("skip-interest-btn");
+        let selectedInterests = [];
+
+        // Render interest buttons
+        function renderInterestOptions() {
+            interestContainer.innerHTML = "";
+            interestList.forEach(interest => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.textContent = interest;
+                btn.classList.add("interest-option");
+                btn.dataset.interest = interest;
+
+                btn.addEventListener("click", () => {
+                    const index = selectedInterests.indexOf(interest);
+                    if (index > -1) {
+                        selectedInterests.splice(index, 1);
+                        btn.classList.remove("selected");
+                    } else {
+                        if (selectedInterests.length >= MAX_SELECTION) {
+                            alert(`You can only select up to ${MAX_SELECTION} interests.`);
+                            return;
+                        }
+                        selectedInterests.push(interest);
+                        btn.classList.add("selected");
+                    }
+                    continueBtn.disabled = selectedInterests.length === 0;
+                });
+
+                interestContainer.appendChild(btn);
+            });
+        }
+
+        // Global function to show interest modal
+        window.showInterestModal = function () {
+            selectedInterests = [];
+            renderInterestOptions();
+            continueBtn.disabled = true;
+
+            const signupFormWrapper = document.getElementById("signup-inputs-wrapper");
+            const emailVerification = document.getElementById("email-verification-message");
+            const signupHeader = document.querySelector(".signup-header"); // get the header
+
+            if (signupFormWrapper) signupFormWrapper.style.display = "none";
+            if (emailVerification) emailVerification.style.display = "none";
+            if (signupHeader) signupHeader.style.display = "none"; // hide header
+            if (interestModal) interestModal.style.display = "flex";
+
+            // Update navbar icons
+            document.querySelector(".nav-login-btn")?.style.setProperty("display", "none", "important");
+            document.querySelector(".nav-signup-btn")?.style.setProperty("display", "none", "important");
+            document.querySelector(".nav-notification-icon")?.style.setProperty("display", "inline-block", "important");
+            document.querySelector(".nav-profile-icon")?.style.setProperty("display", "inline-block", "important");
+        };
+
+        // Global function to close interest modal
+        window.closeInterestModal = function () {
+            if (interestModal) interestModal.style.display = "none";
+            const signupHeader = document.querySelector(".signup-header");
+            if (signupHeader) signupHeader.style.display = "block"; // show header again
+        };
+
+        // Skip button inside interest modal
+        skipBtn?.addEventListener("click", () => {
+            window.closeInterestModal();
+            document.getElementById("signup-modal").style.display = "none";
+            window.location.href = "/Dashboard";
+        });
+
+        // Continue button inside interest modal
+        continueBtn?.addEventListener("click", async () => {
+            if (selectedInterests.length === 0) return;
+
+            try {
+                const response = await fetch('/UserProfile/SaveInterests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(selectedInterests)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || "Failed to save interests");
+                }
+
+                const data = await response.json();
+                console.log("✅ Interests saved:", data.message);
+
+                // Close modal and redirect
+                window.closeInterestModal();
+                document.getElementById("signup-modal").style.display = "none";
+                window.location.href = "/Dashboard";
+
+            } catch (err) {
+                console.error(err);
+                alert(err.message || "An error occurred while saving your interests.");
+            }
+        });
+
+        // “Do it later” button triggers interest modal
+        const skipVerificationBtn = document.getElementById("skip-verification-btn");
+        skipVerificationBtn?.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.showInterestModal();
         });
     });
 </script>

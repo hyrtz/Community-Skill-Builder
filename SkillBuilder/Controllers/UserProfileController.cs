@@ -87,14 +87,12 @@ namespace SkillBuilder.Controllers
                 .Where(p => p.UserId == user.Id)
                 .ToList();
 
-            // Support requests created BY this user
             var supportRequests = _context.SupportSessionRequests
                 .Where(r => r.UserId == user.Id)
                 .Include(r => r.Course)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToList();
 
-            // Support requests created FOR this artisan's courses
             List<SupportSessionRequest> artisanSupportRequests = new List<SupportSessionRequest>();
             if (user.Artisan != null)
             {
@@ -109,6 +107,18 @@ namespace SkillBuilder.Controllers
 
             var achievements = GetAchievementsForUser(user);
 
+            // ✅ RECOMMENDED COURSES LOGIC HERE
+            var userInterests = user.SelectedInterests?
+                .Split(',')
+                .Select(i => i.Trim())
+                .ToList() ?? new List<string>();
+
+            var recommendedCourses = _context.Courses
+                .Where(c => userInterests.Contains(c.Category))
+                .OrderBy(c => Guid.NewGuid())
+                .Take(4)
+                .ToList();
+
             var viewModel = new UserProfileViewModel
             {
                 User = user,
@@ -118,10 +128,33 @@ namespace SkillBuilder.Controllers
                 Achievements = achievements,
                 CourseProgresses = inProgressCourses,
                 SupportRequests = supportRequests,
-                ArtisanSupportRequests = artisanSupportRequests // <-- NEW property for artisan's incoming requests
+                ArtisanSupportRequests = artisanSupportRequests,
+                RecommendedCourses = recommendedCourses // <-- add to ViewModel
             };
 
             return View("~/Views/Profile/UserProfile.cshtml", viewModel);
+        }
+
+        [HttpPost("SaveInterests")]
+        public async Task<IActionResult> SaveInterests([FromBody] List<string> interests)
+        {
+            if (interests == null || interests.Count == 0)
+                return BadRequest("Please select at least one interest.");
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User not found.");
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return NotFound("User not found.");
+
+            // Save as comma-separated values
+            user.SelectedInterests = string.Join(",", interests);
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Interests saved successfully." });
         }
 
         [HttpPost("/api/UserProfile/UploadActivity")]

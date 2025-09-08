@@ -9,6 +9,8 @@
             public List<ArtisanApplication> AllPendingApplications { get; set; }
             public List<Course> SubmittedCourses { get; set; }
             public List<Course> AllSubmittedCourses { get; set; }
+            public List<Community> Communities { get; set; }
+            public List<Community> AllCommunities { get; set; }
             public List<CommunityPost> CommunitySubmissions { get; set; }
             public List<CommunityPost> AllCommunitySubmissions { get; set; }
         }

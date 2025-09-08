@@ -2,6 +2,9 @@
 @model AdminProfileViewModel
 
 <style>
+    /* =======================
+           Layout / Sections
+        ======================== */
     .artisan-application-section {
         padding: 2rem;
     }
@@ -20,6 +23,9 @@
         margin-bottom: 2rem;
     }
 
+    /* =======================
+           Search & Filter
+        ======================== */
     .artisan-search-bar {
         display: flex;
         flex: 0 0 90%;
@@ -58,6 +64,9 @@
         font-weight: bold;
     }
 
+    /* =======================
+       Table
+    ======================== */
     .artisan-table {
         width: 100%;
         border-collapse: separate;
@@ -71,11 +80,24 @@
             padding: 0.5rem 1rem;
         }
 
+    /* Row styling */
     .artisan-row {
         background-color: #f9f9f9;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: background-color 0.3s ease, transform 0.2s ease;
     }
+
+        /* Alternate rows slightly different */
+        .artisan-row:nth-child(even) {
+            background-color: #f1f1f1;
+        }
+
+        /* Hover effect for rows */
+        .artisan-row:hover {
+            background-color: #e6e6e6;
+            transform: scale(1.01); /* subtle pop */
+        }
 
     .artisan-cell {
         padding: 1rem;
@@ -118,35 +140,119 @@
         text-align: center;
     }
 
-    .artisan-action-buttons {
+    /* =======================
+           Action Buttons
+        ======================== */
+    .action-buttons {
         display: flex;
         gap: 0.5rem;
         justify-content: flex-end;
     }
 
-        .artisan-action-buttons button {
-            padding: 0.4rem 0.8rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-    .review-btn {
-        background-color: #344AEA;
-        color: white;
+    .admin-action-btn {
+        padding: 0.4rem 0.8rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
     }
 
-    .approve-btn {
+    .reactivate-btn {
         background-color: #4CAF50;
         color: white;
     }
 
-    .reject-btn {
+        .reactivate-btn:hover {
+            background-color: #45a049;
+        }
+
+    .delete-btn {
         background-color: #FF4C4C;
         color: white;
     }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+    /* =======================
+           Modal & Backdrop
+        ======================== */
+    .admin-modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1001;
+    }
+
+    .admin-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 1002;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+        .admin-modal h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .admin-modal p {
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            color: #555;
+        }
+
+    .admin-modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+        .admin-modal-buttons button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+    .admin-modal-confirm {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .admin-modal-cancel {
+        background-color: #ccc;
+        color: #333;
+    }
+
+    .admin-modal-confirm:hover {
+        opacity: 0.9;
+    }
+
+    .admin-modal-cancel:hover {
+        background-color: #b3b3b3;
+    }
+
 </style>
 
 <div class="artisan-application-section">
@@ -182,7 +288,14 @@
                             <div class="artisan-info">
                                 <img src="@user.UserAvatar" alt="Avatar" />
                                 <div class="artisan-details">
-                                    <div class="artisan-name">@user.FirstName @user.LastName</div>
+                                    <div class="artisan-name">
+                                        <a asp-controller="AdminProfile"
+                                           asp-action="ArtisanApplicationViewByAdmin"
+                                           asp-route-id="@application.Id"
+                                           style="text-decoration: none; color: #344AEA;">
+                                            @user.FirstName @user.LastName
+                                        </a>
+                                    </div>
                                     <div class="artisan-email">@user.Email</div>
                                 </div>
                             </div>
@@ -190,11 +303,30 @@
                         <td class="artisan-cell artisan-status">
                             @application.Status
                         </td>
-                        <td class="artisan-cell">
+                        <td class="user-cell">
                             <div class="action-buttons">
-                                <button class="review-btn">Review</button>
-                                <button class="approve-btn">Approve</button>
-                                <button class="reject-btn">Reject</button>
+                                <!-- Approve button -->
+                                <!-- Approve button -->
+                                <form asp-action="ApproveApplication"
+                                      asp-route-id="@application.Id"
+                                      asp-route-adminId="@Model.Admin.UserId"
+                                      method="post"
+                                      onsubmit="return artisanOpenModal(this, 'Approve');">
+                                    <button type="submit" class="admin-action-btn reactivate-btn">
+                                        Approve
+                                    </button>
+                                </form>
+
+                                <!-- Reject button -->
+                                <form asp-action="RejectApplication"
+                                      asp-route-id="@application.Id"
+                                      asp-route-adminId="@Model.Admin.UserId"
+                                      method="post"
+                                      onsubmit="return artisanOpenModal(this, 'Reject');">
+                                    <button type="submit" class="admin-action-btn delete-btn">
+                                        Reject
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -210,4 +342,69 @@
             }
         </tbody>
     </table>
+
+    <!-- Backdrop -->
+    <div id="artisanModalBackdrop" class="admin-modal-backdrop"></div>
+
+    <!-- Modal -->
+    <div class="admin-modal" id="artisanActionModal">
+        <h3>Confirm Action</h3>
+        <p id="artisanModalMessage"></p>
+        <div class="admin-modal-buttons">
+            <button class="admin-modal-cancel" onclick="artisanCloseModal()">Cancel</button>
+            <button class="admin-modal-confirm" id="artisanConfirmAction">Yes</button>
+        </div>
+    </div>
+
 </div>
+
+<script>
+        let artisanCurrentForm = null;
+
+    function artisanOpenModal(form, action) {
+        artisanCurrentForm = form;
+
+        // Set message
+        document.getElementById("artisanModalMessage").innerText =
+            `Are you sure you want to ${action.toLowerCase()} this artisan application?`;
+
+        const confirmBtn = document.getElementById("artisanConfirmAction");
+
+        // Reset class & style
+        confirmBtn.className = "admin-modal-confirm";
+
+        // Action-specific color
+        if (action === "Approve") {
+            confirmBtn.style.backgroundColor = "#4CAF50";
+            confirmBtn.innerText = "Approve";
+        } else {
+            confirmBtn.style.backgroundColor = "#e74c3c";
+            confirmBtn.innerText = "Reject";
+        }
+
+        // Show backdrop + modal
+        document.getElementById("artisanModalBackdrop").style.display = "block";
+        document.getElementById("artisanActionModal").style.display = "block";
+
+        return false; // prevent default submit
+    }
+
+    function artisanConfirmActionHandler() {
+        if (artisanCurrentForm) artisanCurrentForm.submit();
+    }
+
+    function artisanCloseModal() {
+        document.getElementById("artisanModalBackdrop").style.display = "none";
+        document.getElementById("artisanActionModal").style.display = "none";
+        artisanCurrentForm = null;
+    }
+
+    // Bind buttons
+    document.getElementById("artisanConfirmAction").addEventListener("click", artisanConfirmActionHandler);
+    document.getElementById("artisanModalBackdrop").addEventListener("click", artisanCloseModal);
+
+    // ESC key
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") artisanCloseModal();
+    });
+</script>

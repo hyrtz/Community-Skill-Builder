@@ -83,10 +83,13 @@
 
 <section class="about-section" id="about">
     <div class="about-content">
-        <h2>Stitching Tradition with Technology </h2>
+        <h2>
+            @(User.IsInRole("Artisan") ? "Why Teach on Tahi?" : "Stitching Tradition with Technology")
+        </h2>
         <h5>
-            Our platform offers unique features designed to preserve cultural heritage
-            while embracing modern learning approaches.
+            @(User.IsInRole("Artisan")
+                        ? "Your hands carry history—share your craft, touch lives, and keep our culture alive with every lesson you teach."
+                        : "Our platform offers unique features designed to preserve cultural heritage while embracing modern learning approaches.")
         </h5>
         <div class="features">
             @foreach (var feature in Model)

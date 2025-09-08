@@ -37,18 +37,18 @@ namespace SkillBuilder.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model); // ✅ Use the correct view path
+                return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
             }
 
             var userId = User.FindFirst("UserId")?.Value;
             var artisan = await _context.Artisans.FirstOrDefaultAsync(a => a.UserId == userId);
             if (artisan == null) return Unauthorized();
 
-            // Step 1: Save the Course
             var course = model.Course!;
             course.CreatedBy = artisan.ArtisanId;
             course.CreatedAt = DateTime.UtcNow;
 
+            // Save course media
             if (model.ImageFile != null)
                 course.ImageUrl = await SaveFileAsync(model.ImageFile, "course-images");
 
@@ -58,13 +58,14 @@ namespace SkillBuilder.Controllers
             if (model.ThumbnailFile != null)
                 course.Thumbnail = await SaveFileAsync(model.ThumbnailFile, "course-thumbnails");
 
+            // Generate course link if missing
             course.Link = string.IsNullOrWhiteSpace(course.Link)
                 ? System.Text.RegularExpressions.Regex.Replace(
                     course.Title.ToLower(), @"[^a-z0-9]+", "-"
                   ).Trim('-') + "-" + Guid.NewGuid().ToString("N")[..8]
                 : course.Link;
 
-            // Save WhatToLearn as joined string
+            // Save learning objectives
             course.WhatToLearn = model.LearningObjectives != null
                 ? string.Join("||", model.LearningObjectives.Where(o => !string.IsNullOrWhiteSpace(o)))
                 : null;
@@ -72,7 +73,33 @@ namespace SkillBuilder.Controllers
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
 
-            // Step 2: Modules + Lessons
+            // ✅ Save Artisan Works
+            if (model.ArtisanWorks != null && model.ArtisanWorks.Any())
+            {
+                foreach (var workVm in model.ArtisanWorks)
+                {
+                    if (workVm.ImageFile != null)
+                    {
+                        var imageUrl = await SaveFileAsync(workVm.ImageFile, "artisan-works");
+
+                        var work = new ArtisanWork
+                        {
+                            ArtisanId = artisan.ArtisanId,
+                            CourseId = course.Id,
+                            Title = workVm.Title ?? string.Empty,
+                            Caption = workVm.Caption ?? string.Empty,
+                            ImageUrl = imageUrl,
+                            PublishDate = DateTime.UtcNow
+                        };
+
+                        _context.ArtisanWorks.Add(work);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            // ✅ Save Modules
             if (model.Modules != null)
             {
                 for (int i = 0; i < model.Modules.Count; i++)
@@ -86,7 +113,7 @@ namespace SkillBuilder.Controllers
                     };
 
                     _context.CourseModules.Add(courseModule);
-                    await _context.SaveChangesAsync(); // Get CourseModule.Id
+                    await _context.SaveChangesAsync();
 
                     for (int j = 0; j < moduleVm.Lessons.Count; j++)
                     {
@@ -101,7 +128,6 @@ namespace SkillBuilder.Controllers
                             ContentText = lesson.ContentText
                         };
 
-                        // Uploads (image/video depending on type)
                         if (lesson.ImageFile != null)
                             moduleContent.MediaUrl = await SaveFileAsync(lesson.ImageFile, "lesson-images");
 
@@ -109,9 +135,8 @@ namespace SkillBuilder.Controllers
                             moduleContent.MediaUrl = await SaveFileAsync(lesson.VideoFile, "lesson-videos");
 
                         _context.ModuleContents.Add(moduleContent);
-                        await _context.SaveChangesAsync(); // Get ModuleContent.Id
+                        await _context.SaveChangesAsync();
 
-                        // Quiz (if applicable)
                         if (lesson.LessonType == "Quiz" && lesson.QuizQuestions.Any())
                         {
                             foreach (var q in lesson.QuizQuestions)
@@ -135,7 +160,7 @@ namespace SkillBuilder.Controllers
                 }
             }
 
-            // Step 3: Materials (optional)
+            // ✅ Save Materials
             if (model.Materials != null)
             {
                 foreach (var mat in model.Materials)

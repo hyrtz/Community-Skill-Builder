@@ -1,8 +1,5 @@
-﻿
-<!-- Home Section -->
-
+﻿<!-- Home Section -->
 <style>
-
     /* Home Section */
     .home-section {
         width: 100%;
@@ -74,13 +71,34 @@
 
 <section class="home-section" id="home">
     <div class="home-content">
-        <h1>
-            Stitching
-            <span class="glow-toggle glow-blue">Tradition</span> and
-            <span class="glow-toggle glow-yellow">Technology</span> through
-            <span class="glow-toggle glow-red">Learning</span>
-        </h1>
-        <p>Discover, learn, and preserve Philippine cultural and creative art skills through our community-based platform.</p>
+        @if (User.IsInRole("Artisan"))
+        {
+            <h1>Teach Your
+                <span class="glow-toggle glow-blue">Craft</span>
+                Share our
+                <span class="glow-toggle glow-yellow">Culture</span>
+                Inspire the
+                <span class="glow-toggle glow-red">Next</span>
+            </h1>
+            <p>
+                Join a growing community of artisans preserving
+                Philippine culture through online teaching. Inspire and
+                pass on your legacy to the next generation.
+            </p>
+        }
+        else
+        {
+            <h1>
+                Stitching
+                <span class="glow-toggle glow-blue">Tradition</span> and
+                <span class="glow-toggle glow-yellow">Technology</span> through
+                <span class="glow-toggle glow-red">Learning</span>
+            </h1>
+            <p>
+                Discover, learn, and preserve Philippine cultural and creative art skills through our community-based platform.
+            </p>
+        }
+
         <div class="home-buttons">
             <a asp-controller="Courses" asp-action="CourseCatalog" class="btn explore">Explore Courses ></a>
             <a asp-controller="Community" asp-action="CommunityHub" class="btn join">Join a community</a>

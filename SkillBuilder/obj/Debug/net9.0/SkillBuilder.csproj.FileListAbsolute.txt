@@ -618,4 +618,6 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\ne
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\SkillBuilder.genruntimeconfig.cache
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\ref\SkillBuilder.dll
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\Appwrite.dll
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\gwr47kqyb5-17a5590m7c.gz
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\gwr47kqyb5-2cvdxlgwqn.gz
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\0gx45vrrv5-oz3fg9rowa.gz
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\4bkq6dqe57-obylf5y6nw.gz

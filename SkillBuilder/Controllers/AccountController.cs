@@ -17,11 +17,13 @@ namespace SkillBuilder.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _env; // add this
 
-        public AccountController(AppDbContext context, IConfiguration config)
+        public AccountController(AppDbContext context, IConfiguration config, IWebHostEnvironment env)
         {
             _context = context;
             _config = config;
+            _env = env; // assign _env here
         }
 
         [HttpPost("/signup")]
@@ -65,7 +67,9 @@ namespace SkillBuilder.Controllers
                 new Claim(ClaimTypes.NameIdentifier, newUser.Id),
                 new Claim(ClaimTypes.Name, newUser.FirstName + " " + newUser.LastName),
                 new Claim(ClaimTypes.Email, newUser.Email),
-                new Claim(ClaimTypes.Role, newUser.Role)
+                new Claim(ClaimTypes.Role, newUser.Role),
+                new Claim("IsVerified", newUser.IsVerified.ToString()),
+                new Claim("IsDeactivated", newUser.IsDeactivated.ToString())
             };
 
             var identity = new ClaimsIdentity(claims, "TahiAuth");
@@ -114,11 +118,9 @@ namespace SkillBuilder.Controllers
                 UserId = newUserId,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                Profession = model.Profession,
-                Hometown = model.Hometown,
-                Introduction = model.Introduction,
                 Role = "Artisan",
-                UserAvatar = newUser.UserAvatar
+                UserAvatar = newUser.UserAvatar,
+                IsApproved = false
             };
 
             _context.Users.Add(newUser);
@@ -134,8 +136,11 @@ namespace SkillBuilder.Controllers
                 new Claim(ClaimTypes.NameIdentifier, newUser.Id),
                 new Claim(ClaimTypes.Name, newUser.FirstName + " " + newUser.LastName),
                 new Claim(ClaimTypes.Email, newUser.Email),
-                new Claim(ClaimTypes.Role, newUser.Role)
-            };
+                new Claim(ClaimTypes.Role, newUser.Role),
+                new Claim("IsVerified", newUser.IsVerified.ToString()),
+                new Claim("IsDeactivated", newUser.IsDeactivated.ToString()),
+                new Claim("IsApproved", artisan.IsApproved.ToString())
+        };
 
             var identity = new ClaimsIdentity(claims, "TahiAuth");
             var principal = new ClaimsPrincipal(identity);
@@ -202,6 +207,67 @@ namespace SkillBuilder.Controllers
             return newId;
         }
 
+        [HttpPost("/submit-artisan-application")]
+        public async Task<IActionResult> SubmitArtisanApplication(IFormFile file, string profession, string hometown, string introduction)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (userId == null) return Unauthorized();
+
+            // Save the file
+            string? filePath = null;
+            if (file != null)
+            {
+                var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads/artisan-application");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                filePath = Path.Combine("uploads/artisan-application", uniqueFileName)
+                    .Replace("\\", "/"); // ✅ normalize path for web
+
+                using var stream = new FileStream(Path.Combine(_env.WebRootPath, filePath), FileMode.Create);
+                await file.CopyToAsync(stream);
+            }
+
+            // Save ArtisanApplication
+            var application = new ArtisanApplication
+            {
+                UserId = userId,
+                Profession = profession,
+                Hometown = hometown,
+                Introduction = introduction,
+                SubmittedAt = DateTime.UtcNow,
+                Status = "Pending",
+                ApplicationFile = filePath 
+            };
+            _context.ArtisanApplications.Add(application);
+
+            // Update or create Artisan
+            var artisan = await _context.Artisans.FirstOrDefaultAsync(a => a.UserId == userId);
+            if (artisan == null)
+            {
+                artisan = new Artisan
+                {
+                    UserId = userId,
+                    Profession = profession,
+                    Hometown = hometown,
+                    Introduction = introduction,
+                    ApplicationFile = filePath,
+                };
+                _context.Artisans.Add(artisan);
+            }
+            else
+            {
+                artisan.Profession = profession;
+                artisan.Hometown = hometown;
+                artisan.Introduction = introduction;
+                artisan.ApplicationFile = filePath;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Application submitted successfully!" });
+        }
+
         [HttpGet("/verify")]
         public async Task<IActionResult> VerifyEmail(string id)
         {
@@ -221,7 +287,9 @@ namespace SkillBuilder.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim("IsVerified", user.IsVerified.ToString()),
+                new Claim("IsDeactivated", user.IsDeactivated.ToString())
             };
 
             var identity = new ClaimsIdentity(claims, "TahiAuth");
@@ -260,8 +328,18 @@ namespace SkillBuilder.Controllers
                 new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role),
-                new Claim("IsVerified", user.IsVerified.ToString())
+                new Claim("IsVerified", user.IsVerified.ToString()),
+                new Claim("IsDeactivated", user.IsDeactivated.ToString())
             };
+
+            if (user.Role == "Artisan")
+            {
+                var artisan = await _context.Artisans.FirstOrDefaultAsync(a => a.UserId == user.Id);
+                if (artisan != null)
+                {
+                    claims.Add(new Claim("IsApproved", artisan.IsApproved.ToString()));
+                }
+            }
 
             var identity = new ClaimsIdentity(claims, "TahiAuth");
             var principal = new ClaimsPrincipal(identity);

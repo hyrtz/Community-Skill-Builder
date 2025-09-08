@@ -111,13 +111,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.closeModal = function (modalId, hideOverlay = true) {
         const modal = document.getElementById(modalId);
-        if (modal) modal.style.display = "none";
+        if (modal) modal.style.display = "none"; // hide the modal itself
 
         if (hideOverlay) {
-            overlay.style.display = "none";
-            navButtons.forEach(btn => btn.style.pointerEvents = "auto");
+            const overlay = document.getElementById("modal-overlay");
+            if (overlay) overlay.style.display = "none";
         }
 
+        // Reset signup form if closing signup
         if (modalId === "signup-modal") {
             signupForm.reset();
             resetSignupModalView();
@@ -300,27 +301,108 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById(id).addEventListener("input", checkSignupInputs);
     });
 
-    const skipVerificationBtn = document.getElementById("skip-verification-btn");
+    window.selectedInterests = [];
 
-    if (skipVerificationBtn) {
-        skipVerificationBtn.addEventListener("click", function () {
+    window.renderInterestOptions = function () {
+        const interestContainer = document.getElementById("interest-options");
+        const interestList = ["Pottery", "Weaving", "Shoemaking", "Embroidery", "Paper Crafts", "Wood Carving"];
+        const MAX_SELECTION = 3;
 
-            document.querySelectorAll("#signup-form input").forEach(input => {
-                input.disabled = true;
+        if (!interestContainer) return console.error("Interest container not found.");
+
+        interestContainer.innerHTML = "";
+        interestList.forEach(interest => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = interest;
+            btn.classList.add("interest-option");
+            btn.dataset.interest = interest;
+
+            btn.addEventListener("click", () => {
+                const index = window.selectedInterests.indexOf(interest);
+                if (index > -1) {
+                    window.selectedInterests.splice(index, 1);
+                    btn.classList.remove("selected");
+                } else {
+                    if (window.selectedInterests.length >= MAX_SELECTION) {
+                        alert(`You can only select up to ${MAX_SELECTION} interests.`);
+                        return;
+                    }
+                    window.selectedInterests.push(interest);
+                    btn.classList.add("selected");
+                }
+                document.getElementById("continue-interest-btn").disabled = window.selectedInterests.length === 0;
             });
 
-            document.querySelector(".nav-login-btn")?.style.setProperty("display", "none", "important");
-            document.querySelector(".nav-signup-btn")?.style.setProperty("display", "none", "important");
+            interestContainer.appendChild(btn);
+        });
+    };
 
-            document.querySelector(".nav-notification-icon")?.style.setProperty("display", "inline-block", "important");
-            document.querySelector(".nav-profile-icon")?.style.setProperty("display", "inline-block", "important");
+    // Show interest modal
+    window.showInterestModal = function () {
+        const modal = document.getElementById("interest-selection");
+        if (!modal) return console.error("Interest modal element not found.");
+
+        modal.style.display = "flex";
+        modal.classList.add("fade-in");
+
+        // Reset selection
+        window.selectedInterests = [];
+        renderInterestOptions();
+        document.getElementById("continue-interest-btn").disabled = true;
+    };
+
+    // Skip interest selection
+    document.getElementById("skip-interest-btn")?.addEventListener("click", () => {
+        closeModal("signup-modal");
+        window.location.reload();
+    });
+
+    // Continue interest selection → Save to backend
+    document.getElementById("continue-interest-btn")?.addEventListener("click", async () => {
+        if (window.selectedInterests.length === 0) return;
+
+        try {
+            const response = await fetch('/UserProfile/SaveInterests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(window.selectedInterests)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || "Failed to save interests.");
+            }
+
+            const data = await response.json();
+            console.log("✅ Interests saved:", data.message);
 
             closeModal("signup-modal");
             window.location.reload();
 
-            // openModal("interest-modal");
-        });
-    }
+        } catch (err) {
+            console.error(err);
+            alert(err.message || "An error occurred while saving your interests.");
+        }
+    });
+
+    // Trigger interest modal after email verification skip
+    document.getElementById("skip-verification-btn")?.addEventListener("click", e => {
+        e.preventDefault();
+
+        // Hide signup inputs & verification message
+        document.getElementById("signup-inputs-wrapper").style.display = "none";
+        document.getElementById("email-verification-message").style.display = "none";
+
+        // Show interest modal
+        window.showInterestModal();
+
+        // Update navbar icons
+        document.querySelector(".nav-login-btn")?.style.setProperty("display", "none", "important");
+        document.querySelector(".nav-signup-btn")?.style.setProperty("display", "none", "important");
+        document.querySelector(".nav-notification-icon")?.style.setProperty("display", "inline-block", "important");
+        document.querySelector(".nav-profile-icon")?.style.setProperty("display", "inline-block", "important");
+    });
 
     document.getElementById("signup-agree").addEventListener("change", checkSignupInputs);
 
@@ -452,37 +534,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         loginInProgress = false;
     });
-
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("verified") === "true") {
-        // ✅ Close modal if open
-        closeModal("signup-modal");
-
-        // ✅ Show success toast
-        const successPopup = document.createElement("div");
-        successPopup.textContent = "🎉 Your email has been successfully verified!";
-        successPopup.style.cssText = `
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background-color: #4BB543;
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            z-index: 9999;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            font-size: 0.95rem;
-        `;
-
-        document.body.appendChild(successPopup);
-
-        // Auto-dismiss after 4 seconds
-        setTimeout(() => successPopup.remove(), 4000);
-
-        // Clean up the URL
-        const cleanUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-    }
 
     const skipButton = document.getElementById("skip-interest-button");
     let skipClicked = false;

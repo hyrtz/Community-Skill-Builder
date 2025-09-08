@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Community Hub";
+    var isDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
 }
 
 <style>
@@ -394,10 +395,21 @@
                     <button class="see-more-btn">See more communities</button>
                 </div>
 
-                <div class="create-community-card" id="openCreateCommunityModal">
-                    <span class="plus-icon">＋</span>
-                    Create a community
-                </div>
+                @if (isDeactivated)
+                {
+                    <div class="create-community-card" style="opacity:0.5; pointer-events:none; cursor:not-allowed;">
+                        <p style="color:#d00; font-size:0.85rem; margin-top:0.5rem;">
+                            Can't Create Community, Your account is deactivated.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <div class="create-community-card" id="openCreateCommunityModal">
+                        <span class="plus-icon">＋</span>
+                        Create a community
+                    </div>
+                }
 
                 <div class="right-card">
                     <h4>Your Communities</h4>

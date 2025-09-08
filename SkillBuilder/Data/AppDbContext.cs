@@ -8,6 +8,7 @@ namespace SkillBuilder.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<UserInterest> UserInterests { get; set; }
         public DbSet<CourseProjectSubmission> CourseProjectSubmissions { get; set; }
         public DbSet<Artisan> Artisans { get; set; }
         public DbSet<ArtisanApplication> ArtisanApplications { get; set; }
@@ -62,33 +63,8 @@ namespace SkillBuilder.Data
                     LastName = "Dela Cruz",
                     Profession = "Pottery Artisan",
                     Hometown = "Vigan, Ilocos Sur",
-                    UserAvatar = "/assets/Mentors/juan.png",
+                    UserAvatar = "/assets/Avatar/Sample7.ico",
                     Introduction = "Juan is a 3rd-generation artisan teaching pottery for 15 years."
-                }
-            );
-
-            // Artisan Works
-            modelBuilder.Entity<ArtisanWork>().HasData(
-                new ArtisanWork
-                {
-                    Id = 001,
-                    ArtisanId = "A1111111",
-                    ImageUrl = "/assets/Works/JuanWorks1.png",
-                    Caption = "Handcraft Pottery"
-                },
-                new ArtisanWork
-                {
-                    Id = 002,
-                    ArtisanId = "A1111111",
-                    ImageUrl = "/assets/Works/JuanWorks2.png",
-                    Caption = "Clay Pot"
-                },
-                new ArtisanWork
-                {
-                    Id = 003,
-                    ArtisanId = "A1111111",
-                    ImageUrl = "/assets/Works/JuanWorks3.png",
-                    Caption = "Pot Elegant"
                 }
             );
 
@@ -101,10 +77,11 @@ namespace SkillBuilder.Data
             );
 
             // Courses
+            // Seed Courses first
             modelBuilder.Entity<Course>().HasData(
                 new Course
                 {
-                    Id = 00001,
+                    Id = 1,
                     Title = "Pottery",
                     Link = "pottery",
                     ImageUrl = "/assets/Courses Pics/Pottery.png",
@@ -123,7 +100,7 @@ namespace SkillBuilder.Data
                 },
                 new Course
                 {
-                    Id = 00002,
+                    Id = 2,
                     Title = "Woodcarving",
                     Link = "woodcarving",
                     ImageUrl = "/assets/Courses Pics/Woodcarving.png",
@@ -131,7 +108,7 @@ namespace SkillBuilder.Data
                     Duration = "29 hours",
                     Category = "Wood Carving",
                     Difficulty = "Intermediate",
-                    Video = "/assets/Videos/Wood Carving.mp4",
+                    Video = "/assets/Videos/WoodCarving.mp4",
                     Thumbnail = "/assets/Courses Pics/Woodcarving.png",
                     WhatToLearn = "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing.",
                     FullDescription = "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.",
@@ -142,7 +119,7 @@ namespace SkillBuilder.Data
                 },
                 new Course
                 {
-                    Id = 00003,
+                    Id = 3,
                     Title = "Weaving",
                     Link = "weaving",
                     ImageUrl = "/assets/Courses Pics/Weaving.png",
@@ -158,6 +135,40 @@ namespace SkillBuilder.Data
                     Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
                     CreatedBy = "A1111111",
                     CreatedAt = new DateTime(2024, 6, 1)
+                }
+            );
+
+            // Seed ArtisanWorks **after Courses**
+            modelBuilder.Entity<ArtisanWork>().HasData(
+                new ArtisanWork
+                {
+                    Id = 1,
+                    ArtisanId = "A1111111",
+                    CourseId = 1, // Matches existing Pottery course
+                    Title = "Classic Handcrafted Pottery",
+                    ImageUrl = "/assets/Works/JuanWorks1.png",
+                    Caption = "Handcrafted pottery made using traditional Vigan techniques.",
+                    PublishDate = new DateTime(2025, 1, 1)
+                },
+                new ArtisanWork
+                {
+                    Id = 2,
+                    ArtisanId = "A1111111",
+                    CourseId = 2, // Matches existing Woodcarving course
+                    Title = "Rustic Clay Pot",
+                    ImageUrl = "/assets/Works/JuanWorks2.png",
+                    Caption = "A functional yet beautiful rustic clay pot for everyday use.",
+                    PublishDate = new DateTime(2025, 1, 1)
+                },
+                new ArtisanWork
+                {
+                    Id = 3,
+                    ArtisanId = "A1111111",
+                    CourseId = 3, // Matches existing Weaving course
+                    Title = "Elegant Decorative Pot",
+                    ImageUrl = "/assets/Works/JuanWorks3.png",
+                    Caption = "An elegant pot showcasing intricate carvings and smooth finishing.",
+                    PublishDate = new DateTime(2025, 1, 1)
                 }
             );
 
@@ -422,9 +433,9 @@ namespace SkillBuilder.Data
             );
 
             // USER ⇄ ARTISAN (1:1)
-            modelBuilder.Entity<Artisan>()
-                .HasOne(a => a.User)
-                .WithOne(u => u.Artisan)
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Artisan)
+                .WithOne(a => a.User) 
                 .HasForeignKey<Artisan>(a => a.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -440,7 +451,7 @@ namespace SkillBuilder.Data
                 .HasOne(c => c.Artisan)
                 .WithMany(a => a.Courses)
                 .HasForeignKey(c => c.CreatedBy)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             // ENROLLMENT ⇄ USER (M:1)
             modelBuilder.Entity<Enrollment>()
@@ -600,6 +611,13 @@ namespace SkillBuilder.Data
                 .WithMany(mc => mc.QuizQuestions)
                 .HasForeignKey(q => q.ModuleContentId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // COURSE ⇄ ARTISAN WORKS (1:M)
+            modelBuilder.Entity<ArtisanWork>()
+                .HasOne(aw => aw.Course)
+                .WithMany(c => c.ArtisanWorks)
+                .HasForeignKey(aw => aw.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

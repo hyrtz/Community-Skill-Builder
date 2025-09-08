@@ -177,6 +177,30 @@
             line-height: 1.5;
             margin-bottom: 0.7rem;
         }
+
+    .teach-file-input {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    #artisan-application label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-top: 0.8rem;
+    }
+
+    #artisan-introduction {
+        min-height: 120px;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        resize: vertical;
+    }
 </style>
 
 <div id="teach-modal-overlay" style="z-index: 1001;" class="modal-overlay"></div>
@@ -206,7 +230,7 @@
 
             <form id="teach-form" class="teach-form-wrapper">
                 <button type="button" class="teach-back-btn" onclick="hideTeachForm()" style="margin-top: 0.5rem;">←</button>
-                
+
                 <label for="teach-firstname">First Name</label>
                 <input type="text" id="teach-firstname" required />
                 <p id="teach-fn-error" class="teach-error" style="display: none;">⚠️ Only letters are allowed.</p>
@@ -217,12 +241,6 @@
 
                 <label for="teach-email">Email</label>
                 <input type="email" id="teach-email" required />
-
-                <label for="teach-profession">Profession</label>
-                <input type="text" id="teach-profession" required />
-
-                <label for="teach-hometown">Hometown</label>
-                <input type="text" id="teach-hometown" required />
 
                 <label for="teach-password">Password</label>
                 <div class="teach-password-wrapper">
@@ -270,6 +288,35 @@
                 <button class="teach-modal-btn" style="margin-top: 1.5rem;" onclick="handleTeachSkipVerification()">Do it later</button>
             </div>
 
+            <div id="artisan-application" class="teach-form-wrapper" style="display:none;">
+                <h2 class="teach-header">Complete Your Artisan Application</h2>
+
+                <label for="artisan-profession">Profession</label>
+                <input type="text" id="artisan-profession" required />
+                <p id="artisan-profession-error" class="teach-error" style="display:none;">⚠️ Please enter a valid profession.</p>
+
+                <label for="artisan-hometown">Hometown</label>
+                <input type="text" id="artisan-hometown" required />
+                <p id="artisan-hometown-error" class="teach-error" style="display:none;">⚠️ Please enter a valid hometown.</p>
+
+                <label for="artisan-introduction">Introduction</label>
+                <textarea id="artisan-introduction" required></textarea>
+                <p id="artisan-intro-error" class="teach-error" style="display:none;">⚠️ Please enter an introduction.</p>
+
+                <label for="artisan-file">Upload Portfolio / Proof</label>
+                <input type="file" id="artisan-file" class="teach-file-input" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt" />
+
+                <p id="artisan-error-msg" class="teach-error"></p>
+
+                <button id="artisan-submit-btn" class="teach-modal-btn">Submit Application</button>
+            </div>
+
+            <div id="artisan-success" class="teach-verification-message" style="display:none;">
+                <h3>Thank You!</h3>
+                <p>Your artisan application has been submitted successfully.</p>
+                <button class="teach-modal-btn" id="artisan-success-btn">Great</button>
+            </div>
+
             <p class="teach-description">Share your cultural knowledge with the community by becoming a mentor on Tahi.</p>
         </div>
     </div>
@@ -277,7 +324,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // ---------- Initialize Appwrite once ----------
+        // ---------- Initialize Appwrite ----------
         if (!window.appwriteClient) {
             window.appwriteClient = new Appwrite.Client()
                 .setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -289,52 +336,16 @@
         const facebookBtn = document.getElementById("btn-facebook-teach");
         const SUCCESS_URL = "https://localhost:7049/oauth/success";
 
-        // ---------- OAuth Buttons ----------
+        // ---------- OAuth ----------
         googleBtn?.addEventListener("click", () => {
-            window.appwriteAccount.createOAuth2Session(
-                "google",
-                SUCCESS_URL,
-                "https://localhost:7049/?error=OAuthFailed",
-                ["openid", "email", "profile"] // <-- correct Google scopes
-            );
+            window.appwriteAccount.createOAuth2Session("google", SUCCESS_URL, "https://localhost:7049/?error=OAuthFailed", ["openid", "email", "profile"]);
         });
 
         facebookBtn?.addEventListener("click", () => {
-            window.appwriteAccount.createOAuth2Session(
-                "facebook",
-                SUCCESS_URL,
-                "https://localhost:7049/?error=OAuthFailed"
-            );
+            window.appwriteAccount.createOAuth2Session("facebook", SUCCESS_URL, "https://localhost:7049/?error=OAuthFailed");
         });
 
-        const teachPassword = document.getElementById("teach-password");
-        const passwordChecklist = document.getElementById("teach-password-checklist");
-        const teachConfirm = document.getElementById("teach-confirm");
-        const confirmWarn = document.getElementById("teach-confirm-warning");
-        const closeBtn = document.getElementById("teach-close-btn");
-        if (closeBtn) {
-            closeBtn.addEventListener("click", () => {
-                closeModal("teach-modal", true);
-            });
-        }
-
-        // When 'Teach on Tahi' is clicked
-        document.querySelectorAll(".nav-teach-btn").forEach(btn => {
-            btn.addEventListener("click", function (e) {
-                e.preventDefault();
-                openModal("teach-modal");
-
-                // Show social login and hide form
-                document.querySelector("#teach-form").style.display = "none";
-                document.querySelector(".teach-verification-message").style.display = "none";
-                document.querySelector(".social-login").style.display = "flex";
-                document.querySelector(".teach-email-btn").style.display = "flex";
-                document.querySelector(".separator").style.display = "flex";
-                document.querySelector(".teach-back-btn").style.display = "none";
-                document.querySelector(".auth-close-btn").style.display = "flex";
-            });
-        });
-
+        // ---------- Modal Open/Close ----------
         function openModal(modalId) {
             document.getElementById("teach-modal-overlay").style.display = "block";
             document.getElementById(modalId).style.display = "block";
@@ -343,141 +354,107 @@
 
         function closeModal(modalId, removeOverlay = false) {
             document.getElementById(modalId).style.display = "none";
-            if (removeOverlay) {
-                document.getElementById("teach-modal-overlay").style.display = "none";
-            }
+            if (removeOverlay) document.getElementById("teach-modal-overlay").style.display = "none";
             document.removeEventListener("keydown", escListener);
         }
 
         function escListener(e) {
-            if (e.key === "Escape") {
-                closeModal("teach-modal", true);
-            }
+            if (e.key === "Escape") closeModal("teach-modal", true);
         }
 
-        function showTeachForm() {
+        const closeBtn = document.getElementById("teach-close-btn");
+        closeBtn?.addEventListener("click", () => closeModal("teach-modal", true));
+
+        // ---------- Show/Hide Signup Form ----------
+        window.showTeachForm = function() {
             document.querySelector("#teach-form").style.display = "flex";
             document.querySelector(".teach-back-btn").style.display = "flex";
             document.querySelector(".social-login").style.display = "none";
             document.querySelector(".teach-email-btn").style.display = "none";
             document.querySelector(".separator").style.display = "none";
-        }
+        };
 
-        window.showTeachForm = showTeachForm;
-
-        function hideTeachForm() {
+        window.hideTeachForm = function() {
             document.querySelector("#teach-form").style.display = "none";
             document.querySelector(".teach-back-btn").style.display = "none";
             document.querySelector(".social-login").style.display = "flex";
             document.querySelector(".teach-email-btn").style.display = "flex";
             document.querySelector(".separator").style.display = "flex";
+        };
+
+        document.querySelectorAll(".nav-teach-btn").forEach(btn => {
+            btn.addEventListener("click", e => {
+                e.preventDefault();
+                openModal("teach-modal");
+                // Reset visibility
+                document.querySelector("#teach-form").style.display = "none";
+                document.querySelector(".teach-verification-message").style.display = "none";
+                document.querySelector("#artisan-application").style.display = "none";
+                document.querySelector(".social-login").style.display = "flex";
+                document.querySelector(".teach-email-btn").style.display = "flex";
+                document.querySelector(".separator").style.display = "flex";
+            });
+        });
+
+        // ---------- Password & Form Validation ----------
+        const teachPassword = document.getElementById("teach-password");
+        const teachConfirm = document.getElementById("teach-confirm");
+        const submitBtn = document.getElementById("teach-submit-btn");
+        const passwordChecklist = document.getElementById("teach-password-checklist");
+
+        function updateChecklist(id, valid) {
+            const el = document.getElementById(id);
+            const base = el.dataset.text || el.textContent.replace(/^✔️|❌/, "").trim();
+            el.textContent = (valid ? "✔️ " : "❌ ") + base;
+            el.classList.toggle("valid", valid);
         }
 
-        window.hideTeachForm = hideTeachForm;
+        function validatePasswords() {
+            const pass = teachPassword.value;
+            const confirm = teachConfirm.value;
+            passwordChecklist.style.display = pass.length ? "block" : "none";
+            updateChecklist("teach-check-length", pass.length >= 8);
+            updateChecklist("teach-check-uppercase", /[A-Z]/.test(pass));
+            updateChecklist("teach-check-number", /\d/.test(pass));
+            updateChecklist("teach-check-symbol", /[^A-Za-z0-9]/.test(pass));
+            document.getElementById("teach-confirm-warning").style.display = confirm && pass !== confirm ? "block" : "none";
+        }
 
-         function validateTeachFormInputs() {
+        function validateTeachFormInputs() {
             const fn = document.getElementById("teach-firstname").value.trim();
             const ln = document.getElementById("teach-lastname").value.trim();
             const email = document.getElementById("teach-email").value.trim();
-            const profession = document.getElementById("teach-profession").value.trim();
-            const hometown = document.getElementById("teach-hometown").value.trim();
             const pass = teachPassword.value;
             const confirm = teachConfirm.value;
-            const agree = document.getElementById("teach-agree")?.checked;
+            const agree = document.getElementById("teach-agree").checked;
 
             const namePattern = /^[A-Za-z\s]*$/;
-            const firstNameValid = namePattern.test(fn);
-            const lastNameValid = namePattern.test(ln);
-
-            const allFilled = fn && ln && email && profession && hometown && pass && confirm;
-            const passwordsMatch = pass === confirm;
-
-            const checklistValid =
-                pass.length >= 8 &&
-                /[A-Z]/.test(pass) &&
-                /\d/.test(pass) &&
-                /[^A-Za-z0-9]/.test(pass);
-
-            const valid = allFilled &&
-                passwordsMatch &&
-                checklistValid &&
-                agree &&
-                firstNameValid &&
-                lastNameValid;
-
-            document.getElementById("teach-submit-btn").disabled = !valid;
+            const checklistValid = pass.length >= 8 && /[A-Z]/.test(pass) && /\d/.test(pass) && /[^A-Za-z0-9]/.test(pass);
+            submitBtn.disabled = !(fn && ln && email && pass && confirm && pass === confirm && checklistValid && agree && namePattern.test(fn) && namePattern.test(ln));
         }
 
-        [
-            "teach-password", "teach-confirm",
-            "teach-firstname", "teach-lastname",
-            "teach-email", "teach-profession",
-            "teach-hometown", "teach-agree"
-        ].forEach(id => {
+        ["teach-password","teach-confirm","teach-firstname","teach-lastname","teach-email","teach-agree"].forEach(id => {
             const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener("input", validateTeachFormInputs);
-                el.addEventListener("change", validateTeachFormInputs);
-            }
+            el?.addEventListener("input", () => { validatePasswords(); validateTeachFormInputs(); });
+            el?.addEventListener("change", validateTeachFormInputs);
         });
 
-        // Validate names
+        // Name validation
         function validateTeachNameInput(inputId, errorId) {
             const input = document.getElementById(inputId);
             const error = document.getElementById(errorId);
-
             input.addEventListener("input", () => {
-                const isValid = /^[A-Za-z\s]*$/.test(input.value);
-                error.style.display = input.value && !isValid ? "block" : "none";
+                const valid = /^[A-Za-z\s]*$/.test(input.value);
+                error.style.display = input.value && !valid ? "block" : "none";
             });
         }
-
         validateTeachNameInput("teach-firstname", "teach-fn-error");
         validateTeachNameInput("teach-lastname", "teach-ln-error");
 
-        function updateTeachRequirement(id, valid) {
-            const el = document.getElementById(id);
-            const baseText = el.dataset.text || el.textContent.replace(/^✔️|❌/, "").trim();
-            el.textContent = (valid ? "✔️ " : "❌ ") + baseText;
-            el.classList.toggle("valid", valid);
-            el.style.color = valid ? "green" : "orange";
-        }
-
-        teachPassword.addEventListener("input", function () {
-            const val = this.value;
-
-            // Show checklist if not empty
-            passwordChecklist.style.display = val.length > 0 ? "block" : "none";
-
-            // Update checklist items
-            updateTeachRequirement("teach-check-length", val.length >= 8);
-            updateTeachRequirement("teach-check-uppercase", /[A-Z]/.test(val));
-            updateTeachRequirement("teach-check-number", /\d/.test(val));
-            updateTeachRequirement("teach-check-symbol", /[^A-Za-z0-9]/.test(val));
-
-            validateTeachPasswordMatch();
-            validateTeachFormInputs();
-        });
-
-        function validateTeachPasswordMatch() {
-            if (!teachConfirm.value) {
-                confirmWarn.style.display = "none";
-            } else if (teachPassword.value !== teachConfirm.value) {
-                confirmWarn.style.display = "block";
-            } else {
-                confirmWarn.style.display = "none";
-            }
-        }
-
-        teachPassword.addEventListener("input", validateTeachPasswordMatch);
-        teachConfirm.addEventListener("input", validateTeachPasswordMatch);
-
-        // Submit form
-        async function submitTeachForm(event) {
-            event.preventDefault();
+        // ---------- Signup Form Submission ----------
+        async function submitTeachForm(e) {
+            e.preventDefault();
             const error = document.getElementById("teach-error-msg");
-            const submitBtn = document.getElementById("teach-submit-btn");
-
             error.textContent = "";
             submitBtn.disabled = true;
             submitBtn.textContent = "Submitting...";
@@ -486,11 +463,8 @@
                 FirstName: document.getElementById("teach-firstname").value.trim(),
                 LastName: document.getElementById("teach-lastname").value.trim(),
                 Email: document.getElementById("teach-email").value.trim(),
-                Profession: document.getElementById("teach-profession").value.trim(),
-                Hometown: document.getElementById("teach-hometown").value.trim(),
-                Password: document.getElementById("teach-password").value,
-                ConfirmPassword: document.getElementById("teach-confirm").value,
-                introduction: "Hello I am an Artisan",
+                Password: teachPassword.value,
+                ConfirmPassword: teachConfirm.value,
                 Role: "Artisan"
             };
 
@@ -507,43 +481,98 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(data)
                 });
-
                 const result = await response.json().catch(() => ({ message: "Unexpected response" }));
 
                 if (response.ok) {
                     document.getElementById("teach-form").style.display = "none";
                     document.getElementById("teach-verification").style.display = "flex";
-                    document.getElementById("teach-ob-email").textContent = obfuscateEmail(data.Email);
-                    document.querySelector(".auth-close-btn").style.display = "none";
+                    document.getElementById("teach-ob-email").textContent = data.Email;
                 } else {
                     error.textContent = result.message || "Submission failed.";
                 }
-
             } catch (err) {
-                error.textContent = "An error occurred. Please try again later.";
                 console.error(err);
+                error.textContent = "An error occurred. Please try again.";
             }
 
             submitBtn.disabled = false;
             submitBtn.textContent = "Create Instructor Account";
         }
-
-        window.handleTeachSkipVerification = function () {
-            closeModal("teach-modal", true);
-            location.reload();
-        };
-
         document.getElementById("teach-form").addEventListener("submit", submitTeachForm);
 
-        // Toggle password visibility
-        function togglePasswordVisibility(inputId, icon) {
+        // ---------- Skip Verification ----------
+        window.handleTeachSkipVerification = function() {
+            document.getElementById("teach-verification").style.display = "none";
+            document.getElementById("artisan-application").style.display = "flex";
+        };
+
+        // ---------- Artisan Application ----------
+        const artisanSubmitBtn = document.getElementById("artisan-submit-btn");
+        const artisanErrorMsg = document.getElementById("artisan-error-msg");
+        const artisanProfession = document.getElementById("artisan-profession");
+        const artisanHometown = document.getElementById("artisan-hometown");
+        const artisanIntroduction = document.getElementById("artisan-introduction");
+        const artisanFile = document.getElementById("artisan-file");
+
+        function validateArtisanForm() {
+                const valid = artisanProfession.value.trim() && artisanHometown.value.trim() && artisanIntroduction.value.trim() && artisanFile.files.length > 0;
+                artisanSubmitBtn.disabled = !valid;
+                if (valid) artisanErrorMsg.textContent = "";
+            }
+            [artisanProfession, artisanHometown, artisanIntroduction, artisanFile].forEach(el => {
+                el.addEventListener("input", validateArtisanForm);
+                el.addEventListener("change", validateArtisanForm);
+            });
+
+                artisanSubmitBtn.addEventListener("click", async () => {
+            if (!artisanProfession.value.trim() ||
+                !artisanHometown.value.trim() ||
+                !artisanIntroduction.value.trim() ||
+                !artisanFile.files.length) {
+                artisanErrorMsg.textContent = "⚠️ Please fill in all required fields.";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", artisanFile.files[0]);
+            formData.append("profession", artisanProfession.value.trim());
+            formData.append("hometown", artisanHometown.value.trim());
+            formData.append("introduction", artisanIntroduction.value.trim());
+
+            try {
+                const response = await fetch("/submit-artisan-application", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    // Hide the application form
+                    document.getElementById("artisan-application").style.display = "none";
+
+                    // Show the success UI
+                    const successPanel = document.getElementById("artisan-success");
+                    successPanel.style.display = "flex";
+
+                    // Handle the "Great" button
+                    document.getElementById("artisan-success-btn").onclick = () => {
+                        closeModal("teach-modal", true);
+                        window.location.reload();
+                    };
+                } else {
+                    artisanErrorMsg.textContent = result.message || "Submission failed.";
+                }
+            } catch (err) {
+                console.error(err);
+                artisanErrorMsg.textContent = "An error occurred. Please try again.";
+            }
+        });
+
+        // ---------- Toggle Password Visibility ----------
+        window.togglePasswordVisibility = function(inputId, icon) {
             const input = document.getElementById(inputId);
             if (!input) return;
             input.type = input.type === "password" ? "text" : "password";
             icon.textContent = input.type === "text" ? "👁️" : "👁️‍🗨️";
-        }
-
-        // Hook up back button
-        document.querySelector(".teach-back-btn").addEventListener("click", hideTeachForm);
+        };
     });
 </script>

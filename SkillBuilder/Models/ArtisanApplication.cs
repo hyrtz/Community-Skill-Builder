@@ -11,6 +11,7 @@
         public DateTime SubmittedAt { get; set; }
         public string Profession { get; set; }
         public string Hometown { get; set; }
-        public string AboutArtisan { get; set; }
+        public string Introduction { get; set; } = string.Empty;
+        public string? ApplicationFile { get; set; }
     }
 }

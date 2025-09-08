@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Appwrite.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
@@ -99,6 +100,17 @@ namespace SkillBuilder.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return NotFound(new { success = false, message = "User not found." });
+
+            if (!user.IsVerified)
+                return BadRequest(new { success = false, message = "Please verify your email before creating a community." });
+
+            // ✅ Check deactivation
+            if (user.IsDeactivated)
+                return Forbid();
 
             // 2. Prepare file paths
             string avatarPath = null;

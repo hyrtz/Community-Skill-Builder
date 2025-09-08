@@ -27,6 +27,7 @@ namespace SkillBuilder.Models
         public Artisan? Artisan { get; set; }
 
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+        public ICollection<ArtisanWork> ArtisanWorks { get; set; } = new List<ArtisanWork>();
         public ICollection<CourseReview> Reviews { get; set; } = new List<CourseReview>();
         public ICollection<CourseModule> CourseModules { get; set; } = new List<CourseModule>();
         public ICollection<CourseMaterial> Materials { get; set; } = new List<CourseMaterial>();

@@ -51,6 +51,12 @@
             color: #3182ce;
         }
 
+    .create-course-btn.disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        color: #666;
+    }
+
 </style>
 <nav class="custom-navbar">
     <!-- Left: Logo -->
@@ -59,25 +65,39 @@
     </div>
 
     <!-- Center: Nav links -->
+    @if (string.IsNullOrEmpty(userRole) || userRole != "Admin")
+    {
+        <div class="navbar-center">
+            @if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(userRole))
+            {
+                <a href="@homeLink" class="navbar-item @(currentController == "UserProfile" || currentController == "ArtisanProfile" || currentController == "AdminProfile" ? "active-nav" : "")">Home</a>
+            }
 
-    <div class="navbar-center">
-        @if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(userRole))
-        {
-            <a href="@homeLink" class="navbar-item @(currentController == "UserProfile" || currentController == "ArtisanProfile" || currentController == "AdminProfile" ? "active-nav" : "")">Home</a>
-        }
-
-        <a asp-controller="Courses" asp-action="CourseCatalog" class="navbar-item @(currentController == "Courses" ? "active-nav" : "")">Courses</a>
-        <a asp-controller="Leaderboard" asp-action="UserLeaderboard" class="navbar-item @(currentController == "Leaderboard" ? "active-nav" : "")">Leaderboards</a>
-        <a asp-controller="Artisans" asp-action="ArtisanList" class="navbar-item @(currentController == "Artisans" ? "active-nav" : "")">Artisans</a>
-        <a asp-controller="Community" asp-action="CommunityHub" class="navbar-item @(currentController == "Community" ? "active-nav" : "")">Community</a>
-        
-    </div>
+            <a asp-controller="Courses" asp-action="CourseCatalog" class="navbar-item @(currentController == "Courses" ? "active-nav" : "")">Courses</a>
+            <a asp-controller="Leaderboard" asp-action="UserLeaderboard" class="navbar-item @(currentController == "Leaderboard" ? "active-nav" : "")">Leaderboards</a>
+            <a asp-controller="Artisans" asp-action="ArtisanList" class="navbar-item @(currentController == "Artisans" ? "active-nav" : "")">Artisans</a>
+            <a asp-controller="Community" asp-action="CommunityHub" class="navbar-item @(currentController == "Community" ? "active-nav" : "")">Community</a>
+        </div>
+    }
 
     <!-- Right: Login/Signup -->
     <div class="navbar-right">
         @if (User.Identity.IsAuthenticated && userRole == "Artisan")
         {
-            <a href="/ArtisanActions/CreateCourse" class="navbar-item create-course-btn">Create Course</a>
+            var isApproved = User.FindFirst("IsApproved")?.Value == "True";
+
+            if (isApproved)
+            {
+                <a href="/ArtisanActions/CreateCourse" class="navbar-item create-course-btn">
+                    Create Course
+                </a>
+            }
+            else
+            {
+                <a class="navbar-item create-course-btn disabled" style="pointer-events:none; opacity:0.5;">
+                    Create Course (Pending Approval)
+                </a>
+            }
         }
         <div class="notification-wrapper">
             <a href="javascript:void(0);" class="navbar-item nav-notification-icon" onclick="toggleNotificationDropdown()" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none")">

@@ -1,0 +1,158 @@
+﻿@model List<SkillBuilder.Models.Course>
+
+<style>
+    /* Recommended Courses Section */
+    .recommended-courses-section {
+        scroll-margin-top: 74px;
+        padding: 4rem 1rem 6rem 1rem;
+        background-color: #eef3ff;
+        text-align: center;
+        border-top: 3px solid #d4dbff;
+        border-bottom: 3px solid #d4dbff;
+    }
+
+    .recommended-header {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #344AEA;
+        margin-bottom: 10px;
+    }
+
+    .recommended-courses-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin: 4rem 10rem;
+        justify-content: center;
+    }
+
+    .recommended-card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        width: 23%;
+        min-width: 250px;
+    }
+
+        .recommended-card-link:hover .recommended-card {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+    .recommended-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+        .recommended-card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+    .recommended-image {
+        background-size: cover;
+        background-position: center;
+        height: 15rem;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .recommended-title {
+        font-size: 1.2rem;
+        margin: 1rem;
+        color: #222;
+        font-weight: 600;
+    }
+
+    .recommended-description {
+        font-size: 0.9rem;
+        margin: 0 1rem 1rem 1rem;
+        color: #666;
+    }
+
+    .recommended-details {
+        display: flex;
+        justify-content: space-around;
+        padding: 16px;
+        border-top: 1px solid #eee;
+    }
+
+    .recommended-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .recommended-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .recommended-btn {
+        color: white;
+        background-color: #344AEA;
+        padding: 1rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+        .recommended-btn:hover {
+            color: #FFFF00;
+            background-color: #2A3EC1;
+        }
+
+    .recommended-empty {
+        font-size: 1rem;
+        color: #555;
+        margin: 2rem 0;
+    }   
+
+</style>
+
+<section class="recommended-courses-section profile-layout" id="recommended-courses">
+    <h2 class="recommended-header">Recommended just for you</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="recommended-courses-container profile-layout">
+            @foreach (var course in Model)
+            {
+                <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="recommended-card-link">
+                    <div class="recommended-card">
+                        <div class="recommended-image" style="background-image: url('@course.ImageUrl');"></div>
+                        <h3 class="recommended-title">@course.Title</h3>
+                        <p class="recommended-description">@course.Overview</p>
+
+                        <div class="recommended-details">
+                            <div class="recommended-detail">
+                                <img src="/assets/Icons/Time.ico" class="recommended-icon" />
+                                <span>@course.Duration</span>
+                            </div>
+                            <div class="recommended-detail">
+                                <img src="/assets/Icons/Users.ico" class="recommended-icon" />
+                                <span>@course.UserCount</span>
+                            </div>
+                            <div class="recommended-detail">
+                                <img src="/assets/Icons/Star.ico" class="recommended-icon" />
+                                <span>@course.AverageRating.ToString("0.0")</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="recommended-empty">No recommended courses available yet. Explore all courses below!</p>
+    }
+
+    <a asp-controller="Courses" asp-action="CourseCatalog" class="recommended-btn">
+        Explore All Tahi Courses
+    </a>
+</section>

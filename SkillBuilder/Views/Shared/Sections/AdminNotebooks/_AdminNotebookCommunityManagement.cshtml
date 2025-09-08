@@ -1,5 +1,326 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model SkillBuilder.Models.ViewModels.AdminProfileViewModel
+
+<style>
+    .community-mgmt-section {
+        padding: 2rem;
+    }
+
+    .community-mgmt-header {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: #344AEA;
+    }
+
+    .community-mgmt-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .community-mgmt-search-bar {
+        display: flex;
+        flex: 0 0 90%;
+        border: 1px solid #bbb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .community-mgmt-search-bar input {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .community-mgmt-search-bar button {
+            background-color: #344AEA;
+            border: none;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+        }
+
+            .community-mgmt-search-bar button img {
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+
+    .community-mgmt-filter-btn {
+        flex: 0 0 10%;
+        background-color: #eee;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .community-mgmt-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 1.2rem;
+    }
+
+        .community-mgmt-table th {
+            text-align: left;
+            font-size: 1rem;
+            color: #666;
+            padding: 0.5rem 1rem;
+        }
+
+    .community-mgmt-row {
+        background-color: #fafafa;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: background-color 0.2s ease;
+    }
+
+        .community-mgmt-row:hover {
+            background-color: #efefef;
+            transform: scale(1.01);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+        }
+
+    .community-mgmt-cell {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .community-mgmt-cell.community-author {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .community-mgmt-cell.community-actions {
+        text-align: right;
+    }
+
+    .community-mgmt-name a {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #7D3C98;
+        text-decoration: none;
+    }
+
+    .community-mgmt-creator {
+        font-size: 0.95rem;
+        color: #222;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    /* Actions column */
+    .community-mgmt-cell.community-mgmt-actions {
+        text-align: right;
+    }
+
+    .community-mgmt-action-buttons {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .community-mgmt-action-btn {
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #fff;
+        transition: background-color 0.2s ease;
+    }
+
+    .community-mgmt-delete-btn {
+        background-color: #E74C3C;
+    }
+
+        .community-mgmt-delete-btn:hover {
+            background-color: #C0392B;
+        }
+
+    /* Backdrop */
+    .community-mgmt-modal-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+
+    /* Modal box */
+    .community-mgmt-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 1001;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+    }
+
+        .community-mgmt-modal h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .community-mgmt-modal p {
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            color: #555;
+        }
+
+    .community-mgmt-modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+        .community-mgmt-modal-buttons button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+    .community-mgmt-modal-cancel {
+        background-color: #ccc;
+        color: #333;
+    }
+
+    .community-mgmt-modal-confirm {
+        background-color: #E74C3C;
+        color: white;
+    }
+</style>
+
+<div class="community-mgmt-section">
+    <div class="community-mgmt-header">All Communities</div>
+
+    <div class="community-mgmt-controls">
+        <div class="community-mgmt-search-bar">
+            <input type="text" placeholder="Search by community name or creator..." />
+            <button type="button">
+                <img src="/assets/Icons/Search.ico" alt="Search" />
+            </button>
+        </div>
+        <button class="community-mgmt-filter-btn">Filter</button>
+    </div>
+
+    <table class="community-mgmt-table">
+        <thead>
+            <tr>
+                <th>Community Name</th>
+                <th style="text-align: center;">Created By</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.AllCommunities != null && Model.AllCommunities.Any())
+            {
+                foreach (var community in Model.AllCommunities)
+                {
+                    <tr class="community-mgmt-row">
+                        <td class="community-mgmt-cell community-mgmt-name">
+                            <a href="@Url.Action("CommunityDetails", "AdminProfile", new { id = community.Id })">
+                                @community.Name
+                            </a>
+                        </td>
+
+                        <td class="community-mgmt-cell community-mgmt-creator">
+                            @community.Creator.FirstName @community.Creator.LastName
+                        </td>
+
+                        <td class="community-mgmt-cell community-mgmt-actions">
+                            <div class="community-mgmt-action-buttons">
+                                <form asp-action="DeleteCommunity"
+                                      asp-route-id="@community.Id"
+                                      asp-route-adminId="@Model.Admin.UserId"
+                                      method="post"
+                                      onsubmit="return communityMgmtOpenDeleteModal(this, '@community.Name');">
+                                    <button type="submit" class="community-mgmt-action-btn community-mgmt-delete-btn">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="community-mgmt-cell" style="text-align: center; padding: 2rem; color: #888;">
+                        No communities available.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Backdrop -->
+    <div class="community-mgmt-modal-backdrop" id="communityMgmtModalBackdrop"></div>
+
+    <!-- Delete confirmation modal -->
+    <div class="community-mgmt-modal" id="communityMgmtDeleteModal">
+        <h3>Confirm Deletion</h3>
+        <p id="communityMgmtDeleteMessage">Are you sure you want to delete this community?</p>
+        <div class="community-mgmt-modal-buttons">
+            <button class="community-mgmt-modal-cancel" onclick="communityMgmtCloseModal()">Cancel</button>
+            <button class="community-mgmt-modal-confirm" id="communityMgmtConfirmDelete">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let communityMgmtCurrentForm = null;
+
+    function communityMgmtOpenDeleteModal(form, communityName) {
+        communityMgmtCurrentForm = form;
+        document.getElementById("communityMgmtDeleteMessage").innerText =
+            `Are you sure you want to delete the community "${communityName}"?`;
+
+        document.getElementById("communityMgmtModalBackdrop").style.display = "block";
+        document.getElementById("communityMgmtDeleteModal").style.display = "block";
+        return false; // prevent submit
+    }
+
+    function communityMgmtConfirmDeleteAction() {
+        if (communityMgmtCurrentForm) communityMgmtCurrentForm.submit();
+    }
+
+    function communityMgmtCloseModal() {
+        document.getElementById("communityMgmtModalBackdrop").style.display = "none";
+        document.getElementById("communityMgmtDeleteModal").style.display = "none";
+        communityMgmtCurrentForm = null;
+    }
+
+    // backdrop click closes modal
+    document.getElementById("communityMgmtModalBackdrop")
+        .addEventListener("click", communityMgmtCloseModal);
+
+    // ESC key support
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            communityMgmtCloseModal();
+        }
+    });
+
+    // confirm delete button binding
+    document.getElementById("communityMgmtConfirmDelete")
+        .addEventListener("click", communityMgmtConfirmDeleteAction);
+</script>

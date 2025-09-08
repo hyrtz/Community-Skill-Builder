@@ -1,4 +1,7 @@
 ﻿@using SkillBuilder.Models.ViewModels
+@{
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+}
 @model CourseCatalogViewModel
 
 @{
@@ -12,7 +15,10 @@
 {
     @Html.Partial("~/Views/Shared/Sections/_CourseDetailsSection.cshtml", Model.SelectedCourse)
 
-    @Html.Partial("Sections/_CourseSection", Model.Courses)
+    @if (userRole != "Admin")
+    {
+        @Html.Partial("Sections/_CourseSection", Model.Courses)
+    }
 }
 else
 {

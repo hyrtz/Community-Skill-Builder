@@ -1,208 +1,416 @@
-﻿@using SkillBuilder.Models.ViewModels
-@model AdminProfileViewModel
+﻿    @using SkillBuilder.Models.ViewModels
+    @model AdminProfileViewModel
 
-<style>
-    .admin-user-section {
-        padding: 2rem;
-    }
-
-    .admin-user-header {
-        font-size: 1.8rem;
-        font-weight: bold;
-        margin-bottom: 1.5rem;
-        color: #344AEA;
-    }
-
-    .admin-user-controls {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .search-bar {
-        display: flex;
-        flex: 0 0 90%;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-        .search-bar input {
-            flex: 1;
-            padding: 0.6rem 1rem;
-            border: none;
-            outline: none;
-            font-size: 1rem;
+    <style>
+        .admin-user-section {
+            padding: 2rem;
         }
 
-        .search-bar button {
-            background-color: #344AEA;
-            border: none;
-            padding: 0.6rem 1rem;
-            cursor: pointer;
+        .admin-user-header {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #344AEA;
         }
 
-            .search-bar button img {
-                width: 1.2rem;
-                height: 1.2rem;
+        .admin-user-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-bar {
+            display: flex;
+            flex: 0 0 90%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+            .search-bar input {
+                flex: 1;
+                padding: 0.6rem 1rem;
+                border: none;
+                outline: none;
+                font-size: 1rem;
             }
 
-    .filter-btn {
-        flex: 0 0 10%;
-        background-color: #eee;
-        border: none;
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-    }
+            .search-bar button {
+                background-color: #344AEA;
+                border: none;
+                padding: 0.6rem 1rem;
+                cursor: pointer;
+            }
 
-    .user-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 1.2rem;
-    }
+                .search-bar button img {
+                    width: 1.2rem;
+                    height: 1.2rem;
+                }
 
-        .user-table th {
-            text-align: left;
-            font-size: 1rem;
-            color: #666;
-            padding: 0.5rem 1rem;
-        }
-
-    .user-row {
-        background-color: #f9f9f9;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .user-cell {
-        padding: 1rem;
-        vertical-align: middle;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-        .user-info img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-    .user-details {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .user-name {
-        font-weight: bold;
-        font-size: 1rem;
-        color: #333;
-    }
-
-    .user-email {
-        font-size: 0.85rem;
-        color: #777;
-    }
-
-    .user-role {
-        font-weight: 600;
-        font-size: 1rem;
-        color: #222;
-        text-align: center;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: flex-end;
-    }
-
-        .action-buttons button {
-            padding: 0.4rem 0.8rem;
+        .filter-btn {
+            flex: 0 0 10%;
+            background-color: #eee;
             border: none;
-            border-radius: 6px;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
             font-weight: bold;
         }
 
-    .delete-btn {
-        background-color: #FF4C4C;
-        color: white;
-    }
+        .user-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 1.2rem;
+        }
 
-    .deactivate-btn {
-        background-color: #FFA500;
-        color: white;
-    }
+            .user-table th {
+                text-align: left;
+                font-size: 1rem;
+                color: #666;
+                padding: 0.5rem 1rem;
+            }
 
-    .reactivate-btn {
-        background-color: #4CAF50;
-        color: white;
-    }
-</style>
+        .user-row {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
 
-<div class="admin-user-section">
-    <div class="admin-user-header">All Users</div>
+            /* Alternate rows */
+            .user-row:nth-child(even) {
+                background-color: #f1f1f1;
+            }
 
-    <div class="admin-user-controls">
-        <div class="search-bar">
-            <input type="text" placeholder="Search by name or email..." />
-            <button type="button">
-                <img src="/assets/Icons/Search.ico" alt="Search" />
-            </button>
+            /* Hover effect */
+            .user-row:hover {
+                background-color: #e6e6e6;
+                transform: scale(1.01); /* subtle pop */
+            }
+
+        .user-cell {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .user-info img {
+                width: 50px;
+                height: 50px;
+                object-fit: cover;
+                border-radius: 50%;
+            }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .user-email {
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .user-role {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #222;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+            .action-buttons button {
+                padding: 0.8rem 0.8rem;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 0.9rem;
+                font-weight: bold;
+            }
+
+        .delete-btn {
+            background-color: #e74c3c;
+        }
+
+            .delete-btn:hover {
+                background-color: #c0392b;
+            }
+
+        .deactivate-btn {
+            background-color: #FFA500;
+        }
+
+            .deactivate-btn:hover {
+                background-color: #e69500;
+            }
+
+        .reactivate-btn {
+            background-color: #4CAF50;
+        }
+
+            .reactivate-btn:hover {
+                background-color: #3d8e41;
+            }
+
+        /* Backdrop */
+        .admin-modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        /* Modal box */
+        .admin-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1001;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+            .admin-modal h3 {
+                margin-bottom: 1rem;
+                font-size: 1.3rem;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .admin-modal p {
+                margin-bottom: 1.5rem;
+                font-size: 1rem;
+                color: #555;
+            }
+
+        .admin-modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+            .admin-modal-buttons button {
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+        .admin-modal-confirm {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .admin-modal-cancel {
+            background-color: #ccc;
+            color: #333;
+        }
+
+        .admin-modal-ok {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .admin-action-btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: white;
+            transition: background-color 0.2s ease;
+        }
+    </style>
+
+    <div class="admin-user-section">
+        <div class="admin-user-header">All Users</div>
+
+        <div class="admin-user-controls">
+            <div class="search-bar">
+                <input type="text" placeholder="Search by name or email..." />
+                <button type="button">
+                    <img src="/assets/Icons/Search.ico" alt="Search" />
+                </button>
+            </div>
+            <button class="filter-btn">Filter</button>
         </div>
-        <button class="filter-btn">Filter</button>
+
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th style="text-align: center;">User Type</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.AllUsers)
+                {
+                    <tr class="user-row">
+                        <td class="user-cell">
+                            <div class="user-info">
+                                <img src="@user.UserAvatar" alt="Avatar" />
+                                <div class="user-details">
+                                    <div class="user-name">
+                                        <a asp-controller="AdminProfile" asp-action="UserProfileByAdmin" asp-route-id="@user.Id" style="text-decoration: none;">
+                                            @user.FirstName @user.LastName
+                                        </a>
+                                    </div>
+                                    <div class="user-email">@user.Email</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="user-cell user-role">
+                            @user.Role
+                        </td>
+
+
+                        <td class="user-cell">
+                            <div class="action-buttons">
+                                <!-- Delete button -->
+                                <form asp-action="DeleteUser" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
+                                      onsubmit="return adminOpenDeleteModal(this);">
+                                    <button type="submit" class="admin-action-btn delete-btn">
+                                        Delete User
+                                    </button>
+                                </form>
+
+                                <!-- Toggle Deactivation button -->
+                                <form asp-action="ToggleUserStatus" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
+                                      onsubmit="return adminOpenToggleModal(this, '@(user.IsDeactivated ? "Reactivate" : "Deactivate")');">
+                                    @if (user.IsDeactivated)
+                                    {
+                                        <button type="submit" class="admin-action-btn reactivate-btn">Reactivate</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="admin-action-btn deactivate-btn">Deactivate</button>
+                                    }
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Backdrop -->
+        <div class="admin-modal-backdrop" id="adminModalBackdrop"></div>
+
+        <!-- Delete confirmation modal -->
+        <div class="admin-modal" id="adminDeleteModal">
+            <h3>Confirm Deletion</h3>
+            <p>Are you sure you want to delete this user?</p>
+            <div class="admin-modal-buttons">
+                <button class="admin-modal-cancel" onclick="adminCloseModal()">Cancel</button>
+                <button class="admin-modal-confirm" id="adminConfirmDelete">Delete</button>
+            </div>
+        </div>
+
+        <!-- Status toggle confirmation modal -->
+        <div class="admin-modal" id="adminToggleModal">
+            <h3>Confirm Action</h3>
+            <p id="adminToggleMessage"></p>
+            <div class="admin-modal-buttons">
+                <button class="admin-modal-cancel" onclick="adminCloseModal()">Cancel</button>
+                <button class="admin-modal-confirm" id="adminConfirmToggle">Yes</button>
+            </div>
+        </div>
+
     </div>
 
-    <table class="user-table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th style="text-align: center;">User Type</th>
-                <th style="text-align: right;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model.AllUsers)
-            {
-                <tr class="user-row">
-                    <td class="user-cell">
-                        <div class="user-info">
-                            <img src="@user.UserAvatar" alt="Avatar" />
-                            <div class="user-details">
-                                <div class="user-name">@user.FirstName @user.LastName</div>
-                                <div class="user-email">@user.Email</div>
-                            </div>
-                        </div>
-                    </td>
+    <script>
+        let adminCurrentForm = null;
+        let adminCurrentToggleForm = null;
 
-                    <td class="user-cell user-role">
-                        @user.Role
-                    </td>
+        function adminOpenToggleModal(form, action) {
+            adminCurrentToggleForm = form;
 
-                    <td class="user-cell">
-                        <div class="action-buttons">
-                            <button class="delete-btn">Delete</button>
-                            @if (user.IsVerified)
-                            {
-                                <button class="deactivate-btn">Deactivate</button>
-                            }
-                            else
-                            {
-                                <button class="reactivate-btn">Reactivate</button>
-                            }
-                        </div>
-                    </td>
-                </tr>
+            const msg = `Are you sure you want to ${action.toLowerCase()} this user?`;
+            document.getElementById("adminToggleMessage").innerText = msg;
+
+            const confirmBtn = document.getElementById("adminConfirmToggle");
+            confirmBtn.className = "admin-modal-confirm"; // reset
+
+            if (action === "Reactivate") {
+                confirmBtn.style.backgroundColor = "#4CAF50"; // green
+                confirmBtn.innerText = "Reactivate";
+            } else {
+                confirmBtn.style.backgroundColor = "#FFA500"; // orange
+                confirmBtn.innerText = "Deactivate";
             }
-        </tbody>
-    </table>
-</div>
+
+            document.getElementById("adminModalBackdrop").style.display = "block";
+            document.getElementById("adminToggleModal").style.display = "block";
+            return false;
+        }
+
+        document.getElementById("adminModalBackdrop").addEventListener("click", adminCloseModal);
+
+        function adminConfirmToggleAction() {
+            if (adminCurrentToggleForm) adminCurrentToggleForm.submit();
+        }
+
+        // Bind confirm toggle button
+        document.getElementById("adminConfirmToggle").addEventListener("click", adminConfirmToggleAction);
+
+        function adminOpenDeleteModal(form) {
+            adminCurrentForm = form;
+            document.getElementById("adminModalBackdrop").style.display = "block";
+            document.getElementById("adminDeleteModal").style.display = "block";
+            return false; // prevent default submit
+        }
+
+        function adminConfirmDeleteAction() {
+            if (adminCurrentForm) adminCurrentForm.submit();
+        }
+
+        function adminCloseModal() {
+            document.getElementById("adminModalBackdrop").style.display = "none";
+            document.querySelectorAll(".admin-modal").forEach(m => m.style.display = "none");
+            adminCurrentForm = null;
+            adminCurrentToggleForm = null;
+        }
+
+        // ESC key support
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                adminCloseModal();
+            }
+        });
+
+        // Bind confirm delete button
+        document.getElementById("adminConfirmDelete").addEventListener("click", adminConfirmDeleteAction);
+    </script>

@@ -1,0 +1,183 @@
+﻿@model SkillBuilder.Models.ArtisanApplication
+
+<style>
+    /* SECTION & HEADER */
+    .admin-application-section {
+        padding: 6rem 6rem;
+        background-color: #f9f9f9;
+    }
+
+    .admin-application-header {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        color: #344AEA;
+    }
+
+    /* FLEX WRAPPER */
+    .application-section {
+        display: flex;
+        gap: 2rem;
+        height: 70vh;
+    }
+
+    /* LEFT COLUMN */
+    .left-column {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        width: 30%;
+        height: 100%;
+    }
+
+    .application-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        padding: 2rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .application-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+    /* Stretch avatar and info cards */
+    .avatar-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* center vertically */
+        text-align: center;
+        flex: 1; /* take available height */
+    }
+
+        .avatar-section img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #344AEA;
+            margin-bottom: 1rem;
+        }
+
+        .avatar-section .name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .avatar-section .email {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 0.3rem;
+        }
+
+    .info-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        flex: 1; /* take available height */
+    }
+
+        .info-section .application-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #344AEA;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-section .application-value {
+            font-size: 1.1rem;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+    /* RIGHT FILE CARD */
+    .file-card {
+        width: 70%;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        padding: 2rem;
+        overflow-y: auto;
+    }
+
+    .file-section img, .file-section iframe {
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 12px;
+    }
+
+    .file-section a {
+        color: #344AEA;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .file-section a:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<section class="admin-application-section">
+    <!-- HEADER -->
+    <div class="admin-application-header">Artisan Application (Admin View)</div>
+
+    <!-- CARDS WRAPPER -->
+    <div class="application-section">
+        <!-- LEFT COLUMN -->
+        <div class="left-column">
+            <!-- Avatar Card -->
+            <div class="application-card avatar-section">
+                <img src="@Model.User.UserAvatar" alt="Avatar" />
+                <div class="name">@Model.User.FirstName @Model.User.LastName</div>
+                <div class="email">@Model.User.Email</div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="application-card info-section">
+                <div>
+                    <div class="application-label">Profession</div>
+                    <div class="application-value">@Model.Profession</div>
+                </div>
+                <div>
+                    <div class="application-label">Hometown</div>
+                    <div class="application-value">@Model.Hometown</div>
+                </div>
+                <div>
+                    <div class="application-label">Introduction</div>
+                    <div class="application-value">@Model.Introduction</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT FILE CARD -->
+        <div class="file-card file-section">
+            @if (!string.IsNullOrEmpty(Model.ApplicationFile))
+            {
+                var fileUrl = Url.Content("~/" + Model.ApplicationFile.Replace("\\", "/"));
+                var extension = System.IO.Path.GetExtension(Model.ApplicationFile).ToLower();
+
+                @if (extension == ".pdf")
+                {
+                    <iframe src="@fileUrl" width="100%" height="100%"></iframe>
+                }
+                else if (extension == ".jpg" || extension == ".jpeg" || extension == ".png")
+                {
+                    <img src="@fileUrl" alt="Application File Preview" />
+                }
+                else if (extension == ".doc" || extension == ".docx")
+                {
+                    <a href="@fileUrl" target="_blank">📄 Download Word Document</a>
+                }
+                else
+                {
+                    <a href="@fileUrl" target="_blank">📂 Download File</a>
+                }
+            }
+        </div>
+    </div>
+</section>

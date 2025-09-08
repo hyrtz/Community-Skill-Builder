@@ -11,6 +11,7 @@
         font-weight: bold;
         margin-bottom: 1.5rem;
         color: #344AEA;
+        letter-spacing: 0.5px;
     }
 
     .admin-course-controls {
@@ -26,6 +27,8 @@
         border: 1px solid #ccc;
         border-radius: 8px;
         overflow: hidden;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
 
         .course-search-bar input {
@@ -41,7 +44,12 @@
             border: none;
             padding: 0.6rem 1rem;
             cursor: pointer;
+            transition: background-color 0.2s ease;
         }
+
+            .course-search-bar button:hover {
+                background-color: #2a3bcf;
+            }
 
             .course-search-bar button img {
                 width: 1.2rem;
@@ -56,7 +64,12 @@
         border-radius: 8px;
         cursor: pointer;
         font-weight: bold;
+        transition: background-color 0.2s ease;
     }
+
+        .course-filter-btn:hover {
+            background-color: #ddd;
+        }
 
     .course-table {
         width: 100%;
@@ -71,22 +84,56 @@
             padding: 0.5rem 1rem;
         }
 
+            .course-table th:nth-child(2) {
+                text-align: center;
+            }
+
+            .course-table th:nth-child(3) {
+                text-align: right;
+            }
+
+    /* Row hover effect */
     .course-row {
-        background-color: #f9f9f9;
+        background: #fafafa;
         border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        transition: background-color 0.25s ease, box-shadow 0.25s ease;
     }
 
+        .course-row:hover {
+            background-color: #f0f0f0; /* subtle gray */
+            transform: scale(1.01); /* slight pop */
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08); /* soft shadow */
+            transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+        }
+
+    /* Cells */
     .course-cell {
         padding: 1rem;
         vertical-align: middle;
     }
+
+        .course-cell.course-author {
+            text-align: center;
+            display: table-cell; /* keep natural centering */
+            vertical-align: middle;
+        }
+
+        .course-cell.course-mgmt-actions {
+            text-align: right;
+        }
 
     .course-name {
         font-weight: bold;
         font-size: 1rem;
         color: #333;
     }
+
+        .course-name a {
+            text-decoration: none;
+            color: #7D3C98;
+            transition: color 0.2s ease;
+        }
 
     .course-author {
         font-size: 0.95rem;
@@ -95,35 +142,157 @@
         font-weight: 500;
     }
 
-    .action-buttons {
+    /* Actions alignment */
+    .course-cell.course-mgmt-actions {
+        text-align: right;
+    }
+
+    .course-mgmt-action-buttons {
         display: flex;
-        gap: 0.5rem;
         justify-content: flex-end;
     }
 
-    .review-btn {
-        background-color: #3498DB;
-        color: white;
-    }
-
-    .publish-btn {
-        background-color: #2ECC71;
-        color: white;
-    }
-
-    .unpublish-btn {
-        background-color: #E67E22;
-        color: white;
-    }
-
-    .action-buttons button {
-        padding: 0.4rem 0.8rem;
+    .course-mgmt-action-btn {
+        padding: 0.55rem 1rem;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 0.9rem;
         font-weight: bold;
+        color: #fff;
+        transition: background-color 0.25s ease, transform 0.15s ease;
     }
+
+        .course-mgmt-action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+    .course-mgmt-delete-btn {
+        background-color: #e74c3c;
+    }
+
+        .course-mgmt-delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+    .review-btn {
+        background-color: #3498DB;
+    }
+
+        .review-btn:hover {
+            background-color: #2d83c0;
+        }
+
+    .publish-btn {
+        background-color: #2ECC71;
+    }
+
+        .publish-btn:hover {
+            background-color: #27ae60;
+        }
+
+    .unpublish-btn {
+        background-color: #E67E22;
+    }
+
+        .unpublish-btn:hover {
+            background-color: #ca6a14;
+        }
+
+    /* Backdrop */
+    .course-mgmt-modal-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.55);
+        z-index: 2000;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+    }
+
+        .course-mgmt-modal-backdrop.active {
+            display: block;
+            opacity: 1;
+        }
+
+    /* Modal */
+    .course-mgmt-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.95);
+        background: #ffffff;
+        padding: 1.8rem;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+        z-index: 2001;
+        max-width: 420px;
+        width: 90%;
+        text-align: center;
+        opacity: 0;
+        transition: all 0.25s ease;
+    }
+
+        .course-mgmt-modal.active {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .course-mgmt-modal h3 {
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .course-mgmt-modal p {
+            margin-bottom: 1.6rem;
+            font-size: 1rem;
+            color: #555;
+        }
+
+    .course-mgmt-modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+        .course-mgmt-modal-buttons button {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: background-color 0.2s ease, transform 0.15s ease;
+        }
+
+            .course-mgmt-modal-buttons button:hover {
+                transform: scale(1.05);
+            }
+
+    .course-mgmt-modal-confirm {
+        background-color: #e74c3c;
+        color: #fff;
+    }
+
+        .course-mgmt-modal-confirm:hover {
+            background-color: #c0392b;
+        }
+
+    .course-mgmt-modal-cancel {
+        background-color: #bdc3c7;
+        color: #2c3e50;
+    }
+
+        .course-mgmt-modal-cancel:hover {
+            background-color: #a0a7ad;
+        }
 </style>
 
 <div class="admin-course-section">
@@ -155,26 +324,29 @@
                     <tr class="course-row">
                         <!-- Course Title -->
                         <td class="course-cell course-name">
-                            @course.Title
+                            <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })"
+                               style="text-decoration: none;">
+                                @course.Title
+                            </a>
                         </td>
 
-                        <!-- Creator (Artisan) -->
+                        <!-- Creator -->
                         <td class="course-cell course-author">
                             @course.Artisan?.User?.FirstName @course.Artisan?.User?.LastName
                         </td>
 
                         <!-- Actions -->
-                        <td class="course-cell">
-                            <div class="action-buttons">
-                                <button class="review-btn">Review</button>
-                                @if (course.IsPublished)
-                                {
-                                    <button class="unpublish-btn">Unpublish</button>
-                                }
-                                else
-                                {
-                                    <button class="publish-btn">Publish</button>
-                                }
+                        <td class="course-cell course-mgmt-actions">
+                            <div class="course-mgmt-action-buttons">
+                                <form asp-action="DeleteCourse"
+                                      asp-route-id="@course.Id"
+                                      asp-route-adminId="@Model.Admin.UserId"
+                                      method="post"
+                                      onsubmit="return courseMgmtOpenDeleteModal(this, '@course.Title');">
+                                    <button type="submit" class="course-mgmt-action-btn course-mgmt-delete-btn">
+                                        Delete
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -190,4 +362,55 @@
             }
         </tbody>
     </table>
+
+    <!-- Backdrop -->
+    <div class="course-mgmt-modal-backdrop" id="courseMgmtModalBackdrop"></div>
+
+    <!-- Delete confirmation modal -->
+    <div class="course-mgmt-modal" id="courseMgmtDeleteModal">
+        <h3>Confirm Deletion</h3>
+        <p id="courseMgmtDeleteMessage"></p>
+        <div class="course-mgmt-modal-buttons">
+            <button class="course-mgmt-modal-cancel" onclick="courseMgmtCloseModal()">Cancel</button>
+            <button class="course-mgmt-modal-confirm" id="courseMgmtConfirmDelete">Delete</button>
+        </div>
+    </div>
+
 </div>
+
+<script>
+    let courseMgmtCurrentForm = null;
+
+    function courseMgmtOpenDeleteModal(form, courseTitle) {
+        courseMgmtCurrentForm = form;
+        document.getElementById("courseMgmtDeleteMessage").innerText =
+            `Are you sure you want to delete the course "${courseTitle}"?`;
+
+        document.getElementById("courseMgmtModalBackdrop").classList.add("active");
+        document.getElementById("courseMgmtDeleteModal").classList.add("active");
+        return false; // prevent auto submit
+    }
+
+    function courseMgmtConfirmDeleteAction() {
+        if (courseMgmtCurrentForm) courseMgmtCurrentForm.submit();
+    }
+
+    function courseMgmtCloseModal() {
+        document.getElementById("courseMgmtModalBackdrop").classList.remove("active");
+        document.getElementById("courseMgmtDeleteModal").classList.remove("active");
+        courseMgmtCurrentForm = null;
+    }
+
+    // Backdrop click
+    document.getElementById("courseMgmtModalBackdrop").addEventListener("click", courseMgmtCloseModal);
+
+    // ESC key closes modal
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            courseMgmtCloseModal();
+        }
+    });
+
+    // Confirm delete
+    document.getElementById("courseMgmtConfirmDelete").addEventListener("click", courseMgmtConfirmDeleteAction);
+</script>
