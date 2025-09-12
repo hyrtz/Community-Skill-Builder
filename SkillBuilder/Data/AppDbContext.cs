@@ -48,23 +48,49 @@ namespace SkillBuilder.Data
                 }
             );
 
+            modelBuilder.Entity<Course>().HasQueryFilter(c => !c.IsArchived);
+            modelBuilder.Entity<Community>().HasQueryFilter(c => !c.IsArchived);
+            modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsArchived);
+
             // User default value for Avatar
             modelBuilder.Entity<User>()
                 .Property(u => u.UserAvatar)
                 .HasDefaultValue("/assets/Avatar/Sample10.svg");
 
-            // Artisan
+            // Artisans
             modelBuilder.Entity<Artisan>().HasData(
                 new Artisan
                 {
                     ArtisanId = "A1111111",
-                    UserId = "A1111111",
-                    FirstName = "Juan",
-                    LastName = "Dela Cruz",
+                    UserId = "user-1",
+                    FirstName = "Alice",
+                    LastName = "Artisan",
                     Profession = "Pottery Artisan",
                     Hometown = "Vigan, Ilocos Sur",
-                    UserAvatar = "/assets/Avatar/Sample7.ico",
-                    Introduction = "Juan is a 3rd-generation artisan teaching pottery for 15 years."
+                    UserAvatar = "/assets/Avatar/Sample3.ico",
+                    Introduction = "Alice is a skilled pottery artisan teaching hand-building techniques."
+                },
+                new Artisan
+                {
+                    ArtisanId = "A1111112",
+                    UserId = "user-2",
+                    FirstName = "Bob",
+                    LastName = "Builder",
+                    Profession = "Woodcarving Artisan",
+                    Hometown = "Cebu City",
+                    UserAvatar = "/assets/Avatar/Sample6.ico",
+                    Introduction = "Bob is an expert in woodcarving with 10 years of experience."
+                },
+                new Artisan
+                {
+                    ArtisanId = "A1111113",
+                    UserId = "user-3",
+                    FirstName = "Charlie",
+                    LastName = "Craftsman",
+                    Profession = "Weaving Artisan",
+                    Hometown = "Davao City",
+                    UserAvatar = "/assets/Avatar/Sample9.ico",
+                    Introduction = "Charlie specializes in traditional and modern weaving techniques."
                 }
             );
 
@@ -77,7 +103,6 @@ namespace SkillBuilder.Data
             );
 
             // Courses
-            // Seed Courses first
             modelBuilder.Entity<Course>().HasData(
                 new Course
                 {
@@ -85,18 +110,19 @@ namespace SkillBuilder.Data
                     Title = "Pottery",
                     Link = "pottery",
                     ImageUrl = "/assets/Courses Pics/Pottery.png",
-                    Overview = "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.",
+                    Overview = "Pottery is the art and craft of shaping and firing clay...",
                     Duration = "15 hours",
                     Category = "Pottery",
                     Difficulty = "Beginner",
                     Video = "/assets/Videos/Pottery.mp4",
                     Thumbnail = "/assets/Courses Pics/Pottery.png",
                     WhatToLearn = "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques.",
-                    FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.",
+                    FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery...",
                     ProjectDetails = "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.",
                     Requirements = "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.",
-                    CreatedBy = "A1111111",
-                    CreatedAt = new DateTime(2024, 6, 1)
+                    CreatedBy = "A1111111", // Alice
+                    CreatedAt = new DateTime(2024, 6, 1),
+                    IsArchived = false
                 },
                 new Course
                 {
@@ -104,18 +130,19 @@ namespace SkillBuilder.Data
                     Title = "Woodcarving",
                     Link = "woodcarving",
                     ImageUrl = "/assets/Courses Pics/Woodcarving.png",
-                    Overview = "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.",
+                    Overview = "Woodcarving is the art of shaping and sculpting wood...",
                     Duration = "29 hours",
                     Category = "Wood Carving",
                     Difficulty = "Intermediate",
                     Video = "/assets/Videos/WoodCarving.mp4",
                     Thumbnail = "/assets/Courses Pics/Woodcarving.png",
                     WhatToLearn = "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing.",
-                    FullDescription = "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.",
+                    FullDescription = "Explore the detailed world of woodcarving through this course...",
                     ProjectDetails = "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.",
                     Requirements = "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).",
-                    CreatedBy = "A1111111",
-                    CreatedAt = new DateTime(2024, 6, 1)
+                    CreatedBy = "A1111112", // Bob
+                    CreatedAt = new DateTime(2024, 6, 1),
+                    IsArchived = false
                 },
                 new Course
                 {
@@ -123,18 +150,19 @@ namespace SkillBuilder.Data
                     Title = "Weaving",
                     Link = "weaving",
                     ImageUrl = "/assets/Courses Pics/Weaving.png",
-                    Overview = "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.",
+                    Overview = "Weaving is the craft of interlacing threads or fibers...",
                     Duration = "18 hours",
                     Category = "Weaving",
                     Difficulty = "Professional",
                     Video = "/assets/Videos/Weaving.mp4",
                     Thumbnail = "/assets/Courses Pics/Weaving.png",
                     WhatToLearn = "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation.",
-                    FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.",
+                    FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design...",
                     ProjectDetails = "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.",
                     Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
-                    CreatedBy = "A1111111",
-                    CreatedAt = new DateTime(2024, 6, 1)
+                    CreatedBy = "A1111113", // Charlie
+                    CreatedAt = new DateTime(2024, 6, 1),
+                    IsArchived = false
                 }
             );
 
@@ -329,7 +357,8 @@ namespace SkillBuilder.Data
                     UserAvatar = "/assets/Avatar/Sample3.ico",
                     Points = 10,
                     SelectedInterests = "Crafts, Sewing",
-                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                    IsArchived = false   // ← added
                 },
                 new User
                 {
@@ -343,7 +372,8 @@ namespace SkillBuilder.Data
                     UserAvatar = "/assets/Avatar/Sample6.ico",
                     Points = 5,
                     SelectedInterests = "Woodwork, DIY",
-                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                    IsArchived = false
                 },
                 new User
                 {
@@ -357,7 +387,8 @@ namespace SkillBuilder.Data
                     UserAvatar = "/assets/Avatar/Sample9.ico",
                     Points = 20,
                     SelectedInterests = "Painting, Pottery",
-                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc),
+                    IsArchived = false
                 }
             );
 
@@ -369,9 +400,11 @@ namespace SkillBuilder.Data
                     Name = "Pottery Enthusiasts",
                     Description = "A community for learners and artisans passionate about pottery and ceramics.",
                     AvatarUrl = "/assets/Community Pics/CompletePottery.png",
+                    CoverImageUrl = "/uploads/community-banner/PotteryBanner.png",
                     MembersCount = 125,
-                    CreatorId = "user-1", // optional
-                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                    CreatorId = "user-1",
+                    CreatedAt = new DateTime(2025, 01, 01),
+                    IsArchived = false
                 },
                 new Community
                 {
@@ -379,9 +412,11 @@ namespace SkillBuilder.Data
                     Name = "Weaving Circle",
                     Description = "Connecting artisans and learners who love weaving traditional and modern textiles.",
                     AvatarUrl = "/assets/Community Pics/CompleteWeaving.png",
+                    CoverImageUrl = "/uploads/community-banner/WeavingBanner.png",
                     MembersCount = 98,
-                    CreatorId = "user-2", // optional
-                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                    CreatorId = "user-2",
+                    CreatedAt = new DateTime(2025, 01, 01),
+                    IsArchived = false
                 },
                 new Community
                 {
@@ -389,9 +424,11 @@ namespace SkillBuilder.Data
                     Name = "Woodcarving Masters",
                     Description = "A space for woodcarvers to share projects, tips, and showcase craftsmanship.",
                     AvatarUrl = "/assets/Community Pics/CompleteWoodcarving.png",
+                    CoverImageUrl = "/uploads/community-banner/WoodCarvingBanner.png",
                     MembersCount = 150,
-                    CreatorId = "user-3", // optional
-                    CreatedAt = new DateTime(2025, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+                    CreatorId = "user-3",
+                    CreatedAt = new DateTime(2025, 01, 01),
+                    IsArchived = false
                 }
             );
 

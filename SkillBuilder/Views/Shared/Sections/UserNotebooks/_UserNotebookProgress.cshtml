@@ -1,31 +1,31 @@
 ﻿@model List<SkillBuilder.Models.ViewModels.CourseProgressViewModel>
 
 <style>
-    .keep-learning-section {
+    .user-progress-section {
         margin-bottom: 4rem;
     }
 
-    .keep-learning-header {
+    .user-progress-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1.5rem;
     }
 
-        .keep-learning-header h2 {
+        .user-progress-header h2 {
             font-size: 1.6rem;
             font-weight: bold;
             color: #111;
         }
 
-        .keep-learning-header a {
+        .user-progress-header a {
             font-size: 0.95rem;
             font-weight: 500;
             color: #344AEA;
             text-decoration: none;
         }
 
-    .course-progress-card {
+    .user-progress-card {
         border: 1px solid #e0e0e0;
         border-radius: 10px;
         margin-bottom: 2rem;
@@ -33,13 +33,13 @@
         box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
 
-    .progress-bar-container {
+    .user-progress-bar-container {
         background-color: #e6edff;
         height: 14px;
         position: relative;
     }
 
-    .progress-bar-fill {
+    .user-progress-bar-fill {
         background-color: #344AEA;
         height: 100%;
         border-top-left-radius: 10px;
@@ -52,18 +52,18 @@
         font-weight: 600;
     }
 
-    .card-content {
+    .user-progress-card-content {
         padding: 1.5rem;
     }
 
-        .card-content h4 {
+        .user-progress-card-content h4 {
             margin: 0;
             font-size: 1.1rem;
             color: #222;
             font-weight: 700;
         }
 
-        .card-content small {
+        .user-progress-card-content small {
             display: block;
             font-size: 0.85rem;
             font-weight: bold;
@@ -71,13 +71,13 @@
             margin-bottom: 0.5rem;
         }
 
-        .card-content p {
+        .user-progress-card-content p {
             font-size: 0.95rem;
             color: #444;
             margin-top: 0.5rem;
         }
 
-    .card-resume-button {
+    .user-progress-resume-button {
         background-color: #344AEA;
         color: white;
         width: 100%;
@@ -90,13 +90,13 @@
         transition: background 0.2s;
     }
 
-        .card-resume-button:hover {
+        .user-progress-resume-button:hover {
             background-color: #1f36b6;
         }
 </style>
 
-<div class="keep-learning-section">
-    <div class="keep-learning-header">
+<section class="user-progress-section">
+    <div class="user-progress-header">
         <h2>Keep Learning</h2>
         <a asp-controller="UserProfile" asp-action="Courses" asp-route-id="@Model.FirstOrDefault()?.UserId">
             View all courses in progress &rarr;
@@ -106,14 +106,14 @@
     @foreach (var course in Model)
     {
         var progress = Math.Round(course.ProgressPercentage, 0);
-        <div class="course-progress-card">
+        <div class="user-progress-card">
             <!-- Progress Bar -->
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" style="width:@progress%">@($"{progress}%")</div>
+            <div class="user-progress-bar-container">
+                <div class="user-progress-bar-fill" style="width:@progress%">@($"{progress}%")</div>
             </div>
 
             <!-- Course Info -->
-            <div class="card-content">
+            <div class="user-progress-card-content">
                 <small>Course</small>
                 <h4>@course.CourseTitle</h4>
                 <p>@course.CourseDescription</p>
@@ -121,8 +121,8 @@
 
             <!-- Resume Button -->
             <form asp-controller="Courses" asp-action="CourseModule" asp-route-id="@course.CourseId" method="get">
-                <button type="submit" class="card-resume-button">Resume</button>
+                <button type="submit" class="user-progress-resume-button">Resume</button>
             </form>
         </div>
     }
-</div>
+</section>

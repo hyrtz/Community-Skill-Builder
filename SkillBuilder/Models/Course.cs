@@ -41,5 +41,7 @@ namespace SkillBuilder.Models
 
         [NotMapped]
         public double AverageRating => (Reviews != null && Reviews.Any()) ? Reviews.Average(r => r.Rating) : 0;
+
+        public bool IsArchived { get; set; } = false;
     }
 }

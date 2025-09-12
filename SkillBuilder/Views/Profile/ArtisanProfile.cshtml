@@ -103,7 +103,8 @@
         <div class="artisan-tabs">
             <button class="artisan-tab active" data-tab="dashboard">Dashboard</button>
             <button class="artisan-tab" data-tab="courses">Courses</button>
-            <button class="artisan-tab" data-tab="projects">Support Sessions</button>
+            <button class="artisan-tab" data-tab="sessions">Support Sessions</button>
+            <button class="artisan-tab" data-tab="portfolio">Portfolio</button>
             <button class="artisan-tab" data-tab="reviews">Project to Review</button>
         </div>
     </div>
@@ -116,8 +117,11 @@
         <div class="artisan-panel" data-tab="courses">
             @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookCourses", Model)
         </div>
-        <div class="artisan-panel" data-tab="projects">
+        <div class="artisan-panel" data-tab="sessions">
             @await Html.PartialAsync("Sections/ArtisanNotebooks/_ArtisanNotebookSupportSessions", new List<SupportSessionRequest>())
+        </div>
+        <div class="artisan-panel" data-tab="portfolio">
+            @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookPortfolio", Model)
         </div>
         <div class="artisan-panel" data-tab="reviews">
             @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookReviewProjects", Model)

@@ -2,16 +2,23 @@
     var activeTab = ViewData["ActiveCourseTab"] as string ?? "in-progress";
 }
 
-
-
 <style>
-    .course-tabs {
+    .user-courses-section {
         display: flex;
-        gap: 2rem;
-        margin-bottom: 2rem;
+        flex-direction: column;
     }
 
-    .course-tab {
+    .user-courses-header {
+        font-size: 1.8rem;
+        color: #344AEA;
+        margin-bottom: 1rem;
+    }
+
+    .user-courses-tabs {
+        display: flex;
+    }
+
+    .user-courses-tab {
         padding: 0.75rem 1.5rem;
         background-color: transparent;
         border: none;
@@ -21,52 +28,54 @@
         transition: all 0.2s ease;
     }
 
-        .course-tab.active {
+        .user-courses-tab.active {
             border-bottom: 3px solid #344AEA;
             color: #344AEA;
         }
 
-        .course-tab:hover {
+        .user-courses-tab:hover {
             color: #344AEA;
         }
 
-    .course-tab-content .course-panel {
+    .user-courses-content .user-courses-panel {
         display: none;
     }
 
-        .course-tab-content .course-panel.active {
+        .user-courses-content .user-courses-panel.active {
             display: block;
         }
 </style>
 
-<h2 class="notebook-header">My Courses</h2>
+<div class="user-courses-section">
+    <h2 class="user-courses-header">My Courses</h2>
 
-<div class="course-tabs">
-    <button class="course-tab @(activeTab == "in-progress" ? "active" : "")" data-tab="in-progress">In Progress</button>
-    <button class="course-tab @(activeTab == "completed" ? "active" : "")" data-tab="completed">Completed</button>
-</div>
-
-<div class="course-tab-content">
-    <div class="course-panel @(activeTab == "in-progress" ? "active" : "")" data-tab="in-progress">
-        @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookInProgress", (List<SkillBuilder.Models.Course>)Model.EnrolledCourses)
+    <div class="user-courses-tabs">
+        <button class="user-courses-tab @(activeTab == "in-progress" ? "active" : "")" data-tab="in-progress">In Progress</button>
+        <button class="user-courses-tab @(activeTab == "completed" ? "active" : "")" data-tab="completed">Completed</button>
     </div>
-    <div class="course-panel @(activeTab == "completed" ? "active" : "")" data-tab="completed">
-        @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookCompleted", (List<SkillBuilder.Models.Course>)Model.EnrolledCourses)
+
+    <div class="user-courses-content">
+        <div class="user-courses-panel @(activeTab == "in-progress" ? "active" : "")" data-tab="in-progress">
+            @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookInProgress", (List<SkillBuilder.Models.Course>)Model.EnrolledCourses)
+        </div>
+        <div class="user-courses-panel @(activeTab == "completed" ? "active" : "")" data-tab="completed">
+            @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookCompleted", (List<SkillBuilder.Models.Course>)Model.EnrolledCourses)
+        </div>
     </div>
 </div>
 
 <script>
-    const courseTabs = document.querySelectorAll('.course-tab');
-    const coursePanels = document.querySelectorAll('.course-panel');
+    const userCourseTabs = document.querySelectorAll('.user-courses-tab');
+    const userCoursePanels = document.querySelectorAll('.user-courses-panel');
 
-    courseTabs.forEach(tab => {
+    userCourseTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const selected = tab.dataset.tab;
 
-            courseTabs.forEach(t => t.classList.remove('active'));
+            userCourseTabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
 
-            coursePanels.forEach(panel => {
+            userCoursePanels.forEach(panel => {
                 panel.classList.toggle('active', panel.dataset.tab === selected);
             });
         });

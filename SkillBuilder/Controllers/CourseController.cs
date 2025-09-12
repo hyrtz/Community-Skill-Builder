@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
 using SkillBuilder.Models.ViewModels;
+using System.Reflection;
 using System.Security.Claims;
 
 namespace SkillBuilder.Controllers
@@ -212,10 +213,18 @@ namespace SkillBuilder.Controllers
                 .Include(c => c.Materials)
                 .Include(c => c.CourseModules)
                     .ThenInclude(m => m.Contents)
-                        .ThenInclude(content => content.QuizQuestions) // ✅ ADD THIS LINE
+                        .ThenInclude(content => content.QuizQuestions)
                 .FirstOrDefault(c => c.Id == id);
 
             if (course == null) return NotFound();
+
+            var isEnrolled = _context.Enrollments
+                .Any(e => e.CourseId == id && e.UserId == userId);
+
+            if (!isEnrolled && course.Artisan.UserId != userId)
+            {
+                return Forbid();
+            }
 
             int totalModules = course.CourseModules
                 .SelectMany(m => m.Contents)
@@ -250,8 +259,159 @@ namespace SkillBuilder.Controllers
             return View("CourseModules/CourseModule", course);
         }
 
+        private async Task RecalculateProgress(string userId, int courseId)
+        {
+            var allModuleIds = await _context.CourseModules
+                .Where(m => m.CourseId == courseId)
+                .Select(m => m.Id)
+                .ToListAsync();
+
+            var completedModuleIds = await _context.ModuleProgress
+                .Where(mp => mp.UserId == userId && mp.CourseModule.CourseId == courseId && mp.IsCompleted)
+                .Select(mp => mp.CourseModuleId)
+                .ToListAsync();
+
+            int totalModules = allModuleIds.Count;
+            int completedCount = completedModuleIds.Count;
+
+            double progress = totalModules == 0 ? 0 : (double)completedCount / totalModules * 100;
+
+            var enrollment = await _context.Enrollments
+                .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
+
+            if (progress >= 100 && enrollment != null && !enrollment.IsCompleted)
+            {
+                enrollment.IsCompleted = true;
+                enrollment.CompletedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        [HttpPost("UploadActivity")]
+        public async Task<IActionResult> UploadActivity(IFormFile file, int courseId, int moduleIndex)
+        {
+            var userId = User.FindFirstValue("UserId");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "activities");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var fileUrl = $"/uploads/activities/{uniqueFileName}";
+
+            // Save submission (course-level)
+            var submission = new CourseProjectSubmission
+            {
+                UserId = userId,
+                CourseId = courseId,
+                ImageUrl = fileUrl,
+                SubmittedAt = DateTime.UtcNow
+            };
+
+            _context.CourseProjectSubmissions.Add(submission);
+
+            // Attempt to find the CourseModule by Order == moduleIndex
+            // NOTE: moduleIndex must match how you send it from the client (module order)
+            var courseModule = await _context.CourseModules
+                .FirstOrDefaultAsync(m => m.CourseId == courseId && m.Order == moduleIndex);
+
+            if (courseModule != null)
+            {
+                var moduleProgress = await _context.ModuleProgress
+                    .FirstOrDefaultAsync(mp => mp.UserId == userId && mp.CourseModuleId == courseModule.Id);
+
+                if (moduleProgress == null)
+                {
+                    moduleProgress = new ModuleProgress
+                    {
+                        UserId = userId,
+                        CourseModuleId = courseModule.Id,
+                        IsCompleted = true,
+                        CompletedAt = DateTime.UtcNow,
+                        LastUpdated = DateTime.UtcNow
+                    };
+                    _context.ModuleProgress.Add(moduleProgress);
+                }
+                else if (!moduleProgress.IsCompleted)
+                {
+                    moduleProgress.IsCompleted = true;
+                    moduleProgress.CompletedAt = DateTime.UtcNow;
+                    moduleProgress.LastUpdated = DateTime.UtcNow;
+                }
+            }
+            else
+            {
+                // If module not found, we still persist the submission, but we log (could be replaced with proper logging)
+                // This prevents throwing an exception when client sends an index that doesn't match a module order.
+                // Optionally return BadRequest here if that's desired.
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Recalculate progress (shared logic)
+            await RecalculateProgress(userId, courseId);
+
+            return Ok(new { url = fileUrl });
+        }
+
+        [HttpPost("SubmitReview")]
+        public async Task<IActionResult> SubmitReview([FromBody] SubmitReviewRequest request)
+        {
+            var userId = User.FindFirstValue("UserId");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(new { success = false, message = "Login required." });
+
+            // Check if user is enrolled in the course
+            var isEnrolled = _context.Enrollments.Any(e => e.CourseId == request.CourseId && e.UserId == userId);
+            if (!isEnrolled)
+                return BadRequest(new { success = false, message = "You are not enrolled in this course." });
+
+            var review = new CourseReview
+            {
+                CourseId = request.CourseId,
+                UserId = userId,
+                Rating = request.Rating,
+                Comment = request.Comment ?? "",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.CourseReviews.Add(review);
+            await _context.SaveChangesAsync();
+
+            // Recalculate average rating
+            var reviews = _context.CourseReviews.Where(r => r.CourseId == request.CourseId);
+            var average = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
+            var totalReviews = reviews.Count();
+
+            return Ok(new
+            {
+                success = true,
+                averageRating = average,
+                totalReviews
+            });
+        }
+
+        public class SubmitReviewRequest
+        {
+            public int CourseId { get; set; }
+            public int Rating { get; set; }
+            public string? Comment { get; set; }
+        }
+
         [HttpPost("UpdateProgress")]
-        public IActionResult UpdateProgress([FromBody] ProgressUpdateModel model)
+        public async Task<IActionResult> UpdateProgress([FromBody] ProgressUpdateModel model)
         {
             var userId = User.FindFirst("UserId")?.Value;
             if (userId == null)
@@ -259,13 +419,13 @@ namespace SkillBuilder.Controllers
 
             foreach (var moduleIndex in model.CompletedModules)
             {
-                var courseModule = _context.CourseModules
-                    .FirstOrDefault(m => m.CourseId == model.CourseId && m.Order == moduleIndex);
+                var courseModule = await _context.CourseModules
+                    .FirstOrDefaultAsync(m => m.CourseId == model.CourseId && m.Order == moduleIndex);
 
                 if (courseModule == null) continue;
 
-                var existing = _context.ModuleProgress
-                    .FirstOrDefault(p => p.UserId == userId && p.CourseModuleId == courseModule.Id);
+                var existing = await _context.ModuleProgress
+                    .FirstOrDefaultAsync(p => p.UserId == userId && p.CourseModuleId == courseModule.Id);
 
                 if (existing == null)
                 {
@@ -285,14 +445,10 @@ namespace SkillBuilder.Controllers
                 }
             }
 
-            try
-            {
-                _context.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { success = false, error = ex.Message, inner = ex.InnerException?.Message });
-            }
+            await _context.SaveChangesAsync();
+
+            // Recalculate overall progress (shared)
+            await RecalculateProgress(userId, model.CourseId);
 
             return Ok();
         }
@@ -302,11 +458,29 @@ namespace SkillBuilder.Controllers
         {
             var userId = User.FindFirstValue("UserId");
 
+            // Remove module progress
             var toDelete = _context.ModuleProgress
                 .Where(p => p.UserId == userId && p.CourseModule.CourseId == model.CourseId)
                 .ToList();
 
             _context.ModuleProgress.RemoveRange(toDelete);
+
+            // Reset enrollment completion
+            var enrollment = _context.Enrollments
+                .FirstOrDefault(e => e.UserId == userId && e.CourseId == model.CourseId);
+
+            if (enrollment != null)
+            {
+                enrollment.IsCompleted = false;
+                enrollment.CompletedAt = null;
+            }
+
+            var submissions = _context.CourseProjectSubmissions
+                .Where(s => s.UserId == userId && s.CourseId == model.CourseId)
+                .ToList();
+
+            _context.CourseProjectSubmissions.RemoveRange(submissions);
+
             _context.SaveChanges();
 
             return Ok(new { message = "Reset successful" });

@@ -3,13 +3,26 @@
 }
 
 <style>
-    .session-tabs {
+    .user-sessions-section {
         display: flex;
-        gap: 2rem;
-        margin-bottom: 2rem;
+        flex-direction: column;
+        gap: 1.5rem;
     }
 
-    .session-tab {
+    .user-sessions-header {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #344AEA;
+        margin-bottom: 1rem;
+    }
+
+    .user-sessions-tabs {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .user-sessions-tab {
         padding: 0.75rem 1.5rem;
         background-color: transparent;
         border: none;
@@ -19,51 +32,53 @@
         transition: all 0.2s ease;
     }
 
-        .session-tab.active {
+        .user-sessions-tab.active {
             border-bottom: 3px solid #344AEA;
             color: #344AEA;
         }
 
-        .session-tab:hover {
+        .user-sessions-tab:hover {
             color: #344AEA;
         }
 
-    .session-tab-content .sessions-panel {
+    .user-sessions-content .user-sessions-panel {
         display: none;
     }
 
-        .session-tab-content .sessions-panel.active {
+        .user-sessions-content .user-sessions-panel.active {
             display: block;
         }
 </style>
 
-<h2 class="notebook-header">Request Sessions</h2>
+<section class="user-sessions-section">
+    <h2 class="user-sessions-header">Request Sessions</h2>
 
-<div class="session-tabs">
-    <button class="session-tab @(activeSessionTab == "pending" ? "active" : "")" data-tab="pending">Pending Requests</button>
-    <button class="session-tab @(activeSessionTab == "upcoming" ? "active" : "")" data-tab="upcoming">Upcoming Sessions</button>
-    <button class="session-tab @(activeSessionTab == "declined" ? "active" : "")" data-tab="declined">Declined Requests</button>
-    <button class="session-tab @(activeSessionTab == "completed" ? "active" : "")" data-tab="completed">Completed Sessions</button>
-</div>
+    <div class="user-sessions-tabs">
+        <button class="user-sessions-tab @(activeSessionTab == "pending" ? "active" : "")" data-tab="pending">Pending Requests</button>
+        <button class="user-sessions-tab @(activeSessionTab == "upcoming" ? "active" : "")" data-tab="upcoming">Upcoming Sessions</button>
+        <button class="user-sessions-tab @(activeSessionTab == "declined" ? "active" : "")" data-tab="declined">Declined Requests</button>
+        <button class="user-sessions-tab @(activeSessionTab == "completed" ? "active" : "")" data-tab="completed">Completed Sessions</button>
+    </div>
 
-<div class="session-tab-content">
-    <div class="sessions-panel @(activeSessionTab == "pending" ? "active" : "")" data-tab="pending">
-        @await Html.PartialAsync("Sections/UserNotebooks/RequestSessionsNotebooks/_RequestSessionsNotebookPending")
+    <div class="user-sessions-content">
+        <div class="user-sessions-panel @(activeSessionTab == "pending" ? "active" : "")" data-tab="pending">
+            @await Html.PartialAsync("Sections/UserNotebooks/RequestSessionsNotebooks/_RequestSessionsNotebookPending")
+        </div>
+        <div class="user-sessions-panel @(activeSessionTab == "upcoming" ? "active" : "")" data-tab="upcoming">
+            @await Html.PartialAsync("Sections/UserNotebooks/RequestSessionsNotebooks/_RequestSessionsNotebookUpcoming")
+        </div>
+        <div class="user-sessions-panel @(activeSessionTab == "declined" ? "active" : "")" data-tab="declined">
+            @await Html.PartialAsync("Sections/UserNotebooks/RequestSessionsNotebooks/_RequestSessionsNotebookDeclined")
+        </div>
+        <div class="user-sessions-panel @(activeSessionTab == "completed" ? "active" : "")" data-tab="completed">
+            @await Html.PartialAsync("Sections/UserNotebooks/RequestSessionsNotebooks/_RequestSessionsNotebookCompleted")
+        </div>
     </div>
-    <div class="sessions-panel @(activeSessionTab == "upcoming" ? "active" : "")" data-tab="upcoming">
-        @await Html.PartialAsync("Sections/UserNotebooks/RequestSessionsNotebooks/_RequestSessionsNotebookUpcoming")
-    </div>
-    <div class="sessions-panel @(activeSessionTab == "declined" ? "active" : "")" data-tab="declined">
-        @await Html.PartialAsync("Sections/UserNotebooks/RequestSessionsNotebooks/_RequestSessionsNotebookDeclined")
-    </div>
-    <div class="sessions-panel @(activeSessionTab == "completed" ? "active" : "")" data-tab="completed">
-        @await Html.PartialAsync("Sections/UserNotebooks/RequestSessionsNotebooks/_RequestSessionsNotebookCompleted")
-    </div>
-</div>
+</section>
 
 <script>
-    const sessionTabs = document.querySelectorAll('.session-tab');
-    const sessionPanels = document.querySelectorAll('.sessions-panel');
+    const sessionTabs = document.querySelectorAll('.user-sessions-tab');
+    const sessionPanels = document.querySelectorAll('.user-sessions-panel');
 
     sessionTabs.forEach(tab => {
         tab.addEventListener('click', () => {

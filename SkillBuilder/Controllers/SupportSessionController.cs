@@ -281,5 +281,19 @@ namespace SkillBuilder.Controllers
 
             return PartialView("~/Views/Shared/Sections/ArtisanNotebooks/SupportSessionsNotebooks/_SupportSessionsNotebookUpcoming.cshtml", upcomingSessions);
         }
+
+        [HttpGet("GetLatestSessionRequest")]
+        public async Task<IActionResult> GetLatestSessionRequest(int courseId)
+        {
+            var userId = GetUserId();
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var latestRequest = await _context.SupportSessionRequests
+                .Where(r => r.UserId == userId && r.CourseId == courseId)
+                .OrderByDescending(r => r.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            return Json(new { status = latestRequest?.Status });
+        }
     }
 }

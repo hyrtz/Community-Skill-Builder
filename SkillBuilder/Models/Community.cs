@@ -16,5 +16,7 @@
 
         public List<CommunityMembership> Memberships { get; set; } = new();
         public List<CommunityPost> Posts { get; set; } = new();
+
+        public bool IsArchived { get; set; } = false;
     }
 }

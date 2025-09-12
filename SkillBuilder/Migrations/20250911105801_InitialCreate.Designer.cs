@@ -12,7 +12,7 @@ using SkillBuilder.Data;
 namespace SkillBuilder.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250908071916_InitialCreate")]
+    [Migration("20250911105801_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -203,6 +203,9 @@ namespace SkillBuilder.Migrations
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -238,6 +241,7 @@ namespace SkillBuilder.Migrations
                             Hometown = "Vigan, Ilocos Sur",
                             Introduction = "Juan is a 3rd-generation artisan teaching pottery for 15 years.",
                             IsApproved = false,
+                            IsArchived = false,
                             LastName = "Dela Cruz",
                             Profession = "Pottery Artisan",
                             Role = "Artisan",
@@ -382,6 +386,9 @@ namespace SkillBuilder.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MembersCount")
                         .HasColumnType("int");
 
@@ -403,6 +410,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatorId = "user-1",
                             Description = "A community for learners and artisans passionate about pottery and ceramics.",
+                            IsArchived = false,
                             MembersCount = 125,
                             Name = "Pottery Enthusiasts"
                         },
@@ -413,6 +421,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatorId = "user-2",
                             Description = "Connecting artisans and learners who love weaving traditional and modern textiles.",
+                            IsArchived = false,
                             MembersCount = 98,
                             Name = "Weaving Circle"
                         },
@@ -423,6 +432,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatorId = "user-3",
                             Description = "A space for woodcarvers to share projects, tips, and showcase craftsmanship.",
+                            IsArchived = false,
                             MembersCount = 150,
                             Name = "Woodcarving Masters"
                         });
@@ -670,6 +680,9 @@ namespace SkillBuilder.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsPublished")
                         .HasColumnType("bit");
 
@@ -718,6 +731,7 @@ namespace SkillBuilder.Migrations
                             Duration = "15 hours",
                             FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.",
                             ImageUrl = "/assets/Courses Pics/Pottery.png",
+                            IsArchived = false,
                             IsPublished = false,
                             Link = "pottery",
                             Overview = "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.",
@@ -738,6 +752,7 @@ namespace SkillBuilder.Migrations
                             Duration = "29 hours",
                             FullDescription = "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.",
                             ImageUrl = "/assets/Courses Pics/Woodcarving.png",
+                            IsArchived = false,
                             IsPublished = false,
                             Link = "woodcarving",
                             Overview = "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.",
@@ -758,6 +773,7 @@ namespace SkillBuilder.Migrations
                             Duration = "18 hours",
                             FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.",
                             ImageUrl = "/assets/Courses Pics/Weaving.png",
+                            IsArchived = false,
                             IsPublished = false,
                             Link = "weaving",
                             Overview = "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.",
@@ -1038,11 +1054,17 @@ namespace SkillBuilder.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("EnrolledAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -1543,6 +1565,9 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeactivated")
                         .HasColumnType("bit");
 
@@ -1589,6 +1614,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "juan@example.com",
                             FirstName = "Juan",
+                            IsArchived = false,
                             IsDeactivated = false,
                             IsVerified = true,
                             LastName = "Dela Cruz",
@@ -1603,6 +1629,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "alice@test.com",
                             FirstName = "Alice",
+                            IsArchived = false,
                             IsDeactivated = false,
                             IsVerified = true,
                             LastName = "Artisan",
@@ -1618,6 +1645,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "bob@test.com",
                             FirstName = "Bob",
+                            IsArchived = false,
                             IsDeactivated = false,
                             IsVerified = false,
                             LastName = "Builder",
@@ -1633,6 +1661,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "charlie@test.com",
                             FirstName = "Charlie",
+                            IsArchived = false,
                             IsDeactivated = false,
                             IsVerified = true,
                             LastName = "Craftsman",

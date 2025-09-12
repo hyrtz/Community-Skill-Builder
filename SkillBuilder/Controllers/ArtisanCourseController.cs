@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
@@ -7,6 +8,7 @@ using SkillBuilder.Models.ViewModels;
 namespace SkillBuilder.Controllers
 {
     [Route("ArtisanActions")]
+    [Authorize(Roles = "Artisan")]
     public class ArtisanCourseController : Controller
     {
         private readonly AppDbContext _context;
@@ -47,6 +49,8 @@ namespace SkillBuilder.Controllers
             var course = model.Course!;
             course.CreatedBy = artisan.ArtisanId;
             course.CreatedAt = DateTime.UtcNow;
+
+            course.Duration = $"{model.DurationValue} {model.DurationUnit}";
 
             // Save course media
             if (model.ImageFile != null)

@@ -241,6 +241,7 @@
 
                 <label for="teach-email">Email</label>
                 <input type="email" id="teach-email" required />
+                <p id="teach-email-error" class="teach-error" style="display: none;">⚠️ Please enter a valid email.</p>
 
                 <label for="teach-password">Password</label>
                 <div class="teach-password-wrapper">
@@ -429,8 +430,13 @@
             const agree = document.getElementById("teach-agree").checked;
 
             const namePattern = /^[A-Za-z\s]*$/;
+            const emailPattern = new RegExp("^[^\\s]+@@[^\\s]+\\.[^\\s]+$");
+            const validEmail = emailPattern.test(email);
+
+            document.getElementById("teach-email-error").style.display = email && !validEmail ? "block" : "none";
+
             const checklistValid = pass.length >= 8 && /[A-Z]/.test(pass) && /\d/.test(pass) && /[^A-Za-z0-9]/.test(pass);
-            submitBtn.disabled = !(fn && ln && email && pass && confirm && pass === confirm && checklistValid && agree && namePattern.test(fn) && namePattern.test(ln));
+            submitBtn.disabled = !(fn && ln && validEmail && pass && confirm && pass === confirm && checklistValid && agree && namePattern.test(fn) && namePattern.test(ln));
         }
 
         ["teach-password","teach-confirm","teach-firstname","teach-lastname","teach-email","teach-agree"].forEach(id => {

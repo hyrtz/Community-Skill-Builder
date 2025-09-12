@@ -476,6 +476,85 @@
         .btn-primary:hover {
             background: #2f46cc;
         }
+
+    .tahi-cc-modal {
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .tahi-cc-modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 14px;
+        width: 420px;
+        max-width: 90%;
+        position: relative;
+    }
+
+    .tahi-cc-modal-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.6rem;
+        cursor: pointer;
+    }
+
+    .tahi-cc-star-rating .tahi-cc-star {
+        font-size: 2rem;
+        color: #ccc;
+        cursor: pointer;
+    }
+
+        .tahi-cc-star-rating .tahi-cc-star.filled {
+            color: #FFD700;
+        }
+
+    .tahi-cc-comment {
+        width: 100%;
+        margin-top: 1rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 0.95rem;
+    }
+
+    .tahi-cc-btn {
+        margin-top: 1rem;
+        background-color: #344AEA;
+        color: #fff;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .tahi-cc-btn:hover {
+            background-color: #2A3EC1;
+        }
+
+    #tahi-cc-submit-btn:disabled {
+        background-color: #aaa;
+        color: #666;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    #sendSessionRequest:disabled {
+        background-color: #aaa;
+        color: #666;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
 </style>
 
 <div class="course-module-container">
@@ -536,7 +615,7 @@
             <!-- Buttons -->
             <div style="text-align: right;">
                 <button onclick="closeSessionModal()" style="padding: 0.75rem 1.5rem; margin-right: 1rem;">Cancel</button>
-                <button onclick="sendSessionRequest()" class="quiz-launch-btn">Send Request</button>
+                <button id="sendSessionRequest" onclick="sendSessionRequest()" class="session-launch-btn" disabled>Send Request</button>
             </div>
         </div>
     </div>
@@ -582,7 +661,6 @@
         </div>
     </div>
 
-    <!-- Success Modal -->
     <div id="sessionSuccessModal" class="session-success-modal hidden">
         <div class="session-success-content">
             <h2 class="success-title">Your request has been sent!</h2>
@@ -594,6 +672,34 @@
             </div>
         </div>
     </div>
+
+    <div id="tahi-course-completion-modal" class="tahi-cc-modal" style="display:none;">
+        <div class="tahi-cc-modal-content">
+            <span id="tahi-cc-modal-close" class="tahi-cc-modal-close" onclick="closeTahiModal()">&times;</span>
+
+            <!-- Rating Section -->
+            <div id="tahi-cc-rating-section">
+                <h2 class="tahi-cc-modal-title">Rate this Course</h2>
+                <div id="tahi-cc-star-rating" class="tahi-cc-star-rating">
+                    <span class="tahi-cc-star" data-value="1">&#9733;</span>
+                    <span class="tahi-cc-star" data-value="2">&#9733;</span>
+                    <span class="tahi-cc-star" data-value="3">&#9733;</span>
+                    <span class="tahi-cc-star" data-value="4">&#9733;</span>
+                    <span class="tahi-cc-star" data-value="5">&#9733;</span>
+                </div>
+                <textarea id="tahi-cc-comment" class="tahi-cc-comment" placeholder="Optional message to the artisan" rows="4"></textarea>
+                <button id="tahi-cc-submit-btn" class="tahi-cc-btn" disabled>Submit Review</button>
+            </div>
+
+            <!-- Congratulations Section -->
+            <div id="tahi-cc-congrats-section" style="display:none; text-align:center;">
+                <h2>🎉 Congratulations! 🎉</h2>
+                <p>You’ve successfully completed the course!</p>
+                <button id="tahi-cc-close-btn" class="tahi-cc-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @{
@@ -638,6 +744,7 @@
         let dynamicQuizQuestions = [];
         let nextBtn = null;
         let quizCompleted = false;
+
         const resetBtn = document.getElementById("resetBtn");
         if (resetBtn) {
             resetBtn.addEventListener("click", resetProgress);
@@ -791,7 +898,7 @@
             }
 
             // TEXT CONTENT
-            if (data.type === "Text" || data.type === "Activity") {
+            if (data.type === "Text") {
                 inner.innerHTML = `
                     <h1>${data.title}</h1>
                     <p>${data.contentText}</p>
@@ -865,16 +972,110 @@
                 inner.innerHTML = `
                     <div>
                         <h1>${data.title}</h1>
-                        <p style="margin-bottom: 2rem; color: #555;">Request a live session to complete for a guided instruction for the course.</p>
-                        <button onclick="openSessionModal()" class="session-launch-btn">Request Session</button>
+                        <p style="margin-bottom: 2rem; color: #555;">
+                            Request a live session for guided instruction (optional).
+                        </p>
+                        <button id="sessionLaunchBtn" class="session-launch-btn">Request Session</button>
                     </div>
                 `;
-                showNextButton(index); // ✅ allow proceeding even if not requesting
-            }
-        }
 
-        function requestLiveSession(title) {
-            alert(`A live session request has been sent for: ${title}`);
+                showNextButton(index); // Next button always enabled
+
+                const sessionBtn = document.getElementById("sessionLaunchBtn");
+
+                // Fetch latest request from server
+                fetch(`/SupportSession/GetLatestSessionRequest?courseId=${@Model.Id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.status && data.status !== "Declined") {
+                            sessionBtn.disabled = true;
+                            sessionBtn.innerText = "Session Requested";
+                        }
+                    });
+
+                sessionBtn.onclick = () => {
+                    openSessionModal();
+
+                    const originalSend = window.sendSessionRequest;
+                    window.sendSessionRequest = async function() {
+                        await originalSend();
+
+                        // Disable button after successful request
+                        sessionBtn.disabled = true;
+                        sessionBtn.innerText = "Session Requested";
+                    }
+                };
+            }
+
+            // ACTIVITY
+            else if (data.type === "Activity") {
+                inner.innerHTML = `
+                    <h1>${data.title}</h1>
+                    <p>${data.contentText}</p>
+                    <input type="file" id="activityUpload" accept="image/*" />
+                    <button id="submitActivityBtn" class="quiz-launch-btn">Submit Activity</button>
+                    <div id="activityPreview" style="margin-top:1rem;"></div>
+                `;
+
+                // Create Next button container
+                const nextBtnWrapper = document.createElement("div");
+                nextBtnWrapper.style.marginTop = "2rem";
+                nextBtnWrapper.style.textAlign = "right";
+
+                // Create Next button
+                nextBtn = document.createElement("button");
+                nextBtn.innerText = "Next";
+                nextBtn.className = "quiz-launch-btn";
+                nextBtn.disabled = true; // initially disabled
+                nextBtn.onclick = () => goToNextTab(index);
+
+                nextBtnWrapper.appendChild(nextBtn);
+                moduleContent.appendChild(nextBtnWrapper);
+
+                // Use Razor to generate the upload URL safely
+                const uploadUrl = '@Url.Action("UploadActivity", "Courses")';
+
+                document.getElementById("submitActivityBtn").onclick = async () => {
+                    const fileInput = document.getElementById("activityUpload");
+                    if (!fileInput.files.length) { alert("Please select an image"); return; }
+
+                    const file = fileInput.files[0];
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("courseId", '@Model.Id');
+                    formData.append("moduleIndex", index);
+
+                    try {
+                        const res = await fetch(uploadUrl, { method: "POST", body: formData });
+                        if (!res.ok) throw new Error("Failed to upload activity.");
+                        const data = await res.json();
+
+                        document.getElementById("activityPreview").innerHTML = `<p>Uploaded successfully!</p><img src="${data.url}" style="max-width:200px;" />`;
+
+                        // Enable Next button
+                        nextBtn.disabled = false;
+
+                        // ⚡ Immediately mark Activity as completed
+                        if (!completedModules.includes(index)) {
+                        completedModules.push(index);
+
+                        // 1️⃣ Update local progress
+                        localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
+                        updateProgressDisplay();
+
+                        // 2️⃣ Sync immediately with server
+                        fetch('/Courses/UpdateProgress', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ courseId: @Model.Id, completedModules })
+                        })
+                        .then(res => res.ok ? console.log("Activity progress synced ✅") : console.error("Sync failed ❌"))
+                        .catch(err => console.error("Error syncing:", err));
+                    }
+
+                    } catch (err) { console.error(err); alert("Failed to upload activity."); }
+                };
+            }
         }
 
         function saveProgress() {
@@ -913,13 +1114,12 @@
 
             const nextIndex = currentIndex + 1;
 
-            fetch('/api/ModuleProgress/CompleteModule', {
+            fetch('/Courses/UpdateProgress', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     courseId: @Model.Id,
-                    moduleIndex: currentIndex,
-                    lessonType: moduleData[currentIndex]?.type || "Text"
+                    completedModules: [currentIndex] // wrap in array
                 })
             });
 
@@ -937,7 +1137,7 @@
                 loadTab(nextIndex);
                 quizCompleted = false;
             } else {
-                alert("🎉 You've completed all modules!");
+                openTahiModal();
             }
         }
 
@@ -1076,12 +1276,53 @@
         }
 
         window.openSessionModal = function () {
-            document.getElementById("sessionModal").style.display = "flex";
+            const modal = document.getElementById("sessionModal");
+            modal.style.display = "flex";
+
+            // Get inputs and button dynamically
+            const sendBtn = document.getElementById("sendSessionRequest");
+            const dateInput = document.getElementById("sessionDate");
+            const timeInput = document.getElementById("sessionTime");
+            const messageInput = document.getElementById("sessionMessage");
+
+            // Ensure send button starts disabled
+            sendBtn.disabled = true;
+
+            function checkInputs() {
+                sendBtn.disabled = !(dateInput.value && timeInput.value && messageInput.value.trim());
+            }
+
+            // Attach input listeners
+            dateInput.addEventListener("input", checkInputs);
+            timeInput.addEventListener("input", checkInputs);
+            messageInput.addEventListener("input", checkInputs);
         };
 
         window.closeSessionModal = function () {
-            document.getElementById("sessionModal").style.display = "none";
+            const modal = document.getElementById("sessionModal");
+            modal.style.display = "none";
+
+            const sendBtn = document.getElementById("sendSessionRequest");
+            const dateInput = document.getElementById("sessionDate");
+            const timeInput = document.getElementById("sessionTime");
+            const messageInput = document.getElementById("sessionMessage");
+
+            dateInput.value = "";
+            timeInput.value = "";
+            messageInput.value = "";
+            sendBtn.disabled = true;
+
+            document.querySelectorAll(".time-option.selected").forEach(btn => btn.classList.remove("selected"));
         };
+
+        window.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                const modal = document.getElementById("sessionModal");
+                if (modal && modal.style.display === "flex") {
+                    window.closeSessionModal();
+                }
+            }
+        });
 
         window.selectTime = function (button) {
             button.classList.add("selected");
@@ -1100,12 +1341,6 @@
             const date = document.getElementById("sessionDate").value;
             const time = document.getElementById("sessionTime").value;
             const message = document.getElementById("sessionMessage").value;
-
-            if (!date || !time || !message.trim()) {
-                alert("Please fill out all fields.");
-                return;
-            }
-
             const selectedTabIndex = parseInt(localStorage.getItem("active_tab_@Model.Id")) || 0;
             const currentModule = moduleData[selectedTabIndex];
             const courseId = @Model.Id;
@@ -1154,5 +1389,94 @@
         window.exitQuizModal = exitQuizModal;
         window.openSessionModal = openSessionModal;
         window.closeSessionModal = closeSessionModal;
+
+
+        let tahiCCSelectedRating = 0;
+        const submitBtn = document.getElementById("tahi-cc-submit-btn");
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+
+            // Star click logic
+            document.querySelectorAll("#tahi-cc-star-rating .tahi-cc-star").forEach(star => {
+                star.addEventListener("click", function() {
+                    tahiCCSelectedRating = parseInt(this.dataset.value);
+                    updateTahiCCStars(tahiCCSelectedRating);
+                    submitBtn.disabled = tahiCCSelectedRating === 0;
+                });
+            });
+
+            // Submit review
+            submitBtn.addEventListener("click", async () => {
+                if (tahiCCSelectedRating === 0) return alert("Please select a rating.");
+
+                const comment = document.getElementById("tahi-cc-comment").value;
+                const courseId = parseInt("@Model.Id");
+
+                try {
+                    const res = await fetch("/Courses/SubmitReview", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ courseId, rating: tahiCCSelectedRating, comment })
+                    });
+
+                    const data = await res.json();
+                    if (!data.success) throw new Error("Failed to submit review");
+
+                    // Show Congrats
+                    document.getElementById("tahi-cc-rating-section").style.display = "none";
+                    document.getElementById("tahi-cc-congrats-section").style.display = "block";
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to submit review.");
+                }
+            });
+        }
+
+        // Open modal
+        function openTahiModal() {
+            const modal = document.getElementById("tahi-course-completion-modal");
+            modal.style.display = "flex";
+
+            const submitBtn = document.getElementById("tahi-cc-submit-btn");
+            submitBtn.disabled = true;  // ensure it starts disabled
+            tahiCCSelectedRating = 0;
+            updateTahiCCStars(0);
+            document.getElementById("tahi-cc-comment").value = "";
+        }
+
+        // Close modal AND reset
+        function closeTahiModal() {
+            const modal = document.getElementById("tahi-course-completion-modal");
+            if (modal) modal.style.display = "none";
+
+            // Reset Tahi modal
+            document.getElementById("tahi-cc-rating-section").style.display = "block";
+            document.getElementById("tahi-cc-congrats-section").style.display = "none";
+            document.getElementById("tahi-cc-comment").value = "";
+            updateTahiCCStars(0);
+            if (submitBtn) submitBtn.disabled = true;
+            tahiCCSelectedRating = 0;
+        }
+
+        // Update star visuals
+        function updateTahiCCStars(rating) {
+            document.querySelectorAll("#tahi-cc-star-rating .tahi-cc-star").forEach(star => {
+                const value = parseInt(star.dataset.value);
+                star.classList.toggle("filled", value <= rating);
+            });
+        }
+
+        window.openTahiModal = openTahiModal;
+        window.closeTahiModal = closeTahiModal;
+
+        const courseLink = "@Model.Link";
+
+        document.getElementById("tahi-cc-close-btn").addEventListener("click", () => {
+            // Redirect to course details page
+            window.location.href = `/Courses?selectedCourse=${courseLink}`;
+        });
+
     });
+
 </script>

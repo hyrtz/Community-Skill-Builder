@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
@@ -6,6 +8,7 @@ using SkillBuilder.Models.ViewModels;
 
 namespace SkillBuilder.Controllers
 {
+    [Authorize(AuthenticationSchemes = "TahiAuth", Roles = "Learner")]
     [Route("UserProfile")]
     public class UserProfileController : Controller
     {
@@ -19,6 +22,13 @@ namespace SkillBuilder.Controllers
         [HttpGet("{id}")]
         public IActionResult UserProfile(string id)
         {
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (id != currentUserId)
+            {
+                return Forbid();
+            }
+
             var user = _context.Users
                 .Include(u => u.Artisan)
                 .Include(u => u.Enrollments)
@@ -41,7 +51,6 @@ namespace SkillBuilder.Controllers
                 var courseModulesOrdered = _context.CourseModules
                     .Where(cm => cm.CourseId == course.Id)
                     .OrderBy(cm => cm.Order)
-                    .Include(cm => cm.Contents)
                     .ToList();
 
                 var completedSet = moduleProgress
@@ -49,24 +58,24 @@ namespace SkillBuilder.Controllers
                     .Select(mp => mp.CourseModuleId)
                     .ToHashSet();
 
-                int validCompletions = 0;
-                for (int i = 0; i < courseModulesOrdered.Count; i++)
-                {
-                    var module = courseModulesOrdered[i];
-                    if (i == 0 || completedSet.Contains(courseModulesOrdered[i - 1].Id))
-                    {
-                        if (completedSet.Contains(module.Id))
-                        {
-                            validCompletions++;
-                        }
-                        else break;
-                    }
-                    else break;
-                }
+                int totalModules = courseModulesOrdered.Count;
 
-                int totalModules = courseModulesOrdered.SelectMany(cm => cm.Contents).Count();
+                // ✅ Add project as a "virtual module" if the course has one
+                if (!string.IsNullOrEmpty(course.ProjectDetails))
+                    totalModules += 1;
 
-                var progress = totalModules == 0 ? 0 : (double)validCompletions / totalModules * 100;
+                int completedModules = completedSet.Count;
+
+                // ✅ Count project submission as completed
+                var hasSubmission = _context.CourseProjectSubmissions
+                    .Any(s => s.UserId == user.Id && s.CourseId == course.Id);
+
+                if (hasSubmission)
+                    completedModules += 1;
+
+                var progress = totalModules == 0
+                    ? 0
+                    : (double)completedModules / totalModules * 100;
 
                 return new CourseProgressViewModel
                 {
@@ -275,6 +284,148 @@ namespace SkillBuilder.Controllers
             _context.SaveChanges();
 
             return Redirect($"/UserProfile/{userId}");
+        }
+
+        [HttpGet("EditProfile")]
+        public async Task<IActionResult> EditProfile()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return NotFound();
+
+            var model = new UserProfileViewModel
+            {
+                User = user
+            };
+
+            return View("~/Views/Actions/EditProfile.cshtml", model);
+        }
+
+        [HttpPost("EditProfile")]
+        public async Task<IActionResult> EditProfile(
+            string FirstName,
+            string LastName,
+            string Email,
+            IFormFile UserAvatar,
+            string CurrentPassword,
+            string NewPassword,
+            string ConfirmPassword)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return NotFound();
+
+            // Update basic info
+            user.FirstName = FirstName;
+            user.LastName = LastName;
+            user.Email = Email;
+
+            // Handle avatar upload
+            if (UserAvatar != null && UserAvatar.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/avatars");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(UserAvatar.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await UserAvatar.CopyToAsync(stream);
+                }
+
+                user.UserAvatar = $"/uploads/avatars/{fileName}";
+            }
+
+            // Handle password change
+            if (!string.IsNullOrEmpty(CurrentPassword) || !string.IsNullOrEmpty(NewPassword) || !string.IsNullOrEmpty(ConfirmPassword))
+            {
+                if (string.IsNullOrEmpty(CurrentPassword) || string.IsNullOrEmpty(NewPassword) || string.IsNullOrEmpty(ConfirmPassword))
+                {
+                    TempData["ErrorMessage"] = "Please fill all password fields to update your password.";
+                    return RedirectToAction("EditProfile");
+                }
+
+                if (!BCrypt.Net.BCrypt.Verify(CurrentPassword, user.PasswordHash))
+                {
+                    TempData["ErrorMessage"] = "Current password is incorrect.";
+                    return RedirectToAction("EditProfile");
+                }
+
+                if (NewPassword != ConfirmPassword)
+                {
+                    TempData["ErrorMessage"] = "New password and confirmation do not match.";
+                    return RedirectToAction("EditProfile");
+                }
+
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
+            }
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Profile updated successfully!";
+            return RedirectToAction("EditProfile");
+        }
+
+        [HttpGet("VerifyOldPassword")]
+        public IActionResult VerifyOldPassword(string oldPassword)
+        {
+            // Get the currently logged-in user
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null) return NotFound();
+
+            // Check the password using BCrypt
+            bool isValid = BCrypt.Net.BCrypt.Verify(oldPassword, user.PasswordHash);
+
+            return Json(new { isValid });
+        }
+
+        [HttpPost("ArchiveAccount")]
+        public async Task<IActionResult> ArchiveAccount()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var user = await _context.Users
+                .Include(u => u.Artisan)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) return NotFound();
+
+            // ✅ Soft delete user
+            user.IsArchived = true;
+
+            // ✅ Soft delete artisan profile if exists
+            if (user.Artisan != null)
+            {
+                user.Artisan.IsArchived = true;
+
+                // ✅ Soft delete all courses created by this artisan
+                var artisanCourses = await _context.Courses
+                    .Where(c => c.CreatedBy == user.Artisan.ArtisanId)
+                    .ToListAsync();
+
+                foreach (var course in artisanCourses)
+                {
+                    course.IsArchived = true;
+                }
+            }
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            // ✅ Sign out after archive
+            await HttpContext.SignOutAsync("TahiAuth");
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

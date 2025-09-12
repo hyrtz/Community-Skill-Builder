@@ -20,5 +20,7 @@ namespace SkillBuilder.Models
 
         public List<ArtisanWork> Works { get; set; } = new();
         public List<Course> Courses { get; set; } = new();
+
+        public bool IsArchived { get; set; } = false;
     }
 }

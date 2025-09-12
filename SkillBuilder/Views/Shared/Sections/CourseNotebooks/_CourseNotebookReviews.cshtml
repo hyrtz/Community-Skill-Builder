@@ -1,4 +1,5 @@
-﻿<style>
+﻿
+<style>
     .review-heading {
         font-size: 2rem;
         margin-bottom: 2rem;
@@ -116,6 +117,100 @@
         .show-all-btn:hover {
             background-color: #2A3EC1;
         }
+
+    .review-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        overflow-y: auto;
+        padding: 2rem;
+    }
+
+    .review-modal-content {
+        background: #fff;
+        width: 90%;
+        max-width: 700px;
+        border-radius: 12px;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .review-modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .review-modal-title {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        color: #222;
+        text-align: center;
+    }
+
+    .review-modal-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .review-modal-card {
+        background-color: #f9f9f9;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+        .review-modal-card .review-user {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .review-modal-card .review-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .review-modal-card .review-name {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .review-modal-card .review-stars {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+            .review-modal-card .review-stars .star.filled {
+                color: #FFD700;
+            }
+
+        .review-modal-card .review-date {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .review-modal-card .review-text {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.4;
+        }
 </style>
 
 <h1 class="review-heading">Learner Reviews</h1>
@@ -171,5 +266,65 @@
         <h5>Reviews</h5>
 
         <button class="show-all-btn" onclick="openReviewModal()">Show All Reviews</button>
+
+        <!-- Modal HTML -->
+        <div id="review-modal" class="review-modal">
+            <div class="review-modal-content">
+                <span class="review-modal-close" onclick="closeReviewModal()">&times;</span>
+                <h2 class="review-modal-title">All Reviews</h2>
+
+                <div class="review-modal-list">
+                    @if (Model.Reviews != null && Model.Reviews.Count > 0)
+                    {
+                        foreach (var review in Model.Reviews)
+                        {
+                            <div class="review-modal-card">
+                                <div class="review-user">
+                                    <img src="@review.User.UserAvatar" class="review-avatar" />
+                                    <div>
+                                        <h4 class="review-name">@review.User.FirstName @review.User.LastName</h4>
+                                        <div class="review-stars">
+                                            @{
+                                                for (int star = 1; star <= 5; star++)
+                                                {
+                                                    <span class="star @(star <= review.Rating ? "filled" : "")">&#9733;</span>
+                                                }
+                                            }
+                                        </div>
+                                        <p class="review-date">@review.CreatedAt.ToString("MMMM dd, yyyy")</p>
+                                    </div>
+                                </div>
+                                <p class="review-text">@review.Comment</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p style="text-align:center; color:#555; font-size:1rem; margin-top:2rem;">
+                            No reviews yet. Be the first to leave a review by completing this course!
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    function openReviewModal() {
+        const modal = document.getElementById('review-modal');
+        modal.style.display = 'flex';
+    }
+
+    function closeReviewModal() {
+        const modal = document.getElementById('review-modal');
+        modal.style.display = 'none';
+    }
+
+    // Close modal if clicking outside the content
+    document.getElementById('review-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeReviewModal();
+        }
+    });
+</script>

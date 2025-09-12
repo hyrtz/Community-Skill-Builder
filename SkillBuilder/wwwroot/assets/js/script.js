@@ -90,7 +90,6 @@ document.addEventListener("DOMContentLoaded", function () {
     window.openModal = function (modalId) {
         overlay.style.display = "block";
         document.getElementById(modalId).style.display = "block";
-        navButtons.forEach(btn => btn.style.pointerEvents = "none");
 
         if (modalId === "signup-modal") {
             resetSignupModalView();
@@ -117,6 +116,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const overlay = document.getElementById("modal-overlay");
             if (overlay) overlay.style.display = "none";
         }
+
+        navButtons.forEach(btn => btn.style.pointerEvents = "auto");
 
         // Reset signup form if closing signup
         if (modalId === "signup-modal") {
@@ -219,6 +220,15 @@ document.addEventListener("DOMContentLoaded", function () {
             lastNameError.textContent = "⚠️ Only letters allowed";
         } else {
             lastNameError.textContent = "";
+        }
+
+        const emailError = document.getElementById("signup-email-error");
+        if (email.length === 0) {
+            emailError.textContent = "";
+        } else if (!isValidEmail(email)) {
+            emailError.textContent = "⚠️ Please enter a valid email address";
+        } else {
+            emailError.textContent = "";
         }
 
         // Password match message

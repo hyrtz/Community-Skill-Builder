@@ -1,10 +1,17 @@
 ﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
 
+@{
+    var isApproved = User.FindFirst("IsApproved")?.Value == "True";
+}
+
 <style>
     .artisan-courses-section {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
+        min-height: 580px;
+        max-height: 580px;
+        overflow-y: auto;
     }
 
     .artisan-courses-heading {
@@ -169,7 +176,19 @@
                 <p class="artisan-course-desc">
                     Share your knowledge and skills with students around the world.
                 </p>
-                <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">+ Create course</a>
+
+                @if (isApproved)
+                {
+                    <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">
+                        + Create course
+                    </a>
+                }
+                else
+                {
+                    <a class="btn-primary full-width" style="text-decoration: none; background-color:#ccc; cursor:not-allowed; opacity:0.6; pointer-events:none;">
+                        + Create course (Pending Approval)
+                    </a>
+                }
             </div>
         }
         else
@@ -181,7 +200,19 @@
                 <p class="artisan-course-desc">
                     Start sharing your expertise with learners worldwide.
                 </p>
-                <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">+ Create course</a>
+
+                @if (isApproved)
+                {
+                    <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">
+                        + Create course
+                    </a>
+                }
+                else
+                {
+                    <a class="btn-primary full-width" style="text-decoration: none; background-color:#ccc; cursor:not-allowed; opacity:0.6; pointer-events:none;">
+                        + Create course (Pending Approval)
+                    </a>
+                }
             </div>
         }
     </div>

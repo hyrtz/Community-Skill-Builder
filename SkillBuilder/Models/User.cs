@@ -23,5 +23,7 @@
         public List<CourseReview> Reviews { get; set; }
         public List<CourseProjectSubmission> ProjectSubmissions { get; set; }
         public List<CommunityMembership> Memberships { get; set; }
+
+        public bool IsArchived { get; set; } = false;
     }
 }

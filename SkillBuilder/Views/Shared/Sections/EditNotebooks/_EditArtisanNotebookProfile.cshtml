@@ -1,0 +1,396 @@
+﻿@using SkillBuilder.Models.ViewModels
+@model ArtisanProfileViewModel
+
+<style>
+/* --- Container --- */
+.eap-container-wrapper {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    position: relative;
+    min-height: 580px;
+}
+
+.eap-left-panel {
+    flex: 1;
+    max-width: calc(100% - 200px);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.eap-right-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 180px;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+/* --- Fields --- */
+.eap-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.eap-field label {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.eap-input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #c0c0c0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    width: 100%;
+}
+
+/* --- Buttons --- */
+.eap-submit-btn {
+    margin-top: 1rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: bold;
+    background-color: #344AEA;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.eap-submit-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.eap-avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    background-color: #f0f0f8;
+}
+
+.eap-change-avatar-btn,
+.eap-toggle-password-btn {
+    background-color: #344AEA;
+    color: white;
+    border: none;
+    padding: 0.7rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    transition: background 0.2s ease;
+}
+
+.eap-change-avatar-btn:hover,
+.eap-toggle-password-btn:hover {
+    background-color: #2b36c5;
+}
+
+/* --- Password section --- */
+.eap-password-section {
+    display: none;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.eap-password-field {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.eap-password-field input {
+    padding-right: 2.5rem;
+}
+
+.eap-toggle-eye {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* --- Modal --- */
+.eap-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.eap-modal {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+
+.eap-modal button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.eap-modal-confirm {
+    background-color: #344AEA;
+    color: white;
+}
+
+.eap-modal-cancel {
+    background-color: #ccc;
+    color: #333;
+    margin-left: 1rem;
+}
+
+/* --- Warnings --- */
+.eap-warning {
+    color: red;
+    font-size: 0.8rem;
+    display: none;
+    margin-top: 0.25rem;
+}
+
+/* --- Password checklist --- */
+.eap-password-checklist {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    color: gray;
+}
+</style>
+
+<div class="eap-container-wrapper">
+    <!-- Left Panel -->
+    <div class="eap-left-panel">
+        <form class="eap-form" method="post" enctype="multipart/form-data" asp-controller="ArtisanProfile" asp-action="EditProfileArtisan">
+            
+            <!-- Email -->
+            <div class="eap-field">
+                <label for="Email">Email</label>
+                <input type="email" id="Email" name="Email" class="eap-input" value="@Model.Artisan.User?.Email" required />
+                <p class="eap-warning" id="eap-email-warning">⚠️ Please enter a valid email.</p>
+            </div>
+
+            <!-- First Name -->
+            <div class="eap-field">
+                <label for="FirstName">First Name</label>
+                <input type="text" id="FirstName" name="FirstName" class="eap-input" value="@Model.Artisan.FirstName" required />
+                <p class="eap-warning" id="eap-firstname-warning">⚠️ First Name must contain letters only.</p>
+            </div>
+
+            <!-- Last Name -->
+            <div class="eap-field">
+                <label for="LastName">Last Name</label>
+                <input type="text" id="LastName" name="LastName" class="eap-input" value="@Model.Artisan.LastName" required />
+                <p class="eap-warning" id="eap-lastname-warning">⚠️ Last Name must contain letters only.</p>
+            </div>
+
+            <!-- Profession -->
+            <div class="eap-field">
+                <label for="Profession">Profession</label>
+                <input type="text" id="Profession" name="Profession" class="eap-input" value="@Model.Artisan.Profession" required />
+            </div>
+
+            <!-- Hometown -->
+            <div class="eap-field">
+                <label for="Hometown">Hometown</label>
+                <input type="text" id="Hometown" name="Hometown" class="eap-input" value="@Model.Artisan.Hometown" required />
+            </div>
+
+            <!-- Introduction -->
+            <div class="eap-field">
+                <label for="Introduction">Introduction</label>
+                <textarea id="Introduction" name="Introduction" class="eap-input" rows="4">@Model.Artisan.Introduction</textarea>
+            </div>
+
+            <!-- Password Section -->
+            <div class="eap-password-section" id="eap-password-section">
+                <div class="eap-password-field">
+                    <label for="CurrentPassword">Old Password</label>
+                    <input type="password" id="CurrentPassword" name="CurrentPassword" class="eap-input" placeholder="Enter current password" />
+                    <span class="eap-toggle-eye" onclick="togglePassword('CurrentPassword', this)">👁️‍🗨️</span>
+                    <p class="eap-warning" id="eap-current-warning" style="display:none;">⚠️ Wrong password</p>
+                </div>
+                <div class="eap-password-field">
+                    <label for="NewPassword">New Password</label>
+                    <input type="password" id="NewPassword" name="NewPassword" class="eap-input" placeholder="Enter new password" />
+                    <span class="eap-toggle-eye" onclick="togglePassword('NewPassword', this)">👁️‍🗨️</span>
+                    <div class="eap-password-checklist" id="eap-password-checklist">
+                        <p id="eap-check-length">❌ At least 8 characters</p>
+                        <p id="eap-check-uppercase">❌ At least one uppercase letter</p>
+                        <p id="eap-check-number">❌ At least one number</p>
+                        <p id="eap-check-symbol">❌ At least one symbol</p>
+                    </div>
+                </div>
+                <div class="eap-password-field">
+                    <label for="ConfirmPassword">Confirm Password</label>
+                    <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="eap-input" placeholder="Confirm new password" />
+                    <span class="eap-toggle-eye" onclick="togglePassword('ConfirmPassword', this)">👁️‍🗨️</span>
+                    <p class="eap-warning" id="eap-confirm-warning">⚠️ Passwords do not match.</p>
+                </div>
+            </div>
+
+            <!-- Hidden avatar input -->
+            <input type="file" id="UserAvatar" name="UserAvatar" accept="image/*" style="display:none;" />
+
+            <!-- Submit -->
+            <button type="submit" class="eap-submit-btn" id="eap-submit-btn" disabled>Save Changes</button>
+
+            <!-- Modal -->
+            <div class="eap-modal-overlay" id="eap-modal-overlay">
+                <div class="eap-modal">
+                    <p>Are you sure you want to save changes?</p>
+                    <button type="button" class="eap-modal-confirm" id="eap-modal-confirm">Yes</button>
+                    <button type="button" class="eap-modal-cancel" id="eap-modal-cancel">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="eap-right-panel">
+        <label>Profile Picture</label>
+        <img src="@Model.Artisan.UserAvatar" class="eap-avatar-preview" id="eap-avatar-preview" />
+        <button type="button" class="eap-change-avatar-btn" id="eap-change-avatar-btn">Change Avatar</button>
+        <button type="button" class="eap-toggle-password-btn" id="eap-toggle-password-btn">Change Password</button>
+    </div>
+</div>
+
+<script>
+    const form = document.querySelector('.eap-form');
+    const submitBtn = document.getElementById('eap-submit-btn');
+    const avatarInput = document.getElementById('UserAvatar');
+    const avatarPreview = document.getElementById('eap-avatar-preview');
+    const changeAvatarBtn = document.getElementById('eap-change-avatar-btn');
+    const passwordToggleBtn = document.getElementById('eap-toggle-password-btn');
+    const passwordSection = document.getElementById('eap-password-section');
+    const modalOverlay = document.getElementById('eap-modal-overlay');
+    const modalConfirm = document.getElementById('eap-modal-confirm');
+    const modalCancel = document.getElementById('eap-modal-cancel');
+
+    const emailInput = document.getElementById('Email');
+    const firstNameInput = document.getElementById('FirstName');
+    const lastNameInput = document.getElementById('LastName');
+    const currentPassword = document.getElementById('CurrentPassword');
+    const newPassword = document.getElementById('NewPassword');
+    const confirmPassword = document.getElementById('ConfirmPassword');
+
+    const emailWarning = document.getElementById('eap-email-warning');
+    const firstNameWarning = document.getElementById('eap-firstname-warning');
+    const lastNameWarning = document.getElementById('eap-lastname-warning');
+    const currentWarning = document.getElementById('eap-current-warning');
+    const confirmWarning = document.getElementById('eap-confirm-warning');
+    const passwordChecklist = document.getElementById('eap-password-checklist');
+
+    const checkLength = document.getElementById('eap-check-length');
+    const checkUpper = document.getElementById('eap-check-uppercase');
+    const checkNumber = document.getElementById('eap-check-number');
+    const checkSymbol = document.getElementById('eap-check-symbol');
+
+    let formChanged = false;
+    let oldPasswordTimeout;
+
+    function markFormChanged() {
+        formChanged = true;
+        submitBtn.disabled = false;
+    }
+
+    // --- Avatar ---
+    changeAvatarBtn.addEventListener('click', () => avatarInput.click());
+    avatarInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => avatarPreview.src = ev.target.result;
+        reader.readAsDataURL(file);
+        markFormChanged();
+    });
+
+    // --- Password section toggle ---
+    passwordToggleBtn.addEventListener('click', () => {
+        passwordSection.style.display = passwordSection.style.display === 'flex' ? 'none' : 'flex';
+        markFormChanged();
+    });
+
+    // --- Toggle password visibility ---
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        input.type = input.type === 'password' ? 'text' : 'password';
+        icon.textContent = input.type === 'text' ? "👁️" : "👁️‍🗨️";
+        markFormChanged();
+    }
+
+    // --- Enable save on any input ---
+    form.querySelectorAll('input, textarea').forEach(input => input.addEventListener('input', markFormChanged));
+
+    // --- Validation functions ---
+    function validateText(input, warning, pattern) {
+        warning.style.display = input.value.length && !pattern.test(input.value) ? 'block' : 'none';
+    }
+
+    // Email validation
+    const emailRegex = new RegExp("^[^\\s\\u0040]+\\u0040[^\\s\\u0040]+\\.[^\\s\\u0040]+$");
+    emailInput.addEventListener('input', () => validateText(emailInput, emailWarning, emailRegex));
+
+    // Name validation
+    firstNameInput.addEventListener('input', () => firstNameWarning.style.display = /^[A-Za-z\s-]+$/.test(firstNameInput.value) ? 'none' : 'block');
+    lastNameInput.addEventListener('input', () => lastNameWarning.style.display = /^[A-Za-z\s-]+$/.test(lastNameInput.value) ? 'none' : 'block');
+
+    // --- Old password check (debounced) ---
+    currentPassword.addEventListener('input', () => {
+        clearTimeout(oldPasswordTimeout);
+        oldPasswordTimeout = setTimeout(() => {
+            if(!currentPassword.value) { currentWarning.style.display='none'; return; }
+            fetch(`/ArtisanProfile/VerifyOldPassword?oldPassword=${encodeURIComponent(currentPassword.value)}`)
+                .then(res => res.json())
+                .then(data => { currentWarning.style.display = data.isValid ? 'none' : 'block'; });
+            markFormChanged();
+        }, 500);
+    });
+
+    // --- Password checklist ---
+    function validatePassword() {
+        const pass = newPassword.value;
+        const confirm = confirmPassword.value;
+
+        // Only show checklist if user starts typing
+        passwordChecklist.style.display = pass ? 'block' : 'none';
+
+        checkLength.textContent = (pass.length >=8 ? "✔️":"❌") + " At least 8 characters";
+        checkUpper.textContent = (/[A-Z]/.test(pass) ? "✔️":"❌") + " At least one uppercase letter";
+        checkNumber.textContent = (/\d/.test(pass) ? "✔️":"❌") + " At least one number";
+        checkSymbol.textContent = (/[^A-Za-z0-9]/.test(pass) ? "✔️":"❌") + " At least one symbol";
+
+        confirmWarning.style.display = (confirm && pass !== confirm) ? 'block' : 'none';
+    }
+
+    // Initially hide checklist
+    passwordChecklist.style.display = 'none';
+    [newPassword, confirmPassword].forEach(el => el.addEventListener('input', () => { validatePassword(); markFormChanged(); }));
+
+    // --- Modal ---
+    form.addEventListener('submit', e => { e.preventDefault(); modalOverlay.style.display='flex'; });
+    modalConfirm.addEventListener('click', () => { modalOverlay.style.display='none'; form.submit(); });
+    modalCancel.addEventListener('click', () => { modalOverlay.style.display='none'; });
+</script>

@@ -11,5 +11,8 @@
         public Course Course { get; set; }
 
         public DateTime EnrolledAt { get; set; }
+
+        public bool IsCompleted { get; set; } = false;
+        public DateTime? CompletedAt { get; set; }
     }
 }

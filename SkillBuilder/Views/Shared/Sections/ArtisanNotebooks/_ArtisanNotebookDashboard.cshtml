@@ -1,24 +1,27 @@
 ﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
 
 <style>
-    .artisan-dash-section {
+    .artisan-dashboard-section {
         display: flex;
         flex-direction: column;
         gap: 2rem;
+        min-height: 580px;
+        max-height: 580px;
+        overflow-y: auto;
     }
 
-    .artisan-dash-heading {
+    .artisan-dashboard-heading {
         font-size: 1.8rem;
         font-weight: bold;
         color: #333;
     }
 
-    .artisan-dash-stats {
+    .artisan-dashboard-stats {
         display: flex;
         gap: 2rem;
     }
 
-    .artisan-dash-card {
+    .artisan-dashboard-card {
         flex: 1;
         background-color: #f0f8ff;
         padding: 1.5rem;
@@ -27,19 +30,19 @@
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
-    .artisan-dash-card-title {
+    .artisan-dashboard-card-title {
         font-size: 0.95rem;
         color: #555;
         margin-bottom: 0.5rem;
     }
 
-    .artisan-dash-card-value {
+    .artisan-dashboard-card-value {
         font-size: 2rem;
         font-weight: bold;
         color: #344AEA;
     }
 
-    .artisan-dash-latest {
+    .artisan-dashboard-latest {
         background-color: #fff;
         padding: 1.5rem;
         border-radius: 12px;
@@ -47,30 +50,30 @@
         border: 1px solid #eee;
     }
 
-    .artisan-dash-latest-title {
+    .artisan-dashboard-latest-title {
         font-size: 1.3rem;
         font-weight: bold;
         color: #222;
         margin-bottom: 0.5rem;
     }
 
-    .artisan-dash-latest-overview {
+    .artisan-dashboard-latest-overview {
         font-size: 1rem;
         color: #555;
         margin-bottom: 1rem;
     }
 
-    .artisan-dash-latest-link {
+    .artisan-dashboard-latest-link {
         color: #344AEA;
         text-decoration: none;
         font-weight: bold;
     }
 
-        .artisan-dash-latest-link:hover {
+        .artisan-dashboard-latest-link:hover {
             text-decoration: underline;
         }
 
-    .artisan-dash-quote {
+    .artisan-dashboard-quote {
         background-color: #f1f1f1;
         padding: 1.5rem;
         border-left: 4px solid #344AEA;
@@ -80,37 +83,37 @@
     }
 </style>
 
-<div class="artisan-dash-section">
-    <div class="artisan-dash-heading">
+<div class="artisan-dashboard-section">
+    <div class="artisan-dashboard-heading">
         Welcome back, @Model.Artisan.User?.FirstName!
     </div>
 
-    <div class="artisan-dash-stats">
-        <div class="artisan-dash-card">
-            <div class="artisan-dash-card-title">Total Courses</div>
-            <div class="artisan-dash-card-value">@Model.Courses.Count()</div>
+    <div class="artisan-dashboard-stats">
+        <div class="artisan-dashboard-card">
+            <div class="artisan-dashboard-card-title">Total Courses</div>
+            <div class="artisan-dashboard-card-value">@Model.Courses.Count()</div>
         </div>
-        <div class="artisan-dash-card">
-            <div class="artisan-dash-card-title">Artisan Works</div>
-            <div class="artisan-dash-card-value">@Model.ArtisanWorks.Count()</div>
+        <div class="artisan-dashboard-card">
+            <div class="artisan-dashboard-card-title">Artisan Works</div>
+            <div class="artisan-dashboard-card-value">@Model.ArtisanWorks.Count()</div>
         </div>
-        <div class="artisan-dash-card">
-            <div class="artisan-dash-card-title">Profile Status</div>
-            <div class="artisan-dash-card-value">Active</div>
+        <div class="artisan-dashboard-card">
+            <div class="artisan-dashboard-card-title">Profile Status</div>
+            <div class="artisan-dashboard-card-value">Active</div>
         </div>
     </div>
 
     @if (Model.Courses.Any())
     {
         var latest = Model.Courses.Last();
-        <div class="artisan-dash-latest">
-            <div class="artisan-dash-latest-title">Latest Course: @latest.Title</div>
-            <div class="artisan-dash-latest-overview">@latest.Overview</div>
-            <a class="artisan-dash-latest-link" href="/Courses/@latest.Link">View Course</a>
+        <div class="artisan-dashboard-latest">
+            <div class="artisan-dashboard-latest-title">Latest Course: @latest.Title</div>
+            <div class="artisan-dashboard-latest-overview">@latest.Overview</div>
+            <a class="artisan-dashboard-latest-link" href="/Courses/@latest.Link">View Course</a>
         </div>
     }
 
-    <div class="artisan-dash-quote">
+    <div class="artisan-dashboard-quote">
         “Teaching others is the best way to learn twice.”
     </div>
 </div>

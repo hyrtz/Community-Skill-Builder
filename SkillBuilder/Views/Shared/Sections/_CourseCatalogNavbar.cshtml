@@ -57,6 +57,74 @@
         color: #666;
     }
 
+    .logout-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .logout-modal-content {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        width: 320px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        animation: logout-modal-fadeIn 0.3s ease-out;
+    }
+
+    .logout-modal-title {
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+        color: #3b44f6;
+    }
+
+    .logout-modal-text {
+        font-size: 0.95rem;
+        color: #444;
+        margin-bottom: 1.5rem;
+    }
+
+    .logout-modal-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .logout-modal-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .logout-modal-btn-confirm {
+        background: #3b44f6;
+        color: #fff;
+    }
+
+        .logout-modal-btn-confirm:hover {
+            background: #2c5282;
+        }
+
+    .logout-modal-btn-cancel {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+        .logout-modal-btn-cancel:hover {
+            background: #bdbdbd;
+        }
+
 </style>
 <nav class="custom-navbar">
     <!-- Left: Logo -->
@@ -74,8 +142,14 @@
             }
 
             <a asp-controller="Courses" asp-action="CourseCatalog" class="navbar-item @(currentController == "Courses" ? "active-nav" : "")">Courses</a>
-            <a asp-controller="Leaderboard" asp-action="UserLeaderboard" class="navbar-item @(currentController == "Leaderboard" ? "active-nav" : "")">Leaderboards</a>
-            <a asp-controller="Artisans" asp-action="ArtisanList" class="navbar-item @(currentController == "Artisans" ? "active-nav" : "")">Artisans</a>
+
+            @* Show Leaderboards and Artisans only if NOT Artisan *@
+            @if (userRole != "Artisan")
+            {
+                <a asp-controller="Leaderboard" asp-action="UserLeaderboard" class="navbar-item @(currentController == "Leaderboard" ? "active-nav" : "")">Leaderboards</a>
+                <a asp-controller="Artisans" asp-action="ArtisanList" class="navbar-item @(currentController == "Artisans" ? "active-nav" : "")">Artisans</a>
+            }
+
             <a asp-controller="Community" asp-action="CommunityHub" class="navbar-item @(currentController == "Community" ? "active-nav" : "")">Community</a>
         </div>
     }
@@ -136,11 +210,38 @@
                         </label>
                     </div>
 
-                    <form method="post" action="/Account/Logout">
-                        <button type="button" class="profile-menu-item profile-menu-logout" onclick="window.location.href='/force-logout'">
-                            Log Out
-                        </button>
-                    </form>
+                    @if (userRole == "Artisan")
+                    {
+                        <a href="/ArtisanProfile/EditProfileArtisan" class="profile-menu-item">
+                            Edit Profile
+                        </a>
+                    }
+                    else if (userRole == "Learner")
+                    {
+                        <a href="/UserProfile/EditProfile" class="profile-menu-item">
+                            Edit Profile
+                        </a>
+                    }
+
+                    <button type="button" class="profile-menu-item profile-menu-logout" onclick="logoutModalOpen()">
+                        Log Out
+                    </button>
+
+                    <div id="logout-modal-overlay" class="logout-modal-overlay">
+                        <div class="logout-modal-content">
+                            <h3 class="logout-modal-title">Confirm Logout</h3>
+                            <p class="logout-modal-text">Are you sure you want to log out?</p>
+                            <div class="logout-modal-actions">
+                                <button onclick="logoutModalConfirm()" class="logout-modal-btn logout-modal-btn-confirm">
+                                    Log Out
+                                </button>
+                                <button onclick="logoutModalClose()" class="logout-modal-btn logout-modal-btn-cancel">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         }
@@ -168,4 +269,41 @@
     function setProfileNotif(isOn) {
         console.log("Notification setting changed to:", isOn ? "On" : "Off");
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const logoutModalOverlay = document.getElementById("logout-modal-overlay");
+
+        if (!logoutModalOverlay) return; // safety check
+
+        function logoutModalOpen() {
+            logoutModalOverlay.style.display = "flex";
+        }
+
+        function logoutModalClose() {
+            logoutModalOverlay.style.display = "none";
+        }
+
+        function logoutModalConfirm() {
+            window.location.href = "/force-logout";
+        }
+
+        // expose globally so buttons in markup can use them
+        window.logoutModalOpen = logoutModalOpen;
+        window.logoutModalClose = logoutModalClose;
+        window.logoutModalConfirm = logoutModalConfirm;
+
+        // Close modal when clicking outside modal content
+        logoutModalOverlay.addEventListener("click", function (e) {
+            if (e.target === logoutModalOverlay) {
+                logoutModalClose();
+            }
+        });
+
+        // Close modal on ESC key
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && logoutModalOverlay.style.display === "flex") {
+                logoutModalClose();
+            }
+        });
+    });
 </script>

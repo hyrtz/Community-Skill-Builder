@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
@@ -7,6 +8,7 @@ using System.Linq;
 
 namespace SkillBuilder.Controllers
 {
+    [Authorize(AuthenticationSchemes = "TahiAuth", Roles = "Admin")]
     [Route("AdminProfile")]
     public class AdminProfileController : Controller
     {
@@ -20,6 +22,13 @@ namespace SkillBuilder.Controllers
         [HttpGet("{id}")]
         public IActionResult AdminProfile(string id)
         {
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (id != currentUserId)
+            {
+                return Forbid();
+            }
+
             if (string.IsNullOrEmpty(id))
                 return NotFound();
 
@@ -110,27 +119,21 @@ namespace SkillBuilder.Controllers
         {
             var user = await _context.Users
                 .Include(u => u.Artisan)
-                .Include(u => u.Enrollments)
-                .Include(u => u.Reviews)
-                .Include(u => u.ProjectSubmissions)
-                .Include(u => u.Memberships)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
                 return NotFound();
 
+            // Archive Artisan profile if exists
             if (user.Artisan != null)
-                _context.Artisans.Remove(user.Artisan);
+                user.Artisan.IsArchived = true;
 
-            _context.Enrollments.RemoveRange(user.Enrollments);
-            _context.CourseReviews.RemoveRange(user.Reviews);
-            _context.CourseProjectSubmissions.RemoveRange(user.ProjectSubmissions);
-            _context.CommunityMemberships.RemoveRange(user.Memberships);
+            // Archive user
+            user.IsArchived = true;
 
-            _context.Users.Remove(user);
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            // ✅ Correct redirection
             return RedirectToRoute(new { controller = "AdminProfile", action = "AdminProfile", id = adminId });
         }
 
@@ -224,24 +227,33 @@ namespace SkillBuilder.Controllers
         public async Task<IActionResult> DeleteCourse(int id, string adminId)
         {
             var course = await _context.Courses
-                .Include(c => c.Enrollments)
-                .Include(c => c.Reviews)
-                .Include(c => c.CourseModules)
-                .Include(c => c.Materials)
-                .Include(c => c.ProjectSubmissions)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (course == null)
                 return NotFound();
 
-            // ✅ Remove related entities first
-            _context.Enrollments.RemoveRange(course.Enrollments);
-            _context.CourseReviews.RemoveRange(course.Reviews);
-            _context.CourseModules.RemoveRange(course.CourseModules);
-            _context.CourseMaterials.RemoveRange(course.Materials);
-            _context.CourseProjectSubmissions.RemoveRange(course.ProjectSubmissions);
+            // Archive course
+            course.IsArchived = true;
 
-            _context.Courses.Remove(course);
+            _context.Courses.Update(course);
+            await _context.SaveChangesAsync();
+
+            return RedirectToRoute(new { controller = "AdminProfile", action = "AdminProfile", id = adminId });
+        }
+
+        [HttpPost("DeleteCommunity/{id}")]
+        public async Task<IActionResult> DeleteCommunity(int id, string adminId)
+        {
+            var community = await _context.Communities
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (community == null)
+                return NotFound();
+
+            // Archive community
+            community.IsArchived = true;
+
+            _context.Communities.Update(community);
             await _context.SaveChangesAsync();
 
             return RedirectToRoute(new { controller = "AdminProfile", action = "AdminProfile", id = adminId });

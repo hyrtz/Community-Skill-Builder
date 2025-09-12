@@ -2,11 +2,14 @@
 @model AdminProfileViewModel
 
 <style>
-    .admin-course-section {
+    /* =======================
+               Layout / Sections
+           ======================== */
+    .course-mgmt-section {
         padding: 2rem;
     }
 
-    .admin-course-header {
+    .course-mgmt-header {
         font-size: 1.8rem;
         font-weight: bold;
         margin-bottom: 1.5rem;
@@ -14,16 +17,19 @@
         letter-spacing: 0.5px;
     }
 
-    .admin-course-controls {
+    .course-mgmt-controls {
         display: flex;
         align-items: center;
         gap: 1rem;
         margin-bottom: 2rem;
     }
 
-    .course-search-bar {
+    /* =======================
+               Search Bar
+           ======================== */
+    .course-mgmt-search-bar {
         display: flex;
-        flex: 0 0 90%;
+        width: 100%;
         border: 1px solid #ccc;
         border-radius: 8px;
         overflow: hidden;
@@ -31,7 +37,7 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
 
-        .course-search-bar input {
+        .course-mgmt-search-bar input {
             flex: 1;
             padding: 0.6rem 1rem;
             border: none;
@@ -39,103 +45,94 @@
             font-size: 1rem;
         }
 
-        .course-search-bar button {
+        .course-mgmt-search-bar button {
             background-color: #344AEA;
             border: none;
             padding: 0.6rem 1rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: background-color 0.2s ease;
         }
 
-            .course-search-bar button:hover {
+            .course-mgmt-search-bar button:hover {
                 background-color: #2a3bcf;
             }
 
-            .course-search-bar button img {
+            .course-mgmt-search-bar button img {
                 width: 1.2rem;
                 height: 1.2rem;
             }
 
-    .course-filter-btn {
-        flex: 0 0 10%;
-        background-color: #eee;
-        border: none;
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: background-color 0.2s ease;
-    }
-
-        .course-filter-btn:hover {
-            background-color: #ddd;
-        }
-
-    .course-table {
+    /* =======================
+               Table
+           ======================== */
+    .course-mgmt-table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0 1.2rem;
     }
 
-        .course-table th {
+        .course-mgmt-table th {
             text-align: left;
             font-size: 1rem;
             color: #666;
             padding: 0.5rem 1rem;
         }
 
-            .course-table th:nth-child(2) {
+            .course-mgmt-table th:nth-child(2) {
                 text-align: center;
             }
 
-            .course-table th:nth-child(3) {
+            .course-mgmt-table th:nth-child(3) {
                 text-align: right;
             }
 
     /* Row hover effect */
-    .course-row {
+    .course-mgmt-row {
         background: #fafafa;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         transition: background-color 0.25s ease, box-shadow 0.25s ease;
     }
 
-        .course-row:hover {
-            background-color: #f0f0f0; /* subtle gray */
-            transform: scale(1.01); /* slight pop */
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08); /* soft shadow */
+        .course-mgmt-row:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.01);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
             transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
         }
 
     /* Cells */
-    .course-cell {
+    .course-mgmt-cell {
         padding: 1rem;
         vertical-align: middle;
     }
 
-        .course-cell.course-author {
+        .course-mgmt-cell.course-author {
             text-align: center;
-            display: table-cell; /* keep natural centering */
+            display: table-cell;
             vertical-align: middle;
         }
 
-        .course-cell.course-mgmt-actions {
+        .course-mgmt-cell.course-actions {
             text-align: right;
         }
 
-    .course-name {
+    .course-mgmt-name {
         font-weight: bold;
         font-size: 1rem;
         color: #333;
     }
 
-        .course-name a {
+        .course-mgmt-name a {
             text-decoration: none;
             color: #7D3C98;
             transition: color 0.2s ease;
         }
 
-    .course-author {
+    .course-mgmt-author {
         font-size: 0.95rem;
         color: #222;
         text-align: center;
@@ -143,10 +140,6 @@
     }
 
     /* Actions alignment */
-    .course-cell.course-mgmt-actions {
-        text-align: right;
-    }
-
     .course-mgmt-action-buttons {
         display: flex;
         justify-content: flex-end;
@@ -173,30 +166,6 @@
 
         .course-mgmt-delete-btn:hover {
             background-color: #c0392b;
-        }
-
-    .review-btn {
-        background-color: #3498DB;
-    }
-
-        .review-btn:hover {
-            background-color: #2d83c0;
-        }
-
-    .publish-btn {
-        background-color: #2ECC71;
-    }
-
-        .publish-btn:hover {
-            background-color: #27ae60;
-        }
-
-    .unpublish-btn {
-        background-color: #E67E22;
-    }
-
-        .unpublish-btn:hover {
-            background-color: #ca6a14;
         }
 
     /* Backdrop */
@@ -295,20 +264,19 @@
         }
 </style>
 
-<div class="admin-course-section">
-    <div class="admin-course-header">All Course Submissions</div>
+<div class="course-mgmt-section">
+    <div class="course-mgmt-header">All Course Submissions</div>
 
-    <div class="admin-course-controls">
-        <div class="course-search-bar">
+    <div class="course-mgmt-controls">
+        <div class="course-mgmt-search-bar">
             <input type="text" placeholder="Search by course name or creator..." />
             <button type="button">
                 <img src="/assets/Icons/Search.ico" alt="Search" />
             </button>
         </div>
-        <button class="course-filter-btn">Filter</button>
     </div>
 
-    <table class="course-table">
+    <table class="course-mgmt-table">
         <thead>
             <tr>
                 <th>Course Name</th>
@@ -319,24 +287,18 @@
         <tbody>
             @if (Model.AllSubmittedCourses != null && Model.AllSubmittedCourses.Any())
             {
-                foreach (var course in Model.AllSubmittedCourses)
+                foreach (var course in Model.AllSubmittedCourses.Where(c => !c.IsArchived))
                 {
-                    <tr class="course-row">
-                        <!-- Course Title -->
-                        <td class="course-cell course-name">
-                            <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })"
-                               style="text-decoration: none;">
+                    <tr class="course-mgmt-row">
+                        <td class="course-mgmt-cell course-mgmt-name">
+                            <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })">
                                 @course.Title
                             </a>
                         </td>
-
-                        <!-- Creator -->
-                        <td class="course-cell course-author">
+                        <td class="course-mgmt-cell course-author">
                             @course.Artisan?.User?.FirstName @course.Artisan?.User?.LastName
                         </td>
-
-                        <!-- Actions -->
-                        <td class="course-cell course-mgmt-actions">
+                        <td class="course-mgmt-cell course-actions">
                             <div class="course-mgmt-action-buttons">
                                 <form asp-action="DeleteCourse"
                                       asp-route-id="@course.Id"
@@ -355,7 +317,8 @@
             else
             {
                 <tr>
-                    <td colspan="3" class="course-cell" style="text-align: center; padding: 2rem; color: #888;">
+                    <td colspan="3" class="course-mgmt-cell" style="text-align: center; padding: 2rem; color: #888;">
+
                         No submitted courses available.
                     </td>
                 </tr>
@@ -375,7 +338,6 @@
             <button class="course-mgmt-modal-confirm" id="courseMgmtConfirmDelete">Delete</button>
         </div>
     </div>
-
 </div>
 
 <script>

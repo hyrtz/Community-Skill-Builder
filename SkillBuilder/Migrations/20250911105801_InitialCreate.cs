@@ -94,7 +94,8 @@ namespace SkillBuilder.Migrations
                     SelectedInterests = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PasswordResetOtp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OtpExpiry = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    OtpExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsArchived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -160,7 +161,8 @@ namespace SkillBuilder.Migrations
                     UserAvatar = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Introduction = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsApproved = table.Column<bool>(type: "bit", nullable: false)
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
+                    IsArchived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -185,7 +187,8 @@ namespace SkillBuilder.Migrations
                     CoverImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MembersCount = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatorId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    CreatorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsArchived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -219,7 +222,8 @@ namespace SkillBuilder.Migrations
                     Requirements = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsPublished = table.Column<bool>(type: "bit", nullable: false)
+                    IsPublished = table.Column<bool>(type: "bit", nullable: false),
+                    IsArchived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -431,7 +435,9 @@ namespace SkillBuilder.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CourseId = table.Column<int>(type: "int", nullable: false),
-                    EnrolledAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    EnrolledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "bit", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -599,28 +605,28 @@ namespace SkillBuilder.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "CreatedAt", "Email", "FirstName", "IsDeactivated", "IsVerified", "LastName", "OtpExpiry", "PasswordHash", "PasswordResetOtp", "Points", "Role", "SelectedInterests", "UserAvatar" },
+                columns: new[] { "Id", "CreatedAt", "Email", "FirstName", "IsArchived", "IsDeactivated", "IsVerified", "LastName", "OtpExpiry", "PasswordHash", "PasswordResetOtp", "Points", "Role", "SelectedInterests", "UserAvatar" },
                 values: new object[,]
                 {
-                    { "A1111111", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc), "juan@example.com", "Juan", false, true, "Dela Cruz", null, "hashedpw", null, 0, "Learner", null, "/assets/Avatar/Sample10.svg" },
-                    { "user-1", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "alice@test.com", "Alice", false, true, "Artisan", null, "dummyhash1", null, 10, "Learner", "Crafts, Sewing", "/assets/Avatar/Sample3.ico" },
-                    { "user-2", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "bob@test.com", "Bob", false, false, "Builder", null, "dummyhash2", null, 5, "Learner", "Woodwork, DIY", "/assets/Avatar/Sample6.ico" },
-                    { "user-3", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "charlie@test.com", "Charlie", false, true, "Craftsman", null, "dummyhash3", null, 20, "Learner", "Painting, Pottery", "/assets/Avatar/Sample9.ico" }
+                    { "A1111111", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc), "juan@example.com", "Juan", false, false, true, "Dela Cruz", null, "hashedpw", null, 0, "Learner", null, "/assets/Avatar/Sample10.svg" },
+                    { "user-1", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "alice@test.com", "Alice", false, false, true, "Artisan", null, "dummyhash1", null, 10, "Learner", "Crafts, Sewing", "/assets/Avatar/Sample3.ico" },
+                    { "user-2", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "bob@test.com", "Bob", false, false, false, "Builder", null, "dummyhash2", null, 5, "Learner", "Woodwork, DIY", "/assets/Avatar/Sample6.ico" },
+                    { "user-3", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "charlie@test.com", "Charlie", false, false, true, "Craftsman", null, "dummyhash3", null, 20, "Learner", "Painting, Pottery", "/assets/Avatar/Sample9.ico" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Artisans",
-                columns: new[] { "ArtisanId", "ApplicationFile", "FirstName", "Hometown", "Introduction", "IsApproved", "LastName", "Profession", "Role", "UserAvatar", "UserId" },
-                values: new object[] { "A1111111", null, "Juan", "Vigan, Ilocos Sur", "Juan is a 3rd-generation artisan teaching pottery for 15 years.", false, "Dela Cruz", "Pottery Artisan", "Artisan", "/assets/Avatar/Sample7.ico", "A1111111" });
+                columns: new[] { "ArtisanId", "ApplicationFile", "FirstName", "Hometown", "Introduction", "IsApproved", "IsArchived", "LastName", "Profession", "Role", "UserAvatar", "UserId" },
+                values: new object[] { "A1111111", null, "Juan", "Vigan, Ilocos Sur", "Juan is a 3rd-generation artisan teaching pottery for 15 years.", false, false, "Dela Cruz", "Pottery Artisan", "Artisan", "/assets/Avatar/Sample7.ico", "A1111111" });
 
             migrationBuilder.InsertData(
                 table: "Communities",
-                columns: new[] { "Id", "AvatarUrl", "CoverImageUrl", "CreatedAt", "CreatorId", "Description", "MembersCount", "Name" },
+                columns: new[] { "Id", "AvatarUrl", "CoverImageUrl", "CreatedAt", "CreatorId", "Description", "IsArchived", "MembersCount", "Name" },
                 values: new object[,]
                 {
-                    { 1, "/assets/Community Pics/CompletePottery.png", null, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user-1", "A community for learners and artisans passionate about pottery and ceramics.", 125, "Pottery Enthusiasts" },
-                    { 2, "/assets/Community Pics/CompleteWeaving.png", null, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user-2", "Connecting artisans and learners who love weaving traditional and modern textiles.", 98, "Weaving Circle" },
-                    { 3, "/assets/Community Pics/CompleteWoodcarving.png", null, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user-3", "A space for woodcarvers to share projects, tips, and showcase craftsmanship.", 150, "Woodcarving Masters" }
+                    { 1, "/assets/Community Pics/CompletePottery.png", null, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user-1", "A community for learners and artisans passionate about pottery and ceramics.", false, 125, "Pottery Enthusiasts" },
+                    { 2, "/assets/Community Pics/CompleteWeaving.png", null, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user-2", "Connecting artisans and learners who love weaving traditional and modern textiles.", false, 98, "Weaving Circle" },
+                    { 3, "/assets/Community Pics/CompleteWoodcarving.png", null, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user-3", "A space for woodcarvers to share projects, tips, and showcase craftsmanship.", false, 150, "Woodcarving Masters" }
                 });
 
             migrationBuilder.InsertData(
@@ -635,12 +641,12 @@ namespace SkillBuilder.Migrations
 
             migrationBuilder.InsertData(
                 table: "Courses",
-                columns: new[] { "Id", "Category", "CreatedAt", "CreatedBy", "Difficulty", "Duration", "FullDescription", "ImageUrl", "IsPublished", "Link", "Overview", "ProjectDetails", "Requirements", "Thumbnail", "Title", "Video", "WhatToLearn" },
+                columns: new[] { "Id", "Category", "CreatedAt", "CreatedBy", "Difficulty", "Duration", "FullDescription", "ImageUrl", "IsArchived", "IsPublished", "Link", "Overview", "ProjectDetails", "Requirements", "Thumbnail", "Title", "Video", "WhatToLearn" },
                 values: new object[,]
                 {
-                    { 1, "Pottery", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Beginner", "15 hours", "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.", "/assets/Courses Pics/Pottery.png", false, "pottery", "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.", "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.", "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.", "/assets/Courses Pics/Pottery.png", "Pottery", "/assets/Videos/Pottery.mp4", "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques." },
-                    { 2, "Wood Carving", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Intermediate", "29 hours", "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.", "/assets/Courses Pics/Woodcarving.png", false, "woodcarving", "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.", "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.", "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).", "/assets/Courses Pics/Woodcarving.png", "Woodcarving", "/assets/Videos/WoodCarving.mp4", "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing." },
-                    { 3, "Weaving", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Professional", "18 hours", "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.", "/assets/Courses Pics/Weaving.png", false, "weaving", "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.", "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.", "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.", "/assets/Courses Pics/Weaving.png", "Weaving", "/assets/Videos/Weaving.mp4", "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation." }
+                    { 1, "Pottery", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Beginner", "15 hours", "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.", "/assets/Courses Pics/Pottery.png", false, false, "pottery", "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.", "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.", "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.", "/assets/Courses Pics/Pottery.png", "Pottery", "/assets/Videos/Pottery.mp4", "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques." },
+                    { 2, "Wood Carving", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Intermediate", "29 hours", "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.", "/assets/Courses Pics/Woodcarving.png", false, false, "woodcarving", "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.", "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.", "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).", "/assets/Courses Pics/Woodcarving.png", "Woodcarving", "/assets/Videos/WoodCarving.mp4", "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing." },
+                    { 3, "Weaving", new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "A1111111", "Professional", "18 hours", "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.", "/assets/Courses Pics/Weaving.png", false, false, "weaving", "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.", "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.", "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.", "/assets/Courses Pics/Weaving.png", "Weaving", "/assets/Videos/Weaving.mp4", "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation." }
                 });
 
             migrationBuilder.InsertData(

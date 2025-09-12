@@ -2,39 +2,33 @@
 @model AdminProfileViewModel
 
 <style>
-    /* =======================
-           Layout / Sections
-        ======================== */
-    .artisan-application-section {
+    .apply-mgmt-section {
         padding: 2rem;
     }
 
-    .artisan-application-header {
+    .apply-mgmt-header {
         font-size: 1.8rem;
         font-weight: bold;
         margin-bottom: 1.5rem;
         color: #344AEA;
     }
 
-    .artisan-application-controls {
+    .apply-mgmt-controls {
         display: flex;
         align-items: center;
         gap: 1rem;
         margin-bottom: 2rem;
     }
 
-    /* =======================
-           Search & Filter
-        ======================== */
-    .artisan-search-bar {
+    .apply-mgmt-search-bar {
         display: flex;
-        flex: 0 0 90%;
+        width: 100%;
         border: 1px solid #ccc;
         border-radius: 8px;
         overflow: hidden;
     }
 
-        .artisan-search-bar input {
+        .apply-mgmt-search-bar input {
             flex: 1;
             padding: 0.6rem 1rem;
             border: none;
@@ -42,38 +36,28 @@
             font-size: 1rem;
         }
 
-        .artisan-search-bar button {
+        .apply-mgmt-search-bar button {
             background-color: #344AEA;
             border: none;
             padding: 0.6rem 1rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-            .artisan-search-bar button img {
+            .apply-mgmt-search-bar button img {
                 width: 1.2rem;
                 height: 1.2rem;
             }
 
-    .artisan-filter-btn {
-        flex: 0 0 10%;
-        background-color: #eee;
-        border: none;
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-    }
-
-    /* =======================
-       Table
-    ======================== */
-    .artisan-table {
+    .apply-mgmt-table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0 1.2rem;
     }
 
-        .artisan-table th {
+        .apply-mgmt-table th {
             text-align: left;
             font-size: 1rem;
             color: #666;
@@ -81,75 +65,70 @@
         }
 
     /* Row styling */
-    .artisan-row {
+    .apply-mgmt-row {
         background-color: #f9f9f9;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
-        /* Alternate rows slightly different */
-        .artisan-row:nth-child(even) {
+        .apply-mgmt-row:nth-child(even) {
             background-color: #f1f1f1;
         }
 
-        /* Hover effect for rows */
-        .artisan-row:hover {
+        .apply-mgmt-row:hover {
             background-color: #e6e6e6;
-            transform: scale(1.01); /* subtle pop */
+            transform: scale(1.01);
         }
 
-    .artisan-cell {
+    .apply-mgmt-cell {
         padding: 1rem;
         vertical-align: middle;
     }
 
-    .artisan-info {
+    .apply-mgmt-info {
         display: flex;
         align-items: center;
         gap: 1rem;
     }
 
-        .artisan-info img {
+        .apply-mgmt-info img {
             width: 50px;
             height: 50px;
             object-fit: cover;
             border-radius: 50%;
         }
 
-    .artisan-details {
+    .apply-mgmt-details {
         display: flex;
         flex-direction: column;
     }
 
-    .artisan-name {
+    .apply-mgmt-name {
         font-weight: bold;
         font-size: 1rem;
         color: #333;
     }
 
-    .artisan-email {
+    .apply-mgmt-email {
         font-size: 0.85rem;
         color: #777;
     }
 
-    .artisan-status {
+    .apply-mgmt-status {
         font-weight: 600;
         font-size: 1rem;
         color: #222;
         text-align: center;
     }
 
-    /* =======================
-           Action Buttons
-        ======================== */
-    .action-buttons {
+    .apply-mgmt-action-buttons {
         display: flex;
         gap: 0.5rem;
         justify-content: flex-end;
     }
 
-    .admin-action-btn {
+    .apply-mgmt-admin-action-btn {
         padding: 0.4rem 0.8rem;
         border: none;
         border-radius: 6px;
@@ -159,28 +138,25 @@
         transition: background-color 0.3s ease;
     }
 
-    .reactivate-btn {
+    .apply-mgmt-reactivate-btn {
         background-color: #4CAF50;
         color: white;
     }
 
-        .reactivate-btn:hover {
+        .apply-mgmt-reactivate-btn:hover {
             background-color: #45a049;
         }
 
-    .delete-btn {
+    .apply-mgmt-delete-btn {
         background-color: #FF4C4C;
         color: white;
     }
 
-        .delete-btn:hover {
+        .apply-mgmt-delete-btn:hover {
             background-color: #c0392b;
         }
 
-    /* =======================
-           Modal & Backdrop
-        ======================== */
-    .admin-modal-backdrop {
+    .apply-mgmt-modal-backdrop {
         display: none;
         position: fixed;
         inset: 0;
@@ -190,7 +166,7 @@
         z-index: 1001;
     }
 
-    .admin-modal {
+    .apply-mgmt-modal {
         display: none;
         position: fixed;
         top: 50%;
@@ -207,26 +183,26 @@
         animation: fadeIn 0.3s ease;
     }
 
-        .admin-modal h3 {
+        .apply-mgmt-modal h3 {
             margin-bottom: 1rem;
             font-size: 1.3rem;
             font-weight: bold;
             color: #333;
         }
 
-        .admin-modal p {
+        .apply-mgmt-modal p {
             margin-bottom: 1.5rem;
             font-size: 1rem;
             color: #555;
         }
 
-    .admin-modal-buttons {
+    .apply-mgmt-modal-buttons {
         display: flex;
         justify-content: center;
         gap: 1rem;
     }
 
-        .admin-modal-buttons button {
+        .apply-mgmt-modal-buttons button {
             padding: 0.5rem 1rem;
             border: none;
             border-radius: 6px;
@@ -235,40 +211,38 @@
             transition: background-color 0.3s ease;
         }
 
-    .admin-modal-confirm {
+    .apply-mgmt-modal-confirm {
         background-color: #4CAF50;
         color: white;
     }
 
-    .admin-modal-cancel {
+    .apply-mgmt-modal-cancel {
         background-color: #ccc;
         color: #333;
     }
 
-    .admin-modal-confirm:hover {
+    .apply-mgmt-modal-confirm:hover {
         opacity: 0.9;
     }
 
-    .admin-modal-cancel:hover {
+    .apply-mgmt-modal-cancel:hover {
         background-color: #b3b3b3;
     }
-
 </style>
 
-<div class="artisan-application-section">
-    <div class="artisan-application-header">All Artisan Applications</div>
+<div class="apply-mgmt-section">
+    <div class="apply-mgmt-header">All Artisan Applications</div>
 
-    <div class="artisan-application-controls">
-        <div class="artisan-search-bar">
+    <div class="apply-mgmt-controls">
+        <div class="apply-mgmt-search-bar">
             <input type="text" placeholder="Search by name or email..." />
             <button type="button">
                 <img src="/assets/Icons/Search.ico" alt="Search" />
             </button>
         </div>
-        <button class="artisan-filter-btn">Filter</button>
     </div>
 
-    <table class="artisan-table">
+    <table class="apply-mgmt-table">
         <thead>
             <tr>
                 <th>Name</th>
@@ -283,12 +257,12 @@
                 {
                     var user = application.User;
 
-                    <tr class="artisan-row">
-                        <td class="artisan-cell">
-                            <div class="artisan-info">
+                    <tr class="apply-mgmt-row">
+                        <td class="apply-mgmt-cell">
+                            <div class="apply-mgmt-info">
                                 <img src="@user.UserAvatar" alt="Avatar" />
-                                <div class="artisan-details">
-                                    <div class="artisan-name">
+                                <div class="apply-mgmt-details">
+                                    <div class="apply-mgmt-name">
                                         <a asp-controller="AdminProfile"
                                            asp-action="ArtisanApplicationViewByAdmin"
                                            asp-route-id="@application.Id"
@@ -296,34 +270,31 @@
                                             @user.FirstName @user.LastName
                                         </a>
                                     </div>
-                                    <div class="artisan-email">@user.Email</div>
+                                    <div class="apply-mgmt-email">@user.Email</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="artisan-cell artisan-status">
+                        <td class="apply-mgmt-cell apply-mgmt-status">
                             @application.Status
                         </td>
-                        <td class="user-cell">
-                            <div class="action-buttons">
-                                <!-- Approve button -->
-                                <!-- Approve button -->
+                        <td class="apply-mgmt-cell">
+                            <div class="apply-mgmt-action-buttons">
                                 <form asp-action="ApproveApplication"
                                       asp-route-id="@application.Id"
                                       asp-route-adminId="@Model.Admin.UserId"
                                       method="post"
-                                      onsubmit="return artisanOpenModal(this, 'Approve');">
-                                    <button type="submit" class="admin-action-btn reactivate-btn">
+                                      onsubmit="return applyMgmtOpenModal(this, 'Approve');">
+                                    <button type="submit" class="apply-mgmt-admin-action-btn apply-mgmt-reactivate-btn">
                                         Approve
                                     </button>
                                 </form>
 
-                                <!-- Reject button -->
                                 <form asp-action="RejectApplication"
                                       asp-route-id="@application.Id"
                                       asp-route-adminId="@Model.Admin.UserId"
                                       method="post"
-                                      onsubmit="return artisanOpenModal(this, 'Reject');">
-                                    <button type="submit" class="admin-action-btn delete-btn">
+                                      onsubmit="return applyMgmtOpenModal(this, 'Reject');">
+                                    <button type="submit" class="apply-mgmt-admin-action-btn apply-mgmt-delete-btn">
                                         Reject
                                     </button>
                                 </form>
@@ -335,7 +306,7 @@
             else
             {
                 <tr>
-                    <td colspan="3" class="artisan-cell" style="text-align: center; padding: 2rem; color: #888;">
+                    <td colspan="3" class="apply-mgmt-cell" style="text-align: center; padding: 2rem; color: #888;">
                         No pending artisan applications at the moment.
                     </td>
                 </tr>
@@ -344,36 +315,31 @@
     </table>
 
     <!-- Backdrop -->
-    <div id="artisanModalBackdrop" class="admin-modal-backdrop"></div>
+    <div id="applyMgmtModalBackdrop" class="apply-mgmt-modal-backdrop"></div>
 
     <!-- Modal -->
-    <div class="admin-modal" id="artisanActionModal">
+    <div class="apply-mgmt-modal" id="applyMgmtActionModal">
         <h3>Confirm Action</h3>
-        <p id="artisanModalMessage"></p>
-        <div class="admin-modal-buttons">
-            <button class="admin-modal-cancel" onclick="artisanCloseModal()">Cancel</button>
-            <button class="admin-modal-confirm" id="artisanConfirmAction">Yes</button>
+        <p id="applyMgmtModalMessage"></p>
+        <div class="apply-mgmt-modal-buttons">
+            <button class="apply-mgmt-modal-cancel" onclick="applyMgmtCloseModal()">Cancel</button>
+            <button class="apply-mgmt-modal-confirm" id="applyMgmtConfirmAction">Yes</button>
         </div>
     </div>
-
 </div>
 
 <script>
-        let artisanCurrentForm = null;
+    let applyMgmtCurrentForm = null;
 
-    function artisanOpenModal(form, action) {
-        artisanCurrentForm = form;
+    function applyMgmtOpenModal(form, action) {
+        applyMgmtCurrentForm = form;
 
-        // Set message
-        document.getElementById("artisanModalMessage").innerText =
+        document.getElementById("applyMgmtModalMessage").innerText =
             `Are you sure you want to ${action.toLowerCase()} this artisan application?`;
 
-        const confirmBtn = document.getElementById("artisanConfirmAction");
+        const confirmBtn = document.getElementById("applyMgmtConfirmAction");
+        confirmBtn.className = "apply-mgmt-modal-confirm";
 
-        // Reset class & style
-        confirmBtn.className = "admin-modal-confirm";
-
-        // Action-specific color
         if (action === "Approve") {
             confirmBtn.style.backgroundColor = "#4CAF50";
             confirmBtn.innerText = "Approve";
@@ -382,29 +348,26 @@
             confirmBtn.innerText = "Reject";
         }
 
-        // Show backdrop + modal
-        document.getElementById("artisanModalBackdrop").style.display = "block";
-        document.getElementById("artisanActionModal").style.display = "block";
+        document.getElementById("applyMgmtModalBackdrop").style.display = "block";
+        document.getElementById("applyMgmtActionModal").style.display = "block";
 
-        return false; // prevent default submit
+        return false;
     }
 
-    function artisanConfirmActionHandler() {
-        if (artisanCurrentForm) artisanCurrentForm.submit();
+    function applyMgmtConfirmActionHandler() {
+        if (applyMgmtCurrentForm) applyMgmtCurrentForm.submit();
     }
 
-    function artisanCloseModal() {
-        document.getElementById("artisanModalBackdrop").style.display = "none";
-        document.getElementById("artisanActionModal").style.display = "none";
-        artisanCurrentForm = null;
+    function applyMgmtCloseModal() {
+        document.getElementById("applyMgmtModalBackdrop").style.display = "none";
+        document.getElementById("applyMgmtActionModal").style.display = "none";
+        applyMgmtCurrentForm = null;
     }
 
-    // Bind buttons
-    document.getElementById("artisanConfirmAction").addEventListener("click", artisanConfirmActionHandler);
-    document.getElementById("artisanModalBackdrop").addEventListener("click", artisanCloseModal);
+    document.getElementById("applyMgmtConfirmAction").addEventListener("click", applyMgmtConfirmActionHandler);
+    document.getElementById("applyMgmtModalBackdrop").addEventListener("click", applyMgmtCloseModal);
 
-    // ESC key
     document.addEventListener("keydown", e => {
-        if (e.key === "Escape") artisanCloseModal();
+        if (e.key === "Escape") applyMgmtCloseModal();
     });
 </script>

@@ -131,7 +131,7 @@
                         <a href="#" onclick="showForgotPasswordForm(event)">Forgot your password?</a>
                     </div>
 
-                    <button type="button" class="modal-btn login-btn" disabled>Log In</button>
+                    <button type="submit" class="modal-btn login-btn" disabled>Log In</button>
                     <p class="login-error-message" style="color:red;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
 
                     <p class="signup-redirect">Don't have an account yet? <a href="#" onclick="switchToSignup()">Sign up</a></p>
@@ -253,7 +253,8 @@
         emailInput.addEventListener('input', checkLoginInputs);
         passwordInput.addEventListener('input', checkLoginInputs);
 
-        loginBtn?.addEventListener('click', async () => {
+        document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
             const email = emailInput.value.trim();
             const password = passwordInput.value;
 

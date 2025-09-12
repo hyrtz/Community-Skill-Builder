@@ -3,6 +3,8 @@
     public class CourseBuilderViewModel
     {
         public Course? Course { get; set; } = new();
+        public int DurationValue { get; set; }
+        public string DurationUnit { get; set; } = "minutes";
         public IFormFile? ImageFile { get; set; }
         public IFormFile? VideoFile { get; set; }
         public IFormFile? ThumbnailFile { get; set; }

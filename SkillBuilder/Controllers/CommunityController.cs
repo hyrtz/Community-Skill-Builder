@@ -17,20 +17,16 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpGet("Hub")]
-        public IActionResult CommunityHub(int? selectedCommunityId = null, string search = null)
+        public async Task<IActionResult> CommunityHub(int? selectedCommunityId = null, string search = null)
         {
             ViewData["UseCourseNavbar"] = true;
 
-            // Get communities
             var communitiesQuery = _context.Communities.AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
-            {
-                search = search.ToLower();
-                communitiesQuery = communitiesQuery.Where(c => c.Name.ToLower().Contains(search));
-            }
+                communitiesQuery = communitiesQuery.Where(c => c.Name.ToLower().Contains(search.ToLower()));
 
-            var communities = communitiesQuery
+            var communities = await communitiesQuery
                 .OrderByDescending(c => c.MembersCount)
                 .Take(20)
                 .Select(c => new CommunitiesViewModel
@@ -38,46 +34,67 @@ namespace SkillBuilder.Controllers
                     Id = c.Id,
                     Name = c.Name,
                     Description = c.Description,
-                    AvatarUrl = !string.IsNullOrEmpty(c.AvatarUrl)
-                    ? c.AvatarUrl
-                    : "/uploads/community-profile/default-community.png",
-
-                    CoverImageUrl = !string.IsNullOrEmpty(c.CoverImageUrl)
-                    ? c.CoverImageUrl
-                    : "/uploads/community-banner/default-banner.png",
+                    AvatarUrl = !string.IsNullOrEmpty(c.AvatarUrl) ? c.AvatarUrl : "/uploads/community-profile/default-community.png",
+                    CoverImageUrl = !string.IsNullOrEmpty(c.CoverImageUrl) ? c.CoverImageUrl : "/uploads/community-banner/default-banner.png",
                     MembersCount = c.MembersCount
                 })
-                .ToList();
+                .ToListAsync();
 
-            // Get posts
-            var posts = _context.CommunityPosts
-                .Include(p => p.Author)
-                .OrderByDescending(p => p.SubmittedAt)
-                .Take(10)
-                .Select(p => new CommunityPostViewModel
-                {
-                    Id = p.Id,
-                    Title = p.Title,
-                    Content = p.Content,
-                    SubmittedAt = p.SubmittedAt,
-                    ImageUrl = p.ImageUrl,
-                    IsPublished = p.IsPublished,
-                    AuthorId = p.AuthorId,
-                    AuthorName = p.Author.FirstName,
-                    AuthorAvatarUrl = p.Author.UserAvatar,
-                    Likes = 0,
-                    CommentsCount = 0,
-                    CommunityName = null
-                }).ToList();
-
-            // Determine selected community
             Community selectedCommunity = null;
+            List<CommunityPostViewModel> posts = new List<CommunityPostViewModel>();
+
             if (selectedCommunityId.HasValue)
             {
-                selectedCommunity = _context.Communities
+                selectedCommunity = await _context.Communities
                     .Include(c => c.Memberships)
-                    .Include(c => c.Posts)
-                    .FirstOrDefault(c => c.Id == selectedCommunityId.Value);
+                    .FirstOrDefaultAsync(c => c.Id == selectedCommunityId.Value);
+
+                if (selectedCommunity != null)
+                {
+                    posts = await _context.CommunityPosts
+                        .Include(p => p.Author)
+                        .Where(p => p.CommunityId == selectedCommunity.Id && p.IsPublished)
+                        .OrderByDescending(p => p.SubmittedAt)
+                        .Take(10)
+                        .Select(p => new CommunityPostViewModel
+                        {
+                            Id = p.Id,
+                            Title = p.Title,
+                            Content = p.Content,
+                            SubmittedAt = p.SubmittedAt,
+                            ImageUrl = p.ImageUrl,
+                            AuthorId = p.AuthorId,
+                            AuthorName = p.Author.FirstName,
+                            AuthorAvatarUrl = p.Author.UserAvatar,
+                            CommunityName = p.Community.Name,
+                            Likes = 0,
+                            CommentsCount = 0
+                        })
+                        .ToListAsync();
+                }
+            }
+            else
+            {
+                posts = await _context.CommunityPosts
+                    .Include(p => p.Author)
+                    .Where(p => p.IsPublished)
+                    .OrderByDescending(p => p.SubmittedAt)
+                    .Take(10)
+                    .Select(p => new CommunityPostViewModel
+                    {
+                        Id = p.Id,
+                        Title = p.Title,
+                        Content = p.Content,
+                        SubmittedAt = p.SubmittedAt,
+                        ImageUrl = p.ImageUrl,
+                        AuthorId = p.AuthorId,
+                        AuthorName = p.Author.FirstName,
+                        AuthorAvatarUrl = p.Author.UserAvatar,
+                        CommunityName = p.Community.Name,
+                        Likes = 0, 
+                        CommentsCount = 0
+                    })
+                    .ToListAsync();
             }
 
             var vm = new CommunityHubViewModel
@@ -90,14 +107,142 @@ namespace SkillBuilder.Controllers
             return View("CommunityHub", vm);
         }
 
+        [HttpGet("GetCommunityDetailsPartial")]
+        public async Task<IActionResult> GetCommunityDetailsPartial(int id)
+        {
+            var community = await _context.Communities
+                .Include(c => c.Memberships)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (community == null)
+                return NotFound();
+
+            var currentUserId = User.FindFirst("UserId")?.Value;
+
+            var detailsVm = new CommunityDetailsViewModel
+            {
+                SelectedCommunity = community,
+                IsOwner = community.CreatorId == currentUserId,
+                IsJoined = community.Memberships.Any(m => m.UserId == currentUserId)
+            };
+
+            return PartialView("~/Views/Shared/Sections/_CommunityDetailsSection.cshtml", detailsVm);
+        }
+
+        [HttpPost("CreatePost")]
+        public async Task<IActionResult> CreatePost([FromForm] CreateCommunityPostViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Invalid post data." });
+
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return NotFound(new { success = false, message = "User not found." });
+
+            string? imagePath = null;
+            if (model.Image != null)
+                imagePath = await SaveImage(model.Image, "community-posts");
+
+            var post = new CommunityPost
+            {
+                CommunityId = null,
+                Title = model.Title,
+                Content = model.Content,
+                AuthorId = userId,
+                Category = model.Category, 
+                ImageUrl = imagePath,
+                SubmittedAt = DateTime.UtcNow,
+                IsPublished = true
+            };
+
+            _context.CommunityPosts.Add(post);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Post created successfully!",
+                post = new
+                {
+                    id = post.Id,
+                    title = post.Title,
+                    content = post.Content,
+                    imageUrl = post.ImageUrl,
+                    submittedAt = post.SubmittedAt,
+                    authorName = user.FirstName,
+                    communityName = "Public" // since no community
+                }
+            });
+        }
+
+        [HttpPost("CreatePostInsideCommunity")]
+        public async Task<IActionResult> CreatePostInsideCommunity([FromForm] CreateCommunityPostViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Invalid post data." });
+
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return NotFound(new { success = false, message = "User not found." });
+
+            if (model.CommunityId <= 0)
+                return BadRequest(new { success = false, message = "Community not selected." });
+
+            var community = await _context.Communities.FindAsync(model.CommunityId);
+            if (community == null)
+                return NotFound(new { success = false, message = "Community not found." });
+
+            string? imagePath = null;
+            if (model.Image != null)
+                imagePath = await SaveImage(model.Image, "community-posts");
+
+            var post = new CommunityPost
+            {
+                CommunityId = model.CommunityId,
+                Title = model.Title,
+                Content = model.Content,
+                AuthorId = userId,
+                Category = string.IsNullOrEmpty(model.Category) ? "General" : model.Category,
+                ImageUrl = imagePath,
+                SubmittedAt = DateTime.UtcNow,
+                IsPublished = true
+            };
+
+            _context.CommunityPosts.Add(post);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Post created successfully!",
+                post = new
+                {
+                    id = post.Id,
+                    title = post.Title,
+                    content = post.Content,
+                    imageUrl = post.ImageUrl,
+                    submittedAt = post.SubmittedAt,
+                    authorName = user.FirstName,
+                    communityName = community.Name
+                }
+            });
+        }
+
         [HttpPost("Create")]
         public async Task<IActionResult> CreateCommunity(CreateCommunityViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data.");
 
-            // 1. Get current user ID
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst("UserId")?.Value; // ✅ fixed
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
@@ -108,11 +253,9 @@ namespace SkillBuilder.Controllers
             if (!user.IsVerified)
                 return BadRequest(new { success = false, message = "Please verify your email before creating a community." });
 
-            // ✅ Check deactivation
             if (user.IsDeactivated)
                 return Forbid();
 
-            // 2. Prepare file paths
             string avatarPath = null;
             string bannerPath = null;
 
@@ -122,7 +265,6 @@ namespace SkillBuilder.Controllers
             if (model.Banner != null)
                 bannerPath = await SaveImage(model.Banner, "community-banner");
 
-            // 3. Create community
             var community = new Community
             {
                 Name = model.Name,
@@ -137,7 +279,6 @@ namespace SkillBuilder.Controllers
             _context.Communities.Add(community);
             await _context.SaveChangesAsync();
 
-            // 4. Add membership for creator
             _context.CommunityMemberships.Add(new CommunityMembership
             {
                 CommunityId = community.Id,
@@ -148,8 +289,39 @@ namespace SkillBuilder.Controllers
 
             await _context.SaveChangesAsync();
 
-            // 5. Redirect to the newly created community page
             return RedirectToAction("CommunityHub", new { selectedCommunityId = community.Id });
+        }
+
+        [HttpPost("Join")]
+        public async Task<IActionResult> JoinCommunity(int communityId)
+        {
+            var userId = User.FindFirst("UserId")?.Value; // ✅ fixed
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var existingMembership = await _context.CommunityMemberships
+                .FirstOrDefaultAsync(m => m.CommunityId == communityId && m.UserId == userId);
+
+            if (existingMembership != null)
+                return BadRequest(new { success = false, message = "You are already a member of this community." });
+
+            var membership = new CommunityMembership
+            {
+                CommunityId = communityId,
+                UserId = userId,
+                JoinedAt = DateTime.UtcNow,
+                Role = "Member"
+            };
+
+            _context.CommunityMemberships.Add(membership);
+
+            var community = await _context.Communities.FindAsync(communityId);
+            if (community != null)
+                community.MembersCount += 1;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Joined successfully!", membersCount = community.MembersCount });
         }
 
         private async Task<string> SaveImage(IFormFile file, string folderName)

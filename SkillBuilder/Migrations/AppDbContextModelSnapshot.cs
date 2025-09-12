@@ -34,7 +34,11 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("CommunityId")
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CommunityId")
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
@@ -67,6 +71,7 @@ namespace SkillBuilder.Migrations
                         {
                             Id = 1,
                             AuthorId = "user-1",
+                            Category = "",
                             CommunityId = 1,
                             Content = "Just finished my first clay pot! Excited to share with everyone.",
                             ImageUrl = "/assets/Community Pics/CompletePottery.png",
@@ -78,6 +83,7 @@ namespace SkillBuilder.Migrations
                         {
                             Id = 2,
                             AuthorId = "user-3",
+                            Category = "",
                             CommunityId = 3,
                             Content = "Making progress on a wooden sculpture. Any tips for fine detailing?",
                             ImageUrl = "/assets/Community Pics/CompleteWoodCarving.png",
@@ -89,6 +95,7 @@ namespace SkillBuilder.Migrations
                         {
                             Id = 3,
                             AuthorId = "user-2",
+                            Category = "",
                             CommunityId = 2,
                             Content = "Starting weaving for the first time. Happy to join this community!",
                             ImageUrl = "/assets/Community Pics/CompleteWeaving.png",
@@ -200,6 +207,9 @@ namespace SkillBuilder.Migrations
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -231,15 +241,44 @@ namespace SkillBuilder.Migrations
                         new
                         {
                             ArtisanId = "A1111111",
-                            FirstName = "Juan",
+                            FirstName = "Alice",
                             Hometown = "Vigan, Ilocos Sur",
-                            Introduction = "Juan is a 3rd-generation artisan teaching pottery for 15 years.",
+                            Introduction = "Alice is a skilled pottery artisan teaching hand-building techniques.",
                             IsApproved = false,
-                            LastName = "Dela Cruz",
+                            IsArchived = false,
+                            LastName = "Artisan",
                             Profession = "Pottery Artisan",
                             Role = "Artisan",
-                            UserAvatar = "/assets/Avatar/Sample7.ico",
-                            UserId = "A1111111"
+                            UserAvatar = "/assets/Avatar/Sample3.ico",
+                            UserId = "user-1"
+                        },
+                        new
+                        {
+                            ArtisanId = "A1111112",
+                            FirstName = "Bob",
+                            Hometown = "Cebu City",
+                            Introduction = "Bob is an expert in woodcarving with 10 years of experience.",
+                            IsApproved = false,
+                            IsArchived = false,
+                            LastName = "Builder",
+                            Profession = "Woodcarving Artisan",
+                            Role = "Artisan",
+                            UserAvatar = "/assets/Avatar/Sample6.ico",
+                            UserId = "user-2"
+                        },
+                        new
+                        {
+                            ArtisanId = "A1111113",
+                            FirstName = "Charlie",
+                            Hometown = "Davao City",
+                            Introduction = "Charlie specializes in traditional and modern weaving techniques.",
+                            IsApproved = false,
+                            IsArchived = false,
+                            LastName = "Craftsman",
+                            Profession = "Weaving Artisan",
+                            Role = "Artisan",
+                            UserAvatar = "/assets/Avatar/Sample9.ico",
+                            UserId = "user-3"
                         });
                 });
 
@@ -379,6 +418,9 @@ namespace SkillBuilder.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MembersCount")
                         .HasColumnType("int");
 
@@ -397,9 +439,11 @@ namespace SkillBuilder.Migrations
                         {
                             Id = 1,
                             AvatarUrl = "/assets/Community Pics/CompletePottery.png",
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CoverImageUrl = "/uploads/community-banner/PotteryBanner.png",
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatorId = "user-1",
                             Description = "A community for learners and artisans passionate about pottery and ceramics.",
+                            IsArchived = false,
                             MembersCount = 125,
                             Name = "Pottery Enthusiasts"
                         },
@@ -407,9 +451,11 @@ namespace SkillBuilder.Migrations
                         {
                             Id = 2,
                             AvatarUrl = "/assets/Community Pics/CompleteWeaving.png",
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CoverImageUrl = "/uploads/community-banner/WeavingBanner.png",
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatorId = "user-2",
                             Description = "Connecting artisans and learners who love weaving traditional and modern textiles.",
+                            IsArchived = false,
                             MembersCount = 98,
                             Name = "Weaving Circle"
                         },
@@ -417,9 +463,11 @@ namespace SkillBuilder.Migrations
                         {
                             Id = 3,
                             AvatarUrl = "/assets/Community Pics/CompleteWoodcarving.png",
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CoverImageUrl = "/uploads/community-banner/WoodCarvingBanner.png",
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatorId = "user-3",
                             Description = "A space for woodcarvers to share projects, tips, and showcase craftsmanship.",
+                            IsArchived = false,
                             MembersCount = 150,
                             Name = "Woodcarving Masters"
                         });
@@ -667,6 +715,9 @@ namespace SkillBuilder.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsPublished")
                         .HasColumnType("bit");
 
@@ -713,11 +764,12 @@ namespace SkillBuilder.Migrations
                             CreatedBy = "A1111111",
                             Difficulty = "Beginner",
                             Duration = "15 hours",
-                            FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery. From preparing your clay to understanding kiln temperatures and finishing your work with beautiful glazes, this course is perfect for anyone interested in the craft of ceramics.",
+                            FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery...",
                             ImageUrl = "/assets/Courses Pics/Pottery.png",
+                            IsArchived = false,
                             IsPublished = false,
                             Link = "pottery",
-                            Overview = "Pottery is the art and craft of shaping and firing clay to create objects like bowls, plates, and decorative items.",
+                            Overview = "Pottery is the art and craft of shaping and firing clay...",
                             ProjectDetails = "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.",
                             Requirements = "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.",
                             Thumbnail = "/assets/Courses Pics/Pottery.png",
@@ -730,14 +782,15 @@ namespace SkillBuilder.Migrations
                             Id = 2,
                             Category = "Wood Carving",
                             CreatedAt = new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "A1111111",
+                            CreatedBy = "A1111112",
                             Difficulty = "Intermediate",
                             Duration = "29 hours",
-                            FullDescription = "Explore the detailed world of woodcarving through this course. You'll understand wood grain, learn safe carving practices, and master techniques to transform blocks of wood into detailed figurines, signs, and functional items. Ideal for artists or hobbyists.",
+                            FullDescription = "Explore the detailed world of woodcarving through this course...",
                             ImageUrl = "/assets/Courses Pics/Woodcarving.png",
+                            IsArchived = false,
                             IsPublished = false,
                             Link = "woodcarving",
-                            Overview = "Woodcarving is the art of shaping and sculpting wood into decorative or functional objects.",
+                            Overview = "Woodcarving is the art of shaping and sculpting wood...",
                             ProjectDetails = "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.",
                             Requirements = "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).",
                             Thumbnail = "/assets/Courses Pics/Woodcarving.png",
@@ -750,14 +803,15 @@ namespace SkillBuilder.Migrations
                             Id = 3,
                             Category = "Weaving",
                             CreatedAt = new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "A1111111",
+                            CreatedBy = "A1111113",
                             Difficulty = "Professional",
                             Duration = "18 hours",
-                            FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design. Through projects and demonstrations, you’ll master loom warping, color theory in weaving, and understand how weaving traditions influence contemporary fiber arts.",
+                            FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design...",
                             ImageUrl = "/assets/Courses Pics/Weaving.png",
+                            IsArchived = false,
                             IsPublished = false,
                             Link = "weaving",
-                            Overview = "Weaving is the craft of interlacing threads or fibers to create fabric, textiles, or decorative art.",
+                            Overview = "Weaving is the craft of interlacing threads or fibers...",
                             ProjectDetails = "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.",
                             Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
                             Thumbnail = "/assets/Courses Pics/Weaving.png",
@@ -1035,11 +1089,17 @@ namespace SkillBuilder.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("EnrolledAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -1540,6 +1600,9 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeactivated")
                         .HasColumnType("bit");
 
@@ -1586,6 +1649,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "juan@example.com",
                             FirstName = "Juan",
+                            IsArchived = false,
                             IsDeactivated = false,
                             IsVerified = true,
                             LastName = "Dela Cruz",
@@ -1600,6 +1664,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "alice@test.com",
                             FirstName = "Alice",
+                            IsArchived = false,
                             IsDeactivated = false,
                             IsVerified = true,
                             LastName = "Artisan",
@@ -1615,6 +1680,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "bob@test.com",
                             FirstName = "Bob",
+                            IsArchived = false,
                             IsDeactivated = false,
                             IsVerified = false,
                             LastName = "Builder",
@@ -1630,6 +1696,7 @@ namespace SkillBuilder.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "charlie@test.com",
                             FirstName = "Charlie",
+                            IsArchived = false,
                             IsDeactivated = false,
                             IsVerified = true,
                             LastName = "Craftsman",
@@ -1672,9 +1739,7 @@ namespace SkillBuilder.Migrations
 
                     b.HasOne("SkillBuilder.Models.Community", "Community")
                         .WithMany("Posts")
-                        .HasForeignKey("CommunityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CommunityId");
 
                     b.Navigation("Author");
 

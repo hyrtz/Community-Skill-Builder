@@ -1,0 +1,244 @@
+﻿@using SkillBuilder.Models.ViewModels
+@model UserProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<style>
+    .ep-user-section {
+        padding: 8rem 10rem 4rem;
+        background-color: #f9f9f9;
+    }
+
+    .ep-user-wrapper {
+        display: flex;
+        gap: 2.5rem;
+        align-items: flex-start;
+    }
+
+    .ep-user-sidebar {
+        width: 20%;
+        background-color: #E0F2FF;
+        padding: 2rem 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .ep-user-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .ep-user-tab,
+    .ep-delete-account-btn {
+        padding: 0.75rem;
+        border: none;
+        background-color: transparent;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        text-align: left;
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+        .ep-user-tab:hover,
+        .ep-delete-account-btn:hover {
+            background-color: #D6EBFF;
+        }
+
+        .ep-user-tab.active {
+            border-left-color: #344AEA;
+            background-color: #D6EBFF;
+            color: #344AEA;
+        }
+
+    .ep-delete-account-btn {
+        color: #F44336;
+    }
+
+    .ep-user-main {
+        flex: 1;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .tab-panel {
+        display: none;
+    }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+    .ep-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+        .ep-modal-overlay.active {
+            display: flex; 
+        }
+
+    /* Modal Box */
+    .ep-modal {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        max-width: 420px;
+        width: 100%;
+        text-align: center;
+    }
+
+        .ep-modal h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ep-modal p {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            color: #333;
+        }
+
+    .ep-warning {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    /* Modal Actions */
+    .ep-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .ep-btn-secondary, .ep-btn-danger {
+        min-width: 120px;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-block; 
+        text-align: center;
+    }
+
+    .ep-btn-secondary {
+        background-color: #344AEA;
+        color: white;
+        border: none;
+    }
+
+        .ep-btn-secondary:hover {
+            background-color: #2a34c6;
+        }
+
+    .ep-btn-danger {
+        background-color: #fff;
+        color: #F44336;
+        border: 1px solid #F44336;
+    }
+
+        .ep-btn-danger:hover {
+            background-color: #FDECEA;
+        }
+</style>
+
+<section class="ep-user-section">
+    <div class="ep-user-wrapper">
+
+        <!-- Sidebar -->
+        <div class="ep-user-sidebar">
+            <div class="ep-user-nav">
+                <button class="ep-user-tab active" data-tab="edit-profile">Edit Profile</button>
+
+                <!-- Just a plain button now -->
+                <button type="button" class="ep-delete-account-btn">Delete Account</button>
+            </div>
+        </div>
+
+        <!-- Main Panel -->
+        <div class="ep-user-main">
+            <div class="tab-panel active" data-tab="edit-profile">
+                @Html.Partial("~/Views/Shared/Sections/EditNotebooks/_EditUserNotebookProfile.cshtml", Model)
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div id="deleteAccountModal" class="ep-modal-overlay">
+        <div class="ep-modal">
+            <h2>We’re sorry to see you go...</h2>
+            <p>Are you sure you want to delete your account?</p>
+            <p class="ep-warning">Be advised, account deletion is final. There will be no way to restore your account.</p>
+
+            <div class="ep-modal-actions">
+                <button type="button" class="ep-btn-secondary" id="cancelDeleteBtn">Nevermind</button>
+
+                <form asp-controller="UserProfile" asp-action="ArchiveAccount" method="post" style="display:inline;">
+                    <button type="submit" class="ep-btn-danger">Delete Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const epTabs = document.querySelectorAll(".ep-user-tab");
+    const tabPanels = document.querySelectorAll(".tab-panel");
+
+    epTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            // Update active tab
+            epTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            // Update panel visibility
+            const selected = tab.getAttribute("data-tab");
+            tabPanels.forEach(panel => {
+                panel.classList.toggle("active", panel.getAttribute("data-tab") === selected);
+            });
+        });
+    });
+
+    const deleteBtn = document.querySelector(".ep-delete-account-btn");
+    const modal = document.getElementById("deleteAccountModal");
+    const cancelBtn = document.getElementById("cancelDeleteBtn");
+
+    // Open modal when delete is clicked
+    deleteBtn.addEventListener("click", (e) => {
+        e.preventDefault(); // stop form submission
+        modal.style.display = "flex";
+    });
+
+    // Close modal
+    cancelBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    // Close when clicking outside modal
+    window.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+</script>

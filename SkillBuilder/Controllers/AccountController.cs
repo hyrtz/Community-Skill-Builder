@@ -316,10 +316,15 @@ namespace SkillBuilder.Controllers
             }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
-            {
+
+            if (user == null)
                 return Unauthorized(new { message = "Invalid email or password." });
-            }
+
+            if (user.IsArchived)
+                return Unauthorized(new { message = "Your account has been archived. Please contact support." });
+
+            if (!BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
+                return Unauthorized(new { message = "Invalid email or password." });
 
             var claims = new List<Claim>
             {

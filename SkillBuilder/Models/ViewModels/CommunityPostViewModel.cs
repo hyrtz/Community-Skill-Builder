@@ -7,8 +7,9 @@
         // Post details
         public string Title { get; set; }
         public string Content { get; set; }
-        public DateTime SubmittedAt { get; set; }
         public string ImageUrl { get; set; }
+        public string Category { get; set; }
+        public DateTime SubmittedAt { get; set; }
         public bool IsPublished { get; set; }
 
         // Author (can be a User or an Artisan)

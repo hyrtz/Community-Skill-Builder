@@ -7,14 +7,26 @@
 }
 
 <style>
-    .user-dash-stats {
+    .user-dashboard-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .user-dashboard-header {
+        font-size: 1.8rem;
+        color: #344AEA;
+        margin-bottom: 1rem;
+    }
+
+    .user-dashboard-stats {
         display: flex;
         gap: 2rem;
         justify-content: space-between;
         flex-wrap: wrap;
     }
 
-    .user-dash-card {
+    .user-dashboard-card {
         flex: 1 1 30%;
         background-color: #E6EEFF;
         padding: 2rem;
@@ -25,54 +37,58 @@
         min-width: 200px;
     }
 
-        .user-dash-card:hover {
+        .user-dashboard-card:hover {
             transform: translateY(-4px);
         }
 
-    .user-dash-card-title {
+    .user-dashboard-card-title {
         font-size: 1.2rem;
         color: #344AEA;
         font-weight: 600;
         margin-bottom: 0.8rem;
     }
 
-    .user-dash-card-value {
+    .user-dashboard-card-value {
         font-size: 2rem;
         font-weight: bold;
         color: #222;
     }
 </style>
 
-<div class="user-dash-stats">
-    <div class="user-dash-card">
-        <div class="user-dash-card-title">Total Enrollments</div>
-        <div class="user-dash-card-value">@((Model.EnrolledCourses != null) ? Model.EnrolledCourses.Count() : 0)</div>
-    </div>
-    <div class="user-dash-card">
-        <div class="user-dash-card-title">Total Points</div>
-        <div class="user-dash-card-value" id="pointsDisplay">@Model.User.Points</div>
-    </div>
-    <div class="user-dash-card">
-        <div class="user-dash-card-title">Profile Status</div>
-        <div class="user-dash-card-value">Active</div>
-    </div>
-</div>
+<div class="user-dashboard-section">
+    <h2 class="user-dashboard-header">Dashboard</h2>
 
-@if (!Model.User.IsDeactivated)
-{
-    if (Model.CourseProgresses != null && Model.CourseProgresses.Any())
+    <div class="user-dashboard-stats">
+        <div class="user-dashboard-card">
+            <div class="user-dashboard-card-title">Total Enrollments</div>
+            <div class="user-dashboard-card-value">@((Model.EnrolledCourses != null) ? Model.EnrolledCourses.Count() : 0)</div>
+        </div>
+        <div class="user-dashboard-card">
+            <div class="user-dashboard-card-title">Total Points</div>
+            <div class="user-dashboard-card-value" id="pointsDisplay">@Model.User.Points</div>
+        </div>
+        <div class="user-dashboard-card">
+            <div class="user-dashboard-card-title">Profile Status</div>
+            <div class="user-dashboard-card-value">Active</div>
+        </div>
+    </div>
+
+    @if (!Model.User.IsDeactivated)
     {
-        @await Html.PartialAsync("Sections/UserNotebooks/_UserNotebookProgress", Model.CourseProgresses)
+        if (Model.CourseProgresses != null && Model.CourseProgresses.Any())
+        {
+            @await Html.PartialAsync("Sections/UserNotebooks/_UserNotebookProgress", Model.CourseProgresses)
+        }
+        else
+        {
+            @await Html.PartialAsync("Sections/_RecommendedCourses", Model.RecommendedCourses)
+        }
     }
     else
     {
-        @await Html.PartialAsync("Sections/_RecommendedCourses", Model.RecommendedCourses)
+        <div style="margin-top: 2rem; padding: 1.5rem; background-color: #ffe6e6; border-radius: 12px; text-align: center;">
+            <h3 style="color: #e74c3c; margin-bottom: 0.5rem;">Account Deactivated</h3>
+            <p style="color: #555;">You cannot resume or enroll in courses while your account is deactivated.</p>
+        </div>
     }
-}
-else
-{
-    <div style="margin-top: 2rem; padding: 1.5rem; background-color: #ffe6e6; border-radius: 12px; text-align: center;">
-        <h3 style="color: #e74c3c; margin-bottom: 0.5rem;">Account Deactivated</h3>
-        <p style="color: #555;">You cannot resume or enroll in courses while your account is deactivated.</p>
-    </div>
-}
+</div>

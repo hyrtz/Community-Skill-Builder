@@ -1,129 +1,522 @@
-﻿@model SkillBuilder.Models.Community
+﻿@model SkillBuilder.Models.ViewModels.CommunityDetailsViewModel
+@{
+    var community = Model.SelectedCommunity;
+    var currentUserId = User.FindFirst("UserId")?.Value;
+    bool isOwner = Model.IsOwner;
+    bool isJoined = Model.IsJoined;
+}
 
 <style>
-    .community-details {
-        background: #f5f8ff;
-        padding-bottom: 3rem;
-    }
-
-    /* Cover Image */
-    .community-cover {
-        width: 100%;
-        height: 280px;
-        background: url('@(string.IsNullOrEmpty(Model.CoverImageUrl) ? "/uploads/community-banner/default-banner.jpg" : Model.CoverImageUrl)') center/cover no-repeat;
-        position: relative;
-    }
-
-    /* Avatar */
-    .community-avatar {
-        position: absolute;
-        bottom: -60px;
-        left: 50px;
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        border: 5px solid #fff;
-        background: #ddd center/cover no-repeat;
-    }
-
-    /* Top Info Section */
-    .community-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        padding: 0 2rem;
-        margin-top: 80px; /* offset for avatar */
-    }
-
-    .community-title {
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
-
-    .create-post-btn {
-        padding: 0.8rem 1.5rem;
-        background: #224499;
-        color: white;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-        .create-post-btn:hover {
-            background: #193677;
-        }
-
-    /* Main Layout */
-    .community-main {
-        display: flex;
-        gap: 2rem;
+    /* ===================== Scoped styles for community-details ===================== */
+    .community-details-section {
         padding: 2rem;
     }
 
-    .community-left {
-        width: 70%;
+    .community-details-cover {
+        height: 200px;
+        background: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
-    .community-right {
-        width: 30%;
+    .community-details-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background-size: cover;
+        background-position: center;
+        border: 3px solid #fff;
     }
 
-    /* Posts Placeholder */
-    .post-card {
+    .community-details-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 1rem 0;
+    }
+
+        .community-details-top .community-details-btn {
+            padding: 0.5rem 1rem;
+            background-color: #344AEA;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+            .community-details-top .community-details-btn:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+
+    .community-details-main {
+        display: flex;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .community-details-left,
+    .community-details-right {
+        flex: 1;
+    }
+
+    /* Posts & Cards */
+    .community-details-posts .community-details-post-card {
         background: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    }
+
+        .community-details-posts .community-details-post-card h3 {
+            margin: 0 0 0.5rem 0;
+        }
+
+        .community-details-posts .community-details-post-card p {
+            margin: 0 0 0.5rem 0;
+        }
+
+    /* Info card */
+    .community-details-info-card {
+        background: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    }
+
+    /* Modal Overlay */
+    .community-details-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .community-details-modal-content {
+        background: #fff;
+        padding: 2rem;
         border-radius: 12px;
-        padding: 1.5rem;
+        width: 400px;
+        max-width: 90%;
+        text-align: center;
+        position: relative;
+    }
+
+        .community-details-modal-content h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .community-details-modal-content p {
+            margin-bottom: 1.5rem;
+            color: #555;
+        }
+
+    .community-details-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    /* Create post form/modal */
+    .community-details-create-post-form {
+        margin-bottom: 1rem;
+        background: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    }
+
+        .community-details-create-post-form input,
+        .community-details-create-post-form textarea {
+            width: 100%;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .community-details-create-post-form button {
+            background: #344AEA;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+    .community-details-posts-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .community-details-posts-modal-content {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 600px;
+        max-width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .community-details-posts-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 0.25rem;
+    }
+
+    .community-details-posts-subtitle {
+        text-align: center;
+        color: #555;
         margin-bottom: 1.5rem;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
-    /* Right Card */
-    .community-info-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    .community-details-posts-field {
+        margin-bottom: 1.5rem;
     }
 
-    .community-info-title {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 0.8rem;
+        .community-details-posts-field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .community-details-posts-field input,
+        .community-details-posts-field textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .community-details-posts-field textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+    .community-details-posts-charcount {
+        font-size: 0.8rem;
+        color: #888;
+        float: right;
+        margin-top: 0.25rem;
     }
+
+    .community-details-posts-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .community-details-posts-btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        border: none;
+    }
+
+        .community-details-posts-btn.primary {
+            background: #344AEA;
+            color: #fff;
+        }
+
+        .community-details-posts-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .community-details-posts-btn:disabled {
+            background-color: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
 </style>
 
-<section class="community-details">
+<section class="community-details-section">
     <!-- Cover Image -->
-    <div class="community-cover">
-        <div class="community-avatar" style="background-image:url('@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/uploads/community-profile/default-profile.jpg" : Model.AvatarUrl)');"></div>
+    <div class="community-details-cover"
+         style="background-image: url('@(string.IsNullOrEmpty(community.CoverImageUrl) ? "/uploads/community-banner/default-banner.png" : community.CoverImageUrl)'); background-size: cover; background-position: center;">
+        <div class="community-details-avatar"
+             style="background-image:url('@(string.IsNullOrEmpty(community.AvatarUrl) ? "/uploads/community-profile/default-profile.jpg" : community.AvatarUrl)');">
+        </div>
     </div>
 
     <!-- Top Info -->
-    <div class="community-top">
-        <div>
-            <h1 class="community-title">@Model.Name</h1>
+    <div class="community-details-top">
+        <h1 class="community-details-title">@community.Name</h1>
+        <div style="display:flex; gap:0.5rem;">
+            @if (!isOwner && !isJoined)
+            {
+                <button class="community-details-btn" id="communityDetailsJoinBtn">Join</button>
+            }
+            <button class="community-details-btn" id="communityDetailsCreatePostBtn" @(isOwner || isJoined ? "" : "disabled")>Create Post</button>
         </div>
-        <button class="create-post-btn">Create Post</button>
     </div>
 
     <!-- Main Layout -->
-    <div class="community-main">
+    <div class="community-details-main">
         <!-- Left: Posts -->
-        <div class="community-left">
-            <div class="post-card">Post 1 (placeholder)</div>
-            <div class="post-card">Post 2 (placeholder)</div>
+        <div class="community-details-left community-details-posts">
+            
+            <!-- Create Post Modal -->
+            <div id="communityDetailsCreatePostModal" class="community-details-posts-modal-overlay" style="display:none;">
+                <div class="community-details-posts-modal-content">
+                    <h2 class="community-details-posts-title">Create a Post</h2>
+                    <p class="community-details-posts-subtitle">
+                        Share your thoughts, ask questions, or start a discussion in this community!
+                    </p>
+
+                    <form id="communityDetailsCreatePostForm" class="community-details-posts-form"
+                          enctype="multipart/form-data" method="post"
+                          action="@Url.Action("CreatePostInsideCommunity", "Community")">
+
+                        <!-- Hidden CommunityId -->
+                        <input type="hidden" name="CommunityId" value="@community.Id" />
+
+                        <!-- Title -->
+                        <div class="community-details-posts-field">
+                            <label for="communityDetailsPostTitle">Start with a title.</label>
+                            <input type="text" name="Title" id="communityDetailsPostTitle" maxlength="100" placeholder="Please enter a title :)" required />
+                            <small class="community-details-posts-charcount" id="communityDetailsPostTitleCount">0/100 maximum characters</small>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="community-details-posts-field">
+                            <label for="communityDetailsPostContent">Provide more details.</label>
+                            <textarea name="Content" id="communityDetailsPostContent" maxlength="1000" placeholder="Provide more details" required></textarea>
+                            <small class="community-details-posts-charcount" id="communityDetailsPostContentCount">0/1000 maximum characters</small>
+                        </div>
+
+                        <!-- Image -->
+                        <div class="community-details-posts-field">
+                            <label for="communityDetailsPostImage">Attach an image (optional)</label>
+                            <input type="file" name="Image" id="communityDetailsPostImage" accept="image/*" />
+                            <div id="communityDetailsPostImagePreviewContainer" style="margin-top:0.5rem;">
+                                <img id="communityDetailsPostImagePreview" style="max-width:100%; border-radius:8px; display:none;" />
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="community-details-posts-actions">
+                            <button type="submit" class="community-details-posts-btn primary" id="communityDetailsPostSubmit" disabled>Post</button>
+                            <button type="button" class="community-details-posts-btn secondary" id="communityDetailsPostCancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (Model.Posts != null && Model.Posts.Any())
+            {
+                @foreach (var post in Model.Posts)
+                {
+                    <div class="community-details-post-card">
+                        <h3>@post.Title</h3>
+
+                        @if (!string.IsNullOrEmpty(post.ImageUrl))
+                        {
+                            <img src="@post.ImageUrl" style="max-width:100%; margin:0.5rem 0; border-radius:6px;" />
+                        }
+
+                        <p>@post.Content</p>
+                        <small>By @post.AuthorName on @(post.SubmittedAt.ToString("MMM dd, yyyy"))</small>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="community-details-post-card">
+                    <p style="text-align:center; color:#777;">No posts yet. Be the first to contribute!</p>
+                </div>
+            }
         </div>
 
         <!-- Right: Info Card -->
-        <div class="community-right">
-            <div class="community-info-card">
-                <h2 class="community-info-title">@Model.Name</h2>
-                <p>@Model.Description</p>
-                <p><strong>Members:</strong> @Model.MembersCount</p>
+        <div class="community-details-right">
+            <div class="community-details-info-card">
+                <h2 class="community-details-info-title">@community.Name</h2>
+                <p>@community.Description</p>
+                <p><strong>Members:</strong> @community.MembersCount</p>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Join & Policy Modals (same as before) -->
+<div id="communityDetailsJoinModal" class="community-details-modal-overlay" style="display:none;">
+    <div class="community-details-modal-content">
+        <h2>Join Community</h2>
+        <p>Join community to participate in this conversation</p>
+        <div class="community-details-modal-actions">
+            <button class="community-details-btn" id="communityDetailsConfirmJoinBtn">Join Now</button>
+            <button class="community-details-btn" id="communityDetailsCancelBtn" style="background:#ccc; color:#333;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="communityDetailsPolicyModal" class="community-details-modal-overlay" style="display:none;">
+    <div class="community-details-modal-content" style="max-width:600px; text-align:left; overflow-y:auto; max-height:80vh;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Community Policy</h2>
+            <button onclick="communityDetailsClosePolicyModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+        </div>
+        <p>By joining, you agree to follow our community guidelines...</p>
+        <div class="community-details-modal-actions" style="justify-content:flex-end;">
+            <button class="community-details-btn" id="communityDetailsFinalJoinBtn">Join</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const joinBtn = document.getElementById('communityDetailsJoinBtn');
+    const joinModal = document.getElementById('communityDetailsJoinModal');
+    const cancelBtn = document.getElementById('communityDetailsCancelBtn');
+    const confirmJoinBtn = document.getElementById('communityDetailsConfirmJoinBtn');
+    const policyModal = document.getElementById('communityDetailsPolicyModal');
+    const finalJoinBtn = document.getElementById('communityDetailsFinalJoinBtn');
+
+    const createPostBtn = document.getElementById('communityDetailsCreatePostBtn');
+    const createPostModal = document.getElementById('communityDetailsCreatePostModal');
+    const createPostForm = document.getElementById('communityDetailsCreatePostForm');
+    const postsContainer = document.querySelector('.community-details-posts');
+    const postCancelBtn = document.getElementById('communityDetailsPostCancel');
+    const postSubmitBtn = document.getElementById('communityDetailsPostSubmit');
+
+    const postTitleInput = document.getElementById('communityDetailsPostTitle');
+    const postContentInput = document.getElementById('communityDetailsPostContent');
+    const postImageInput = document.getElementById('communityDetailsPostImage');
+    const postImagePreview = document.getElementById('communityDetailsPostImagePreview');
+
+    // ===================== Join Modal =====================
+    if(joinBtn) joinBtn.addEventListener('click', () => joinModal.style.display = 'flex');
+    cancelBtn.addEventListener('click', () => joinModal.style.display = 'none');
+    joinModal.addEventListener('click', e => { if(e.target === joinModal) joinModal.style.display = 'none'; });
+    confirmJoinBtn.addEventListener('click', () => {
+        joinModal.style.display = 'none';
+        policyModal.style.display = 'flex';
+    });
+
+    function communityDetailsClosePolicyModal() { policyModal.style.display = 'none'; }
+    policyModal.addEventListener('click', e => { if(e.target === policyModal) communityDetailsClosePolicyModal(); });
+
+    finalJoinBtn.addEventListener('click', async () => {
+        const communityId = '@community.Id';
+        try {
+            const formData = new FormData();
+            formData.append('communityId', communityId);
+
+            const response = await fetch('/Community/Join', { method: 'POST', body: formData });
+            const data = await response.json();
+
+            if(response.ok && data.success){
+                alert(data.message);
+                policyModal.style.display = 'none';
+                if(joinBtn) joinBtn.style.display = 'none';
+                document.querySelector('.community-details-top button[disabled]')?.removeAttribute('disabled');
+                const membersInfo = document.querySelector('.community-details-info-card p strong');
+                if(membersInfo) membersInfo.parentNode.innerHTML = `<strong>Members:</strong> ${data.membersCount}`;
+            } else {
+                alert(data.message || 'Failed to join community.');
+            }
+        } catch(err) {
+            console.error(err);
+            alert('Error joining community');
+        }
+    });
+
+    // ===================== Create Post Modal =====================
+    createPostBtn?.addEventListener('click', () => {
+        createPostModal.style.display = 'flex';
+        postSubmitBtn.disabled = true; // disable submit initially
+    });
+
+    function communityDetailsCloseCreatePostModal() {
+        createPostModal.style.display = 'none';
+        createPostForm.reset();
+        postImagePreview.style.display = 'none';
+    }
+
+    postCancelBtn?.addEventListener('click', communityDetailsCloseCreatePostModal);
+    createPostModal.addEventListener('click', e => { if(e.target === createPostModal) communityDetailsCloseCreatePostModal(); });
+
+    // ===================== Enable Submit on Input =====================
+    [postTitleInput, postContentInput].forEach(input => {
+        input.addEventListener('input', () => {
+            const title = postTitleInput.value.trim();
+            const content = postContentInput.value.trim();
+            postSubmitBtn.disabled = !title || !content;
+        });
+    });
+
+    // ===================== Image Preview =====================
+    postImageInput?.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if(file){
+            postImagePreview.src = URL.createObjectURL(file);
+            postImagePreview.style.display = 'block';
+        } else {
+            postImagePreview.style.display = 'none';
+        }
+    });
+
+    // ===================== Handle Create Post Submission =====================
+    createPostForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(createPostForm);
+
+        try {
+            const response = await fetch(createPostForm.action, { method: 'POST', body: formData });
+            const result = await response.json();
+
+            if(result.success){
+                let imageHTML = result.post.imageUrl
+                    ? `<img src="${result.post.imageUrl}" alt="Post image" style="max-width:100%; margin:0.5rem 0; border-radius:6px;">`
+                    : '';
+
+                const newPost = document.createElement('div');
+                newPost.classList.add('community-details-post-card');
+                newPost.innerHTML = `
+                    <h3>${result.post.title}</h3>
+                    ${imageHTML}
+                    <p>${result.post.content}</p>
+                    <small>By ${result.post.authorName} on ${new Date(result.post.submittedAt).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'})}</small>
+                `;
+
+                const placeholder = postsContainer.querySelector('p[style*="text-align:center"]');
+                if (placeholder) placeholder.parentNode.remove();
+
+                postsContainer.prepend(newPost);
+                communityDetailsCloseCreatePostModal();
+            } else {
+                alert(result.message || 'Failed to create post.');
+            }
+        } catch(err){
+            console.error(err);
+            alert('Error creating post');
+        }
+    });
+
+    // ===================== Escape Key =====================
+    document.addEventListener('keydown', e => {
+        if(e.key === "Escape") communityDetailsCloseCreatePostModal();
+    });
+</script>

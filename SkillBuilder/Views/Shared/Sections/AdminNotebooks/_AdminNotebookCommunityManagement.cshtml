@@ -19,12 +19,15 @@
         margin-bottom: 2rem;
     }
 
+    /* Full-width search bar */
     .community-mgmt-search-bar {
         display: flex;
-        flex: 0 0 90%;
+        width: 100%;
         border: 1px solid #bbb;
         border-radius: 8px;
         overflow: hidden;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
 
         .community-mgmt-search-bar input {
@@ -46,16 +49,6 @@
                 width: 1.2rem;
                 height: 1.2rem;
             }
-
-    .community-mgmt-filter-btn {
-        flex: 0 0 10%;
-        background-color: #eee;
-        border: none;
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-    }
 
     .community-mgmt-table {
         width: 100%;
@@ -89,14 +82,13 @@
         vertical-align: middle;
     }
 
-    .community-mgmt-cell.community-author {
-        text-align: center;
-        vertical-align: middle;
-    }
+        .community-mgmt-cell.community-author {
+            text-align: center;
+        }
 
-    .community-mgmt-cell.community-actions {
-        text-align: right;
-    }
+        .community-mgmt-cell.community-actions {
+            text-align: right;
+        }
 
     .community-mgmt-name a {
         font-weight: bold;
@@ -110,11 +102,6 @@
         color: #222;
         text-align: center;
         font-weight: 500;
-    }
-
-    /* Actions column */
-    .community-mgmt-cell.community-mgmt-actions {
-        text-align: right;
     }
 
     .community-mgmt-action-buttons {
@@ -141,7 +128,7 @@
             background-color: #C0392B;
         }
 
-    /* Backdrop */
+    /* Modal & backdrop */
     .community-mgmt-modal-backdrop {
         display: none;
         position: fixed;
@@ -153,7 +140,6 @@
         z-index: 1000;
     }
 
-    /* Modal box */
     .community-mgmt-modal {
         display: none;
         position: fixed;
@@ -218,7 +204,6 @@
                 <img src="/assets/Icons/Search.ico" alt="Search" />
             </button>
         </div>
-        <button class="community-mgmt-filter-btn">Filter</button>
     </div>
 
     <table class="community-mgmt-table">
@@ -232,7 +217,7 @@
         <tbody>
             @if (Model.AllCommunities != null && Model.AllCommunities.Any())
             {
-                foreach (var community in Model.AllCommunities)
+                foreach (var community in Model.AllCommunities.Where(c => !c.IsArchived))
                 {
                     <tr class="community-mgmt-row">
                         <td class="community-mgmt-cell community-mgmt-name">
@@ -296,7 +281,7 @@
 
         document.getElementById("communityMgmtModalBackdrop").style.display = "block";
         document.getElementById("communityMgmtDeleteModal").style.display = "block";
-        return false; // prevent submit
+        return false;
     }
 
     function communityMgmtConfirmDeleteAction() {
@@ -309,18 +294,9 @@
         communityMgmtCurrentForm = null;
     }
 
-    // backdrop click closes modal
-    document.getElementById("communityMgmtModalBackdrop")
-        .addEventListener("click", communityMgmtCloseModal);
-
-    // ESC key support
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") {
-            communityMgmtCloseModal();
-        }
+    document.getElementById("communityMgmtModalBackdrop").addEventListener("click", communityMgmtCloseModal);
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") communityMgmtCloseModal();
     });
-
-    // confirm delete button binding
-    document.getElementById("communityMgmtConfirmDelete")
-        .addEventListener("click", communityMgmtConfirmDeleteAction);
+    document.getElementById("communityMgmtConfirmDelete").addEventListener("click", communityMgmtConfirmDeleteAction);
 </script>

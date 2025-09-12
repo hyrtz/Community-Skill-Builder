@@ -178,6 +178,20 @@
         .delete-work-btn:hover {
             color: #d00;
         }
+
+    .basicinfo-duration-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .duration-value {
+        width: 150px;
+    }
+
+    .duration-unit {
+        flex: 1; 
+    }
 </style>
 
 <div class="basicinfo-form-wrapper">
@@ -220,8 +234,15 @@
             </select>
         </div>
         <div class="basicinfo-form-col basicinfo-form-group">
-            <label for="Course_Duration">Duration *</label>
-            <input asp-for="Course.Duration" class="basicinfo-form-control" placeholder="e.g. 7 hours" required />
+            <label>Duration *</label>
+            <div class="basicinfo-duration-row">
+                <input type="number" name="DurationValue" id="Course_DurationValue" class="basicinfo-form-control duration-value" placeholder="Enter duration" required />
+                <select name="DurationUnit" id="Course_DurationUnit" class="basicinfo-form-select duration-unit" required>
+                    <option value="minutes">Minutes</option>
+                    <option value="hours">Hours</option>
+                    <option value="days">Days</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -505,6 +526,14 @@
         }
 
         checkRequiredWorks();
+
+        const durationInput = document.getElementById("Course_DurationValue");
+        if (durationInput) {
+            durationInput.addEventListener("input", () => {
+                // Remove non-digit characters
+                durationInput.value = durationInput.value.replace(/\D/g, '');
+            });
+        }
 
     });
 </script>
