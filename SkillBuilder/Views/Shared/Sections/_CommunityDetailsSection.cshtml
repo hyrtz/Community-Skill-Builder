@@ -4,6 +4,18 @@
     var currentUserId = User.FindFirst("UserId")?.Value;
     bool isOwner = Model.IsOwner;
     bool isJoined = Model.IsJoined;
+
+    var fullName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "";
+
+    // Split full name into first and last (basic split on first space)
+    var nameParts = fullName.Split(' ', 2);
+    var currentUserFirstName = nameParts.Length > 0 ? nameParts[0] : "";
+    var currentUserLastName = nameParts.Length > 1 ? nameParts[1] : "";
+
+    var currentUserAvatar = User.FindFirst("AvatarUrl")?.Value ?? "/assets/Avatar/Sample10.svg";
+    var currentUserIsVerified = User.FindFirst("IsVerified")?.Value == "True";
+    var currentUserIsDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
+    var userDisabled = !currentUserIsVerified || currentUserIsDeactivated;
 }
 
 <style>
@@ -13,20 +25,30 @@
     }
 
     .community-details-cover {
+        position: relative; 
         height: 200px;
         background: #f0f0f0;
         display: flex;
-        justify-content: center;
-        align-items: center;
+        justify-content: flex-start; 
+        align-items: flex-end;
+        padding-left: 2rem; 
     }
 
     .community-details-avatar {
+        position: absolute;
+        bottom: -60px;
+        left: 2rem; 
         width: 120px;
         height: 120px;
         border-radius: 50%;
         background-size: cover;
         background-position: center;
-        border: 3px solid #fff;
+        border: 4px solid #fff;
+        box-shadow: 0 0 6px rgba(0,0,0,0.2); 
+    }
+
+    .community-details-title {
+        margin-left: 10rem;
     }
 
     .community-details-top {
@@ -250,6 +272,98 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
+
+    .comments-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        max-height: 200px;
+        overflow-y: auto;
+        padding-right: 0.25rem;
+    }
+
+    .comment {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-start;
+        background: #f3f4f6;
+        border-radius: 6px;
+        padding: 0.5rem;
+        font-size: 0.875rem;
+        word-break: break-word;
+    }
+
+        .comment .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+        }
+
+    .comment-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        flex: 1;
+    }
+
+        .comment-content .comment-header {
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .comment-content .comment-header .timestamp {
+                font-weight: 400;
+                font-size: 0.75rem;
+                color: #555;
+            }
+
+        .comment-content .comment-text {
+            font-size: 0.85rem;
+            color: #333;
+        }
+
+    .comments-section textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        resize: none;
+        font-size: 0.85rem;
+    }
+
+    .comments-section button {
+        align-self: flex-end;
+        margin-top: 0.25rem;
+        padding: 0.3rem 0.75rem;
+        background: #344AEA;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    .like-btn {
+        background: none;
+        border: none;
+    }
+
+    .comment-btn {
+        background: none;
+        border: none;
+    }
 </style>
 
 <section class="community-details-section">
@@ -267,7 +381,11 @@
         <div style="display:flex; gap:0.5rem;">
             @if (!isOwner && !isJoined)
             {
-                <button class="community-details-btn" id="communityDetailsJoinBtn">Join</button>
+                <button class="community-details-btn"
+                        id="communityDetailsJoinBtn"
+                        @(userDisabled ? "disabled title='Your account is not verified or is deactivated'" : "")>
+                    Join
+                </button>
             }
             <button class="community-details-btn" id="communityDetailsCreatePostBtn" @(isOwner || isJoined ? "" : "disabled")>Create Post</button>
         </div>
@@ -329,7 +447,7 @@
             {
                 @foreach (var post in Model.Posts)
                 {
-                    <div class="community-details-post-card">
+                    <div class="community-details-post-card" data-post-id="@post.Id">
                         <h3>@post.Title</h3>
 
                         @if (!string.IsNullOrEmpty(post.ImageUrl))
@@ -339,6 +457,19 @@
 
                         <p>@post.Content</p>
                         <small>By @post.AuthorName on @(post.SubmittedAt.ToString("MMM dd, yyyy"))</small>
+
+                        <!-- Likes & Comments -->
+                        <div style="margin-top:0.5rem; display:flex; gap:1rem; font-size:0.9rem;">
+                            <button class="like-btn" onclick="likePost(@post.Id)">❤️ <span id="like-count-@post.Id">@post.Likes</span></button>
+                            <button class="comment-btn" onclick="toggleComments(@post.Id)">💬 <span id="comment-count-@post.Id">@post.CommentsCount</span></button>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div class="comments-section" id="comments-section-@post.Id" style="display:none; margin-top:0.5rem;">
+                            <div class="comments-list" id="comments-list-@post.Id"></div>
+                            <textarea id="comment-input-@post.Id" placeholder="Write a comment..." rows="2"></textarea>
+                            <button onclick="addComment(@post.Id)">Post</button>
+                        </div>
                     </div>
                 }
             }
@@ -374,149 +505,339 @@
 </div>
 
 <div id="communityDetailsPolicyModal" class="community-details-modal-overlay" style="display:none;">
-    <div class="community-details-modal-content" style="max-width:600px; text-align:left; overflow-y:auto; max-height:80vh;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div class="community-details-modal-content" style="max-width:600px; text-align:left; overflow-y:auto; max-height:80vh; padding:2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
             <h2>Community Policy</h2>
             <button onclick="communityDetailsClosePolicyModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
         </div>
-        <p>By joining, you agree to follow our community guidelines...</p>
-        <div class="community-details-modal-actions" style="justify-content:flex-end;">
-            <button class="community-details-btn" id="communityDetailsFinalJoinBtn">Join</button>
+        <p>
+            Welcome! This is a space for pottery lovers of all skill levels to connect, learn, and grow.<br>
+            To keep things positive and helpful, please follow these simple guidelines:
+        </p>
+
+        <hr style="margin:1rem 0;">
+
+        <h3>Do:</h3>
+        <ul>
+            <li>Share your pottery (finished or in progress)</li>
+            <li>Ask questions and offer respectful feedback</li>
+            <li>Encourage and support other members</li>
+            <li>Credit original artists when sharing work</li>
+            <li>Share tips, tools, and inspiration</li>
+        </ul>
+
+        <h3>Don't:</h3>
+        <ul>
+            <li>Post hateful, offensive, or inappropriate content</li>
+            <li>Spam or promote products outside the allowed channels</li>
+            <li>Steal or claim others’ work as your own</li>
+            <li>Give unsafe advice—safety first with kilns, glazes, etc.</li>
+        </ul>
+
+        <h3>Breaking the Rules:</h3>
+        <ul>
+            <li>First: Reminder</li>
+            <li>Second: Warning</li>
+            <li>Third: Ban (temporary or permanent)</li>
+        </ul>
+
+        <p>
+            By joining, you agree to keep this space respectful, creative, and safe.<br>
+            Thanks for being part of the clay-loving community!
+        </p>
+
+        <div class="community-details-modal-actions" style="justify-content:flex-end; margin-top:1.5rem;">
+            <button class="community-details-btn" id="communityDetailsFinalJoinBtn" style="background:#344AEA; color:#fff;">Join</button>
         </div>
     </div>
 </div>
 
 <script>
-    const joinBtn = document.getElementById('communityDetailsJoinBtn');
-    const joinModal = document.getElementById('communityDetailsJoinModal');
-    const cancelBtn = document.getElementById('communityDetailsCancelBtn');
-    const confirmJoinBtn = document.getElementById('communityDetailsConfirmJoinBtn');
-    const policyModal = document.getElementById('communityDetailsPolicyModal');
-    const finalJoinBtn = document.getElementById('communityDetailsFinalJoinBtn');
+    const currentUserId = "@currentUserId";
+    const currentUserFirstName = "@currentUserFirstName";
+    const currentUserLastName = "@currentUserLastName";
+    const currentUserAvatar = "@currentUserAvatar";
+    const userDisabled = @userDisabled.ToString().ToLower();
 
-    const createPostBtn = document.getElementById('communityDetailsCreatePostBtn');
-    const createPostModal = document.getElementById('communityDetailsCreatePostModal');
-    const createPostForm = document.getElementById('communityDetailsCreatePostForm');
-    const postsContainer = document.querySelector('.community-details-posts');
-    const postCancelBtn = document.getElementById('communityDetailsPostCancel');
-    const postSubmitBtn = document.getElementById('communityDetailsPostSubmit');
+    // LocalStorage helpers
+    function getLikedPostsByUser() { return JSON.parse(localStorage.getItem("likedPostsByUser")) || {}; }
+    function setLikedPostsByUser(data) { localStorage.setItem("likedPostsByUser", JSON.stringify(data)); }
 
-    const postTitleInput = document.getElementById('communityDetailsPostTitle');
-    const postContentInput = document.getElementById('communityDetailsPostContent');
-    const postImageInput = document.getElementById('communityDetailsPostImage');
-    const postImagePreview = document.getElementById('communityDetailsPostImagePreview');
+    function getLikeCounts() { return JSON.parse(localStorage.getItem("likeCounts")) || {}; }
+    function setLikeCounts(counts) { localStorage.setItem("likeCounts", JSON.stringify(counts)); }
 
-    // ===================== Join Modal =====================
-    if(joinBtn) joinBtn.addEventListener('click', () => joinModal.style.display = 'flex');
-    cancelBtn.addEventListener('click', () => joinModal.style.display = 'none');
-    joinModal.addEventListener('click', e => { if(e.target === joinModal) joinModal.style.display = 'none'; });
-    confirmJoinBtn.addEventListener('click', () => {
-        joinModal.style.display = 'none';
-        policyModal.style.display = 'flex';
-    });
+    function getPostComments() { return JSON.parse(localStorage.getItem("postComments")) || {}; }
+    function setPostComments(comments) { localStorage.setItem("postComments", JSON.stringify(comments)); }
 
-    function communityDetailsClosePolicyModal() { policyModal.style.display = 'none'; }
-    policyModal.addEventListener('click', e => { if(e.target === policyModal) communityDetailsClosePolicyModal(); });
+    // Like a post
+    function likePost(postId) {
+        const btn = document.querySelector(`.community-details-post-card[data-post-id="${postId}"] .like-btn`);
+        const countEl = document.getElementById(`like-count-${postId}`);
 
-    finalJoinBtn.addEventListener('click', async () => {
-        const communityId = '@community.Id';
-        try {
-            const formData = new FormData();
-            formData.append('communityId', communityId);
+        let likedPostsByUser = getLikedPostsByUser();
+        let likeCounts = getLikeCounts();
 
-            const response = await fetch('/Community/Join', { method: 'POST', body: formData });
-            const data = await response.json();
+        if(!likedPostsByUser[currentUserId]) likedPostsByUser[currentUserId] = [];
 
-            if(response.ok && data.success){
-                alert(data.message);
-                policyModal.style.display = 'none';
-                if(joinBtn) joinBtn.style.display = 'none';
-                document.querySelector('.community-details-top button[disabled]')?.removeAttribute('disabled');
-                const membersInfo = document.querySelector('.community-details-info-card p strong');
-                if(membersInfo) membersInfo.parentNode.innerHTML = `<strong>Members:</strong> ${data.membersCount}`;
-            } else {
-                alert(data.message || 'Failed to join community.');
-            }
-        } catch(err) {
-            console.error(err);
-            alert('Error joining community');
+        let currentLikes = likeCounts[postId] || 0;
+
+        if(likedPostsByUser[currentUserId].includes(postId)){
+            likedPostsByUser[currentUserId] = likedPostsByUser[currentUserId].filter(id => id !== postId);
+            currentLikes = Math.max(0, currentLikes - 1);
+            btn.classList.remove("liked");
+        } else {
+            likedPostsByUser[currentUserId].push(postId);
+            currentLikes += 1;
+            btn.classList.add("liked");
         }
-    });
 
-    // ===================== Create Post Modal =====================
-    createPostBtn?.addEventListener('click', () => {
-        createPostModal.style.display = 'flex';
-        postSubmitBtn.disabled = true; // disable submit initially
-    });
+        likeCounts[postId] = currentLikes;
+        setLikedPostsByUser(likedPostsByUser);
+        setLikeCounts(likeCounts);
 
-    function communityDetailsCloseCreatePostModal() {
-        createPostModal.style.display = 'none';
-        createPostForm.reset();
-        postImagePreview.style.display = 'none';
+        countEl.innerText = currentLikes;
     }
 
-    postCancelBtn?.addEventListener('click', communityDetailsCloseCreatePostModal);
-    createPostModal.addEventListener('click', e => { if(e.target === createPostModal) communityDetailsCloseCreatePostModal(); });
+    // Toggle comments
+    function toggleComments(postId){
+        const section = document.getElementById(`comments-section-${postId}`);
+        section.style.display = section.style.display === "none" ? "flex" : "none";
+    }
 
-    // ===================== Enable Submit on Input =====================
-    [postTitleInput, postContentInput].forEach(input => {
-        input.addEventListener('input', () => {
-            const title = postTitleInput.value.trim();
-            const content = postContentInput.value.trim();
-            postSubmitBtn.disabled = !title || !content;
+    // Add comment
+    function addComment(postId){
+        const input = document.getElementById(`comment-input-${postId}`);
+        const list = document.getElementById(`comments-list-${postId}`);
+        const commentText = input.value.trim();
+        if(!commentText) return;
+
+        const commentData = {
+            userId: currentUserId,
+            firstName: currentUserFirstName,  // use Razor variable
+            lastName: currentUserLastName,    // use Razor variable
+            avatarUrl: currentUserAvatar,     // use Razor variable
+            text: commentText,
+            createdAt: new Date().toISOString()
+        };
+
+        let savedComments = getPostComments();
+        if(!savedComments[postId]) savedComments[postId] = [];
+        savedComments[postId].push(commentData);
+        setPostComments(savedComments);
+
+        renderComment(list, commentData);
+
+        const countEl = document.getElementById(`comment-count-${postId}`);
+        countEl.innerText = savedComments[postId].length;
+
+        input.value = "";
+    }
+
+    function renderComment(list, commentData){
+        const commentEl = document.createElement("div");
+        commentEl.classList.add("comment");
+        commentEl.innerHTML = `
+            <div class="avatar" style="background-image:url('${commentData.avatarUrl}'); width:32px; height:32px;"></div>
+            <div class="comment-content">
+                <div class="comment-header">${commentData.firstName} ${commentData.lastName} <span class="timestamp">${timeAgo(commentData.createdAt)}</span></div>
+                <div class="comment-text">${commentData.text}</div>
+            </div>
+        `;
+        list.appendChild(commentEl);
+    }
+
+    function timeAgo(timestamp){
+        const now = new Date();
+        const diff = Math.floor((now - new Date(timestamp))/1000);
+        if(diff < 60) return `${diff} seconds ago`;
+        if(diff < 3600) return `${Math.floor(diff/60)} minutes ago`;
+        if(diff < 86400) return `${Math.floor(diff/3600)} hours ago`;
+        if(diff < 604800) return `${Math.floor(diff/86400)} days ago`;
+        return `${Math.floor(diff/604800)} weeks ago`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if (userDisabled) {
+            document.querySelectorAll(".like-btn, .comment-btn").forEach(btn => {
+                btn.disabled = true;
+                btn.style.cursor = "not-allowed";
+            });
+
+            document.querySelectorAll(".comments-section textarea, .comments-section button").forEach(el => {
+                el.disabled = true;
+                el.style.cursor = "not-allowed";
+            });
+        }
+
+        const likedPostsByUser = getLikedPostsByUser();
+        const likeCounts = getLikeCounts();
+        const userId = currentUserId;
+        const likedPosts = likedPostsByUser[userId] || [];
+
+        likedPosts.forEach(postId => {
+            const btn = document.querySelector(`.post-card[data-post-id="${postId}"] .like-btn`);
+            if (btn) btn.classList.add("liked");
         });
-    });
 
-    // ===================== Image Preview =====================
-    postImageInput?.addEventListener('change', e => {
-        const file = e.target.files[0];
-        if(file){
-            postImagePreview.src = URL.createObjectURL(file);
-            postImagePreview.style.display = 'block';
-        } else {
-            postImagePreview.style.display = 'none';
+        for (let postId in likeCounts) {
+            const countEl = document.getElementById(`like-count-${postId}`);
+            if (countEl) countEl.innerText = likeCounts[postId];
         }
-    });
 
-    // ===================== Handle Create Post Submission =====================
-    createPostForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(createPostForm);
+        // Restore comments
+        const savedComments = getPostComments();
+        for (let postId in savedComments) {
+            const list = document.getElementById(`comments-list-${postId}`);
+            if (!list) continue;
 
-        try {
-            const response = await fetch(createPostForm.action, { method: 'POST', body: formData });
-            const result = await response.json();
+            savedComments[postId].forEach(commentData => {
+                // Fallback to current user info if old data missing
+                commentData.firstName = commentData.firstName || "Unknown";
+                commentData.lastName = commentData.lastName || "";
+                commentData.avatarUrl = commentData.avatarUrl || "/assets/Avatar/Sample10.svg";
 
-            if(result.success){
-                let imageHTML = result.post.imageUrl
-                    ? `<img src="${result.post.imageUrl}" alt="Post image" style="max-width:100%; margin:0.5rem 0; border-radius:6px;">`
-                    : '';
+                renderComment(list, commentData);
+            });
 
-                const newPost = document.createElement('div');
-                newPost.classList.add('community-details-post-card');
-                newPost.innerHTML = `
-                    <h3>${result.post.title}</h3>
-                    ${imageHTML}
-                    <p>${result.post.content}</p>
-                    <small>By ${result.post.authorName} on ${new Date(result.post.submittedAt).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'})}</small>
-                `;
+            const countEl = document.getElementById(`comment-count-${postId}`);
+            if (countEl) countEl.innerText = savedComments[postId].length;
+        }
 
-                const placeholder = postsContainer.querySelector('p[style*="text-align:center"]');
-                if (placeholder) placeholder.parentNode.remove();
+        // Join & Policy Modal
+        function initJoinPolicyModal() {
+            const joinBtn = document.getElementById('communityDetailsJoinBtn');
+            const joinModal = document.getElementById('communityDetailsJoinModal');
+            const cancelBtn = document.getElementById('communityDetailsCancelBtn');
+            const confirmJoinBtn = document.getElementById('communityDetailsConfirmJoinBtn');
+            const policyModal = document.getElementById('communityDetailsPolicyModal');
+            const finalJoinBtn = document.getElementById('communityDetailsFinalJoinBtn');
 
-                postsContainer.prepend(newPost);
-                communityDetailsCloseCreatePostModal();
-            } else {
-                alert(result.message || 'Failed to create post.');
+            if(joinBtn) joinBtn.addEventListener('click', () => joinModal.style.display = 'flex');
+            cancelBtn?.addEventListener('click', () => joinModal.style.display = 'none');
+            joinModal?.addEventListener('click', e => { if(e.target === joinModal) joinModal.style.display = 'none'; });
+            confirmJoinBtn?.addEventListener('click', () => {
+                joinModal.style.display = 'none';
+                policyModal.style.display = 'flex';
+            });
+
+            function communityDetailsClosePolicyModal() { policyModal.style.display = 'none'; }
+            policyModal?.addEventListener('click', e => { if(e.target === policyModal) communityDetailsClosePolicyModal(); });
+
+            finalJoinBtn?.addEventListener('click', async () => {
+                const communityId = '@community.Id';
+                try {
+                    const formData = new FormData();
+                    formData.append('communityId', communityId);
+
+                    const response = await fetch('/Community/Join', { method: 'POST', body: formData });
+                    const data = await response.json();
+
+                    if(response.ok && data.success){
+                        alert(data.message);
+                        policyModal.style.display = 'none';
+                        if(joinBtn) joinBtn.style.display = 'none';
+                        document.querySelector('.community-details-top button[disabled]')?.removeAttribute('disabled');
+                        const membersInfo = document.querySelector('.community-details-info-card p strong');
+                        if(membersInfo) membersInfo.parentNode.innerHTML = `<strong>Members:</strong> ${data.membersCount}`;
+                    } else {
+                        alert(data.message || 'Failed to join community.');
+                    }
+                } catch(err){
+                    console.error(err);
+                    alert('Error joining community');
+                }
+            });
+        }
+
+        // Create Post Modal
+        function initCreatePostModal() {
+            const createPostBtn = document.getElementById('communityDetailsCreatePostBtn');
+            const createPostModal = document.getElementById('communityDetailsCreatePostModal');
+            const createPostForm = document.getElementById('communityDetailsCreatePostForm');
+            const postsContainer = document.querySelector('.community-details-posts');
+            const postCancelBtn = document.getElementById('communityDetailsPostCancel');
+            const postSubmitBtn = document.getElementById('communityDetailsPostSubmit');
+
+            const postTitleInput = document.getElementById('communityDetailsPostTitle');
+            const postContentInput = document.getElementById('communityDetailsPostContent');
+            const postImageInput = document.getElementById('communityDetailsPostImage');
+            const postImagePreview = document.getElementById('communityDetailsPostImagePreview');
+
+            createPostBtn?.addEventListener('click', () => {
+                createPostModal.style.display = 'flex';
+                postSubmitBtn.disabled = true;
+            });
+
+            function communityDetailsCloseCreatePostModal() {
+                createPostModal.style.display = 'none';
+                createPostForm.reset();
+                postImagePreview.style.display = 'none';
             }
-        } catch(err){
-            console.error(err);
-            alert('Error creating post');
-        }
-    });
 
-    // ===================== Escape Key =====================
-    document.addEventListener('keydown', e => {
-        if(e.key === "Escape") communityDetailsCloseCreatePostModal();
+            postCancelBtn?.addEventListener('click', communityDetailsCloseCreatePostModal);
+            createPostModal?.addEventListener('click', e => { if(e.target === createPostModal) communityDetailsCloseCreatePostModal(); });
+
+            [postTitleInput, postContentInput].forEach(input => {
+                input?.addEventListener('input', () => {
+                    const title = postTitleInput.value.trim();
+                    const content = postContentInput.value.trim();
+                    postSubmitBtn.disabled = !title || !content;
+                });
+            });
+
+            postImageInput?.addEventListener('change', e => {
+                const file = e.target.files[0];
+                if(file){
+                    postImagePreview.src = URL.createObjectURL(file);
+                    postImagePreview.style.display = 'block';
+                } else {
+                    postImagePreview.style.display = 'none';
+                }
+            });
+
+            createPostForm?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(createPostForm);
+
+                try {
+                    const response = await fetch(createPostForm.action, { method: 'POST', body: formData });
+                    const result = await response.json();
+
+                    if(result.success){
+                        let imageHTML = result.post.imageUrl
+                            ? `<img src="${result.post.imageUrl}" alt="Post image" style="max-width:100%; margin:0.5rem 0; border-radius:6px;">`
+                            : '';
+
+                        const newPost = document.createElement('div');
+                        newPost.classList.add('community-details-post-card');
+                        newPost.innerHTML = `
+                            <h3>${result.post.title}</h3>
+                            ${imageHTML}
+                            <p>${result.post.content}</p>
+                            <small>By ${result.post.authorName} on ${new Date(result.post.submittedAt).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'})}</small>
+                        `;
+
+                        const placeholder = postsContainer.querySelector('p[style*="text-align:center"]');
+                        if (placeholder) placeholder.parentNode.remove();
+
+                        postsContainer.prepend(newPost);
+                        communityDetailsCloseCreatePostModal();
+                    } else {
+                        alert(result.message || 'Failed to create post.');
+                    }
+                } catch(err){
+                    console.error(err);
+                    alert('Error creating post');
+                }
+            });
+
+            document.addEventListener('keydown', e => {
+                if(e.key === "Escape") communityDetailsCloseCreatePostModal();
+            });
+        }
+
+        // Initialize everything
+        initJoinPolicyModal();
+        initCreatePostModal();
     });
 </script>

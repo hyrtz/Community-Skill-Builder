@@ -188,6 +188,17 @@
             .modal-actions .btn-confirm:hover {
                 background: #2563eb;
             }
+
+    #declineReason {
+        resize: none;
+    }
+
+    #declineConfirmBtn:disabled {
+        background-color: #ccc !important;
+        color: #666 !important;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
 </style>
 
 <div id="pendingSupportContainer">
@@ -257,9 +268,90 @@
     </div>
 </div>
 
+<!-- Modal for Decline -->
+<div id="declineSessionModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h3>Decline Session</h3>
+        <p>Please provide a reason for declining this session:</p>
+        <textarea id="declineReason" rows="4" placeholder="Type reason here..." style="width:100%; padding:0.6rem 0.75rem; border:1px solid #ccc; border-radius:8px; resize:none;"></textarea>
+        <input type="hidden" id="declineSessionId" />
+
+        <div class="modal-actions">
+            <button id="declineCancelBtn" class="btn-cancel">Cancel</button>
+            <button id="declineConfirmBtn" class="btn-confirm" disabled>Decline Session</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let currentSessionId = null;
     let isModalOpen = false;
+    let currentDeclineId = null;
+    let isDeclineModalOpen = false;
+
+    // ===== OPEN DECLINE MODAL =====
+    function openDeclineModal(id) {
+        currentDeclineId = id;
+        const reasonInput = document.getElementById('declineReason');
+        reasonInput.value = '';
+        document.getElementById('declineConfirmBtn').disabled = true;
+        document.getElementById('declineSessionId').value = id;
+        document.getElementById('declineSessionModal').style.display = 'flex';
+        reasonInput.focus();
+
+        reasonInput.oninput = () => {
+            document.getElementById('declineConfirmBtn').disabled = reasonInput.value.trim() === '';
+        };
+        isDeclineModalOpen = true;
+    }
+
+    // ===== CLOSE DECLINE MODAL =====
+    function closeDeclineModal() {
+        const modal = document.getElementById('declineSessionModal');
+        if (!modal) return;
+        modal.style.display = 'none';
+        currentDeclineId = null;
+        document.getElementById('declineReason').value = '';
+        isDeclineModalOpen = false;
+    }
+
+    // ===== ENABLE/DISABLE DECLINE BUTTON =====
+    document.getElementById('declineReason').addEventListener('input', function() {
+        const btn = document.getElementById('declineConfirmBtn');
+        btn.disabled = this.value.trim() === '';
+    });
+
+    // ===== SUBMIT DECLINE =====
+    async function submitDecline() {
+        if (!currentDeclineId) return;
+        const reason = document.getElementById('declineReason').value.trim();
+        if (!reason) return;
+
+        try {
+            const res = await fetch('/SupportSession/Decline', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ Id: currentDeclineId, Reason: reason })
+            });
+            if (!res.ok) throw new Error('Failed to decline session.');
+
+            closeDeclineModal();
+            await refreshPendingRequests();
+            await refreshDeclinedSessions();
+        } catch (err) {
+            console.error(err);
+            alert('Something went wrong. Please try again.');
+        }
+    }
+
+    // ===== MODAL & BUTTON EVENTS =====
+    document.getElementById('declineCancelBtn').addEventListener('click', closeDeclineModal);
+    document.getElementById('declineConfirmBtn').addEventListener('click', submitDecline);
+
+    // Close modal when clicking outside
+    document.getElementById('declineSessionModal').addEventListener('click', function(e){
+        if(e.target === this) closeDeclineModal();
+    });
 
     // ===== MODAL FUNCTIONS =====
     function openConfirmModal(id) {
@@ -307,22 +399,8 @@
     }
 
     // ===== DECLINE SESSION =====
-    async function declineSession(id) {
-        if (!confirm('Are you sure you want to decline this session?')) return;
-        try {
-            const res = await fetch('/SupportSession/Decline', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ Id: id })
-            });
-            if (!res.ok) throw new Error('Failed to decline session.');
-
-            await refreshPendingRequests();
-            await refreshDeclinedSessions();
-        } catch (err) {
-            console.error(err);
-            alert('Something went wrong. Please try again.');
-        }
+    function declineSession(id) {
+        openDeclineModal(id);
     }
 
     // ===== COMPLETE SESSION =====
@@ -402,6 +480,21 @@
             declineSession(id);
         }
 
+        // Decline modal cancel button
+        if (e.target.closest('#declineCancelBtn')) {
+            closeDeclineModal();
+        }
+
+        // Click outside decline modal content
+        if (e.target.id === 'declineSessionModal') {
+            closeDeclineModal();
+        }
+
+        // Confirm decline button
+        if (e.target.closest('#declineConfirmBtn')) {
+            submitDecline();
+        }
+
         // Complete session button
         if (e.target.closest('.complete-session-btn')) {
             const id = e.target.closest('.artisan-support-card').id.replace('support-', '');
@@ -424,6 +517,17 @@
         }
     });
 
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (isModalOpen) {
+                closeSessionModal();
+            }
+            if (isDeclineModalOpen) {
+                closeDeclineModal();
+            }
+        }
+    });
+
     // ===== MODAL LISTENER =====
     function attachModalListeners() {
         const cancelBtn = document.getElementById('modalCancelBtn');
@@ -437,7 +541,7 @@
 
     // ===== AUTO REFRESH EVERY 10 SECONDS =====
     setInterval(() => {
-        if (!isModalOpen) {
+        if (!isModalOpen && !isDeclineModalOpen) {
             refreshPendingRequests();
             refreshUpcomingSessions();
             refreshDeclinedSessions();

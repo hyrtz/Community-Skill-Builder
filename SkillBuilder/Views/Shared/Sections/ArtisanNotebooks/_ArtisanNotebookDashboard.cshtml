@@ -1,5 +1,10 @@
 ﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
 
+@{
+    var isVerified = Model.Artisan.User?.IsVerified ?? false;
+    var isDeactivated = Model.Artisan.User?.IsDeactivated ?? false;
+}
+
 <style>
     .artisan-dashboard-section {
         display: flex;
@@ -73,17 +78,27 @@
             text-decoration: underline;
         }
 
-    .artisan-dashboard-quote {
-        background-color: #f1f1f1;
+    .artisan-dashboard-message {
+        margin-top: 2rem;
         padding: 1.5rem;
-        border-left: 4px solid #344AEA;
-        font-style: italic;
-        color: #666;
-        border-radius: 8px;
+        border-radius: 12px;
+        text-align: center;
     }
+
+        .artisan-dashboard-message.deactivated {
+            background-color: #ffe6e6;
+            color: #e74c3c;
+        }
+
+        .artisan-dashboard-message.not-verified {
+            background-color: #fff3e6;
+            color: #e67e22;
+        }
 </style>
 
 <div class="artisan-dashboard-section">
+
+    @* Existing dashboard content remains untouched *@
     <div class="artisan-dashboard-heading">
         Welcome back, @Model.Artisan.User?.FirstName!
     </div>
@@ -113,7 +128,19 @@
         </div>
     }
 
-    <div class="artisan-dashboard-quote">
-        “Teaching others is the best way to learn twice.”
-    </div>
+    @* Show messages if deactivated or not verified BELOW the dashboard *@
+    @if (isDeactivated)
+    {
+        <div class="artisan-dashboard-message deactivated">
+            <h3>Account Deactivated</h3>
+            <p>You cannot view your dashboard or manage courses while your account is deactivated.</p>
+        </div>
+    }
+    else if (!isVerified)
+    {
+        <div class="artisan-dashboard-message not-verified">
+            <h3>Email Not Verified</h3>
+            <p>Please verify your email to access your dashboard and manage courses. Check your inbox for the verification link.</p>
+        </div>
+    }
 </div>

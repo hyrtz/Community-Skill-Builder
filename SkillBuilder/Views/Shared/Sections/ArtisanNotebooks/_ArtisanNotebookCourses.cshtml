@@ -2,6 +2,7 @@
 
 @{
     var isApproved = User.FindFirst("IsApproved")?.Value == "True";
+    var isVerified = User.FindFirst("IsVerified")?.Value == "True";
 }
 
 <style>
@@ -163,8 +164,12 @@
                         <p class="artisan-course-desc">@course.Overview</p>
                     </div>
                     <div class="artisan-course-actions">
-                        <button class="btn-outline">View Reviews</button>
-                        <button class="btn-primary">Edit</button>
+                        <a href="/Courses?selectedCourse=@course.Link&tab=reviews" class="btn-outline" style="text-decoration: none;">
+                            View Reviews
+                        </a>
+                        <a href="/ArtisanActions/EditCourse/@course.Id" class="btn-primary" style="text-decoration: none;">
+                            Edit
+                        </a>
                     </div>
                 </div>
             }
@@ -177,7 +182,7 @@
                     Share your knowledge and skills with students around the world.
                 </p>
 
-                @if (isApproved)
+                @if (isApproved && isVerified)
                 {
                     <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">
                         + Create course
@@ -201,7 +206,7 @@
                     Start sharing your expertise with learners worldwide.
                 </p>
 
-                @if (isApproved)
+                @if (isApproved && isVerified)
                 {
                     <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">
                         + Create course

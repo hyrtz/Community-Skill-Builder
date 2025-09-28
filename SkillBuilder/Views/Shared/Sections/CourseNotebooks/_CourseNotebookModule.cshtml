@@ -1,31 +1,55 @@
 ﻿@model SkillBuilder.Models.Course
 
 <style>
-    .module-title {
+    .course-module-view-module-item {
+        margin-top: 2rem;
+        padding-left: 10px;
+    }
+
+    .course-module-view-module-title {
         font-size: 1.2rem;
         font-weight: bold;
         color: #333;
-        margin-top: 2rem;
+        margin-bottom: 0.5rem;
     }
 
-    .module-description {
-        font-size: 0.95rem;
-        color: #666;
-        margin-bottom: 1rem;
-        margin-left: 10px; /* slight indent for visual nesting */
-    }
-
-    .lesson-list {
-        margin-left: 20px; /* more indent for lesson list */
+    .course-module-view-lesson-list {
+        margin-left: 20px;
+        list-style-type: disc;
         color: #444;
         line-height: 1.6;
     }
 
-        .lesson-list li {
-            margin-top: 0.5rem;
-        }
+    .course-module-view-lesson-item {
+        margin-top: 0.5rem;
+    }
 
-    .lesson-text {
+    .course-module-view-lesson-title {
+        color: #555;
+    }
+
+    .course-module-view-lesson-duration {
+        color: #777;
+        font-size: 0.9rem;
+        margin-left: 0.5rem;
+    }
+
+    .course-module-view-final-project {
+        margin-top: 3rem;
+        padding: 1rem;
+        background-color: #f7f7f7;
+        border-radius: 8px;
+    }
+
+    .course-module-view-final-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .course-module-view-final-desc {
+        font-size: 0.95rem;
         color: #555;
     }
 </style>
@@ -35,27 +59,37 @@
     var moduleIndex = 1;
     foreach (var module in Model.CourseModules.OrderBy(m => m.Order))
     {
-        <div class="materials-lesson-item">
-            <div class="module-title">Module @moduleIndex: @module.Title</div>
+        @* Skip modules with no contents *@
+        if (module.Contents == null || !module.Contents.Any()) continue;
 
-            @if (module.Contents != null && module.Contents.Any())
-            {
-                <ul class="lesson-list">
-                    @foreach (var content in module.Contents.OrderBy(c => c.Order))
-                    {
-                        <li>
-                            <strong>@content.Title</strong> - <em>@content.ContentType</em><br />
-                            @if (!string.IsNullOrWhiteSpace(content.ContentText))
-                            {
-                                <div class="lesson-text">@content.ContentText</div>
-                            }
-                        </li>
-                    }
-                </ul>
-            }
+        <div class="course-module-view-module-item">
+            <div class="course-module-view-module-title">
+                Module @moduleIndex: @module.Title
+            </div>
+
+            <ul class="course-module-view-lesson-list">
+                @foreach (var lesson in module.Contents.OrderBy(c => c.Order))
+                {
+                    <li class="course-module-view-lesson-item">
+                        <span class="course-module-view-lesson-title">@lesson.Title</span> -
+                        <span class="course-module-view-lesson-duration">
+                            @lesson.Duration ?? "N/A"
+                        </span>
+                    </li>
+                }
+            </ul>
         </div>
 
         moduleIndex++;
+    }
+
+    @* Show Final Project separately *@
+    @if (!string.IsNullOrWhiteSpace(Model.FinalProjectTitle))
+    {
+        <div class="course-module-view-final-project">
+            <div class="course-module-view-final-title">Final Project Details: @Model.FinalProjectTitle</div>
+            <div class="course-module-view-final-desc">@Model.FinalProjectDescription</div>
+        </div>
     }
 }
 else

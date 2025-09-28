@@ -6,168 +6,255 @@
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
-        min-height: 580px;
-        max-height: 580px;
-        overflow-y: auto;
     }
 
     .artisan-portfolio-heading {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         font-weight: bold;
         color: #222;
     }
 
     .artisan-portfolio-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.5rem;
     }
 
-    .artisan-portfolio-item {
-        width: 200px;
-        height: 150px;
-        border-radius: 8px;
+    .artisan-portfolio-card {
+        background: #fff;
+        border-radius: 12px;
         overflow: hidden;
         cursor: pointer;
-        position: relative;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        display: flex;
+        flex-direction: column;
     }
 
-        .artisan-portfolio-item:hover {
+        .artisan-portfolio-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
 
-        .artisan-portfolio-item img {
+        .artisan-portfolio-card img {
             width: 100%;
-            height: 100%;
+            height: 180px;
             object-fit: cover;
         }
 
-    /* Modal Styles */
-    .artisan-portfolio-modal {
+    .artisan-portfolio-card-body {
+        padding: 0.8rem 1rem;
+    }
+
+        .artisan-portfolio-card-body h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .artisan-portfolio-card-body p {
+            font-size: 0.9rem;
+            color: #555;
+            margin: 0;
+        }
+
+    /* Add Work card */
+    .artisan-portfolio-add {
+        border: 2px dashed #c3c3ff;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #344AEA;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        min-height: 260px;
+    }
+
+        .artisan-portfolio-add:hover {
+            background: #f8f9ff;
+        }
+
+        .artisan-portfolio-add span {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+    /* Modal */
+    .artisan-modal {
         display: none;
         position: fixed;
-        z-index: 9999;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.7);
+        inset: 0;
+        z-index: 10000;
+        background: rgba(0, 0, 0, 0.6);
         justify-content: center;
         align-items: center;
     }
 
-    .artisan-portfolio-modal-content {
+    .artisan-modal-content {
         background: #fff;
         border-radius: 10px;
-        max-width: 700px;
-        width: 90%;
         padding: 1.5rem;
-        position: relative;
-        animation: fadeIn 0.3s ease-in-out;
+        max-width: 500px;
+        width: 100%;
+        animation: fadeIn 0.2s ease;
     }
 
-    .artisan-portfolio-close {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 1.5rem;
+    .artisan-modal-header {
+        font-size: 1.3rem;
         font-weight: bold;
-        color: #333;
-        cursor: pointer;
-    }
-
-    .artisan-portfolio-modal-body {
-        text-align: center;
-    }
-
-    .artisan-portfolio-modal-image {
-        max-width: 100%;
-        max-height: 400px;
         margin-bottom: 1rem;
-        border-radius: 10px;
+        color: #344AEA;
     }
 
-    .artisan-portfolio-modal-details {
-        text-align: left;
+    .artisan-form-group {
+        margin-bottom: 1rem;
     }
 
-        .artisan-portfolio-modal-details h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #344AEA;
+        .artisan-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
         }
 
-        .artisan-portfolio-modal-details p {
-            margin: 0.2rem 0;
-            font-size: 1rem;
-            color: #444;
+        .artisan-form-group input,
+        .artisan-form-group textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.95rem;
+        }
+
+    .artisan-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.8rem;
+        margin-top: 1.2rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-cancel {
+        background: #ddd;
+    }
+
+    .btn-submit {
+        background: #344AEA;
+        color: #fff;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+        .btn-submit.enabled {
+            opacity: 1;
+            cursor: pointer;
         }
 </style>
 
 <div class="artisan-portfolio-section">
-    <div class="artisan-portfolio-heading">Portfolio</div>
+    <div class="artisan-portfolio-heading">My Works</div>
 
     <div class="artisan-portfolio-grid">
         @if (Model.ArtisanWorks != null && Model.ArtisanWorks.Any())
         {
             foreach (var work in Model.ArtisanWorks)
             {
-                <div class="artisan-portfolio-item"
-                     data-title="@work.Title"
-                     data-publish="@work.PublishDate.ToString("MMMM dd, yyyy")"
-                     data-caption="@work.Caption">
+                <div class="artisan-portfolio-card">
                     <img src="@work.ImageUrl" alt="@work.Title" />
+                    <div class="artisan-portfolio-card-body">
+                        <h3>@work.Title</h3>
+                        <p>@work.Caption</p>
+                    </div>
                 </div>
             }
         }
-        else
-        {
-            <p>No works uploaded yet.</p>
-        }
+
+        <!-- Add Work Card -->
+        <div class="artisan-portfolio-add" id="openAddWorkModal">
+            <span>+</span>
+            Add your work
+        </div>
     </div>
 </div>
 
-<!-- Modal -->
-<div id="artisanPortfolioModal" class="artisan-portfolio-modal">
-    <div class="artisan-portfolio-modal-content">
-        <span class="artisan-portfolio-close">&times;</span>
-        <div class="artisan-portfolio-modal-body">
-            <img id="artisanPortfolioModalImage" class="artisan-portfolio-modal-image" src="" alt="Work Image" />
-            <div class="artisan-portfolio-modal-details">
-                <h2 id="artisanPortfolioModalTitle"></h2>
-                <p id="artisanPortfolioModalDate"></p>
-                <p id="artisanPortfolioModalCaption"></p>
+<!-- Add Work Modal -->
+<div id="addWorkModal" class="artisan-modal">
+    <div class="artisan-modal-content">
+        <div class="artisan-modal-header">Add New Work</div>
+
+        <form asp-action="AddWork" asp-controller="Artisan" method="post" enctype="multipart/form-data" id="addWorkForm">
+            <div class="artisan-form-group">
+                <label for="workTitle">Add Title</label>
+                <input type="text" id="workTitle" name="Title" required />
             </div>
-        </div>
+
+            <div class="artisan-form-group">
+                <label for="workCaption">Add Description</label>
+                <textarea id="workCaption" name="Caption" rows="3" required></textarea>
+            </div>
+
+            <div class="artisan-form-group">
+                <label for="workImage">Upload Image</label>
+                <input type="file" id="workImage" name="ImageFile" accept="image/*" required />
+            </div>
+
+            <div class="artisan-modal-actions">
+                <button type="button" class="btn btn-cancel" id="cancelAddWork">Cancel</button>
+                <button type="submit" class="btn btn-submit" id="submitAddWork" disabled>Add Work</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const modal = document.getElementById("artisanPortfolioModal");
-        const modalImage = document.getElementById("artisanPortfolioModalImage");
-        const modalTitle = document.getElementById("artisanPortfolioModalTitle");
-        const modalDate = document.getElementById("artisanPortfolioModalDate");
-        const modalCaption = document.getElementById("artisanPortfolioModalCaption");
-        const closeBtn = document.querySelector(".artisan-portfolio-close");
+        const modal = document.getElementById("addWorkModal");
+        const openBtn = document.getElementById("openAddWorkModal");
+        const cancelBtn = document.getElementById("cancelAddWork");
+        const form = document.getElementById("addWorkForm");
+        const submitBtn = document.getElementById("submitAddWork");
 
-        document.querySelectorAll(".artisan-portfolio-item").forEach(item => {
-            item.addEventListener("click", () => {
-                const img = item.querySelector("img");
-                modalImage.src = img.src;
-                modalTitle.textContent = item.dataset.title;
-                modalDate.textContent = `Published on: ${item.dataset.publish}`;
-                modalCaption.textContent = item.dataset.caption;
-                modal.style.display = "flex";
-            });
+        const titleInput = document.getElementById("workTitle");
+        const captionInput = document.getElementById("workCaption");
+        const imageInput = document.getElementById("workImage");
+
+        function validateForm() {
+            if (titleInput.value.trim() && captionInput.value.trim() && imageInput.files.length > 0) {
+                submitBtn.disabled = false;
+                submitBtn.classList.add("enabled");
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.remove("enabled");
+            }
+        }
+
+        [titleInput, captionInput, imageInput].forEach(input => {
+            input.addEventListener("input", validateForm);
+            input.addEventListener("change", validateForm);
         });
 
-        closeBtn.addEventListener("click", () => modal.style.display = "none");
+        openBtn.addEventListener("click", () => modal.style.display = "flex");
+        cancelBtn.addEventListener("click", () => {
+            modal.style.display = "none";
+            form.reset();
+            validateForm();
+        });
+
         modal.addEventListener("click", (e) => {
-            if (e.target === modal) modal.style.display = "none";
+            if (e.target === modal) {
+                modal.style.display = "none";
+                form.reset();
+                validateForm();
+            }
         });
     });
 </script>

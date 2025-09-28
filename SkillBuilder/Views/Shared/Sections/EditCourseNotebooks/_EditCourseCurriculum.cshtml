@@ -1,0 +1,490 @@
+﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
+@using System.Text.Json
+
+<style>
+    /* === Updated classnames === */
+    .curriculum-edit-container {
+        margin-bottom: 2rem;
+    }
+
+    .curriculum-edit-module {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .curriculum-edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .curriculum-edit-form-group {
+        margin-bottom: 1rem;
+    }
+
+        .curriculum-edit-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+    .curriculum-edit-form-control, .curriculum-edit-form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .curriculum-edit-form-row {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .curriculum-edit-form-col {
+        flex: 1;
+    }
+
+    .curriculum-edit-delete-btn {
+        background: none;
+        border: none;
+        color: #888;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+    .curriculum-edit-lesson-block {
+        border-top: 1px dashed #ccc;
+        padding-top: 1rem;
+        margin-top: 1rem;
+        position: relative;
+    }
+
+    .curriculum-edit-add-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #344AEA;
+        background-color: transparent;
+        border: 1.5px solid #344AEA;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .curriculum-edit-add-btn:hover {
+            background-color: #344AEA;
+            color: white;
+        }
+
+    .curriculum-edit-lesson-duration-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .curriculum-edit-lesson-duration-value {
+        width: 150px;
+    }
+
+    .curriculum-edit-lesson-duration-unit {
+        flex: 1;
+    }
+
+    .curriculum-edit-lesson-delete-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: #888;
+        cursor: pointer;
+    }
+
+    .curriculum-edit-quiz-question {
+        border-top: 1px dashed #ccc;
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+        position: relative;
+    }
+
+    .curriculum-edit-quiz-delete-btn {
+        position: absolute;
+        top: 0.2rem;
+        right: 0.2rem;
+        background: none;
+        border: none;
+        color: #888;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .curriculum-edit-lesson-preview img,
+    .curriculum-edit-lesson-preview video {
+        max-width: 100%;
+        margin-bottom: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="curriculum-edit-container">
+    <h3>Curriculum</h3>
+
+    <!-- Modules Container -->
+    <div id="curriculum-edit-modules"></div>
+
+    <div id="curriculum-edit-module-warning" style="color:red; margin-bottom:1rem; display:none;">
+        You must add at least 2 modules.
+    </div>
+
+    <div class="curriculum-edit-add-module-wrapper">
+        <button type="button" class="curriculum-edit-add-btn" onclick="curriculumEditAddModule()">+ Add Module</button>
+    </div>
+
+    <!-- Final Project -->
+    <div class="curriculum-edit-final-project curriculum-edit-module" id="curriculum-edit-final-project-module">
+        <div class="curriculum-edit-header"><strong>Final Project</strong></div>
+
+        <div class="curriculum-edit-form-group">
+            <label>Title *</label>
+            <input type="text" class="curriculum-edit-form-control" name="FinalProject.Title" placeholder="Final project title" required />
+        </div>
+
+        <div class="curriculum-edit-form-group">
+            <label>Details / Context *</label>
+            <textarea class="curriculum-edit-form-control" name="FinalProject.Description" rows="4" placeholder="Describe the final project..." required></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    let curriculumEditModuleIndex = 0;
+
+    // ------------------ MODULE FUNCTIONS ------------------
+    function curriculumEditAddModule(moduleData = null) {
+        const container = document.getElementById("curriculum-edit-modules");
+        const moduleIndex = curriculumEditModuleIndex++;
+
+        const moduleDiv = document.createElement("div");
+        moduleDiv.className = "curriculum-edit-module";
+        moduleDiv.setAttribute("data-index", moduleIndex);
+
+        moduleDiv.innerHTML = `
+            <div class="curriculum-edit-header">
+                <strong class="curriculum-edit-module-label">Module ${moduleIndex + 1}</strong>
+                <button type="button" class="curriculum-edit-delete-btn" onclick="curriculumEditRemoveModule(${moduleIndex})">🗑️</button>
+            </div>
+            <div class="curriculum-edit-form-group">
+                <label>Module Title *</label>
+                <input type="text" class="curriculum-edit-form-control" name="Modules[${moduleIndex}].Title" placeholder="Module title" value="${moduleData?.Title || ''}" required />
+            </div>
+            <div class="curriculum-edit-lessons" id="curriculum-edit-lessons-${moduleIndex}"></div>
+            <button type="button" class="curriculum-edit-add-btn" onclick="curriculumEditAddLesson(${moduleIndex})">+ Add Lesson</button>
+        `;
+        container.appendChild(moduleDiv);
+
+        if(moduleData?.Lessons?.length){
+            moduleData.Lessons.forEach(lesson => curriculumEditAddLesson(moduleIndex, lesson));
+        }
+        curriculumEditRenumberModules();
+    }
+
+    function curriculumEditRemoveModule(index) {
+        const module = document.querySelector(`.curriculum-edit-module[data-index='${index}']`);
+        if(module) module.remove();
+        curriculumEditRenumberModules();
+    }
+
+    // ------------------ LESSON FUNCTIONS ------------------
+    function curriculumEditAddLesson(moduleIndex, lessonData = null) {
+        const lessonsContainer = document.getElementById(`curriculum-edit-lessons-${moduleIndex}`);
+        const lessonIndex = lessonsContainer.children.length;
+
+        const lessonDiv = document.createElement("div");
+        lessonDiv.className = "curriculum-edit-lesson-block";
+
+        lessonDiv.innerHTML = `
+            <button type="button" class="curriculum-edit-lesson-delete-btn" onclick="curriculumEditRemoveLesson(${moduleIndex}, this)">🗑️</button>
+            <div class="curriculum-edit-form-group">
+                <label>Lesson Title *</label>
+                <input type="text" class="curriculum-edit-form-control" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].Title" placeholder="Lesson title" value="${lessonData?.Title || ''}" required />
+            </div>
+            <div class="curriculum-edit-form-group">
+                <label>Lesson Type *</label>
+                <select class="curriculum-edit-form-select" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].LessonType" onchange="curriculumEditHandleLessonTypeChange(this, ${moduleIndex}, ${lessonIndex})" required>
+                    <option value="">-- Select Type --</option>
+                    <option value="Text" ${lessonData?.LessonType==='Text'?'selected':''}>Text</option>
+                    <option value="Image + Text" ${lessonData?.LessonType==='Image + Text'?'selected':''}>Image + Text</option>
+                    <option value="Video" ${lessonData?.LessonType==='Video'?'selected':''}>Video</option>
+                    <option value="Quiz" ${lessonData?.LessonType==='Quiz'?'selected':''}>Assessment</option>
+                    <option value="Session" ${lessonData?.LessonType==='Session'?'selected':''}>Session</option>
+                </select>
+            </div>
+            <div class="curriculum-edit-lesson-duration-row">
+                <input type="number" class="curriculum-edit-form-control curriculum-edit-lesson-duration-value" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].DurationValue" value="${lessonData?.DurationValue || ''}" required />
+                <select class="curriculum-edit-form-select curriculum-edit-lesson-duration-unit" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].DurationUnit" required>
+                    <option value="minutes" ${lessonData?.DurationUnit==='minutes'?'selected':''}>Minutes</option>
+                    <option value="hours" ${lessonData?.DurationUnit==='hours'?'selected':''}>Hours</option>
+                </select>
+            </div>
+            <div class="curriculum-edit-lesson-config-container"></div>
+        `;
+        lessonsContainer.appendChild(lessonDiv);
+
+        if(lessonData) curriculumEditHandleLessonTypeChange(lessonDiv.querySelector("select"), moduleIndex, lessonIndex, lessonData);
+        curriculumEditRenumberLessons(moduleIndex);
+    }
+
+    function curriculumEditRemoveLesson(moduleIndex, btn) {
+        const lessonsContainer = document.getElementById(`curriculum-edit-lessons-${moduleIndex}`);
+        const lessonDiv = btn.closest(".curriculum-edit-lesson-block");
+        if(lessonDiv) lessonDiv.remove();
+        curriculumEditRenumberLessons(moduleIndex);
+    }
+
+    // ------------------ RENUMBERING ------------------
+    function curriculumEditRenumberModules() {
+        const modules = document.querySelectorAll(".curriculum-edit-module:not(#curriculum-edit-final-project-module)");
+        modules.forEach((mod, i) => {
+            mod.setAttribute("data-index", i);
+            const label = mod.querySelector(".curriculum-edit-module-label");
+            if(label) label.textContent = `Module ${i+1}`;
+            const titleInput = mod.querySelector("input[name$='.Title']");
+            if(titleInput) titleInput.name = `Modules[${i}].Title`;
+
+            curriculumEditRenumberLessons(i);
+            const addLessonBtn = mod.querySelector("button[onclick^='curriculumEditAddLesson']");
+            if(addLessonBtn) addLessonBtn.setAttribute("onclick", `curriculumEditAddLesson(${i})`);
+            const removeBtn = mod.querySelector("button[onclick^='curriculumEditRemoveModule']");
+            if(removeBtn) removeBtn.setAttribute("onclick", `curriculumEditRemoveModule(${i})`);
+        });
+        curriculumEditModuleIndex = modules.length;
+    }
+
+    function curriculumEditRenumberLessons(moduleIndex) {
+        const lessonsContainer = document.getElementById(`curriculum-edit-lessons-${moduleIndex}`);
+        const lessons = lessonsContainer.children;
+        Array.from(lessons).forEach((lesson, i) => {
+            const titleInput = lesson.querySelector("input[name$='.Title']");
+            if(titleInput) titleInput.name = `Modules[${moduleIndex}].Lessons[${i}].Title`;
+            const typeSelect = lesson.querySelector("select[name$='.LessonType']");
+            if(typeSelect) typeSelect.name = `Modules[${moduleIndex}].Lessons[${i}].LessonType`;
+            const durationVal = lesson.querySelector("input[name$='.DurationValue']");
+            if(durationVal) durationVal.name = `Modules[${moduleIndex}].Lessons[${i}].DurationValue`;
+            const durationUnit = lesson.querySelector("select[name$='.DurationUnit']");
+            if(durationUnit) durationUnit.name = `Modules[${moduleIndex}].Lessons[${i}].DurationUnit`;
+            const deleteBtn = lesson.querySelector(".curriculum-edit-lesson-delete-btn");
+            if(deleteBtn) deleteBtn.setAttribute("onclick", `curriculumEditRemoveLesson(${moduleIndex}, this)`);
+
+            const quizBuilder = lesson.querySelector(".curriculum-edit-quiz-builder");
+            if(quizBuilder) curriculumEditRenumberQuizQuestions(quizBuilder);
+        });
+    }
+
+    // ------------------ LESSON TYPE HANDLER ------------------
+    function curriculumEditHandleLessonTypeChange(selectEl, moduleIndex, lessonIndex, lessonData = null) {
+        const lessonBlock = selectEl.closest(".curriculum-edit-lesson-block");
+        const configContainer = lessonBlock.querySelector(".curriculum-edit-lesson-config-container");
+        const nameBase = `Modules[${moduleIndex}].Lessons[${lessonIndex}]`;
+        let html = '';
+
+        switch(selectEl.value){
+            case 'Text':
+                html = `<div class="curriculum-edit-form-group">
+                            <label>Content</label>
+                            <textarea class="curriculum-edit-form-control" name="${nameBase}.ContentText" rows="4" required>${lessonData?.ContentText || ''}</textarea>
+                        </div>`;
+                configContainer.innerHTML = html;
+                break;
+            case 'Image + Text':
+                html = `<div class="curriculum-edit-form-group">
+                            <label>Content</label>
+                            <textarea class="curriculum-edit-form-control" name="${nameBase}.ContentText" rows="4" required>${lessonData?.ContentText || ''}</textarea>
+                        </div>
+                        <div class="curriculum-edit-form-group">
+                            <label>Current Image</label>
+                            ${lessonData?.ImageUrl ? `<img src="${lessonData.ImageUrl}" alt="Preview" style="max-width:200px; display:block; margin-bottom:0.5rem;" />` : `<p>No image uploaded</p>`}
+                            <input type="file" name="${nameBase}.ImageFile" accept="image/*" />
+                        </div>`;
+                configContainer.innerHTML = html;
+                break;
+
+            case 'Video':
+                html = `<div class="curriculum-edit-form-group">
+                            <label>Current Video</label>
+                            ${lessonData?.VideoUrl ? `<video src="${lessonData.VideoUrl}" controls style="max-width:300px; display:block; margin-bottom:0.5rem;"></video>` : `<p>No video uploaded</p>`}
+                            <input type="file" name="${nameBase}.VideoFile" accept="video/*" />
+                        </div>`;
+                configContainer.innerHTML = html;
+                break;
+            case 'Quiz':
+                html = `<div class="curriculum-edit-quiz-builder" data-namebase="${nameBase}">
+                            <div class="curriculum-edit-quiz-questions"></div>
+                            <button type="button" class="curriculum-edit-add-btn" onclick="curriculumEditAddQuizQuestion(this)">+ Add Question</button>
+                        </div>`;
+                configContainer.innerHTML = html;
+
+                const quizBuilder = configContainer.querySelector(".curriculum-edit-quiz-builder");
+                if (lessonData?.QuizQuestions?.length) {
+                    setTimeout(() => {
+                        lessonData.QuizQuestions.forEach((q, i) => {
+                            curriculumEditAddQuizQuestionToBuilder(quizBuilder.getAttribute("data-namebase"), q, i);
+                        });
+                    }, 0);
+                }
+                break;
+            case 'Session':
+                html = `<div class="curriculum-edit-form-group">
+                            <label>This will be a live session learners can request.</label>
+                        </div>`;
+                configContainer.innerHTML = html;
+                break;
+        }
+    }
+
+    // ------------------ QUIZ FUNCTIONS ------------------
+    function curriculumEditAddQuizQuestion(button){
+        const builder = button.closest(".curriculum-edit-quiz-builder");
+        const container = builder.querySelector(".curriculum-edit-quiz-questions");
+        const nameBase = builder.getAttribute("data-namebase");
+        const index = container.children.length;
+        curriculumEditAddQuizQuestionToBuilder(nameBase, null, index);
+    }
+
+    function curriculumEditAddQuizQuestionToBuilder(nameBase, questionData = null, index){
+        const container = document.querySelector(`[data-namebase='${nameBase}'] .curriculum-edit-quiz-questions`);
+        const qBlock = document.createElement("div");
+        qBlock.className = "curriculum-edit-quiz-question";
+
+        qBlock.innerHTML = `
+            <button type="button" class="curriculum-edit-quiz-delete-btn" onclick="this.closest('.curriculum-edit-quiz-question').remove(); curriculumEditRenumberQuizQuestions(this.closest('.curriculum-edit-quiz-builder'));">🗑️</button>
+            <div class="curriculum-edit-form-group">
+                <label>Question ${index+1} *</label>
+                <input type="text" name="${nameBase}.QuizQuestions[${index}].QuestionText" class="curriculum-edit-form-control" value="${questionData?.QuestionText || ''}" required />
+            </div>
+            <div class="curriculum-edit-form-group">
+                <label>Options *</label>
+                <div class="curriculum-edit-form-row">
+                    ${['A','B','C','D'].map(letter => {
+                        const val = questionData ? questionData[`Option${letter}`] || '' : '';
+                        return `<div style="flex:1;">
+                            <input type="text" name="${nameBase}.QuizQuestions[${index}].Option${letter}" class="curriculum-edit-form-control" placeholder="Option ${letter}" value="${val}" required />
+                            <input type="radio"
+                               name="${nameBase}.QuizQuestions[${index}].CorrectAnswer"
+                               data-letter="${letter}"
+                               value="${val}"
+                               ${questionData?.CorrectAnswer === val ? 'checked' : ''} />
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+        container.appendChild(qBlock);
+
+        // Add listener so radio value updates if option text changes
+        ['A','B','C','D'].forEach(letter => {
+            const optInput = qBlock.querySelector(`input[name$='Option${letter}']`);
+            const radio = qBlock.querySelector(`input[type='radio'][name$='CorrectAnswer'][data-letter='${letter}']`);
+
+            // initial value
+            if(optInput && radio) {
+                radio.value = optInput.value;
+                radio.checked = questionData?.CorrectAnswer === optInput.value;
+
+                // sync value on input change
+                optInput.addEventListener('input', e => {
+                    const newVal = e.target.value;
+                    radio.value = newVal;
+                    // preserve checked
+                    if(radio.checked) radio.checked = true;
+                });
+            }
+        });
+
+        curriculumEditRenumberQuizQuestions(container.closest(".curriculum-edit-quiz-builder"));
+    }
+
+    function curriculumEditRenumberQuizQuestions(builder){
+        if(!builder) return; // Prevent null errors
+        const container = builder.querySelector(".curriculum-edit-quiz-questions");
+        if(!container) return;
+
+        const nameBase = builder.getAttribute("data-namebase");
+        const questions = container.querySelectorAll(".curriculum-edit-quiz-question");
+
+        questions.forEach((qBlock, i) => {
+            const questionTextInput = qBlock.querySelector("input[name$='.QuestionText']");
+            if(questionTextInput) questionTextInput.name = `${nameBase}.QuizQuestions[${i}].QuestionText`;
+
+            ['A','B','C','D'].forEach(letter => {
+                const optInput = qBlock.querySelector(`input[name$='Option${letter}']`);
+                const radio = qBlock.querySelector(`input[type='radio'][name$='CorrectAnswer'][data-letter='${letter}']`);
+                if(radio && optInput) radio.value = optInput.value;
+            });
+        });
+    }
+
+    // ------------------ PRELOAD MODULES & FINAL PROJECT ------------------
+    document.addEventListener("DOMContentLoaded", () => {
+        const fpData = @Html.Raw(JsonSerializer.Serialize(Model.FinalProject ?? new SkillBuilder.Models.ViewModels.FinalProjectViewModel()));
+        const fpTitle = document.querySelector("input[name='FinalProject.Title']");
+        const fpDesc = document.querySelector("textarea[name='FinalProject.Description']");
+        if(fpTitle) fpTitle.value = fpData.Title || '';
+        if(fpDesc) fpDesc.value = fpData.Description || '';
+
+        const modules = @Html.Raw(JsonSerializer.Serialize(Model.Modules ?? []));
+        modules.forEach(m => curriculumEditAddModule(m));
+
+        const form = document.getElementById("edit-course-form");
+        const submitBtn = document.getElementById("editBtn");
+
+        function validateCurriculumEditForm() {
+            let allValid = true;
+            const requiredFields = form.querySelectorAll("input[required], select[required], textarea[required]");
+            requiredFields.forEach(f=>{
+                if(f.offsetParent!==null && (!f.value||f.value.trim()==="")) allValid=false;
+            });
+
+            const modules = form.querySelectorAll(".curriculum-edit-module");
+            if(modules.length < 2) allValid=false;
+
+            modules.forEach(mod=>{
+                const lessons = mod.querySelectorAll(".curriculum-edit-lesson-block");
+                lessons.forEach(lesson=>{
+                    const lessonTitle = lesson.querySelector("input[name$='.Title']");
+                    const lessonType = lesson.querySelector("select[name$='.LessonType']");
+                    const lessonDuration = lesson.querySelector("input[name$='.DurationValue']");
+                    const lessonUnit = lesson.querySelector("select[name$='.DurationUnit']");
+                    if(!lessonTitle || !lessonTitle.value.trim()) allValid=false;
+                    if(!lessonType || !lessonType.value) allValid=false;
+                    if(!lessonDuration || !lessonDuration.value.trim()) allValid=false;
+                    if(!lessonUnit || !lessonUnit.value) allValid=false;
+
+                    const quizQuestions = lesson.querySelectorAll(".curriculum-edit-quiz-question input[type='text']");
+                    quizQuestions.forEach(q=>{
+                        if(!q || !q.value.trim()) allValid=false;
+                    });
+                });
+            });
+
+            if(!fpTitle || !fpTitle.value.trim()) allValid=false;
+            if(!fpDesc || !fpDesc.value.trim()) allValid=false;
+
+            submitBtn.disabled = !allValid;
+
+            const warning = document.getElementById("curriculum-edit-module-warning");
+            if(warning) warning.style.display = modules.length<2?"block":"none";
+        }
+
+        validateCurriculumEditForm();
+        form.addEventListener("input", validateCurriculumEditForm);
+        form.addEventListener("change", validateCurriculumEditForm);
+        const observer = new MutationObserver(validateCurriculumEditForm);
+        observer.observe(form, {childList:true, subtree:true});
+    });
+</script>

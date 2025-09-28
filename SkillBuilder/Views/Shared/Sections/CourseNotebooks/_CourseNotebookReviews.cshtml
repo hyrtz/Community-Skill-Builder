@@ -1,12 +1,11 @@
-﻿
-<style>
-    .review-heading {
+﻿<style>
+    .course-review-view-heading {
         font-size: 2rem;
         margin-bottom: 2rem;
         color: #222;
     }
 
-    .review-section {
+    .course-review-view-section {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
@@ -14,19 +13,19 @@
     }
 
     /* Scrollable Cards */
-    .review-cards-wrapper {
+    .course-review-view-cards-wrapper {
         width: 60%;
         overflow-x: auto;
     }
 
-    .review-cards-scroll {
+    .course-review-view-cards-scroll {
         display: flex;
         gap: 1.5rem;
         padding-bottom: 1rem;
         scroll-snap-type: x mandatory;
     }
 
-    .review-card {
+    .course-review-view-card {
         min-width: 250px;
         max-width: 250px;
         background-color: #fff;
@@ -36,73 +35,73 @@
         scroll-snap-align: start;
     }
 
-    .review-card-top {
+    .course-review-view-card-top {
         display: flex;
         justify-content: space-between;
         margin-bottom: 1rem;
     }
 
-    .review-user {
+    .course-review-view-user {
         display: flex;
         gap: 0.75rem;
     }
 
-    .review-avatar {
+    .course-review-view-avatar {
         width: 40px;
         height: 40px;
         border-radius: 50%;
         object-fit: cover;
     }
 
-    .review-name {
+    .course-review-view-name {
         font-size: 1rem;
         margin: 0;
     }
 
-    .review-stars {
+    .course-review-view-stars {
         font-size: 1rem;
         color: #ccc;
     }
 
-        .review-stars .star.filled {
+        .course-review-view-stars .star.filled {
             color: #FFD700;
         }
 
-    .review-date {
+    .course-review-view-date {
         font-size: 0.85rem;
         color: #777;
     }
 
-    .review-text {
+    .course-review-view-text {
         font-size: 0.95rem;
         color: #333;
         line-height: 1.4;
     }
 
     /* Summary */
-    .review-summary {
+    .course-review-view-summary {
         width: 30%;
         text-align: center;
         padding: 1rem;
     }
 
-        .review-summary h1 {
+        .course-review-view-summary h1 {
             font-size: 3rem;
             margin: 0;
             color: #344AEA;
         }
 
-        .review-summary h5 {
+        .course-review-view-summary h5 {
             font-size: 1rem;
             color: #555;
             margin-top: 0.5rem;
         }
 
-    .spacer {
+    .course-review-view-spacer {
         height: 2rem;
     }
 
-    .show-all-btn {
+    .course-review-view-show-all-btn {
         margin-top: 1.5rem;
         padding: 0.75rem 1.25rem;
         background-color: #344AEA;
@@ -114,11 +113,11 @@
         transition: background 0.2s ease;
     }
 
-        .show-all-btn:hover {
+        .course-review-view-show-all-btn:hover {
             background-color: #2A3EC1;
         }
 
-    .review-modal {
+    .course-review-view-modal {
         display: none;
         position: fixed;
         top: 0;
@@ -133,7 +132,7 @@
         padding: 2rem;
     }
 
-    .review-modal-content {
+    .course-review-view-modal-content {
         background: #fff;
         width: 90%;
         max-width: 700px;
@@ -142,7 +141,7 @@
         position: relative;
     }
 
-    .review-modal-close {
+    .course-review-view-modal-close {
         position: absolute;
         top: 1rem;
         right: 1rem;
@@ -150,14 +149,14 @@
         cursor: pointer;
     }
 
-    .review-modal-title {
+    .course-review-view-modal-title {
         font-size: 2rem;
         margin-bottom: 1.5rem;
         color: #222;
         text-align: center;
     }
 
-    .review-modal-list {
+    .course-review-view-modal-list {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
@@ -166,67 +165,67 @@
         padding-right: 0.5rem;
     }
 
-    .review-modal-card {
+    .course-review-view-modal-card {
         background-color: #f9f9f9;
         border-radius: 12px;
         padding: 1rem 1.5rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
-        .review-modal-card .review-user {
+        .course-review-view-modal-card .course-review-view-user {
             display: flex;
             gap: 0.75rem;
             margin-bottom: 0.5rem;
         }
 
-        .review-modal-card .review-avatar {
+        .course-review-view-modal-card .course-review-view-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             object-fit: cover;
         }
 
-        .review-modal-card .review-name {
+        .course-review-view-modal-card .course-review-view-name {
             margin: 0;
             font-size: 1rem;
             font-weight: bold;
         }
 
-        .review-modal-card .review-stars {
+        .course-review-view-modal-card .course-review-view-stars {
             font-size: 0.9rem;
             color: #ccc;
         }
 
-            .review-modal-card .review-stars .star.filled {
+            .course-review-view-modal-card .course-review-view-stars .star.filled {
                 color: #FFD700;
             }
 
-        .review-modal-card .review-date {
+        .course-review-view-modal-card .course-review-view-date {
             font-size: 0.8rem;
             color: #777;
         }
 
-        .review-modal-card .review-text {
+        .course-review-view-modal-card .course-review-view-text {
             font-size: 0.95rem;
             color: #333;
             line-height: 1.4;
         }
 </style>
 
-<h1 class="review-heading">Learner Reviews</h1>
+<h1 class="course-review-view-heading">Learner Reviews</h1>
 
-<div class="review-section">
-    <div class="review-cards-wrapper">
-        <div class="review-cards-scroll">
+<div class="course-review-view-section">
+    <div class="course-review-view-cards-wrapper">
+        <div class="course-review-view-cards-scroll">
             @foreach (var review in Model.Reviews)
             {
-                <div class="review-card">
-                    <div class="review-card-top">
-                        <div class="review-user">
-                            <img src="@review.User.UserAvatar" class="review-avatar" />
+                <div class="course-review-view-card">
+                    <div class="course-review-view-card-top">
+                        <div class="course-review-view-user">
+                            <img src="@review.User.UserAvatar" class="course-review-view-avatar" />
                             <div>
-                                <h4 class="review-name">@review.User.FirstName @review.User.LastName</h4>
-                                <div class="review-stars">
+                                <h4 class="course-review-view-name">@review.User.FirstName @review.User.LastName</h4>
+                                <div class="course-review-view-stars">
                                     @{
                                         for (int star = 1; star <= 5; star++)
                                         {
@@ -236,20 +235,20 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="review-date">
+                        <div class="course-review-view-date">
                             <p>@review.CreatedAt.ToString("MMMM dd, yyyy")</p>
                         </div>
                     </div>
-                    <p class="review-text">@review.Comment</p>
+                    <p class="course-review-view-text">@review.Comment</p>
                 </div>
             }
         </div>
     </div>
 
     <!-- Right: Summary + Button -->
-    <div class="review-summary">
+    <div class="course-review-view-summary">
         <h1>@Model.AverageRating.ToString("0.0")</h1>
-        <div class="review-stars">
+        <div class="course-review-view-stars">
             @{
                 var avg = Math.Round(Model.AverageRating);
                 for (int i = 1; i <= 5; i++)
@@ -260,30 +259,30 @@
         </div>
         <h5>Average Rating</h5>
 
-        <div class="spacer"></div>
+        <div class="course-review-view-spacer"></div>
 
         <h1>@Model.Reviews.Count</h1>
         <h5>Reviews</h5>
 
-        <button class="show-all-btn" onclick="openReviewModal()">Show All Reviews</button>
+        <button class="course-review-view-show-all-btn" onclick="openReviewModal()">Show All Reviews</button>
 
         <!-- Modal HTML -->
-        <div id="review-modal" class="review-modal">
-            <div class="review-modal-content">
-                <span class="review-modal-close" onclick="closeReviewModal()">&times;</span>
-                <h2 class="review-modal-title">All Reviews</h2>
+        <div id="course-review-view-modal" class="course-review-view-modal">
+            <div class="course-review-view-modal-content">
+                <span class="course-review-view-modal-close" onclick="closeReviewModal()">&times;</span>
+                <h2 class="course-review-view-modal-title">All Reviews</h2>
 
-                <div class="review-modal-list">
+                <div class="course-review-view-modal-list">
                     @if (Model.Reviews != null && Model.Reviews.Count > 0)
                     {
                         foreach (var review in Model.Reviews)
                         {
-                            <div class="review-modal-card">
-                                <div class="review-user">
-                                    <img src="@review.User.UserAvatar" class="review-avatar" />
+                            <div class="course-review-view-modal-card">
+                                <div class="course-review-view-user">
+                                    <img src="@review.User.UserAvatar" class="course-review-view-avatar" />
                                     <div>
-                                        <h4 class="review-name">@review.User.FirstName @review.User.LastName</h4>
-                                        <div class="review-stars">
+                                        <h4 class="course-review-view-name">@review.User.FirstName @review.User.LastName</h4>
+                                        <div class="course-review-view-stars">
                                             @{
                                                 for (int star = 1; star <= 5; star++)
                                                 {
@@ -291,10 +290,10 @@
                                                 }
                                             }
                                         </div>
-                                        <p class="review-date">@review.CreatedAt.ToString("MMMM dd, yyyy")</p>
+                                        <p class="course-review-view-date">@review.CreatedAt.ToString("MMMM dd, yyyy")</p>
                                     </div>
                                 </div>
-                                <p class="review-text">@review.Comment</p>
+                                <p class="course-review-view-text">@review.Comment</p>
                             </div>
                         }
                     }
@@ -312,18 +311,25 @@
 
 <script>
     function openReviewModal() {
-        const modal = document.getElementById('review-modal');
+        const modal = document.getElementById('course-review-view-modal');
         modal.style.display = 'flex';
     }
 
     function closeReviewModal() {
-        const modal = document.getElementById('review-modal');
+        const modal = document.getElementById('course-review-view-modal');
         modal.style.display = 'none';
     }
 
     // Close modal if clicking outside the content
-    document.getElementById('review-modal').addEventListener('click', function(e) {
+    document.getElementById('course-review-view-modal').addEventListener('click', function(e) {
         if (e.target === this) {
+            closeReviewModal();
+        }
+    });
+
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === "Escape") {
             closeReviewModal();
         }
     });

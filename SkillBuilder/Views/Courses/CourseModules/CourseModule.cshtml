@@ -6,6 +6,8 @@
     ViewData["UseCourseNavbar"] = true;
     var courseModules = Model.CourseModules.ToList();
     var moduleDataIndex = 0;
+    var userId = User.FindFirst("UserId")?.Value;
+    var finalProject = Model.ProjectSubmissions.FirstOrDefault(p => p.UserId == userId);
 }
 
 <style>
@@ -555,10 +557,75 @@
         cursor: not-allowed;
         opacity: 0.6;
     }
+
+    .final-project-upload {
+        display: none;
+    }
+
+    #giveFeedbackBtn {
+        background: #007bff;
+        color: #fff;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        transition: background 0.2s ease;
+    }
+
+        #giveFeedbackBtn:hover:not(:disabled) {
+            background: #0056b3;
+        }
+
+        #giveFeedbackBtn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+    .final-submit-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .final-submit-modal .modal-box {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+            .final-submit-modal .modal-box h2 {
+                margin-bottom: 1rem;
+            }
+
+            .final-submit-modal .modal-box p {
+                margin-bottom: 2rem;
+            }
+
+            .final-submit-modal .modal-box button {
+                padding: 0.75rem 1.5rem;
+                background: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+            }
 </style>
 
 <div class="course-module-container">
-    <button id="resetBtn">Reset Progress</button>
+    @* <button id="resetBtn">Reset Progress</button> *@
     <!-- Header -->
     <div class="course-module-header progress-header">
         <span class="course-title">@Model.Title</span>
@@ -576,6 +643,12 @@
             @for (int i = 0; i < courseModules.Count; i++)
             {
                 var mod = courseModules[i];
+
+                if (mod == null || mod.Contents == null || !mod.Contents.Any())
+                {
+                    continue; // 👈 skip empty/ghost modules
+                }
+
                 var contents = mod.Contents.ToList();
                 <div class="module-chapter">
                     <h3>Module @(@i + 1): @mod.Title</h3>
@@ -588,11 +661,18 @@
                     }
                 </div>
             }
+
+            <div class="module-chapter">
+                <h3>Final Project</h3>
+                <div class="module-tab final-project-tab locked" data-index="@courseModules.Count">
+                    Final Project
+                </div>
+            </div>
         </div>
 
         <!-- Right Content Area -->
         <div class="module-content" id="moduleContent">
-            <!-- dynamic content goes here -->
+
         </div>
     </div>
 
@@ -602,7 +682,7 @@
 
             <!-- Date Selection -->
             <label for="sessionDate" style="display:block; margin-bottom: 0.5rem; text-align:left;">Date</label>
-            <input type="date" id="sessionDate" style="width: 100%; padding: 0.5rem; margin-bottom: 1.2rem;" />
+            <input type="date" id="sessionDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" style="width: 100%; padding: 0.5rem; margin-bottom: 1.2rem;" />
 
             <!-- Time Input -->
             <label for="sessionTime" style="display:block; margin-bottom: 0.5rem; text-align:left;">Time</label>
@@ -675,7 +755,6 @@
 
     <div id="tahi-course-completion-modal" class="tahi-cc-modal" style="display:none;">
         <div class="tahi-cc-modal-content">
-            <span id="tahi-cc-modal-close" class="tahi-cc-modal-close" onclick="closeTahiModal()">&times;</span>
 
             <!-- Rating Section -->
             <div id="tahi-cc-rating-section">
@@ -693,10 +772,21 @@
 
             <!-- Congratulations Section -->
             <div id="tahi-cc-congrats-section" style="display:none; text-align:center;">
-                <h2>🎉 Congratulations! 🎉</h2>
-                <p>You’ve successfully completed the course!</p>
+                <h2>🎉 Thank You for your Support! 🎉</h2>
+                <p>You’ve successfully submitted a rating!</p>
                 <button id="tahi-cc-close-btn" class="tahi-cc-btn">Close</button>
             </div>
+        </div>
+    </div>
+
+    <div id="finalProjectSuccessModal" class="final-submit-modal">
+        <div class="modal-box">
+            <h2>🎉 Congratulations!</h2>
+            <p>
+                You have successfully submitted your Final Project.<br />
+                Now, just wait for the Artisan to approve your work to receive your Certificate.
+            </p>
+            <button id="closeFinalProjectModal">Great!</button>
         </div>
     </div>
 
@@ -738,9 +828,25 @@
             }
         }
 
-        const moduleTabs = document.querySelectorAll(".module-tab");
+        const regularTabs = Array.from(document.querySelectorAll(".module-tab"))
+        .filter(tab => !tab.classList.contains("final-project-tab"));
+
+        let currentQuizModuleIndex = null;
+        const finalProjectTab = document.querySelector(".final-project-tab");
         const moduleContent = document.getElementById("moduleContent");
-        let completedModules = JSON.parse(localStorage.getItem("progress_course_@Model.Id")) || [];
+        const userId = "@User.FindFirst("UserId")?.Value";
+        const storageKey = `progress_course_${userId}_@Model.Id`;
+        const completedQuizzesKey = `completedQuizzes_${userId}_@Model.Id`;
+        const activeTabKey = `active_tab_${userId}_@Model.Id`;
+        let completedModules = [];
+        try {
+            const stored = JSON.parse(localStorage.getItem(storageKey));
+            if (Array.isArray(stored) && stored.every(idx => typeof idx === "number")) {
+                completedModules = stored;
+            }
+        } catch (err) {
+            completedModules = [];
+        }
         let dynamicQuizQuestions = [];
         let nextBtn = null;
         let quizCompleted = false;
@@ -750,26 +856,46 @@
             resetBtn.addEventListener("click", resetProgress);
         }
 
-        try {
-            const stored = JSON.parse(localStorage.getItem("progress_course_@Model.Id"));
-            if (Array.isArray(stored)) {
-                completedModules = stored;
+        function checkFinalProjectUnlock() {
+            const moduleTabs = document.querySelectorAll(".module-tab:not(.final-project-tab)");
+            const allCompleted = Array.from(moduleTabs).length > 0 && Array.from(moduleTabs).every(tab => tab.classList.contains("completed"));
+
+            const finalProjectTabEl = document.querySelector(".final-project-tab");
+            if (finalProjectTabEl) {
+                if (allCompleted) {
+                    finalProjectTabEl.classList.remove("locked");
+                } else {
+                    finalProjectTabEl.classList.add("locked");
+                    finalProjectTabEl.classList.remove("active"); // don't show active unless unlocked + chosen
+                }
             }
-        } catch (err) {
-            completedModules = [];
         }
 
+        if (!Array.isArray(completedModules)) completedModules = [];
+        validateCompletedModules();
+
         function validateCompletedModules() {
-            completedModules = completedModules.filter((idx, i) => {
-                if (idx === 0) return true;
-                return completedModules.includes(idx - 1);
-            });
+            if (!Array.isArray(completedModules)) completedModules = [];
+
+            // Only keep a module if previous one is completed
+            const validated = [];
+            completedModules.sort((a,b) => a-b);
+            for (let i = 0; i < completedModules.length; i++) {
+                const idx = completedModules[i];
+                if (idx === 0 || validated.includes(idx - 1)) {
+                    validated.push(idx);
+                }
+            }
+
+            // ✅ DO NOT remove final project here
+            completedModules = validated;
         }
 
         console.log("completedModules:", completedModules);
 
         function updateModuleTabs() {
-            moduleTabs.forEach((tab, idx) => {
+            // update classes on regularTabs
+            regularTabs.forEach((tab, idx) => {
                 tab.classList.remove("active", "completed", "locked");
 
                 if (completedModules.includes(idx)) {
@@ -777,24 +903,50 @@
                 }
 
                 if (idx === 0 || completedModules.includes(idx - 1)) {
-                    tab.classList.remove("locked");
+                    tab.classList.remove("locked"); // first module unlocked
                 } else {
                     tab.classList.add("locked");
                 }
+                checkFinalProjectUnlock();
             });
+            // Handle finalProjectTab class (locked/unlocked) relative to regular tabs completion
+            if (finalProjectTab) {
+                // Unlock final project only when all regular tabs completed
+                if (completedModules.length === regularTabs.length) {
+                    finalProjectTab.classList.remove("locked");
+                } else {
+                    finalProjectTab.classList.add("locked");
+                }
+            }
 
-            const savedActiveIndex = parseInt(localStorage.getItem("active_tab_@Model.Id"));
-            let targetIndex = !isNaN(savedActiveIndex) ? savedActiveIndex : 0;
+            // Restore last active (supports numeric index or "finalProject")
+            const savedActive = localStorage.getItem(activeTabKey);
 
-            if (targetIndex !== 0 && !completedModules.includes(targetIndex - 1)) {
+            // If finalProject was last active, load it and bail out
+            if (savedActive === "finalProject") {
+                // clear any active class on regular tabs
+                regularTabs.forEach(t => t.classList.remove("active"));
+                finalProjectTab?.classList.add("active");
+                loadFinalProject();
+                updateProgressDisplay();
+                return;
+            }
+
+            // otherwise parse numeric
+            const parsed = parseInt(savedActive, 10);
+            let targetIndex = (!isNaN(parsed) ? parsed : 0);
+
+            // targetIndex must be bounded to regularTabs length
+            if (targetIndex < 0) targetIndex = 0;
+            if (targetIndex >= regularTabs.length) {
                 targetIndex = completedModules.length > 0 ? Math.max(...completedModules) : 0;
             }
 
-            moduleTabs.forEach(t => t.classList.remove("active"));
-
-            if (moduleTabs[targetIndex]) {
-                moduleTabs[targetIndex].classList.add("active");
-                loadTab(targetIndex);
+            // set active on the chosen regular tab
+            regularTabs.forEach(t => t.classList.remove("active"));
+            if (regularTabs[targetIndex]) {
+                regularTabs[targetIndex].classList.add("active");
+                loadTab(targetIndex); // safe: targetIndex maps to moduleData
             }
 
             updateProgressDisplay();
@@ -820,10 +972,20 @@
         }
 
         function updateProgressDisplay() {
-            if (moduleTabs.length === 0) return;
-            const percentage = Math.round((new Set(completedModules).size / moduleTabs.length) * 100);
-            document.querySelector(".course-progress-label").innerText = `${percentage}%`;
-            document.querySelector(".course-progress-bar .filled").style.width = `${percentage}%`;
+            if (regularTabs.length === 0) return;
+
+            let completedCount = new Set(completedModules).size;
+            const totalModules = regularTabs.length;
+
+            const finalProjectCompleted = localStorage.getItem(`finalProjectCompleted_${userId}_@Model.Id`) === "true";
+
+            // ✅ Add final project to count if completed
+            if (finalProjectCompleted) completedCount += 1;
+
+            const displayPercentage = Math.round((completedCount / (totalModules + 1)) * 100);
+
+            document.querySelector(".course-progress-label").innerText = `${displayPercentage}%`;
+            document.querySelector(".course-progress-bar .filled").style.width = `${displayPercentage}%`;
         }
 
         function resetProgress() {
@@ -839,17 +1001,20 @@
                 return response.json();
             })
             .then(() => {
-                localStorage.removeItem(`progress_course_@Model.Id`);
-                localStorage.removeItem(`active_tab_@Model.Id`);
+                // Remove all relevant localStorage keys
+                localStorage.removeItem(storageKey);
+                localStorage.removeItem(activeTabKey);
+                localStorage.removeItem(completedQuizzesKey);
+                localStorage.removeItem(`finalProjectCompleted_${userId}_@Model.Id`);
 
+                // Reset in-memory progress
                 completedModules = [];
                 validateCompletedModules();
                 updateModuleTabs();
                 updateProgressDisplay();
 
-                setTimeout(() => {
-                    location.reload();
-                }, 500);
+                // Optional: reload page to fully refresh the UI
+                setTimeout(() => location.reload(), 500);
             })
             .catch(err => {
                 alert("An error occurred while resetting progress.");
@@ -964,7 +1129,9 @@
                 nextBtn.onclick = () => goToNextTab(index);
 
                 nextBtnWrapper.appendChild(nextBtn);
-                moduleContent.appendChild(nextBtnWrapper);  // 👈 append outside the centered content
+                moduleContent.appendChild(nextBtnWrapper);
+
+                nextBtn.disabled = !isQuizCompleted(index);
             }
 
             // SESSION
@@ -1006,154 +1173,298 @@
                     }
                 };
             }
+        }
 
-            // ACTIVITY
-            else if (data.type === "Activity") {
-                inner.innerHTML = `
-                    <h1>${data.title}</h1>
-                    <p>${data.contentText}</p>
-                    <input type="file" id="activityUpload" accept="image/*" />
-                    <button id="submitActivityBtn" class="quiz-launch-btn">Submit Activity</button>
-                    <div id="activityPreview" style="margin-top:1rem;"></div>
-                `;
+        function loadFinalProject() {
+            moduleContent.innerHTML = `<div id="moduleInnerContent" class="centered-module-content"></div>`;
+            const inner = document.getElementById("moduleInnerContent");
+            // Values injected from server → course creator’s inputs
+            const finalProjectData = {title: @Html.Raw(JsonSerializer.Serialize(Model.FinalProjectTitle)),description: @Html.Raw(JsonSerializer.Serialize(Model.FinalProjectDescription))};
 
-                // Create Next button container
-                const nextBtnWrapper = document.createElement("div");
-                nextBtnWrapper.style.marginTop = "2rem";
-                nextBtnWrapper.style.textAlign = "right";
+            inner.innerHTML = `
+                <div class="final-project-wrapper" style="
+                    max-width: 700px;
+                    margin: 0 auto;
+                    padding: 2rem;
+                    background: #fff;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                ">
+                    <h1 style="font-size:1.8rem; margin-bottom:1rem; text-align:center;">Final Project</h1>
 
-                // Create Next button
-                nextBtn = document.createElement("button");
-                nextBtn.innerText = "Next";
-                nextBtn.className = "quiz-launch-btn";
-                nextBtn.disabled = true; // initially disabled
-                nextBtn.onclick = () => goToNextTab(index);
+                    <div style="margin-bottom:2rem; text-align:center;">
+                        <h3 style="margin-bottom:0.5rem; color:#333;">
+                            ${finalProjectData?.title ?? "Untitled Final Project"}
+                        </h3>
+                        <p style="color:#666;">
+                            ${finalProjectData?.description ?? "No description provided."}
+                        </p>
+                    </div>
 
-                nextBtnWrapper.appendChild(nextBtn);
-                moduleContent.appendChild(nextBtnWrapper);
+                    <hr style="margin:2rem 0;" />
 
-                // Use Razor to generate the upload URL safely
-                const uploadUrl = '@Url.Action("UploadActivity", "Courses")';
+                    <h2 style="font-size:1.3rem; margin-bottom:1rem;">Your Submission</h2>
 
-                document.getElementById("submitActivityBtn").onclick = async () => {
-                    const fileInput = document.getElementById("activityUpload");
-                    if (!fileInput.files.length) { alert("Please select an image"); return; }
+                    <div class="form-group" style="margin-bottom:1.5rem;">
+                        <label for="finalProjectSubmissionTitle" style="font-weight:600;">Project Title *</label>
+                        <input type="text" id="finalProjectSubmissionTitle" class="form-control"
+                                placeholder="Enter your project title"
+                                style="width:100%; padding:0.75rem; border:1px solid #ccc; border-radius:8px;" />
+                    </div>
 
-                    const file = fileInput.files[0];
-                    const formData = new FormData();
-                    formData.append("file", file);
-                    formData.append("courseId", '@Model.Id');
-                    formData.append("moduleIndex", index);
+                    <div class="form-group" style="margin-bottom:1.5rem;">
+                        <label for="finalProjectSubmissionCaption" style="font-weight:600;">Caption / Description *</label>
+                        <textarea id="finalProjectSubmissionCaption" class="form-control" rows="3"
+                                    placeholder="Enter a brief caption"
+                                    style="width:100%; padding:0.75rem; border:1px solid #ccc; border-radius:8px;"></textarea>
+                    </div>
 
-                    try {
-                        const res = await fetch(uploadUrl, { method: "POST", body: formData });
-                        if (!res.ok) throw new Error("Failed to upload activity.");
-                        const data = await res.json();
+                    <div class="form-group" style="margin-bottom:1.5rem;">
+                        <label for="finalProjectImage" style="font-weight:600;">Upload Image *</label>
+                        <input type="file" id="finalProjectImage" class="form-control" accept="image/*"
+                                style="display:block; margin-top:0.5rem;" />
+                    </div>
 
-                        document.getElementById("activityPreview").innerHTML = `<p>Uploaded successfully!</p><img src="${data.url}" style="max-width:200px;" />`;
+                    <div id="finalProjectPreview" style="margin-top:1rem; text-align:center;"></div>
 
-                        // Enable Next button
-                        nextBtn.disabled = false;
+                    <button id="submitFinalProjectBtn" class="btn-primary"
+                            style="margin-top:2rem; width:100%; padding:0.75rem; border:none; border-radius:8px; background:#007bff; color:#fff; font-weight:600; cursor:pointer;">
+                        Submit Final Project
+                    </button>
+                </div>
+            `;
 
-                        // ⚡ Immediately mark Activity as completed
-                        if (!completedModules.includes(index)) {
-                        completedModules.push(index);
+            // ✅ attach preview handler
+            document.getElementById("finalProjectImage")
+                .addEventListener("change", function () {
+                    previewFinalProject(this);
+                });
 
-                        // 1️⃣ Update local progress
-                        localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
-                        updateProgressDisplay();
+            // ✅ attach submit handler
+            document.getElementById("submitFinalProjectBtn")
+                .addEventListener("click", submitFinalProject);
 
-                        // 2️⃣ Sync immediately with server
-                        fetch('/Courses/UpdateProgress', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ courseId: @Model.Id, completedModules })
-                        })
-                        .then(res => res.ok ? console.log("Activity progress synced ✅") : console.error("Sync failed ❌"))
-                        .catch(err => console.error("Error syncing:", err));
-                    }
-
-                    } catch (err) { console.error(err); alert("Failed to upload activity."); }
-                };
+            const finalProjectCompleted = localStorage.getItem(`finalProjectCompleted_${userId}_@Model.Id`) === "true";
+            if (finalProjectCompleted) {
+                const submitBtn = document.getElementById("submitFinalProjectBtn");
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = "Submitted";
+                }
+                addFeedbackButton();
             }
+        }
+
+        // make sure it's accessible globally
+        window.loadFinalProject = loadFinalProject;
+
+        // ✅ Handles preview before submitting
+        function previewFinalProject(input) {
+            const previewContainer = document.getElementById("finalProjectPreview");
+            previewContainer.innerHTML = "";
+
+            const file = input.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image")) {
+                alert("Only image files are allowed.");
+                input.value = "";
+                return;
+            }
+
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(file);
+            img.style.maxWidth = "100%";
+            img.style.borderRadius = "8px";
+            previewContainer.appendChild(img);
+        }
+
+        // ✅ make it globally available
+        window.previewFinalProject = previewFinalProject;
+
+        // ✅ Final Project submission
+        async function submitFinalProject() {
+            const title = document.getElementById("finalProjectSubmissionTitle")?.value.trim();
+            const caption = document.getElementById("finalProjectSubmissionCaption")?.value.trim();
+            const file = document.getElementById("finalProjectImage")?.files[0];
+            const submitBtn = document.getElementById("submitFinalProjectBtn");
+
+            if (!title) return alert("Please enter a project title.");
+            if (!caption) return alert("Please enter a project caption.");
+            if (!file) return alert("Please upload your project file.");
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting...";
+
+            const formData = new FormData();
+            formData.append("Title", title);
+            formData.append("Description", caption);
+            formData.append("File", file);
+            formData.append("CourseId", "@Model.Id");
+
+            try {
+                const response = await fetch(`/Courses/SubmitFinalProject`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Show modal instead of alert
+                    const modal = document.getElementById("finalProjectSuccessModal");
+                    const closeBtn = document.getElementById("closeFinalProjectModal");
+
+                    if (modal) modal.style.display = "flex";
+
+                    closeBtn.onclick = () => {
+                        modal.style.display = "none";
+                        // Optional: refresh or update progress
+                        updateProgressDisplay(true);
+                    };
+
+                    // Disable submit button to prevent multiple submissions
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = "Submitted";
+
+                    // Persist Final Project completion for this user
+                    localStorage.setItem(`finalProjectCompleted_${userId}_@Model.Id`, "true");
+
+                    // Add the "Give Feedback" button dynamically
+                    addFeedbackButton();
+                } else {
+                    alert(result.message || "Failed to submit project.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Submit Final Project";
+                }
+            } catch (err) {
+                console.error(err);
+                alert("An error occurred while submitting the project.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Final Project";
+            }
+        }
+
+        function addFeedbackButton() {
+            if (document.getElementById("giveFeedbackBtn")) return; // prevent duplicates
+
+            const wrapper = document.createElement("div");
+            wrapper.style.position = "absolute";  // relative to module
+            wrapper.style.bottom = "1.5rem";
+            wrapper.style.right = "1.5rem";
+            wrapper.style.zIndex = 10; // above module content
+
+            const btn = document.createElement("button");
+            btn.id = "giveFeedbackBtn";
+            btn.innerText = "Give Feedback";
+            btn.onclick = () => openTahiModal();
+
+            wrapper.appendChild(btn);
+
+            // append inside module content area
+            const moduleContent = document.getElementById("moduleContent");
+            moduleContent.style.position = "relative"; // ensure button positions correctly
+            moduleContent.appendChild(wrapper);
         }
 
         function saveProgress() {
             completedModules = [...new Set(completedModules)];
 
-            const activeIndex = parseInt(localStorage.getItem("active_tab_@Model.Id"));
+            const activeIndex = parseInt(localStorage.getItem(activeTabKey));
             const maxAllowed = Math.max(...completedModules, 0);
 
             if (activeIndex > maxAllowed + 1) {
                 return;
             }
 
-            localStorage.setItem(`progress_course_@Model.Id`, JSON.stringify(completedModules));
+            localStorage.setItem(storageKey, JSON.stringify(completedModules));
             syncProgressWithServer();
         }
 
         function goToNextTab(currentIndex) {
-            if (currentIndex >= moduleTabs.length) return;
+            if (currentIndex >= regularTabs.length) return;
+
+            const isFinalProject = currentIndex === regularTabs.length - 1;
 
             if (!completedModules.includes(currentIndex)) {
                 completedModules.push(currentIndex);
                 saveProgress();
+
                 const lessonType = moduleData[currentIndex]?.type || "Text";
 
-                const points = {
+                // Points logic
+                let points = {
                     "Text": 10,
                     "Image + Text": 15,
                     "Video": 20,
                     "Quiz": 10,
-                    "Session": 60,
-                    "Activity": 100,
+                    "Session": 60
                 }[lessonType] || 5;
+
+                if (isFinalProject) {
+                    points = 100; // final project points
+                }
 
                 showPointsPopup(points);
             }
 
-            const nextIndex = currentIndex + 1;
-
-            fetch('/Courses/UpdateProgress', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    courseId: @Model.Id,
-                    completedModules: [currentIndex] // wrap in array
-                })
-            });
-
             validateCompletedModules();
             updateModuleTabs();
+            checkFinalProjectUnlock();
 
-            const nextTab = moduleTabs[nextIndex];
+            const nextIndex = currentIndex + 1;
+            const nextTab = regularTabs[nextIndex];
 
             if (nextTab) {
                 nextTab.classList.remove("locked");
-
                 localStorage.setItem("active_tab_@Model.Id", nextIndex);
-                moduleTabs.forEach(t => t.classList.remove("active"));
+                regularTabs.forEach(t => t.classList.remove("active"));
                 nextTab.classList.add("active");
                 loadTab(nextIndex);
                 quizCompleted = false;
+            } else if (currentIndex === regularTabs.length - 1) {
+                // Next step: go to Final Project
+                completedModules.push(currentIndex); // mark current as completed
+                saveProgress();
+                validateCompletedModules();
+                updateModuleTabs();
+                checkFinalProjectUnlock();
+
+                // unlock and activate final project
+                finalProjectTab?.classList.remove("locked");
+                regularTabs.forEach(t => t.classList.remove("active"));
+                finalProjectTab?.classList.add("active");
+
+                // Persist state and load final project
+                localStorage.setItem("active_tab_@Model.Id", "finalProject");
+                loadFinalProject();
             } else {
-                openTahiModal();
+                openTahiModal(); // show completion modal
             }
         }
 
-        moduleTabs.forEach(tab => {
+        // --- Regular module tabs (numeric) ---
+        regularTabs.forEach(tab => {
             tab.addEventListener("click", function () {
-                const index = parseInt(this.dataset.tab);
-
                 if (this.classList.contains("locked")) return;
-
-                localStorage.setItem("active_tab_@Model.Id", index);
-
-                moduleTabs.forEach(t => t.classList.remove("active"));
+                const index = parseInt(this.dataset.tab, 10);
+                localStorage.setItem(activeTabKey, String(index));
+                regularTabs.forEach(t => t.classList.remove("active"));
                 this.classList.add("active");
                 loadTab(index);
             });
         });
+
+        // --- Final Project tab (separate) ---
+        if (finalProjectTab) {
+            finalProjectTab.addEventListener("click", function () {
+                if (this.classList.contains("locked")) return;
+                localStorage.setItem(activeTabKey, "finalProject");
+                regularTabs.forEach(t => t.classList.remove("active"));
+                this.classList.add("active");
+                loadFinalProject();
+            });
+        }
 
         let currentQ = 0, selected = null, score = 0;
 
@@ -1173,7 +1484,8 @@
             }
         }
 
-        window.startDynamicQuizByIndex = function (index) {
+        window.startDynamicQuizByIndex = function(index) {
+            currentQuizModuleIndex = index;  // store current module index
             const quizData = moduleData[index]?.quizQuestions || [];
             if (!quizData.length) {
                 alert("No quiz data found for this module.");
@@ -1218,21 +1530,28 @@
         function showFeedback(correct) {
             const box = document.getElementById("feedbackBox");
             const msg = document.getElementById("feedbackMsg");
+            const tryAgainBtn = document.getElementById("tryAgainBtn");
+            const continueBtn = document.getElementById("continueNextBtn");
 
-            if (!box || !msg) {
-                console.error("⚠️ Missing #feedbackBox or #feedbackMsg in DOM.");
-                return;
-            }
+            if (!box || !msg) return;
 
             box.classList.remove("wrong", "correct");
 
             if (correct) {
                 msg.innerText = "✅ Correct! Well done!";
-                tryAgainBtn.style.display = "none"; // Hide the Try Again button
+                box.classList.add("correct");
+
+                // Correct → only continue enabled
+                tryAgainBtn.style.display = "none";
+                continueBtn.disabled = false;
+
             } else {
                 msg.innerText = "❌ Wrong! Please try again.";
                 box.classList.add("wrong");
-                tryAgainBtn.style.display = "inline-block"; // Show the Try Again button
+
+                // Wrong → both try again and continue enabled
+                tryAgainBtn.style.display = "inline-block";
+                continueBtn.disabled = false;
             }
 
             box.style.display = "flex";
@@ -1248,6 +1567,9 @@
         }
 
         function tryAgain() {
+            const feedbackBox = document.getElementById("feedbackBox");
+            if(feedbackBox) feedbackBox.style.display = "none";
+
             loadDynamicQuestion();
         }
 
@@ -1273,6 +1595,21 @@
 
             const nextBtn = document.getElementById("continueNextBtn");
             if (nextBtn) nextBtn.disabled = false;
+
+            // ✅ Use the stored index here
+            markQuizCompleted(currentQuizModuleIndex);
+            nextBtn.disabled = false;
+        }
+
+        function isQuizCompleted(index) {
+            const stored = JSON.parse(localStorage.getItem(completedQuizzesKey)) || [];
+            return stored.includes(index);
+        }
+
+        function markQuizCompleted(index) {
+            const stored = JSON.parse(localStorage.getItem(completedQuizzesKey)) || [];
+            if (!stored.includes(index)) stored.push(index);
+            localStorage.setItem(completedQuizzesKey, JSON.stringify(stored));
         }
 
         window.openSessionModal = function () {
@@ -1341,7 +1678,7 @@
             const date = document.getElementById("sessionDate").value;
             const time = document.getElementById("sessionTime").value;
             const message = document.getElementById("sessionMessage").value;
-            const selectedTabIndex = parseInt(localStorage.getItem("active_tab_@Model.Id")) || 0;
+            const selectedTabIndex = parseInt(localStorage.getItem(activeTabKey)) || 0;
             const currentModule = moduleData[selectedTabIndex];
             const courseId = @Model.Id;
             const lessonTitle = currentModule?.title || "Untitled";
@@ -1380,6 +1717,7 @@
 
         validateCompletedModules();
         updateModuleTabs();
+        checkFinalProjectUnlock();
 
         console.log("Module Data:", moduleData);
 
@@ -1390,8 +1728,16 @@
         window.openSessionModal = openSessionModal;
         window.closeSessionModal = closeSessionModal;
 
+        window.addEventListener('beforeunload', function(e) {
+            const quizModal = document.getElementById("quizModal");
+            if (quizModal && quizModal.classList.contains("show")) {
+                e.preventDefault();
+                e.returnValue = ''; // modern browsers require this
+            }
+        });
 
         let tahiCCSelectedRating = 0;
+
         const submitBtn = document.getElementById("tahi-cc-submit-btn");
 
         if (submitBtn) {
@@ -1419,13 +1765,17 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ courseId, rating: tahiCCSelectedRating, comment })
                     });
-
                     const data = await res.json();
                     if (!data.success) throw new Error("Failed to submit review");
 
-                    // Show Congrats
+                    // Mark rating as sent
+                    localStorage.setItem(`course_${courseId}_ratingSent`, true);
+
+                    // Show Congrats section
                     document.getElementById("tahi-cc-rating-section").style.display = "none";
                     document.getElementById("tahi-cc-congrats-section").style.display = "block";
+
+
                 } catch (err) {
                     console.error(err);
                     alert("Failed to submit review.");
@@ -1438,25 +1788,15 @@
             const modal = document.getElementById("tahi-course-completion-modal");
             modal.style.display = "flex";
 
+            // Disable closing unless rating submitted
+            modal.addEventListener("click", e => e.stopPropagation());
+
             const submitBtn = document.getElementById("tahi-cc-submit-btn");
-            submitBtn.disabled = true;  // ensure it starts disabled
-            tahiCCSelectedRating = 0;
+            submitBtn.disabled = true; // must select a star first
+
+            tahiCCSelectedRating = 0; // now works
             updateTahiCCStars(0);
             document.getElementById("tahi-cc-comment").value = "";
-        }
-
-        // Close modal AND reset
-        function closeTahiModal() {
-            const modal = document.getElementById("tahi-course-completion-modal");
-            if (modal) modal.style.display = "none";
-
-            // Reset Tahi modal
-            document.getElementById("tahi-cc-rating-section").style.display = "block";
-            document.getElementById("tahi-cc-congrats-section").style.display = "none";
-            document.getElementById("tahi-cc-comment").value = "";
-            updateTahiCCStars(0);
-            if (submitBtn) submitBtn.disabled = true;
-            tahiCCSelectedRating = 0;
         }
 
         // Update star visuals
@@ -1468,7 +1808,6 @@
         }
 
         window.openTahiModal = openTahiModal;
-        window.closeTahiModal = closeTahiModal;
 
         const courseLink = "@Model.Link";
 

@@ -221,17 +221,24 @@
         <!-- My Work -->
         <div class="artisan-section">
             <h1>My Work</h1>
-            <div class="artisan-gallery">
-                @foreach (var work in Model.ArtisanWorks)
-                {
-                    <img src="@work.ImageUrl"
-                         alt="@work.Caption"
-                         class="gallery-img"
-                         data-title="@work.Title"
-                         data-publish="@work.PublishDate.ToString("MMMM dd, yyyy")"
-                         data-caption="@work.Caption" />
-                }
-            </div>
+            @if (Model.ArtisanWorks != null && Model.ArtisanWorks.Any())
+            {
+                <div class="artisan-gallery">
+                    @foreach (var work in Model.ArtisanWorks)
+                    {
+                        <img src="@work.ImageUrl"
+                             alt="@work.Caption"
+                             class="gallery-img"
+                             data-title="@work.Title"
+                             data-publish="@work.PublishDate.ToString("MMMM dd, yyyy")"
+                             data-caption="@work.Caption" />
+                    }
+                </div>
+            }
+            else
+            {
+                <p style="color:#777; font-style:italic;">This artisan hasn’t shared any works yet.</p>
+            }
         </div>
 
         <!-- Work Detail Modal -->
@@ -252,16 +259,23 @@
         <!-- My Courses -->
         <div class="artisan-section">
             <h1>My Courses</h1>
-            <div class="artisan-courses">
-                @foreach (var course in Model.Courses)
-                {
-                    <a href="/Courses/@course.Link" class="course-card">
-                        <img src="@course.ImageUrl" alt="Course Image" />
-                        <div class="course-card-title">@course.Title</div>
-                        <div class="course-card-desc">@course.Overview</div>
-                    </a>
-                }
-            </div>
+            @if (Model.Courses != null && Model.Courses.Any())
+            {
+                <div class="artisan-courses">
+                    @foreach (var course in Model.Courses)
+                    {
+                        <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="course-card">
+                            <img src="@course.ImageUrl" alt="Course Image" />
+                            <div class="course-card-title">@course.Title</div>
+                            <div class="course-card-desc">@course.Overview</div>
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <p style="color:#777; font-style:italic;">This artisan hasn’t published any courses yet.</p>
+            }
         </div>
     </div>
 </div>

@@ -1,0 +1,197 @@
+﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
+
+<style>
+    .material-add-btn-wrapper {
+        text-align: right;
+        margin-top: 1.5rem;
+    }
+
+    .material-add-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #344AEA;
+        background-color: transparent;
+        border: 1.5px solid #344AEA;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+        .material-add-btn:hover {
+            background-color: #344AEA;
+            color: white;
+        }
+
+    .material-entry {
+        border: 1px solid #ccc;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .material-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .material-title {
+        font-size: 1.1rem;
+    }
+
+    .material-size {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .material-delete {
+        background: none;
+        border: none;
+        color: #888;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+    .material-fields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .material-form-group {
+        flex: 1;
+    }
+
+        .material-form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .material-form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border: 1px solid #aaa;
+            border-radius: 6px;
+        }
+
+    .material-upload-wrapper {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+        .material-upload-wrapper input[type="file"] {
+            flex: 1;
+        }
+
+        .material-upload-wrapper button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            background-color: #E0EDFF;
+            color: #1957D2;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+    .material-description {
+        margin-top: 1rem;
+    }
+</style>
+
+<div class="material-section">
+    <h3>Course Materials</h3>
+    <div id="material-list"></div>
+    <div class="material-add-btn-wrapper">
+        <button type="button" class="material-add-btn" onclick="addMaterial()">+ Add Material</button>
+    </div>
+</div>
+
+<script>
+    let materialIndex = 0;
+
+    function addMaterial(preloadData) {
+        const list = document.getElementById("material-list");
+        const index = materialIndex++;
+
+        const container = document.createElement("div");
+        container.className = "material-entry";
+        container.setAttribute("data-index", index);
+
+        const titleValue = preloadData?.Title ?? "";
+        const descValue = preloadData?.Description ?? "";
+        const fileSize = preloadData?.FileSize ?? 0;
+
+        container.innerHTML = `
+            <div class="material-header">
+                <span class="material-title">Material ${index + 1}</span>
+                <span class="material-size">${fileSize > 0 ? (fileSize / 1024).toFixed(1) + " KB" : ""}</span>
+                <span class="material-delete" onclick="removeMaterial(${index})">🗑️</span>
+            </div>
+
+            <div class="material-fields">
+                <div class="material-form-group">
+                    <label>Material Title</label>
+                    <input type="text" name="Materials[${index}].Title" placeholder="Sample course material.pdf" value="${titleValue}" />
+                </div>
+                <div class="material-form-group">
+                    <label>Replace File</label>
+                    <div class="material-upload-wrapper">
+                        <input type="file" name="Materials[${index}].UploadFile" />
+                        <button type="button">Upload</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="material-form-group material-description">
+                <label>Description</label>
+                <input type="text" name="Materials[${index}].Description" placeholder="Add a description..." value="${descValue}" />
+            </div>
+        `;
+
+        list.appendChild(container);
+        renumberMaterials();
+    }
+
+    function removeMaterial(index) {
+        const item = document.querySelector(`.material-entry[data-index='${index}']`);
+        if (item) item.remove();
+        renumberMaterials();
+    }
+
+    function renumberMaterials() {
+        const materials = document.querySelectorAll('.material-entry');
+        materials.forEach((entry, i) => {
+            entry.setAttribute("data-index", i);
+            const titleSpan = entry.querySelector(".material-title");
+            if (titleSpan) titleSpan.textContent = `Material ${i + 1}`;
+
+            const titleInput = entry.querySelector("input[name*='Title']");
+            const fileInput = entry.querySelector("input[type='file']");
+            const descInput = entry.querySelector("input[name*='Description']");
+            const deleteBtn = entry.querySelector(".material-delete");
+
+            if (titleInput) titleInput.name = `Materials[${i}].Title`;
+            if (fileInput) fileInput.name = `Materials[${i}].UploadFile`;
+            if (descInput) descInput.name = `Materials[${i}].Description`;
+            if (deleteBtn) deleteBtn.setAttribute("onclick", `removeMaterial(${i})`);
+        });
+
+        materialIndex = materials.length;
+    }
+
+    // ---------------- PRELOAD EXISTING MATERIALS ----------------
+    document.addEventListener("DOMContentLoaded", () => {
+        const preloadMaterials = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Materials ?? new List<SkillBuilder.Models.ViewModels.CourseMaterialViewModel>()));
+        preloadMaterials.forEach(mat => addMaterial(mat));
+    });
+</script>

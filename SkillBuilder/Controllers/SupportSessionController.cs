@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
+using SkillBuilder.Services;
 using System.Security.Claims;
 
 namespace SkillBuilder.Controllers
@@ -10,10 +11,12 @@ namespace SkillBuilder.Controllers
     public class SupportSessionController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public SupportSessionController(AppDbContext context)
+        public SupportSessionController(AppDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         private string? GetUserId() => User.FindFirst("UserId")?.Value;
@@ -121,6 +124,21 @@ namespace SkillBuilder.Controllers
 
             await _context.SaveChangesAsync();
 
+            // Notify learner
+            if (request.User != null)
+            {
+                await AddNotificationAsync(
+                    request.User.Id,
+                    $"✅ Your support session for '{request.Course?.Title}' has been confirmed by the artisan."
+                );
+            }
+
+            // Notify artisan
+            await AddNotificationAsync(
+                artisanId,
+                $"You have confirmed the support session for '{request.Course?.Title}'."
+            );
+
             // Return the full updated object
             return Json(request);
         }
@@ -128,6 +146,7 @@ namespace SkillBuilder.Controllers
         public class DeclineSessionRequest
         {
             public int Id { get; set; }
+            public string? Reason { get; set; }
         }
 
         [HttpPost("Decline")]
@@ -145,6 +164,27 @@ namespace SkillBuilder.Controllers
 
             request.Status = "Declined";
             await _context.SaveChangesAsync();
+
+            // Notify learner with reschedule action
+            if (request.User != null)
+            {
+                var message = $"❌ Your support session for '{request.Course?.Title}' has been declined by the artisan.";
+                if (!string.IsNullOrWhiteSpace(data.Reason))
+                    message += $" Reason: {data.Reason}";
+
+                await AddNotificationAsync(
+                    request.User.Id,
+                    message,
+                    "Reschedule Session",
+                    $"/Support/RequestSession/{request.Course?.Id}"
+                );
+            }
+
+            // Notify artisan
+            await AddNotificationAsync(
+                artisanId,
+                $"You have declined the support session for '{request.Course?.Title}'."
+            );
 
             // return the updated request
             return Ok(new
@@ -186,6 +226,22 @@ namespace SkillBuilder.Controllers
             request.CompletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            // Notify learner
+            if (request.User != null)
+            {
+                await AddNotificationAsync(
+                    request.User.Id,
+                    $"✅ Your support session for '{request.Course?.Title}' has been completed by the artisan."
+                );
+            }
+
+            // Notify artisan
+            await AddNotificationAsync(
+                artisanId,
+                $"You marked the support session for '{request.Course?.Title}' as completed."
+            );
+
             return Ok(new { success = true });
         }
 
@@ -294,6 +350,25 @@ namespace SkillBuilder.Controllers
                 .FirstOrDefaultAsync();
 
             return Json(new { status = latestRequest?.Status });
+        }
+
+        private async Task AddNotificationAsync(string userId, string message, string? actionText = null, string? actionUrl = null)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(message))
+                return;
+
+            var notification = new Notification
+            {
+                UserId = userId,
+                Message = message,
+                ActionText = actionText,
+                ActionUrl = actionUrl,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
         }
     }
 }

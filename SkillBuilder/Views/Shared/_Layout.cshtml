@@ -5,142 +5,145 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <meta charset="utf-8" />
-    <title>@ViewData["Title"] - SkillBuilder</title>
-    <link rel="stylesheet" href="~/assets/css/style.css" />
-</head>
+    <head>
+        <meta charset="utf-8" />
+        <title>@ViewData["Title"] - SkillBuilder</title>
+        <link rel="stylesheet" href="~/assets/css/style.css" />
+    </head>
 
-<body>
+    <body>
 
-    <!-- Modal Overlay -->
-    <div id="modal-overlay" class="modal-overlay"></div>
+        <!-- Modal Overlay -->
+        <div id="modal-overlay" class="modal-overlay"></div>
 
-    <!-- Teach on Tahi Modal -->
-    @Html.Partial("Sections/_TeachOnTahiModal")
+        <!-- Notification Modal -->
+        @await Html.PartialAsync("Sections/_NotificationModal")
 
-    <!-- Login Modal -->
-    @Html.Partial("Sections/_LoginModal")
+        <!-- Teach on Tahi Modal -->
+        @Html.Partial("Sections/_TeachOnTahiModal")
 
-    <!-- Signup Modal -->
-    @Html.Partial("Sections/_SignupModal")
+        <!-- Login Modal -->
+        @Html.Partial("Sections/_LoginModal")
 
-    <!-- Celebration Modal -->
-    @Html.Partial("Modals/_CelebrationModal")
+        <!-- Signup Modal -->
+        @Html.Partial("Sections/_SignupModal")
 
-    <header>
-        @if (ViewData["UseCourseNavbar"] as bool? ?? false)
-        {
-            @Html.Partial("Sections/_CourseCatalogNavbar")
-        }
-        else
-        {
-            @Html.Partial("Sections/_LandingPageNavbar")
-        }
-    </header>
+        <!-- Celebration Modal -->
+        @Html.Partial("Modals/_CelebrationModal")
 
-    <main role="main">
-        @RenderBody()
-     </main>
+        <header>
+            @if (ViewData["UseCourseNavbar"] as bool? ?? false)
+            {
+                @Html.Partial("Sections/_CourseCatalogNavbar")
+            }
+            else
+            {
+                @Html.Partial("Sections/_LandingPageNavbar")
+            }
+        </header>
 
-    <footer class="footer-section">
-        <div class="footer-content">
-            <!-- First Column -->
-            <div class="footer-column footer-col-wide">
-                <img src="~/assets/Logos/Tahi.svg" alt="Logo" class="footer-logo" />
-                <p class="footer-description">
-                    Stitching Tradition and Technology through Learning: A Community-Based Skill Builder for Cultural and Creative Art Skills
-                </p>
-            </div>
+        <main role="main">
+            @RenderBody()
+         </main>
 
-            <!-- Second Column -->
-            <div class="footer-column">
-                <h5>Courses</h5>
-                <a href="#">Traditional Skills</a>
-                <a href="#">General Skills</a>
-                <a href="#">Beginner Course</a>
-                <a href="#">Advanced Course</a>
-            </div>
+        <footer class="footer-section">
+            <div class="footer-content">
+                <!-- First Column -->
+                <div class="footer-column footer-col-wide">
+                    <img src="~/assets/Logos/Tahi.svg" alt="Logo" class="footer-logo" />
+                    <p class="footer-description">
+                        Stitching Tradition and Technology through Learning: A Community-Based Skill Builder for Cultural and Creative Art Skills
+                    </p>
+                </div>
 
-            <!-- Third Column -->
-            <div class="footer-column">
-                <h5>About Us</h5>
-                <a href="#">About</a>
-                <a href="#">Terms and Conditions</a>
-                <a href="#">Privacy Policy</a>
-            </div>
+                <!-- Second Column -->
+                <div class="footer-column">
+                    <h5>Courses</h5>
+                    <a href="#">Traditional Skills</a>
+                    <a href="#">General Skills</a>
+                    <a href="#">Beginner Course</a>
+                    <a href="#">Advanced Course</a>
+                </div>
 
-            <!-- Fourth Column -->
-            <div class="footer-column">
-                <h5>Inquiries</h5>
-                <a href="tel:+639123456789">+63 912 3456 789</a>
-                <a href="tel:+0201234567">(02) 0123 4567</a>
-                <a href="mailto:tahi@gmail.com">tahi@gmail.com</a>
-            </div>
+                <!-- Third Column -->
+                <div class="footer-column">
+                    <h5>About Us</h5>
+                    <a href="#">About</a>
+                    <a href="#">Terms and Conditions</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
 
-            <!-- Fifth Column -->
-            <div class="footer-column">
-                <h5>Follow us</h5>
-                <div class="social-icons">
-                    <a href="#"><img src="/assets/Logos/Instagram.svg"></a>
-                    <a href="#"><img src="/assets/Logos/Facebook.svg"></a>
-                    <a href="#"><img src="/assets/Logos/Gmail.svg"></a>
-                    <a href="#"><img src="/assets/Logos/Twitter.svg"></a>
+                <!-- Fourth Column -->
+                <div class="footer-column">
+                    <h5>Inquiries</h5>
+                    <a href="tel:+639123456789">+63 912 3456 789</a>
+                    <a href="tel:+0201234567">(02) 0123 4567</a>
+                    <a href="mailto:tahi@gmail.com">tahi@gmail.com</a>
+                </div>
+
+                <!-- Fifth Column -->
+                <div class="footer-column">
+                    <h5>Follow us</h5>
+                    <div class="social-icons">
+                        <a href="#"><img src="/assets/Logos/Instagram.svg"></a>
+                        <a href="#"><img src="/assets/Logos/Facebook.svg"></a>
+                        <a href="#"><img src="/assets/Logos/Gmail.svg"></a>
+                        <a href="#"><img src="/assets/Logos/Twitter.svg"></a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <hr class="footer-separator" />
+            <hr class="footer-separator" />
 
-        <div class="footer-bottom">
-            <p class="footer-left">© @DateTime.Now.Year Tahi Paborito. All rights reserved.</p>
-            <p class="footer-right">Philippines</p>
-        </div>
+            <div class="footer-bottom">
+                <p class="footer-left">© @DateTime.Now.Year Tahi Paborito. All rights reserved.</p>
+                <p class="footer-right">Philippines</p>
+            </div>
 
-    </footer>
+        </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
-    <script src="@(Url.Content("~/assets/js/script.js"))"></script>
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+        <script src="@(Url.Content("~/assets/js/script.js"))"></script>
 
-    <!-- Load Appwrite SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0"></script>
+        <!-- Load Appwrite SDK -->
+        <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0"></script>
 
-    <!-- Initialize Appwrite Client (Only Once) -->
-    <script>
-        window.appwriteClient = new Appwrite.Client()
-            .setEndpoint("https://fra.cloud.appwrite.io/v1")
-            .setProject("689ad4040030d8902c02");
+        <!-- Initialize Appwrite Client (Only Once) -->
+        <script>
+            window.appwriteClient = new Appwrite.Client()
+                .setEndpoint("https://fra.cloud.appwrite.io/v1")
+                .setProject("689ad4040030d8902c02");
 
-        window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
-    </script>
+            window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
+        </script>
 
-    <script>
-        function toggleDropdown() {
-            const dropdown = document.getElementById("exploreDropdown");
-            const button = document.querySelector(".dropbtn");
+        <script>
+            function toggleDropdown() {
+                const dropdown = document.getElementById("exploreDropdown");
+                const button = document.querySelector(".dropbtn");
 
-            if (!dropdown || !button) return; // guard clause
+                if (!dropdown || !button) return; // guard clause
 
-            const isOpen = dropdown.classList.contains("show");
+                const isOpen = dropdown.classList.contains("show");
 
-            dropdown.classList.toggle("show");
-            button.classList.toggle("active", !isOpen);
-        }
-
-        document.addEventListener("click", function (event) {
-            const dropdown = document.getElementById("exploreDropdown");
-
-            if (!dropdown) return; // dropdown doesn't exist on this page
-
-            const button = event.target.closest(".dropbtn");
-
-            if (!button && !event.target.closest(".dropdown")) {
-                dropdown.classList.remove("show");
-                document.querySelector(".dropbtn")?.classList.remove("active");
+                dropdown.classList.toggle("show");
+                button.classList.toggle("active", !isOpen);
             }
-        });
-    </script>
+
+            document.addEventListener("click", function (event) {
+                const dropdown = document.getElementById("exploreDropdown");
+
+                if (!dropdown) return; // dropdown doesn't exist on this page
+
+                const button = event.target.closest(".dropbtn");
+
+                if (!button && !event.target.closest(".dropdown")) {
+                    dropdown.classList.remove("show");
+                    document.querySelector(".dropbtn")?.classList.remove("active");
+                }
+            });
+        </script>
 
 
-</body>
+    </body>
 </html>

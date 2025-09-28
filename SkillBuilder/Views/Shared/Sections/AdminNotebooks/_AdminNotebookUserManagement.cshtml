@@ -1,7 +1,17 @@
-﻿    @using SkillBuilder.Models.ViewModels
-    @model AdminProfileViewModel
+﻿@using SkillBuilder.Models.ViewModels
+@model AdminProfileViewModel
 
-    <style>
+@{
+    var showArchived = false;
+    if (ViewBag.ShowArchived != null)
+        showArchived = (bool)ViewBag.ShowArchived;
+
+    var existingUsers = Model.AllUsers.Where(u => !u.IsArchived).ToList();
+    var archivedUsers = Model.AllUsers.Where(u => u.IsArchived).ToList();
+}
+
+
+<style>
     /* Section */
     .user-mgmt-user-section {
         padding: 2rem;
@@ -52,10 +62,6 @@
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
-
-        .user-mgmt-user-row:nth-child(even) {
-            background-color: #f1f1f1;
-        }
 
         .user-mgmt-user-row:hover {
             background-color: #e6e6e6;
@@ -127,22 +133,26 @@
 
         .user-mgmt-delete-btn:hover {
             background-color: #c0392b;
+            color: white;
         }
 
     .user-mgmt-deactivate-btn {
-        background-color: #FFA500;
+        background-color: #e74c3c;
     }
 
         .user-mgmt-deactivate-btn:hover {
-            background-color: #e69500;
+            background-color: #c0392b;
+            color: white;
         }
 
     .user-mgmt-reactivate-btn {
-        background-color: #4CAF50;
+        background-color: #A5D6A7 !important;
+        color: #4CAF50 !important;
     }
 
         .user-mgmt-reactivate-btn:hover {
-            background-color: #3d8e41;
+            background-color: #3d8e41 !important;
+            color: white !important;
         }
 
     /* Backdrop */
@@ -203,8 +213,20 @@
 
     .user-mgmt-admin-modal-confirm {
         background-color: #e74c3c;
-        color: white;
+        color: #fff;
     }
+
+        .user-mgmt-admin-modal-confirm:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none !important;
+        }
+
+        .user-mgmt-admin-modal-confirm:not(:disabled):hover {
+            transform: scale(1.05);
+            background-color: #c0392b;
+        }
 
     .user-mgmt-admin-modal-cancel {
         background-color: #ccc;
@@ -241,6 +263,7 @@
             border: none;
             outline: none;
             font-size: 1rem;
+            cursor: text;
         }
 
         .user-mgmt-search-bar-wrapper button {
@@ -258,21 +281,60 @@
                 width: 1.2rem;
                 height: 1.2rem;
             }
-    </style>
+
+    .archived-user-greyed {
+        opacity: 0.5;
+    }
+
+    .user-mgmt-user-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .user-mgmt-user-tab {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .user-mgmt-user-tab.active {
+            border-bottom-color: #344AEA;
+            color: #344AEA;
+        }
+
+        .user-mgmt-user-tab:hover {
+            color: #344AEA;
+        }
+ </style>
 
 <div class="user-mgmt-user-section">
     <div class="user-mgmt-user-header">All Users</div>
 
     <div class="user-mgmt-user-controls">
         <div class="user-mgmt-search-bar-wrapper">
-            <input type="text" placeholder="Search by name or email..." />
-            <button type="button">
+            <input type="text" id="userSearchInput" placeholder="Search by name or email..." />
+            <button type="button" id="userSearchButton">
                 <img src="/assets/Icons/Search.ico" alt="Search" />
             </button>
         </div>
     </div>
 
+    <div class="user-mgmt-user-tabs">
+        <button class="user-mgmt-user-tab active" data-tab="existing">Existing</button>
+        <button class="user-mgmt-user-tab" data-tab="archived">Deleted</button>
+    </div>
+
     <table class="user-mgmt-user-table">
+            <colgroup>
+                <col style="width: 33%;">
+                <col style="width: 33%; text-align:center;">
+                <col style="width: 33%; text-align:right;">
+            </colgroup>
         <thead>
             <tr>
                 <th>Name</th>
@@ -280,55 +342,104 @@
                 <th style="text-align: right;">Actions</th>
             </tr>
         </thead>
-        <tbody>
-            @foreach (var user in Model.AllUsers.Where(u => !u.IsArchived))
-            {
-                <tr class="user-mgmt-user-row">
-                    <td class="user-mgmt-user-cell">
-                        <div class="user-mgmt-user-info">
-                            <img src="@user.UserAvatar" alt="Avatar" />
-                            <div class="user-mgmt-user-details">
-                                <div class="user-mgmt-user-name">
-                                    <a asp-controller="AdminProfile" asp-action="UserProfileByAdmin" asp-route-id="@user.Id" style="text-decoration: none;">
-                                        @user.FirstName @user.LastName
-                                    </a>
+            <tbody>
+                @* Existing users *@
+                @foreach (var user in existingUsers)
+                {
+                    <tr class="user-mgmt-user-row" data-tab="existing">
+                        <td class="user-mgmt-user-cell">
+                            <div class="user-mgmt-user-info">
+                                <img src="@user.UserAvatar" alt="Avatar" />
+                                <div class="user-mgmt-user-details">
+                                    <div class="user-mgmt-user-name">
+                                        <a asp-controller="AdminProfile" asp-action="UserProfileByAdmin" asp-route-id="@user.Id" style="text-decoration: none;">
+                                            @user.FirstName @user.LastName
+                                        </a>
+                                    </div>
+                                    <div class="user-mgmt-user-email">@user.Email</div>
                                 </div>
-                                <div class="user-mgmt-user-email">@user.Email</div>
                             </div>
-                        </div>
-                    </td>
+                        </td>
 
-                    <td class="user-mgmt-user-cell user-mgmt-user-role">
-                        @user.Role
-                    </td>
+                        <td class="user-mgmt-user-cell user-mgmt-user-role">
+                            @user.Role
+                        </td>
 
-                    <td class="user-mgmt-user-cell">
-                        <div class="user-mgmt-action-buttons">
-                            <!-- Delete button -->
-                            <form asp-action="DeleteUser" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
-                                  onsubmit="return adminOpenDeleteModal(this);">
-                                <button type="submit" class="user-mgmt-admin-action-btn user-mgmt-delete-btn">
-                                    Delete User
-                                </button>
-                            </form>
+                        <td class="user-mgmt-user-cell">
+                            <div class="user-mgmt-action-buttons">
+                                <!-- Delete button -->
+                                <form asp-action="DeleteUser" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
+                                      onsubmit="return adminOpenDeleteModal(this);">
+                                    <button type="submit" class="user-mgmt-admin-action-btn user-mgmt-delete-btn">
+                                        Delete User
+                                    </button>
+                                </form>
 
-                            <!-- Toggle Deactivation button -->
-                            <form asp-action="ToggleUserStatus" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
-                                  onsubmit="return adminOpenToggleModal(this, '@(user.IsDeactivated ? "Reactivate" : "Deactivate")');">
-                                @if (user.IsDeactivated)
-                                {
-                                    <button type="submit" class="user-mgmt-admin-action-btn user-mgmt-reactivate-btn">Reactivate</button>
-                                }
-                                else
-                                {
-                                    <button type="submit" class="user-mgmt-admin-action-btn user-mgmt-deactivate-btn">Deactivate</button>
-                                }
-                            </form>
-                        </div>
+                                <!-- Toggle Deactivation button -->
+                                <form asp-action="ToggleUserStatus" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
+                                      onsubmit="return adminOpenToggleModal(this, '@(user.IsDeactivated ? "Reactivate" : "Deactivate")');">
+                                    @if (user.IsDeactivated)
+                                    {
+                                        <button type="submit" class="user-mgmt-admin-action-btn user-mgmt-reactivate-btn">Reactivate</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="user-mgmt-admin-action-btn user-mgmt-deactivate-btn">Deactivate</button>
+                                    }
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+                @* Archived users *@
+                @if (archivedUsers.Any())
+                {
+                    <!-- Archived users -->
+                    @foreach (var user in archivedUsers)
+                    {
+                        <tr class="user-mgmt-user-row" data-tab="archived" style="display:none;">
+                            <td class="user-mgmt-user-cell">
+                                <div class="user-mgmt-user-info archived-user-greyed">
+                                    <img src="@user.UserAvatar" alt="Avatar" />
+                                    <div class="user-mgmt-user-details">
+                                        <div class="user-mgmt-user-name">
+                                            <a asp-controller="AdminProfile" asp-action="UserProfileByAdmin" asp-route-id="@user.Id" style="text-decoration: none;">
+                                                @user.FirstName @user.LastName
+                                            </a>
+                                        </div>
+                                        <div class="user-mgmt-user-email">@user.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="user-mgmt-user-cell user-mgmt-user-role archived-user-greyed">
+                                @user.Role
+                            </td>
+
+                            <td class="user-mgmt-user-cell archived-user-greyedl">
+                                <div class="user-mgmt-action-buttons">
+                                    Deleted
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr class="user-mgmt-user-row" data-tab="archived" style="display:none;">
+                        <td colspan="3" class="user-mgmt-user-cell" style="text-align:center; font-style:italic; color:#777;">
+                            No deleted users yet.
+                        </td>
+                    </tr>
+                }
+
+                <tr id="noUsersMessage" style="display:none;">
+                    <td colspan="3" class="user-mgmt-user-cell" style="text-align:center; font-style:italic; color:#777;">
+                        No users found.
                     </td>
                 </tr>
-            }
-        </tbody>
+            </tbody>
     </table>
 
     <!-- Backdrop -->
@@ -348,16 +459,95 @@
     <div class="user-mgmt-admin-modal" id="adminToggleModal">
         <h3>Confirm Action</h3>
         <p id="adminToggleMessage"></p>
+        <textarea id="adminToggleReason" placeholder="Enter reason (optional)"
+                  style="width:100%; min-height:80px; margin-bottom:1rem; padding:0.5rem; border-radius:6px; border:1px solid #ccc; resize: none;"></textarea>
         <div class="user-mgmt-admin-modal-buttons">
             <button class="user-mgmt-admin-modal-cancel" onclick="adminCloseModal()">Cancel</button>
             <button class="user-mgmt-admin-modal-confirm" id="adminConfirmToggle">Yes</button>
         </div>
     </div>
 
+
 </div>
 
 <script>
-    let adminCurrentForm = null;
+
+    const searchInput = document.getElementById("userSearchInput");
+    const searchButton = document.getElementById("userSearchButton");
+
+    function filterUsers() {
+        const filter = searchInput.value.toLowerCase().trim();
+        const rows = document.querySelectorAll(".user-mgmt-user-row");
+        const activeTab = document.querySelector(".user-mgmt-user-tab.active").dataset.tab;
+
+        let anyVisible = false;
+
+        rows.forEach(row => {
+            // Ignore rows not in active tab
+            if (row.dataset.tab !== activeTab) {
+                row.style.display = "none";
+                return;
+            }
+
+            // Skip the "No users found" message
+            if (row.id === "noUsersMessage") return;
+
+            // Skip empty rows ("No deleted users yet")
+            const isEmptyRow = row.querySelector(".user-mgmt-user-cell")?.innerText.includes("No");
+            if (isEmptyRow) {
+                // Show only if no filter is applied
+                row.style.display = !filter ? "table-row" : "none";
+                return;
+            }
+
+            const nameCell = row.querySelector(".user-mgmt-user-name");
+            const emailCell = row.querySelector(".user-mgmt-user-email");
+            const text = (nameCell?.innerText + " " + emailCell?.innerText).toLowerCase();
+
+            if (!filter || text.includes(filter)) {
+                row.style.display = "table-row";
+                anyVisible = true;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        // Show "No users found" only when searching and nothing matches
+        const noUsersMessage = document.getElementById("noUsersMessage");
+        if (noUsersMessage) {
+            noUsersMessage.style.display = filter && !anyVisible ? "table-row" : "none";
+        }
+    }
+
+    // Trigger search when Enter is pressed
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault(); // prevent form submission
+            filterUsers();
+        }
+    });
+
+    // Trigger search when search button is clicked
+    searchButton.addEventListener("click", filterUsers);
+    
+    // ==========================
+    // Delete User Modal
+    // ==========================
+    let adminCurrentDeleteForm = null;
+
+    function adminOpenDeleteModal(form) {
+        adminCurrentDeleteForm = form;
+        showModal("adminDeleteModal");
+        return false; // prevent immediate form submission
+    }
+
+    function adminConfirmDeleteAction() {
+        if (adminCurrentDeleteForm) adminCurrentDeleteForm.submit();
+    }
+
+    // ==========================
+    // Toggle User Status Modal
+    // ==========================
     let adminCurrentToggleForm = null;
 
     function adminOpenToggleModal(form, action) {
@@ -367,52 +557,91 @@
         document.getElementById("adminToggleMessage").innerText = msg;
 
         const confirmBtn = document.getElementById("adminConfirmToggle");
-        confirmBtn.className = "user-mgmt-admin-modal-confirm"; // reset
+        const reasonTextarea = document.getElementById("adminToggleReason");
 
         if (action === "Reactivate") {
-            confirmBtn.style.backgroundColor = "#4CAF50"; // green
+             confirmBtn.style.backgroundColor = "#4CAF50"; // green
             confirmBtn.innerText = "Reactivate";
+            reasonTextarea.style.display = "none";
+            reasonTextarea.value = "";
+            confirmBtn.disabled = false;
         } else {
-            confirmBtn.style.backgroundColor = "#FFA500"; // orange
+            reasonTextarea.style.display = "block";
+            reasonTextarea.value = "";
             confirmBtn.innerText = "Deactivate";
+            confirmBtn.disabled = true; // Disable until reason entered
+
+            // Enable/disable confirm button based on textarea input
+            reasonTextarea.addEventListener("input", () => {
+                confirmBtn.disabled = reasonTextarea.value.trim() === "";
+            });
         }
 
-        document.getElementById("adminModalBackdrop").style.display = "block";
-        document.getElementById("adminToggleModal").style.display = "block";
+        showModal("adminToggleModal");
         return false;
     }
-
-    document.getElementById("adminModalBackdrop").addEventListener("click", adminCloseModal);
 
     function adminConfirmToggleAction() {
-        if (adminCurrentToggleForm) adminCurrentToggleForm.submit();
+        if (!adminCurrentToggleForm) return;
+
+        const action = document.getElementById("adminConfirmToggle").innerText; // "Deactivate" or "Reactivate"
+        let hiddenInput = adminCurrentToggleForm.querySelector("input[name='reason']");
+
+        if (action === "Reactivate") {
+            if (hiddenInput) hiddenInput.remove();
+        } else {
+            const reason = document.getElementById("adminToggleReason").value;
+            if (!hiddenInput) {
+                hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "reason";
+                adminCurrentToggleForm.appendChild(hiddenInput);
+            }
+            hiddenInput.value = reason;
+        }
+
+        adminCurrentToggleForm.submit();
     }
 
-    document.getElementById("adminConfirmToggle").addEventListener("click", adminConfirmToggleAction);
+    // ==========================
+    // Tab Switching
+    // ==========================
+    const userTabs = document.querySelectorAll(".user-mgmt-user-tab");
+    const userRows = document.querySelectorAll(".user-mgmt-user-row");
 
-    function adminOpenDeleteModal(form) {
-        adminCurrentForm = form;
+    userTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            userTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            const selectedTab = tab.dataset.tab;
+            userRows.forEach(row => {
+                row.style.display = (row.dataset.tab === selectedTab) ? "table-row" : "none";
+            });
+
+            filterUsers();
+        });
+    });
+
+    // ==========================
+    // Modal Utility
+    // ==========================
+    function showModal(modalId) {
         document.getElementById("adminModalBackdrop").style.display = "block";
-        document.getElementById("adminDeleteModal").style.display = "block";
-        return false;
-    }
-
-    function adminConfirmDeleteAction() {
-        if (adminCurrentForm) adminCurrentForm.submit();
+        document.getElementById(modalId).style.display = "block";
     }
 
     function adminCloseModal() {
         document.getElementById("adminModalBackdrop").style.display = "none";
         document.querySelectorAll(".user-mgmt-admin-modal").forEach(m => m.style.display = "none");
-        adminCurrentForm = null;
+        adminCurrentDeleteForm = null;
         adminCurrentToggleForm = null;
     }
 
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") {
-            adminCloseModal();
-        }
-    });
-
+    // Event listeners
+    document.getElementById("adminModalBackdrop").addEventListener("click", adminCloseModal);
+    document.addEventListener("keydown", e => { if (e.key === "Escape") adminCloseModal(); });
     document.getElementById("adminConfirmDelete").addEventListener("click", adminConfirmDeleteAction);
+    document.getElementById("adminConfirmToggle").addEventListener("click", adminConfirmToggleAction);
+
 </script>

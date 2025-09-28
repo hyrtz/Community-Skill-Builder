@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
+using System;
+using System.Linq;
 
 namespace SkillBuilder.Controllers
 {
@@ -25,7 +27,7 @@ namespace SkillBuilder.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return Unauthorized();
 
-                // Find the module by CourseId + ModuleIndex (if you store them like that)
+                // Get modules for the course
                 var courseModules = _context.CourseModules
                     .Where(cm => cm.CourseId == model.CourseId)
                     .Include(cm => cm.Contents)
@@ -39,11 +41,10 @@ namespace SkillBuilder.Controllers
                 if (courseModule == null)
                     return NotFound("Course module not found.");
 
-                var lessonType = model.LessonType;
-
-                if (string.IsNullOrEmpty(lessonType))
+                if (string.IsNullOrEmpty(model.LessonType))
                     return BadRequest("Lesson type is required.");
 
+                // Check if user already completed this module
                 var existing = _context.ModuleProgress
                     .FirstOrDefault(mp => mp.UserId == userId && mp.CourseModuleId == courseModule.Id);
 
@@ -69,20 +70,20 @@ namespace SkillBuilder.Controllers
                     isNewCompletion = true;
                 }
 
+                // Award points if newly completed
                 if (isNewCompletion)
                 {
                     var user = _context.Users.FirstOrDefault(u => u.Id == userId);
                     if (user == null)
                         return NotFound("User not found.");
 
-                    int points = lessonType switch
+                    int points = model.LessonType switch
                     {
                         "Text" => 10,
                         "Image + Text" => 15,
                         "Video" => 20,
                         "Quiz" => 80,
                         "Session" => 60,
-                        "Activity" => 100,
                         _ => 5
                     };
 
@@ -92,7 +93,6 @@ namespace SkillBuilder.Controllers
                 }
 
                 _context.SaveChanges();
-
                 return Ok();
             }
             catch (Exception ex)
@@ -100,12 +100,12 @@ namespace SkillBuilder.Controllers
                 return StatusCode(500, $"Server error: {ex.Message}\n{ex.StackTrace}");
             }
         }
+    }
 
-        public class ModuleProgressDto
-        {
-            public int CourseId { get; set; }
-            public int ModuleIndex { get; set; }
-            public string LessonType { get; set; }
-        }
+    public class ModuleProgressDto
+    {
+        public int CourseId { get; set; }
+        public int ModuleIndex { get; set; }
+        public string LessonType { get; set; }
     }
 }

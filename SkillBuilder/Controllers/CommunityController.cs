@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
 using SkillBuilder.Models.ViewModels;
+using SkillBuilder.Services;
 
 namespace SkillBuilder.Controllers
 {
@@ -11,9 +12,11 @@ namespace SkillBuilder.Controllers
     public class CommunityController : Controller
     {
         private readonly AppDbContext _context;
-        public CommunityController(AppDbContext context)
+        private readonly INotificationService _notificationService;
+        public CommunityController(AppDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpGet("Hub")]
@@ -77,7 +80,7 @@ namespace SkillBuilder.Controllers
             {
                 posts = await _context.CommunityPosts
                     .Include(p => p.Author)
-                    .Where(p => p.IsPublished)
+                    .Where(p => p.IsPublished && p.CommunityId == null)
                     .OrderByDescending(p => p.SubmittedAt)
                     .Take(10)
                     .Select(p => new CommunityPostViewModel
@@ -90,8 +93,8 @@ namespace SkillBuilder.Controllers
                         AuthorId = p.AuthorId,
                         AuthorName = p.Author.FirstName,
                         AuthorAvatarUrl = p.Author.UserAvatar,
-                        CommunityName = p.Community.Name,
-                        Likes = 0, 
+                        CommunityName = "Public", 
+                        Likes = 0,
                         CommentsCount = 0
                     })
                     .ToListAsync();
@@ -162,6 +165,11 @@ namespace SkillBuilder.Controllers
             _context.CommunityPosts.Add(post);
             await _context.SaveChangesAsync();
 
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"✅ Your post '{post.Title}' has been successfully created in the public feed."
+            );
+
             return Ok(new
             {
                 success = true,
@@ -174,6 +182,7 @@ namespace SkillBuilder.Controllers
                     imageUrl = post.ImageUrl,
                     submittedAt = post.SubmittedAt,
                     authorName = user.FirstName,
+                    authorAvatarUrl = user.UserAvatar,
                     communityName = "Public" // since no community
                 }
             });
@@ -218,6 +227,24 @@ namespace SkillBuilder.Controllers
 
             _context.CommunityPosts.Add(post);
             await _context.SaveChangesAsync();
+
+            var memberIds = await _context.CommunityMemberships
+                .Where(m => m.CommunityId == post.CommunityId && m.UserId != userId)
+                .Select(m => m.UserId)
+                .ToListAsync();
+
+            foreach (var memberId in memberIds)
+            {
+                await _notificationService.AddNotificationAsync(
+                    memberId,
+                    $"📝 New post '{post.Title}' has been added in the community '{community.Name}'."
+                );
+            }
+
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"✅ Your post '{post.Title}' has been successfully created in '{community.Name}'."
+            );
 
             return Ok(new
             {
@@ -289,6 +316,11 @@ namespace SkillBuilder.Controllers
 
             await _context.SaveChangesAsync();
 
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"✅ Your Community '{community.Name}' has been created successfully."
+            );
+
             return RedirectToAction("CommunityHub", new { selectedCommunityId = community.Id });
         }
 
@@ -321,6 +353,20 @@ namespace SkillBuilder.Controllers
 
             await _context.SaveChangesAsync();
 
+            var ownerId = community.CreatorId;
+            if (!string.IsNullOrEmpty(ownerId) && ownerId != userId)
+            {
+                await _notificationService.AddNotificationAsync(
+                    ownerId,
+                    $"👤 {User.Identity.Name} has joined your community '{community.Name}'."
+                );
+            }
+
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"✅ You have successfully joined the community '{community.Name}'."
+            );
+
             return Ok(new { success = true, message = "Joined successfully!", membersCount = community.MembersCount });
         }
 
@@ -340,6 +386,7 @@ namespace SkillBuilder.Controllers
 
             return $"/uploads/{folderName}/{fileName}";
         }
+
     }
 
 }

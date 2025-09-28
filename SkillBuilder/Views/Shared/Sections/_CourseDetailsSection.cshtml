@@ -202,6 +202,42 @@
         gap: 1rem;
         align-items: stretch; /* ensure same width for all buttons */
     }
+
+    .enroll-modal-content {
+        max-width: 450px;
+        padding: 2rem 1.5rem;
+        border-radius: 12px;
+        background-color: #fff;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .enroll-modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+        .enroll-modal-buttons .course-detail-enroll-btn {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+            .enroll-modal-buttons .course-detail-enroll-btn:hover {
+                opacity: 0.9;
+            }
+
+        .enroll-modal-buttons .cancel-btn {
+            background-color: #ccc;
+            color: #333;
+        }
 </style>
 
 <section class="course-detail-section">
@@ -268,7 +304,7 @@
 
                                     @if (showCompletionBtn)
                                     {
-                                        <button type="button" class="course-detail-enroll-btn" id="view-completion-btn">View Completion Status</button>
+                                        <button type="button" class="course-detail-enroll-btn" id="view-completion-btn">Receive Course Completion Status</button>
                                     }
                                 </form>
                             }
@@ -291,9 +327,22 @@
         <div class="course-detail-cc-content">
             <span class="course-detail-cc-close" id="completion-modal-close">&times;</span>
             <h2 class="course-detail-cc-title">Course Completion Status</h2>
-            <p style="text-align:center; font-size:1rem; margin-top:1rem;">
-                Wait for the artisan to check your final project.
-            </p>
+
+            @if (userEnrollment?.IsCompleted == true)
+            {
+                <p style="text-align:center; font-size:1rem; margin-top:1rem; margin-bottom: 2rem;">
+                    🎉 Congratulations! You've successfully completed this course.
+                </p>
+                <a href="/Courses/DownloadCertificate/@Model.Id" class="course-detail-enroll-btn" style="text-decoration: none;">
+                    Download Certificate
+                </a>
+            }
+            else
+            {
+                <p style="text-align:center; font-size:1rem; margin-top:1rem;">
+                    Wait for the artisan to check your final project.
+                </p>
+            }
         </div>
     </div>
 
@@ -325,6 +374,20 @@
             </div>
         </div>
     </div>
+
+    <div id="enroll-confirmation-modal" class="course-detail-cc" style="display:none;">
+        <div class="course-detail-cc-content enroll-modal-content">
+            <span class="course-detail-cc-close" id="enroll-modal-close">&times;</span>
+            <h2 class="course-detail-cc-title">Confirm Enrollment</h2>
+            <p style="text-align:center; font-size:1rem; margin-top:1rem;">
+                Are you sure you want to enroll in this course?
+            </p>
+            <div class="enroll-modal-buttons">
+                <button class="course-detail-enroll-btn" id="confirm-enroll-btn">Yes, Enroll</button>
+                <button class="course-detail-enroll-btn cancel-btn" id="cancel-enroll-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
 </section>
 
 <script>
@@ -347,6 +410,24 @@
             });
         });
     });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get("tab");
+
+    if (tabParam) {
+        const targetTab = document.querySelector(`.notebook-tab[data-tab="${tabParam}"]`);
+        const targetContent = document.querySelector(`.tab-content[data-tab="${tabParam}"]`);
+
+        if (targetTab && targetContent) {
+            // Deactivate all first
+            tabs.forEach(t => t.classList.remove("active"));
+            contents.forEach(c => c.classList.remove("active"));
+
+            // Activate requested tab
+            targetTab.classList.add("active");
+            targetContent.classList.add("active");
+        }
+    }
 
     function enrollCourse(courseId) {
         fetch("/Courses/Enroll", {
@@ -427,6 +508,55 @@
         completionModal.addEventListener("click", e => {
             if (e.target === completionModal) completionModal.style.display = "none";
         });
+    }
+
+    function enrollCourse(courseId) {
+        const modal = document.getElementById("enroll-confirmation-modal");
+        modal.style.display = "flex";
+
+        const confirmBtn = document.getElementById("confirm-enroll-btn");
+        const cancelBtn = document.getElementById("cancel-enroll-btn");
+        const closeBtn = document.getElementById("enroll-modal-close");
+
+        // Remove old listeners to prevent duplicates
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+        closeBtn.onclick = null;
+
+        confirmBtn.addEventListener("click", () => {
+            fetch("/Courses/Enroll", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ courseId: courseId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `/Courses/CourseModule/${courseId}`;
+                } else {
+                    console.error("Enrollment failed");
+                }
+            });
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+        closeBtn.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+        modal.addEventListener("click", e => {
+            if (e.target === modal) modal.style.display = "none";
+        });
+
+        // ESC key listener
+        const escHandler = (e) => {
+            if (e.key === "Escape") closeModal();
+        };
+        document.addEventListener("keydown", escHandler);
     }
 
 </script>

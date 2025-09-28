@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
 using SkillBuilder.Models.ViewModels;
+using SkillBuilder.Services;
 
 namespace SkillBuilder.Controllers
 {
@@ -13,11 +15,13 @@ namespace SkillBuilder.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly INotificationService _notificationService;
 
-        public ArtisanCourseController(AppDbContext context, IWebHostEnvironment env)
+        public ArtisanCourseController(AppDbContext context, IWebHostEnvironment env, INotificationService notificationService)
         {
             _context = context;
             _env = env;
+            _notificationService = notificationService;
         }
 
         [HttpGet("CreateCourse")]
@@ -74,34 +78,40 @@ namespace SkillBuilder.Controllers
                 ? string.Join("||", model.LearningObjectives.Where(o => !string.IsNullOrWhiteSpace(o)))
                 : null;
 
+            if (model.FinalProject != null)
+            {
+                course.FinalProjectTitle = model.FinalProject.Title;
+                course.FinalProjectDescription = model.FinalProject.Description;
+            }
+
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
 
-            // ✅ Save Artisan Works
-            if (model.ArtisanWorks != null && model.ArtisanWorks.Any())
-            {
-                foreach (var workVm in model.ArtisanWorks)
-                {
-                    if (workVm.ImageFile != null)
-                    {
-                        var imageUrl = await SaveFileAsync(workVm.ImageFile, "artisan-works");
+            //// ✅ Save Artisan Works
+            //if (model.ArtisanWorks != null && model.ArtisanWorks.Any())
+            //{
+            //    foreach (var workVm in model.ArtisanWorks)
+            //    {
+            //        if (workVm.ImageFile != null)
+            //        {
+            //            var imageUrl = await SaveFileAsync(workVm.ImageFile, "artisan-works");
 
-                        var work = new ArtisanWork
-                        {
-                            ArtisanId = artisan.ArtisanId,
-                            CourseId = course.Id,
-                            Title = workVm.Title ?? string.Empty,
-                            Caption = workVm.Caption ?? string.Empty,
-                            ImageUrl = imageUrl,
-                            PublishDate = DateTime.UtcNow
-                        };
+            //            var work = new ArtisanWork
+            //            {
+            //                ArtisanId = artisan.ArtisanId,
+            //                CourseId = course.Id,
+            //                Title = workVm.Title ?? string.Empty,
+            //                Caption = workVm.Caption ?? string.Empty,
+            //                ImageUrl = imageUrl,
+            //                PublishDate = DateTime.UtcNow
+            //            };
 
-                        _context.ArtisanWorks.Add(work);
-                    }
-                }
+            //            _context.ArtisanWorks.Add(work);
+            //        }
+            //    }
 
-                await _context.SaveChangesAsync();
-            }
+            //    await _context.SaveChangesAsync();
+            //}
 
             // ✅ Save Modules
             if (model.Modules != null)
@@ -128,15 +138,19 @@ namespace SkillBuilder.Controllers
                             Title = lesson.Title,
                             ContentType = lesson.LessonType ?? "Text",
                             Order = j,
-                            Duration = lesson.Duration,
+                            Duration = $"{lesson.DurationValue} {lesson.DurationUnit}",
                             ContentText = lesson.ContentText
                         };
 
-                        if (lesson.ImageFile != null)
-                            moduleContent.MediaUrl = await SaveFileAsync(lesson.ImageFile, "lesson-images");
-
+                        // Fix MediaUrl: prefer Video over Image
                         if (lesson.VideoFile != null)
+                        {
                             moduleContent.MediaUrl = await SaveFileAsync(lesson.VideoFile, "lesson-videos");
+                        }
+                        else if (lesson.ImageFile != null)
+                        {
+                            moduleContent.MediaUrl = await SaveFileAsync(lesson.ImageFile, "lesson-images");
+                        }
 
                         _context.ModuleContents.Add(moduleContent);
                         await _context.SaveChangesAsync();
@@ -153,7 +167,7 @@ namespace SkillBuilder.Controllers
                                     OptionB = q.OptionB,
                                     OptionC = q.OptionC,
                                     OptionD = q.OptionD,
-                                    CorrectAnswer = q.CorrectAnswer
+                                    CorrectAnswer = q.CorrectAnswer ?? ""
                                 };
                                 _context.QuizQuestions.Add(quiz);
                             }
@@ -187,6 +201,11 @@ namespace SkillBuilder.Controllers
 
             await _context.SaveChangesAsync();
 
+            await _notificationService.AddNotificationAsync(
+                artisan.UserId,
+                $"✅ Your course '{course.Title}' has been successfully created!"
+            );
+
             var redirectUrl = Url.Action("ArtisanProfile", "ArtisanProfile", new { id = artisan.ArtisanId });
             if (string.IsNullOrEmpty(redirectUrl))
                 return BadRequest("Redirect URL failed to generate.");
@@ -207,6 +226,341 @@ namespace SkillBuilder.Controllers
                 await file.CopyToAsync(stream);
 
             return $"/uploads/{folderName}/{fileName}";
+        }
+
+        [HttpGet("EditCourse/{courseId}")]
+        public async Task<IActionResult> EditCourse(int courseId)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            var artisan = await _context.Artisans.FirstOrDefaultAsync(a => a.UserId == userId);
+            if (artisan == null) return Unauthorized();
+
+            var course = await _context.Courses
+                .Include(c => c.Materials)
+                .Include(c => c.CourseModules)
+                .ThenInclude(m => m.Contents)
+                .ThenInclude(mc => mc.QuizQuestions)
+                .Include(c => c.ArtisanWorks) // ✅ Include ArtisanWorks
+                .FirstOrDefaultAsync(c => c.Id == courseId && c.CreatedBy == artisan.ArtisanId);
+
+            if (course == null) return NotFound();
+
+            var viewModel = new CourseBuilderViewModel
+            {
+                Course = course,
+                DurationValue = int.TryParse(course.Duration?.Split(' ')[0], out var val) ? val : 0,
+                DurationUnit = course.Duration?.Split(' ').ElementAtOrDefault(1) ?? "hours",
+                LearningObjectives = course.WhatToLearn?.Split("||").ToList() ?? new List<string> { "" },
+                Modules = course.CourseModules
+                    .OrderBy(m => m.Order)
+                    .Select(m => new CourseModuleViewModel
+                    {
+                        Title = m.Title,
+                        Order = m.Order,
+                        Lessons = m.Contents
+                            .OrderBy(c => c.Order)
+                            .Select(l =>
+                            {
+                                int durationValue = 0;
+                                string durationUnit = "minutes";
+
+                                if (!string.IsNullOrWhiteSpace(l.Duration))
+                                {
+                                    var parts = l.Duration.Split(' ');
+                                    int.TryParse(parts[0], out durationValue);
+                                    durationUnit = parts.Length > 1 ? parts[1] : "minutes";
+                                }
+
+                                return new LessonViewModel
+                                {
+                                    Title = l.Title ?? "",
+                                    LessonType = l.ContentType ?? "",
+                                    DurationValue = durationValue,
+                                    DurationUnit = durationUnit,
+                                    ContentText = l.ContentText ?? "",
+                                    ImageFile = null,
+                                    VideoFile = null,
+                                    ImageUrl = l.ContentType == "Image + Text" ? l.MediaUrl : null,
+                                    VideoUrl = l.ContentType == "Video" ? l.MediaUrl : null,
+                                    QuizQuestions = l.QuizQuestions
+                                        .Select(q => new QuizQuestionViewModel
+                                        {
+                                            Id = q.Id,
+                                            QuestionText = q.Question,
+                                            OptionA = q.OptionA,
+                                            OptionB = q.OptionB,
+                                            OptionC = q.OptionC,
+                                            OptionD = q.OptionD,
+                                            CorrectAnswer = q.CorrectAnswer
+                                        }).ToList()
+                                };
+                            }).ToList()
+                    }).ToList(),
+                Materials = course.Materials
+                    .Select(mat => new CourseMaterialViewModel
+                    {
+                        Title = mat.Title,
+                        FileName = mat.FileName,
+                        FileSize = mat.FileSize,
+                        Description = mat.Description
+                    }).ToList(),
+                FinalProject = new FinalProjectViewModel
+                {
+                    Title = course.FinalProjectTitle,
+                    Description = course.FinalProjectDescription
+                },
+                //ArtisanWorks = course.ArtisanWorks
+                //    .Select(w => new ArtisanWorkViewModel
+                //    {
+                //        Id = w.Id,
+                //        CourseId = w.CourseId,
+                //        Title = w.Title,
+                //        Caption = w.Caption,
+                //        ImageUrl = w.ImageUrl // ✅ preload existing image URL
+                //    }).ToList()
+            };
+
+            return View("~/Views/Actions/ArtisanActions/EditCourse.cshtml", viewModel);
+        }
+
+        [HttpPost("EditCourse")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCourse(int courseId, CourseBuilderViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View("~/Views/Actions/ArtisanActions/EditCourse.cshtml", model);
+
+            var userId = User.FindFirst("UserId")?.Value;
+            var artisan = await _context.Artisans.FirstOrDefaultAsync(a => a.UserId == userId);
+            if (artisan == null) return Unauthorized();
+
+            var course = await _context.Courses
+                .Include(c => c.ArtisanWorks)
+                .Include(c => c.Materials)
+                .Include(c => c.CourseModules)
+                .ThenInclude(m => m.Contents)
+                .ThenInclude(l => l.QuizQuestions)
+                .FirstOrDefaultAsync(c => c.Id == courseId && c.CreatedBy == artisan.ArtisanId);
+
+            if (course == null) return NotFound();
+
+            // ------------------ Update Basic Course Info ------------------
+            course.Title = model.Course.Title;
+            course.Category = model.Course.Category;
+            course.Overview = model.Course.Overview;
+            course.Difficulty = model.Course.Difficulty;
+            course.Duration = $"{model.DurationValue} {model.DurationUnit}";
+            course.Requirements = model.Course.Requirements;
+            course.WhatToLearn = model.LearningObjectives != null
+                ? string.Join("||", model.LearningObjectives.Where(o => !string.IsNullOrWhiteSpace(o)))
+                : null;
+            course.FullDescription = model.Course.FullDescription;
+
+            // Update media
+            if (model.ImageFile != null)
+                course.ImageUrl = await SaveFileAsync(model.ImageFile, "course-images");
+            if (model.VideoFile != null)
+                course.Video = await SaveFileAsync(model.VideoFile, "course-videos");
+            if (model.ThumbnailFile != null)
+                course.Thumbnail = await SaveFileAsync(model.ThumbnailFile, "course-thumbnails");
+
+            // ------------------ Update Final Project ------------------
+            if (model.FinalProject != null)
+            {
+                course.FinalProjectTitle = model.FinalProject.Title;
+                course.FinalProjectDescription = model.FinalProject.Description;
+            }
+
+            _context.Courses.Update(course);
+
+            // ------------------ Update Modules and Lessons ------------------
+            if (model.Modules != null)
+            {
+                var formModuleIds = model.Modules.Select(m => m.Id).ToList();
+
+                // Remove deleted modules
+                var modulesToDelete = course.CourseModules
+                    .Where(m => !formModuleIds.Contains(m.Id))
+                    .ToList();
+                if (modulesToDelete.Any()) _context.CourseModules.RemoveRange(modulesToDelete);
+
+                for (int i = 0; i < model.Modules.Count; i++)
+                {
+                    var moduleVm = model.Modules[i];
+                    CourseModule courseModule;
+
+                    // Existing module
+                    if (moduleVm.Id > 0)
+                    {
+                        courseModule = course.CourseModules.First(m => m.Id == moduleVm.Id);
+                        courseModule.Title = moduleVm.Title;
+                        courseModule.Order = i;
+                        _context.CourseModules.Update(courseModule);
+                    }
+                    else
+                    {
+                        // New module
+                        courseModule = new CourseModule
+                        {
+                            CourseId = course.Id,
+                            Title = moduleVm.Title,
+                            Order = i
+                        };
+                        _context.CourseModules.Add(courseModule);
+                        await _context.SaveChangesAsync(); // Need ID for lessons
+                    }
+
+                    // ------------------ Lessons ------------------
+                    if (moduleVm.Lessons != null)
+                    {
+                        var lessonIds = moduleVm.Lessons.Select(l => l.Id).ToList();
+                        var lessonsToDelete = courseModule.Contents
+                            .Where(l => !lessonIds.Contains(l.Id))
+                            .ToList();
+                        if (lessonsToDelete.Any()) _context.ModuleContents.RemoveRange(lessonsToDelete);
+
+                        for (int j = 0; j < moduleVm.Lessons.Count; j++)
+                        {
+                            var lessonVm = moduleVm.Lessons[j];
+                            ModuleContent lesson;
+
+                            // Existing lesson
+                            if (lessonVm.Id > 0)
+                            {
+                                lesson = courseModule.Contents.First(l => l.Id == lessonVm.Id);
+                                lesson.Title = lessonVm.Title;
+                                lesson.ContentType = lessonVm.LessonType ?? "Text";
+                                lesson.Duration = $"{lessonVm.DurationValue} {lessonVm.DurationUnit}";
+                                lesson.ContentText = lessonVm.ContentText;
+
+                                // --------- Media handling ---------
+                                if (lessonVm.ImageFile != null)
+                                {
+                                    lesson.MediaUrl = await SaveFileAsync(lessonVm.ImageFile, "lesson-media");
+                                }
+                                else if (lessonVm.VideoFile != null)
+                                {
+                                    lesson.MediaUrl = await SaveFileAsync(lessonVm.VideoFile, "lesson-media");
+                                }
+                                // else keep existing MediaUrl
+                                // lesson.MediaUrl = lesson.MediaUrl;  <-- no need to assign, already preserved
+
+                                _context.ModuleContents.Update(lesson);
+                            }
+                            else
+                            {
+                                // New lesson
+                                lesson = new ModuleContent
+                                {
+                                    CourseModuleId = courseModule.Id,
+                                    Title = lessonVm.Title,
+                                    ContentType = lessonVm.LessonType ?? "Text",
+                                    Duration = $"{lessonVm.DurationValue} {lessonVm.DurationUnit}",
+                                    ContentText = lessonVm.ContentText,
+                                    MediaUrl = lessonVm.ImageFile != null
+                                        ? await SaveFileAsync(lessonVm.ImageFile, "lesson-media")
+                                        : lessonVm.VideoFile != null
+                                            ? await SaveFileAsync(lessonVm.VideoFile, "lesson-media")
+                                            : null
+                                };
+                                _context.ModuleContents.Add(lesson);
+                                await _context.SaveChangesAsync();
+                            }
+
+                            // ------------------ Quiz Questions ------------------
+                            if (lessonVm.LessonType == "Quiz")
+                            {
+                                lesson.QuizQuestions ??= new List<QuizQuestion>();
+
+                                var quizIds = lessonVm.QuizQuestions?.Select(q => q.Id).ToList() ?? new List<int>();
+                                var quizzesToDelete = lesson.QuizQuestions
+                                    .Where(q => !quizIds.Contains(q.Id))
+                                    .ToList();
+                                if (quizzesToDelete.Any()) _context.QuizQuestions.RemoveRange(quizzesToDelete);
+
+                                for (int qIndex = 0; qIndex < (lessonVm.QuizQuestions?.Count ?? 0); qIndex++)
+                                {
+                                    var qVm = lessonVm.QuizQuestions[qIndex];
+                                    QuizQuestion quiz;
+
+                                    if (qVm.Id > 0)
+                                    {
+                                        quiz = lesson.QuizQuestions.First(q => q.Id == qVm.Id);
+                                        quiz.Question = qVm.QuestionText;
+                                        quiz.OptionA = qVm.OptionA;
+                                        quiz.OptionB = qVm.OptionB;
+                                        quiz.OptionC = qVm.OptionC;
+                                        quiz.OptionD = qVm.OptionD;
+                                        quiz.CorrectAnswer = qVm.CorrectAnswer;
+                                        _context.QuizQuestions.Update(quiz);
+                                    }
+                                    else
+                                    {
+                                        quiz = new QuizQuestion
+                                        {
+                                            ModuleContentId = lesson.Id,
+                                            Question = qVm.QuestionText,
+                                            OptionA = qVm.OptionA,
+                                            OptionB = qVm.OptionB,
+                                            OptionC = qVm.OptionC,
+                                            OptionD = qVm.OptionD,
+                                            CorrectAnswer = qVm.CorrectAnswer
+                                        };
+                                        _context.QuizQuestions.Add(quiz);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ------------------ Artisan Works ------------------
+            if (model.ArtisanWorks != null)
+            {
+                var formIds = model.ArtisanWorks.Where(w => w.Id > 0).Select(w => w.Id).ToList();
+                var toDelete = course.ArtisanWorks.Where(w => w.Id > 0 && !formIds.Contains(w.Id)).ToList();
+                if (toDelete.Any()) _context.ArtisanWorks.RemoveRange(toDelete);
+
+                foreach (var workVm in model.ArtisanWorks.Where(w => w.Id > 0))
+                {
+                    var existingWork = course.ArtisanWorks.FirstOrDefault(w => w.Id == workVm.Id);
+                    if (existingWork != null)
+                    {
+                        existingWork.Title = workVm.Title ?? "";
+                        existingWork.Caption = workVm.Caption ?? "";
+                        if (workVm.ImageFile != null)
+                            existingWork.ImageUrl = await SaveFileAsync(workVm.ImageFile, "artisan-works");
+                    }
+                }
+
+                foreach (var workVm in model.ArtisanWorks.Where(w => w.Id == 0))
+                {
+                    var imageUrl = workVm.ImageFile != null
+                        ? await SaveFileAsync(workVm.ImageFile, "artisan-works")
+                        : null;
+
+                    var newWork = new ArtisanWork
+                    {
+                        ArtisanId = artisan.ArtisanId,
+                        CourseId = course.Id,
+                        Title = workVm.Title ?? "",
+                        Caption = workVm.Caption ?? "",
+                        ImageUrl = imageUrl,
+                        PublishDate = DateTime.UtcNow
+                    };
+                    _context.ArtisanWorks.Add(newWork);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            await _notificationService.AddNotificationAsync(
+                artisan.UserId,
+                $"✏️ Your course '{course.Title}' has been successfully updated!"
+            );
+
+            return RedirectToAction("ArtisanProfile", "ArtisanProfile", new { id = artisan.ArtisanId });
         }
     }
 }

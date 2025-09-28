@@ -1,64 +1,103 @@
-﻿<style>
-    .artisan-review-section {
+﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
+
+@{
+    var activeTab = ViewData["ActiveProjectTab"] as string ?? "pending";
+}
+
+<style>
+    .artisan-projects-section {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
-        min-height: 580px;
-        max-height: 580px;
-        overflow-y: auto;
+        gap: 1.5rem;
     }
 
-    .artisan-review-heading {
+    .artisan-projects-header {
         font-size: 1.8rem;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .artisan-review-card {
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        color: #344AEA;
         margin-bottom: 1rem;
     }
 
-    .artisan-review-student {
+    /* Tabs */
+    .artisan-projects-tabs {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .artisan-projects-tab {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
         font-weight: bold;
-        color: #344AEA;
-        margin-bottom: 0.25rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
     }
 
-    .artisan-review-desc {
-        font-size: 0.95rem;
-        color: #555;
-        margin-bottom: 0.5rem;
+        .artisan-projects-tab.active {
+            border-bottom: 3px solid #344AEA;
+            color: #344AEA;
+        }
+
+        .artisan-projects-tab:hover {
+            color: #344AEA;
+        }
+
+    /* Notebook */
+    .artisan-projects-content .artisan-projects-panel {
+        display: none;
     }
 
-    .artisan-review-course {
-        font-size: 0.9rem;
-        color: #777;
-        font-style: italic;
-    }
+        .artisan-projects-content .artisan-projects-panel.active {
+            display: block;
+        }
 
-    .artisan-review-empty {
-        padding: 2rem;
-        background-color: #fdfdfd;
-        border: 1px dashed #ccc;
+    .artisan-notebook {
+        background: #fff;
+        border: 1px solid #ddd;
         border-radius: 10px;
-        text-align: center;
-        color: #777;
-        font-size: 1rem;
-        line-height: 1.6;
+        padding: 1.5rem;
     }
 </style>
 
-<div class="artisan-review-section">
-    <div class="artisan-review-heading">Project to Review</div>
+<section class="artisan-projects-section">
+    <h2 class="artisan-projects-header">Projects to Review</h2>
 
-    <!-- Replace this with real submissions later -->
-    <div class="artisan-review-empty">
-        No learner projects submitted for review yet.<br />
-        Once learners finish their final activities, they will appear here for your feedback.
+    <!-- Tabs -->
+    <div class="artisan-projects-tabs">
+        <button class="artisan-projects-tab @(activeTab == "pending" ? "active" : "")" data-tab="pending">Pending</button>
+        <button class="artisan-projects-tab @(activeTab == "approved" ? "active" : "")" data-tab="approved">Accepted</button>
+        <button class="artisan-projects-tab @(activeTab == "rejected" ? "active" : "")" data-tab="rejected">Declined</button>
     </div>
-</div>
+
+    <!-- Notebook -->
+    <div class="artisan-notebook artisan-projects-content">
+        <div class="artisan-projects-panel @(activeTab == "pending" ? "active" : "")" data-tab="pending">
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/ProjectsToReviewNotebooks/_ReviewProjectsNotebookPending", Model.ProjectSubmissions.Where(p => p.Status == "Pending").ToList())
+        </div>
+        <div class="artisan-projects-panel @(activeTab == "approved" ? "active" : "")" data-tab="approved">
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/ProjectsToReviewNotebooks/_ReviewProjectsNotebookApproved", Model.ProjectSubmissions.Where(p => p.Status == "Approved").ToList())
+        </div>
+        <div class="artisan-projects-panel @(activeTab == "rejected" ? "active" : "")" data-tab="rejected">
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/ProjectsToReviewNotebooks/_ReviewProjectsNotebookRejected", Model.ProjectSubmissions.Where(p => p.Status == "Rejected").ToList())
+        </div>
+    </div>
+</section>
+
+<script>
+    const tabs = document.querySelectorAll('.artisan-projects-tab');
+    const panels = document.querySelectorAll('.artisan-projects-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const selected = tab.dataset.tab;
+
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            panels.forEach(panel => {
+                panel.classList.toggle('active', panel.dataset.tab === selected);
+            });
+        });
+    });
+</script>

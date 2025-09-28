@@ -129,31 +129,24 @@
     }
 
     .apply-mgmt-admin-action-btn {
-        padding: 0.4rem 0.8rem;
-        border: none;
+        background-color: #FEE4E2;
+        color: #B42318;
+        padding: 0.8rem 0.8rem;
+        border: solid #B42318 1px;
         border-radius: 6px;
         cursor: pointer;
         font-size: 0.9rem;
         font-weight: bold;
-        transition: background-color 0.3s ease;
     }
 
-    .apply-mgmt-reactivate-btn {
-        background-color: #4CAF50;
-        color: white;
-    }
-
-        .apply-mgmt-reactivate-btn:hover {
+        .apply-mgmt-approve-btn:hover {
             background-color: #45a049;
+            color: white;
         }
 
-    .apply-mgmt-delete-btn {
-        background-color: #FF4C4C;
-        color: white;
-    }
-
-        .apply-mgmt-delete-btn:hover {
+        .apply-mgmt-reject-btn:hover {
             background-color: #c0392b;
+            color: white;
         }
 
     .apply-mgmt-modal-backdrop {
@@ -198,8 +191,9 @@
 
     .apply-mgmt-modal-buttons {
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         gap: 1rem;
+        width: 100%;
     }
 
         .apply-mgmt-modal-buttons button {
@@ -209,6 +203,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: background-color 0.3s ease;
+            flex: 1;
         }
 
     .apply-mgmt-modal-confirm {
@@ -228,6 +223,44 @@
     .apply-mgmt-modal-cancel:hover {
         background-color: #b3b3b3;
     }
+
+    .apply-mgmt-modal-confirm:disabled {
+        background-color: #ccc !important;
+        color: #666 !important;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .apply-mgmt-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .apply-mgmt-tab {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .apply-mgmt-tab.active {
+            border-bottom-color: #344AEA;
+            color: #344AEA;
+        }
+
+        .apply-mgmt-tab:hover {
+            color: #344AEA;
+        }
+
+    #applyMgmtRejectReason {
+        border-radius: 6px;
+        border: 1px solid rgb(204, 204, 204);
+        resize: none;
+    }
 </style>
 
 <div class="apply-mgmt-section">
@@ -235,11 +268,18 @@
 
     <div class="apply-mgmt-controls">
         <div class="apply-mgmt-search-bar">
-            <input type="text" placeholder="Search by name or email..." />
-            <button type="button">
+            <input type="text" id="applySearchInput" placeholder="Search by name or email..." />
+            <button type="button" id="applySearchButton">
                 <img src="/assets/Icons/Search.ico" alt="Search" />
             </button>
         </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="apply-mgmt-tabs">
+        <button class="apply-mgmt-tab active" data-tab="applications">Applications</button>
+        <button class="apply-mgmt-tab" data-tab="approved">Approved</button>
+        <button class="apply-mgmt-tab" data-tab="rejected">Rejected</button>
     </div>
 
     <table class="apply-mgmt-table">
@@ -251,32 +291,29 @@
             </tr>
         </thead>
         <tbody>
+            @* Pending Applications *@
             @if (Model.AllPendingApplications != null && Model.AllPendingApplications.Any())
             {
                 foreach (var application in Model.AllPendingApplications)
                 {
-                    var user = application.User;
-
-                    <tr class="apply-mgmt-row">
+                    <tr class="apply-mgmt-row" data-tab="applications">
                         <td class="apply-mgmt-cell">
                             <div class="apply-mgmt-info">
-                                <img src="@user.UserAvatar" alt="Avatar" />
+                                <img src="@application.User.UserAvatar" alt="Avatar" />
                                 <div class="apply-mgmt-details">
                                     <div class="apply-mgmt-name">
                                         <a asp-controller="AdminProfile"
                                            asp-action="ArtisanApplicationViewByAdmin"
                                            asp-route-id="@application.Id"
                                            style="text-decoration: none; color: #344AEA;">
-                                            @user.FirstName @user.LastName
+                                            @application.User.FirstName @application.User.LastName
                                         </a>
                                     </div>
-                                    <div class="apply-mgmt-email">@user.Email</div>
+                                    <div class="apply-mgmt-email">@application.User.Email</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="apply-mgmt-cell apply-mgmt-status">
-                            @application.Status
-                        </td>
+                        <td class="apply-mgmt-cell apply-mgmt-status">@application.Status</td>
                         <td class="apply-mgmt-cell">
                             <div class="apply-mgmt-action-buttons">
                                 <form asp-action="ApproveApplication"
@@ -284,7 +321,7 @@
                                       asp-route-adminId="@Model.Admin.UserId"
                                       method="post"
                                       onsubmit="return applyMgmtOpenModal(this, 'Approve');">
-                                    <button type="submit" class="apply-mgmt-admin-action-btn apply-mgmt-reactivate-btn">
+                                    <button type="submit" class="apply-mgmt-admin-action-btn apply-mgmt-approve-btn">
                                         Approve
                                     </button>
                                 </form>
@@ -294,7 +331,7 @@
                                       asp-route-adminId="@Model.Admin.UserId"
                                       method="post"
                                       onsubmit="return applyMgmtOpenModal(this, 'Reject');">
-                                    <button type="submit" class="apply-mgmt-admin-action-btn apply-mgmt-delete-btn">
+                                    <button type="submit" class="apply-mgmt-admin-action-btn apply-mgmt-reject-btn">
                                         Reject
                                     </button>
                                 </form>
@@ -305,69 +342,238 @@
             }
             else
             {
-                <tr>
-                    <td colspan="3" class="apply-mgmt-cell" style="text-align: center; padding: 2rem; color: #888;">
-                        No pending artisan applications at the moment.
+                <tr class="apply-mgmt-row" data-tab="applications">
+                    <td class="apply-mgmt-cell" colspan="3" style="text-align:center; font-style:italic; color:#777;">
+                        No pending applications yet.
                     </td>
                 </tr>
             }
+
+            @* Approved Applications *@
+            @if (Model.AllApprovedApplications != null && Model.AllApprovedApplications.Any())
+            {
+                foreach (var application in Model.AllApprovedApplications)
+                {
+                    <tr class="apply-mgmt-row" data-tab="approved" style="display:none;">
+                        <td class="apply-mgmt-cell">
+                            <div class="apply-mgmt-info">
+                                <img src="@application.User.UserAvatar" alt="Avatar" />
+                                <div class="apply-mgmt-details">
+                                    <div class="apply-mgmt-name">@application.User.FirstName @application.User.LastName</div>
+                                    <div class="apply-mgmt-email">@application.User.Email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="apply-mgmt-cell apply-mgmt-status">@application.Status</td>
+                        <td class="apply-mgmt-cell">
+                            <div class="apply-mgmt-action-buttons">Approved</div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr class="apply-mgmt-row" data-tab="approved" style="display:none;">
+                    <td class="apply-mgmt-cell" colspan="3" style="text-align:center; font-style:italic; color:#777;">
+                        No approved applications yet.
+                    </td>
+                </tr>
+            }
+
+            @* Rejected Applications *@
+            @if (Model.AllRejectedApplications != null && Model.AllRejectedApplications.Any())
+            {
+                foreach (var application in Model.AllRejectedApplications)
+                {
+                    <tr class="apply-mgmt-row" data-tab="rejected" style="display:none;">
+                        <td class="apply-mgmt-cell">
+                            <div class="apply-mgmt-info">
+                                <img src="@application.User.UserAvatar" alt="Avatar" />
+                                <div class="apply-mgmt-details">
+                                    <div class="apply-mgmt-name">@application.User.FirstName @application.User.LastName</div>
+                                    <div class="apply-mgmt-email">@application.User.Email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="apply-mgmt-cell apply-mgmt-status">@application.Status</td>
+                        <td class="apply-mgmt-cell">
+                            <div class="apply-mgmt-action-buttons">Rejected</div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr class="apply-mgmt-row" data-tab="rejected" style="display:none;">
+                    <td class="apply-mgmt-cell" colspan="3" style="text-align:center; font-style:italic; color:#777;">
+                        No rejected applications yet.
+                    </td>
+                </tr>
+            }
+            <tr id="noApplicationsMessage" style="display:none;">
+                <td colspan="3" class="apply-mgmt-cell" style="text-align:center; font-style:italic; color:#777;">
+                    No applications found.
+                </td>
+            </tr>
         </tbody>
     </table>
+</div>
 
-    <!-- Backdrop -->
-    <div id="applyMgmtModalBackdrop" class="apply-mgmt-modal-backdrop"></div>
+<div id="applyMgmtModalBackdrop" class="apply-mgmt-modal-backdrop"></div>
 
-    <!-- Modal -->
-    <div class="apply-mgmt-modal" id="applyMgmtActionModal">
-        <h3>Confirm Action</h3>
-        <p id="applyMgmtModalMessage"></p>
-        <div class="apply-mgmt-modal-buttons">
-            <button class="apply-mgmt-modal-cancel" onclick="applyMgmtCloseModal()">Cancel</button>
-            <button class="apply-mgmt-modal-confirm" id="applyMgmtConfirmAction">Yes</button>
-        </div>
+<div id="applyMgmtActionModal" class="apply-mgmt-modal">
+    <h3 id="applyMgmtModalMessage">Confirm action</h3>
+    <div id="applyMgmtRejectReasonWrapper" style="display:none; margin-bottom:1rem;">
+        <textarea id="applyMgmtRejectReason" placeholder="Enter rejection reason..." style="width:100%; padding:0.5rem;"></textarea>
+    </div>
+    <div class="apply-mgmt-modal-buttons">
+        <button type="button" onclick="applyMgmtCloseModal()" class="apply-mgmt-modal-cancel">Cancel</button>
+        <button id="applyMgmtConfirmAction" class="apply-mgmt-modal-confirm">Confirm</button>
     </div>
 </div>
 
 <script>
-    let applyMgmtCurrentForm = null;
+    document.addEventListener("DOMContentLoaded", () => {
+        const applySearchInput = document.getElementById("applySearchInput");
+        const applySearchButton = document.getElementById("applySearchButton");
+        const applyRows = document.querySelectorAll(".apply-mgmt-row");
+        const noApplicationsMessage = document.getElementById("noApplicationsMessage");
+        const applyMgmtTabs = document.querySelectorAll(".apply-mgmt-tab");
+        const applyMgmtRows = document.querySelectorAll(".apply-mgmt-row");
 
-    function applyMgmtOpenModal(form, action) {
-        applyMgmtCurrentForm = form;
-
-        document.getElementById("applyMgmtModalMessage").innerText =
-            `Are you sure you want to ${action.toLowerCase()} this artisan application?`;
-
+        let applyMgmtCurrentForm = null;
+        const rejectTextarea = document.getElementById("applyMgmtRejectReason");
         const confirmBtn = document.getElementById("applyMgmtConfirmAction");
-        confirmBtn.className = "apply-mgmt-modal-confirm";
+        const rejectWrapper = document.getElementById("applyMgmtRejectReasonWrapper");
 
-        if (action === "Approve") {
-            confirmBtn.style.backgroundColor = "#4CAF50";
-            confirmBtn.innerText = "Approve";
-        } else {
-            confirmBtn.style.backgroundColor = "#e74c3c";
-            confirmBtn.innerText = "Reject";
+        // Prevent textarea resizing & handle confirm button enabling
+        if (rejectTextarea) {
+            rejectTextarea.style.resize = "none";
+            rejectTextarea.addEventListener("input", () => {
+                confirmBtn.disabled = rejectTextarea.value.trim() === "";
+            });
         }
 
-        document.getElementById("applyMgmtModalBackdrop").style.display = "block";
-        document.getElementById("applyMgmtActionModal").style.display = "block";
+        // FILTER FUNCTION
+        function filterApplications() {
+            const filter = applySearchInput.value.toLowerCase().trim();
+            const activeTab = document.querySelector(".apply-mgmt-tab.active").dataset.tab;
+            let anyVisible = false;
 
-        return false;
-    }
+            applyRows.forEach(row => {
+                if (row.dataset.tab !== activeTab) {
+                    row.style.display = "none";
+                    return;
+                }
 
-    function applyMgmtConfirmActionHandler() {
-        if (applyMgmtCurrentForm) applyMgmtCurrentForm.submit();
-    }
+                const isEmptyRow = row.querySelector(".apply-mgmt-cell")?.innerText.includes("No");
+                if (isEmptyRow) {
+                    row.style.display = !filter ? "table-row" : "none";
+                    return;
+                }
 
-    function applyMgmtCloseModal() {
-        document.getElementById("applyMgmtModalBackdrop").style.display = "none";
-        document.getElementById("applyMgmtActionModal").style.display = "none";
-        applyMgmtCurrentForm = null;
-    }
+                const nameCell = row.querySelector(".apply-mgmt-name");
+                const emailCell = row.querySelector(".apply-mgmt-email");
+                const text = (nameCell?.innerText + " " + emailCell?.innerText).toLowerCase();
 
-    document.getElementById("applyMgmtConfirmAction").addEventListener("click", applyMgmtConfirmActionHandler);
-    document.getElementById("applyMgmtModalBackdrop").addEventListener("click", applyMgmtCloseModal);
+                if (!filter || text.includes(filter)) {
+                    row.style.display = "table-row";
+                    anyVisible = true;
+                } else {
+                    row.style.display = "none";
+                }
+            });
 
-    document.addEventListener("keydown", e => {
-        if (e.key === "Escape") applyMgmtCloseModal();
+            noApplicationsMessage.style.display = filter && !anyVisible ? "table-row" : "none";
+        }
+
+        // SEARCH EVENTS
+        applySearchInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                filterApplications();
+            }
+        });
+
+        applySearchButton.addEventListener("click", filterApplications);
+
+        // TAB SWITCHING
+        applyMgmtTabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                // Remove active from all tabs
+                applyMgmtTabs.forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                // Show only rows for selected tab
+                const selectedTab = tab.dataset.tab;
+                applyMgmtRows.forEach(row => {
+                    row.style.display = (row.dataset.tab === selectedTab) ? "table-row" : "none";
+                });
+
+                // Apply search filter to active tab
+                filterApplications();
+            });
+        });
+
+        // MODAL LOGIC
+        window.applyMgmtOpenModal = function(form, action) {
+            applyMgmtCurrentForm = form;
+
+            document.getElementById("applyMgmtModalMessage").innerText =
+                `Are you sure you want to ${action.toLowerCase()} this artisan application?`;
+
+            if (action === "Approve") {
+                confirmBtn.style.backgroundColor = "#4CAF50";
+                confirmBtn.innerText = "Approve";
+                rejectWrapper.style.display = "none";
+                confirmBtn.disabled = false;
+            } else {
+                confirmBtn.style.backgroundColor = "#e74c3c";
+                confirmBtn.innerText = "Reject";
+                rejectWrapper.style.display = "block";
+                rejectTextarea.value = "";
+                confirmBtn.disabled = true;
+            }
+
+            document.getElementById("applyMgmtModalBackdrop").style.display = "block";
+            document.getElementById("applyMgmtActionModal").style.display = "block";
+
+            return false;
+        }
+
+        function applyMgmtConfirmActionHandler() {
+            if (!applyMgmtCurrentForm) return;
+
+            if (rejectWrapper.style.display === "block" && rejectTextarea) {
+                let input = applyMgmtCurrentForm.querySelector('input[name="reason"]');
+                if (!input) {
+                    input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "reason";
+                    applyMgmtCurrentForm.appendChild(input);
+                }
+                input.value = rejectTextarea.value.trim();
+            }
+
+            applyMgmtCurrentForm.submit();
+        }
+
+        window.applyMgmtCloseModal = function() {
+            document.getElementById("applyMgmtModalBackdrop").style.display = "none";
+            document.getElementById("applyMgmtActionModal").style.display = "none";
+            applyMgmtCurrentForm = null;
+        };
+
+        confirmBtn.addEventListener("click", applyMgmtConfirmActionHandler);
+        document.getElementById("applyMgmtModalBackdrop").addEventListener("click", applyMgmtCloseModal);
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") applyMgmtCloseModal();
+        });
+
+        // INITIAL DISPLAY: show only active tab rows
+        const initialTab = document.querySelector(".apply-mgmt-tab.active").dataset.tab;
+        applyMgmtRows.forEach(row => {
+            row.style.display = (row.dataset.tab === initialTab) ? "table-row" : "none";
+        });
     });
 </script>

@@ -1,0 +1,103 @@
+﻿@model List<SkillBuilder.Models.CourseProjectSubmission>
+
+<style>
+    .artisan-declined-review-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .artisan-declined-review-card {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        overflow: hidden;
+        cursor: pointer;
+        padding: 1rem;
+        max-height: 280px;
+        min-height: 280px;
+        max-width: 270px;
+        min-width: 270px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .artisan-declined-review-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .artisan-declined-review-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+    .artisan-declined-review-info {
+        font-size: 0.95rem;
+    }
+
+    .artisan-declined-review-course {
+        font-weight: bold;
+        margin-bottom: 0.3rem;
+    }
+
+    .artisan-declined-review-desc {
+        color: #555;
+        font-size: 0.9rem;
+    }
+
+    .artisan-declined-review-status {
+        background-color: red;
+        border: solid red 1px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 600;
+        padding: 0.5rem;
+        text-align: center;
+        width: 50%;
+        margin-top: 1rem;
+    }
+
+    .artisan-declined-review-empty {
+        text-align: center;
+        color: #777;
+        font-style: italic;
+        margin: 2rem 0;
+    }
+</style>
+
+<div class="artisan-declined-review-grid">
+    @if (Model != null && Model.Count > 0)
+    {
+        @foreach (var submission in Model)
+        {
+            <div class="artisan-declined-review-card"
+                 data-id="@submission.Id"
+                 data-image="@submission.MediaUrl"
+                 data-title="@submission.Title"
+                 data-caption="@submission.Description"
+                 data-course="@submission.Course?.Title"
+                 data-status="@submission.Status">
+
+                <img src="@submission.MediaUrl" alt="Declined project from @submission.Course?.Title" />
+
+                <div class="artisan-declined-review-info">
+                    <div class="artisan-declined-review-course">@submission.Course?.Title</div>
+                    <div class="artisan-declined-review-desc">@submission.Description</div>
+                    <div class="artisan-declined-review-status">@submission.Status</div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="artisan-declined-review-empty">
+        No declined projects yet.
+    </div>
+}

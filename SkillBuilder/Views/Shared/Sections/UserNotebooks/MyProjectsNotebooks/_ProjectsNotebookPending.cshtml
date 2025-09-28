@@ -1,0 +1,186 @@
+﻿@model List<SkillBuilder.Models.CourseProjectSubmission>
+
+<style>
+    /* === Pending Projects Section === */
+    .user-pending-projects-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .user-pending-projects-header {
+        font-size: 1.8rem;
+        color: #344AEA;
+        margin-bottom: 1rem;
+    }
+
+    .user-pending-projects-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .user-pending-projects-card {
+        width: 200px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+        .user-pending-projects-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease;
+        }
+
+            .user-pending-projects-card img:hover {
+                transform: scale(1.05);
+            }
+
+    .user-pending-projects-course-name {
+        margin-top: 0.5rem;
+        font-weight: bold;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .user-pending-projects-empty {
+        padding: 2rem;
+        text-align: center;
+        color: #777;
+        font-size: 1rem;
+        line-height: 1.6;
+        border: 1px dashed #ccc;
+        border-radius: 10px;
+        background-color: #fafafa;
+    }
+
+    /* Modal Styles */
+    .pending-projects-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.7);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pending-projects-modal-content {
+        background: #fff;
+        border-radius: 10px;
+        max-width: 700px;
+        width: 90%;
+        padding: 1.5rem;
+        position: relative;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .pending-projects-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        cursor: pointer;
+    }
+
+    .pending-projects-modal-body {
+        text-align: center;
+    }
+
+    .pending-projects-image {
+        max-width: 100%;
+        max-height: 400px;
+        margin-bottom: 1rem;
+        border-radius: 10px;
+    }
+
+    .pending-projects-details {
+        text-align: left;
+    }
+
+        .pending-projects-details h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #344AEA;
+        }
+
+        .pending-projects-details p {
+            margin: 0.2rem 0;
+            font-size: 1rem;
+            color: #444;
+        }
+</style>
+
+<section class="user-pending-projects-section">
+    <h2 class="user-pending-projects-header">Pending Projects</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="user-pending-projects-grid">
+            @foreach (var project in Model)
+            {
+                <div class="user-pending-projects-card"
+                     data-image="@project.MediaUrl"
+                     data-title="@project.Course?.Title"
+                     data-caption="@project.Description">
+                    <img src="@project.MediaUrl" alt="Pending project from @project.Course?.Title" />
+                    <div class="user-pending-projects-course-name">@project.Course?.Title</div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="user-pending-projects-empty">
+            You have no pending projects at the moment.<br />
+            Once you submit a project, it will show up here for review.
+        </div>
+    }
+</section>
+
+<!-- Modal -->
+<div id="pendingProjectsModal" class="pending-projects-modal">
+    <div class="pending-projects-modal-content">
+        <span class="pending-projects-close">&times;</span>
+        <div class="pending-projects-modal-body">
+            <img id="pendingProjectsImage" class="pending-projects-image" src="" alt="Project Image" />
+            <div class="pending-projects-details">
+                <h2 id="pendingProjectsTitle"></h2>
+                <p id="pendingProjectsCaption"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("pendingProjectsModal");
+        const modalImage = document.getElementById("pendingProjectsImage");
+        const modalTitle = document.getElementById("pendingProjectsTitle");
+        const modalCaption = document.getElementById("pendingProjectsCaption");
+        const closeBtn = document.querySelector(".pending-projects-close");
+
+        document.querySelectorAll(".user-pending-projects-card").forEach(card => {
+            card.addEventListener("click", () => {
+                modalImage.src = card.dataset.image;
+                modalTitle.textContent = card.dataset.title;
+                modalCaption.textContent = card.dataset.caption;
+                modal.style.display = "flex";
+            });
+        });
+
+        closeBtn.addEventListener("click", () => modal.style.display = "none");
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) modal.style.display = "none";
+        });
+    });
+</script>

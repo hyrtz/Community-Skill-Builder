@@ -14,7 +14,7 @@
         public int Points { get; set; } = 0;
         public string? SelectedInterests { get; set; }
         public DateTime CreatedAt { get; set; }
-
+        public string? EmailVerificationToken { get; set; }
         public string? PasswordResetOtp { get; set; } 
         public DateTime? OtpExpiry { get; set; }
 

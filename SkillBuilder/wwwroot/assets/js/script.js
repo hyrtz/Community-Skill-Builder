@@ -293,6 +293,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const obfuscatedEmail = document.getElementById("obfuscated-email");
         const signupModal = document.getElementById("signup-modal");
 
+        // ✅ hide interest modal too
+        const interestModal = document.getElementById("interest-selection");
+        if (interestModal) interestModal.style.display = "none";
+
         if (form) form.style.display = "none";
         if (verificationMessage) verificationMessage.style.display = "block";
         if (obfuscatedEmail) obfuscatedEmail.textContent = obfuscateEmail(email);
@@ -349,28 +353,95 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     // Show interest modal
-    window.showInterestModal = function () {
-        const modal = document.getElementById("interest-selection");
-        if (!modal) return console.error("Interest modal element not found.");
+    let currentSignupEmail = null;
 
-        modal.style.display = "flex";
-        modal.classList.add("fade-in");
+    window.showInterestModal = function (email) {
+        if (email) currentSignupEmail = email;
 
-        // Reset selection
+        // reset selection and UI
         window.selectedInterests = [];
         renderInterestOptions();
-        document.getElementById("continue-interest-btn").disabled = true;
+
+        const signupFormWrapper = document.getElementById("signup-inputs-wrapper");
+        const emailVerification = document.getElementById("email-verification-message");
+        const signupHeader = document.querySelector(".signup-header");
+        const signupRedirect = document.querySelector(".signup-redirect");
+        const interestModal = document.getElementById("interest-selection");
+        const continueBtn = document.getElementById("continue-interest-btn");
+
+        if (continueBtn) continueBtn.disabled = true;
+        if (signupFormWrapper) signupFormWrapper.style.display = "none";
+        if (emailVerification) emailVerification.style.display = "none";
+        if (signupHeader) signupHeader.style.display = "none";
+        if (signupRedirect) signupRedirect.style.display = "none";
+        if (interestModal) interestModal.style.display = "flex";
+
+        // ✅ Hide close, back, redirect inside signup modal (same as email verification)
+        const signupModal = document.getElementById("signup-modal");
+        if (signupModal) {
+            const closeBtn = signupModal.querySelector(".auth-close-btn");
+            const backBtn = signupModal.querySelector(".back-social-btn");
+            const redirectLogin = signupModal.querySelector(".signup-redirect");
+
+            if (closeBtn) closeBtn.style.display = "none";
+            if (backBtn) backBtn.style.display = "none";
+            if (redirectLogin) redirectLogin.style.display = "none";
+        }
+
+        // ✅ Update navbar icons
+        document.querySelector(".nav-teach-btn")?.style.setProperty("display", "none", "important");
+        document.querySelector(".nav-login-btn")?.style.setProperty("display", "none", "important");
+        document.querySelector(".nav-signup-btn")?.style.setProperty("display", "none", "important");
+        document.querySelector(".nav-notification-icon")?.style.setProperty("display", "inline-block", "important");
+        document.querySelector(".nav-profile-icon")?.style.setProperty("display", "inline-block", "important");
     };
 
+    const skipBtn = document.getElementById("skip-interest-btn");
+    const continueBtn = document.getElementById("continue-interest-btn");
+
     // Skip interest selection
-    document.getElementById("skip-interest-btn")?.addEventListener("click", () => {
-        closeModal("signup-modal");
-        window.location.reload();
+    document.getElementById("skip-interest-btn")?.addEventListener("click", async () => {
+        if (!skipBtn) return;
+
+        skipBtn.disabled = true;
+        continueBtn.disabled = true;
+
+        try {
+            await fetch('/UserProfile/SaveInterests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify([]) // Save empty interests
+            });
+
+            // Send verification email
+            await fetch('/send-verification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentSignupEmail)
+            });
+
+            // Move to email verification screen
+            showEmailVerificationMessage(currentSignupEmail);
+
+        } catch (err) {
+            console.warn("Skipping interests or sending verification failed:", err);
+            skipBtn.disabled = false;
+            continueBtn.disabled = false;
+        }
+
     });
 
     // Continue interest selection → Save to backend
     document.getElementById("continue-interest-btn")?.addEventListener("click", async () => {
-        if (window.selectedInterests.length === 0) return;
+        if (!continueBtn) return;
+
+        if (!window.selectedInterests || window.selectedInterests.length === 0) {
+            alert("Please select at least one interest or skip.");
+            return;
+        }
+
+        skipBtn.disabled = true;
+        continueBtn.disabled = true;
 
         try {
             const response = await fetch('/UserProfile/SaveInterests', {
@@ -384,34 +455,33 @@ document.addEventListener("DOMContentLoaded", function () {
                 throw new Error(errorData.message || "Failed to save interests.");
             }
 
-            const data = await response.json();
-            console.log("✅ Interests saved:", data.message);
-
-            closeModal("signup-modal");
-            window.location.reload();
+            // ✅ Send verification email
+            await fetch('/send-verification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentSignupEmail)
+            });
 
         } catch (err) {
             console.error(err);
-            alert(err.message || "An error occurred while saving your interests.");
+            alert(err.message || "An error occurred while saving your interests or sending verification email.");
+            skipBtn.disabled = false;
+            continueBtn.disabled = false;
         }
+
+        // Move to email verification screen
+        showEmailVerificationMessage(currentSignupEmail);
     });
 
     // Trigger interest modal after email verification skip
     document.getElementById("skip-verification-btn")?.addEventListener("click", e => {
         e.preventDefault();
 
-        // Hide signup inputs & verification message
-        document.getElementById("signup-inputs-wrapper").style.display = "none";
-        document.getElementById("email-verification-message").style.display = "none";
+        // Close signup modal
+        closeModal("signup-modal");
 
-        // Show interest modal
-        window.showInterestModal();
-
-        // Update navbar icons
-        document.querySelector(".nav-login-btn")?.style.setProperty("display", "none", "important");
-        document.querySelector(".nav-signup-btn")?.style.setProperty("display", "none", "important");
-        document.querySelector(".nav-notification-icon")?.style.setProperty("display", "inline-block", "important");
-        document.querySelector(".nav-profile-icon")?.style.setProperty("display", "inline-block", "important");
+        // Refresh navbar & redirect user to dashboard
+        window.location.href = "";
     });
 
     document.getElementById("signup-agree").addEventListener("change", checkSignupInputs);
@@ -473,7 +543,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const submitBtn = document.getElementById("signup-submit-btn");
                 if (submitBtn) submitBtn.style.display = "none";
 
-                showEmailVerificationMessage(email);
+                window.showInterestModal(email);
             } else {
                 signupError.textContent = data.message || "Signup failed.";
             }
@@ -591,10 +661,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Escape key closes modal
 document.addEventListener("keydown", function (e) {
-    const emailMessageVisible = document.getElementById("email-verification-message")?.style.display === "block";
-    if (e.key === "Escape" && !emailMessageVisible) {
+    const emailMessageVisible = getComputedStyle(document.getElementById("email-verification-message") || {}).display === "block";
+    const otpStageVisible = getComputedStyle(document.getElementById("otp-stage") || {}).display !== "none";
+    const resetStageVisible = getComputedStyle(document.getElementById("reset-password-stage") || {}).display !== "none";
+    const successStageVisible = getComputedStyle(document.getElementById("reset-success-stage") || {}).display !== "none"; // <-- add this
+
+    if (e.key === "Escape" && !emailMessageVisible && !otpStageVisible && !resetStageVisible && !successStageVisible) {
         window.closeModal("login-modal");
         window.closeModal("signup-modal");
+    } else if (e.key === "Escape" && (otpStageVisible || resetStageVisible || successStageVisible)) {
+        e.preventDefault(); // prevent closing during OTP, Reset, or Success
     }
 });
 

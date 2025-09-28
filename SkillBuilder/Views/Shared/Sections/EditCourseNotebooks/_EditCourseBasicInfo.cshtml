@@ -1,0 +1,531 @@
+﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
+
+@{
+    var learningObjectives = Model.LearningObjectives.Any() ? Model.LearningObjectives : new List<string> { "" };
+}
+
+<style>
+    /* ================= Basic Info Form Styles ================= */
+    .basicinfo-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+        .basicinfo-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+    .basicinfo-form-control, .basicinfo-form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .basicinfo-form-row {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .basicinfo-form-col {
+        flex: 1;
+    }
+
+    .basicinfo-objectives-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .basicinfo-objective-item {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #fff;
+    }
+
+        .basicinfo-objective-item input {
+            flex: 1;
+            border: none;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            outline: none;
+            background: transparent;
+        }
+
+    .basicinfo-delete-btn {
+        background-color: transparent;
+        border: none;
+        color: #333;
+        font-size: 1.1rem;
+        padding: 0 1rem;
+        cursor: pointer;
+    }
+
+        .basicinfo-delete-btn:hover {
+            color: #d00;
+        }
+
+    .basicinfo-add-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #344AEA;
+        background-color: transparent;
+        border: 1.5px solid #344AEA;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+        .basicinfo-add-btn:hover {
+            background-color: #344AEA;
+            color: white;
+        }
+
+    .basicinfo-upload-box {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+    }
+
+    .basicinfo-upload-preview {
+        width: 100px;
+        height: 100px;
+        background-color: #eee;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #aaa;
+        overflow: hidden;
+    }
+
+    .artisan-work-item {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: #fafafa;
+        position: relative;
+    }
+
+    .artisan-work-preview {
+        width: 120px;
+        height: 120px;
+        background: #eee;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+        .artisan-work-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+    .artisan-work-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+        .artisan-work-fields input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+    .delete-work-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #666;
+    }
+
+        .delete-work-btn:hover {
+            color: #d00;
+        }
+
+    .basicinfo-duration-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .duration-value {
+        width: 150px;
+    }
+
+    .duration-unit {
+        flex: 1;
+    }
+</style>
+
+<div class="basicinfo-form-wrapper">
+
+    <!-- Course Title & Category -->
+    <div class="basicinfo-form-row">
+        <div class="basicinfo-form-col basicinfo-form-group">
+            <label for="Course_Title">Course Title *</label>
+            <input asp-for="Course.Title" class="basicinfo-form-control" placeholder="Enter course title" required />
+        </div>
+        <div class="basicinfo-form-col basicinfo-form-group">
+            <label for="Course_Category">Category *</label>
+            <select asp-for="Course.Category" class="basicinfo-form-select" required>
+                <option value="">Select category</option>
+                @foreach (var cat in new[] { "Pottery", "Weaving", "Woodcarving", "Paper Crafts", "Shoemaking", "Embroidery" })
+                {
+                    <option value="@cat">@cat</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <div class="basicinfo-form-group">
+        <label for="Course_Overview">Course Overview *</label>
+        <textarea asp-for="Course.Overview" class="basicinfo-form-control" rows="4" placeholder="Write a brief overview..." required></textarea>
+    </div>
+
+    <!-- Difficulty & Duration -->
+    <div class="basicinfo-form-row">
+        <div class="basicinfo-form-col basicinfo-form-group">
+            <label for="Course_Difficulty">Difficulty Level *</label>
+            <select asp-for="Course.Difficulty" class="basicinfo-form-select" required>
+                <option value="">-- Select --</option>
+                @foreach (var level in new[] { "Beginner", "Intermediate", "Professional" })
+                {
+                    <option value="@level">@level</option>
+                }
+            </select>
+        </div>
+        <div class="basicinfo-form-col basicinfo-form-group">
+            <label>Duration *</label>
+            <div class="basicinfo-duration-row">
+                <input type="number" name="DurationValue" id="Course_DurationValue" class="basicinfo-form-control duration-value" value="@Model.DurationValue" required />
+                <select name="DurationUnit" id="Course_DurationUnit" class="basicinfo-form-select duration-unit" required>
+                    <option value="minutes" selected="@(Model.DurationUnit == "minutes")">Minutes</option>
+                    <option value="hours" selected="@(Model.DurationUnit == "hours")">Hours</option>
+                    <option value="days" selected="@(Model.DurationUnit == "days")">Days</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Requirements -->
+    <div class="basicinfo-form-group">
+        <label for="Course_Requirements">Requirements *</label>
+        <textarea asp-for="Course.Requirements" class="basicinfo-form-control" rows="3" placeholder="List required tools or skills" required></textarea>
+    </div>
+
+    <!-- Learning Objectives -->
+    <div class="basicinfo-form-group">
+        <label>Learning Objectives *</label>
+        <div id="objectives-container" class="basicinfo-objectives-container">
+            @for (int i = 0; i < learningObjectives.Count; i++)
+            {
+                <div class="basicinfo-objective-item">
+                    <input type="text" name="LearningObjectives[@i]" value="@learningObjectives[i]" class="basicinfo-form-control" placeholder="Objective" required />
+                    <button type="button" class="basicinfo-delete-btn" onclick="this.parentElement.remove()">🗑️</button>
+                </div>
+            }
+        </div>
+        <button type="button" id="add-objective" class="basicinfo-add-btn">+ Add Objective</button>
+    </div>
+
+    <!-- Full Description -->
+    <div class="basicinfo-form-group">
+        <label for="Course_FullDescription">Full Course Description *</label>
+        <textarea asp-for="Course.FullDescription" class="basicinfo-form-control" rows="5" placeholder="Detailed explanation..." required></textarea>
+    </div>
+
+    <!-- Image Upload -->
+    <div class="basicinfo-form-group">
+        <label>Course Image *</label>
+        <div class="basicinfo-upload-box">
+            <div class="basicinfo-upload-preview">
+                <img id="imagePreview" src="@(Model.Course.ImageUrl ?? "#")" alt="Preview" style="width: 100px; height: 100px; object-fit: cover; @(string.IsNullOrEmpty(Model.Course.ImageUrl) ? "display:none;" : "display:block;")" />
+            </div>
+            <div>
+                <label for="ImageFile">Upload image</label>
+                <input type="file" name="ImageFile" id="ImageFile" accept="image/*" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Thumbnail Upload -->
+    <div class="basicinfo-form-group">
+        <label>Video Thumbnail *</label>
+        <div class="basicinfo-upload-box">
+            <div class="basicinfo-upload-preview">
+                <img id="thumbPreview" src="@(Model.Course.Thumbnail ?? "#")" alt="Thumbnail" style="width: 100px; height: 100px; object-fit: cover; @(string.IsNullOrEmpty(Model.Course.Thumbnail) ? "display:none;" : "display:block;")" />
+            </div>
+            <div>
+                <label for="ThumbnailFile">Upload thumbnail</label>
+                <input type="file" name="ThumbnailFile" id="ThumbnailFile" accept="image/*" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Upload -->
+    <div class="basicinfo-form-group">
+        <label>Course Intro Video *</label>
+        <div class="basicinfo-upload-box">
+            <div class="basicinfo-upload-preview">
+                <video id="videoPreview" width="100" height="100" controls style="@(string.IsNullOrEmpty(Model.Course.Video) ? "display:none;" : "display:block;")">
+                    @if (!string.IsNullOrEmpty(Model.Course.Video))
+                    {
+                        <source src="@Model.Course.Video" type="video/mp4" />
+                    }
+                </video>
+            </div>
+            <div>
+                <label for="VideoFile">Upload video</label>
+                <input type="file" name="VideoFile" id="VideoFile" accept="video/*" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Artisan Works -->
+    <div class="basicinfo-form-group">
+        <label>Artisan Works *</label>
+        <div id="artisan-works-container">
+            @for (int i = 0; i < Model.ArtisanWorks.Count; i++)
+            {
+                var work = Model.ArtisanWorks[i];
+                <div class="artisan-work-item">
+                    <button type="button" class="delete-work-btn" onclick="this.parentElement.remove(); renumberWorks();">🗑️</button>
+
+                    <div class="artisan-work-preview">
+                        @if (!string.IsNullOrEmpty(work.ImageUrl))
+                        {
+                            <img id="workPreview_@i" src="@work.ImageUrl" style="width:100%; height:100%; object-fit:cover;" />
+                        }
+                    </div>
+
+                    <div class="artisan-work-fields">
+                        <input type="hidden" name="ArtisanWorks[@i].Id" value="@work.Id" />
+                        <input type="file" name="ArtisanWorks[@i].ImageFile" accept="image/*" onchange="previewWorkImage(event, @i)" />
+                        <input type="text" name="ArtisanWorks[@i].Title" value="@work.Title" placeholder="Work Title" required />
+                        <input type="text" name="ArtisanWorks[@i].Caption" value="@work.Caption" placeholder="Work Caption" required />
+                    </div>
+                </div>
+            }
+        </div>
+
+        <button type="button" id="add-work" class="basicinfo-add-btn">+ Add Work</button>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ====================== Image Preview ======================
+        const imageInput = document.getElementById("ImageFile");
+        const imagePreview = document.getElementById("imagePreview");
+        if (imageInput) {
+            imageInput.addEventListener("change", function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = "block";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // ====================== Thumbnail Preview ======================
+        const thumbInput = document.getElementById("ThumbnailFile");
+        const thumbPreview = document.getElementById("thumbPreview");
+        if (thumbInput) {
+            thumbInput.addEventListener("change", function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        thumbPreview.src = e.target.result;
+                        thumbPreview.style.display = "block";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // ====================== Video Preview ======================
+        const videoInput = document.getElementById("VideoFile");
+        const videoPreview = document.getElementById("videoPreview");
+        if (videoInput) {
+            videoInput.addEventListener("change", function () {
+                const file = this.files[0];
+                if (file) {
+                    videoPreview.src = URL.createObjectURL(file);
+                    videoPreview.style.display = "block";
+                }
+            });
+        }
+
+        // ====================== Learning Objectives ======================
+        const objectivesContainer = document.getElementById("objectives-container");
+        const addObjectiveBtn = document.getElementById("add-objective");
+        let objectiveIndex = objectivesContainer.children.length;
+
+        addObjectiveBtn.addEventListener("click", function () {
+            const wrapper = document.createElement("div");
+            wrapper.className = "basicinfo-objective-item";
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.name = `LearningObjectives[${objectiveIndex++}]`;
+            input.className = "basicinfo-form-control";
+            input.placeholder = "Objective";
+            input.required = true;
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.type = "button";
+            deleteBtn.className = "basicinfo-delete-btn";
+            deleteBtn.innerHTML = "🗑️";
+            deleteBtn.onclick = function () { wrapper.remove(); renumberObjectives(); };
+
+            wrapper.appendChild(input);
+            wrapper.appendChild(deleteBtn);
+            objectivesContainer.appendChild(wrapper);
+        });
+
+        function renumberObjectives() {
+            const items = objectivesContainer.querySelectorAll(".basicinfo-objective-item");
+            items.forEach((item, i) => {
+                const input = item.querySelector("input");
+                if (input) input.name = `LearningObjectives[${i}]`;
+            });
+            objectiveIndex = items.length;
+        }
+
+        // ====================== Artisan Works ======================
+        const worksContainer = document.getElementById("artisan-works-container");
+        const addWorkBtn = document.getElementById("add-work");
+        let workIndex = worksContainer.querySelectorAll(".artisan-work-item").length;
+
+        addWorkBtn.addEventListener("click", function () {
+            const wrapper = document.createElement("div");
+            wrapper.className = "artisan-work-item";
+
+            wrapper.innerHTML = `
+                <button type="button" class="delete-work-btn">🗑️</button>
+                <div class="artisan-work-preview">
+                    <img id="workPreview_${workIndex}" style="width:100px;height:100px;object-fit:cover;display:none;" />
+                </div>
+                <div class="artisan-work-fields">
+                    <input type="file" name="ArtisanWorks[${workIndex}].ImageFile" accept="image/*" onchange="previewWorkImage(event,${workIndex})" />
+                    <input type="text" name="ArtisanWorks[${workIndex}].Title" placeholder="Work Title" required />
+                    <input type="text" name="ArtisanWorks[${workIndex}].Caption" placeholder="Work Caption" required />
+                </div>
+            `;
+
+            worksContainer.appendChild(wrapper);
+
+            wrapper.querySelector(".delete-work-btn").addEventListener("click", function () { wrapper.remove(); renumberWorks(); });
+
+            workIndex++;
+        });
+
+        window.previewWorkImage = function (e, index) {
+            const file = e.target.files[0];
+            const preview = document.getElementById(`workPreview_${index}`);
+            if (file && preview) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    preview.src = evt.target.result;
+                    preview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.renumberWorks = function () {
+            const items = worksContainer.querySelectorAll(".artisan-work-item");
+            items.forEach((item, i) => {
+                const inputs = item.querySelectorAll("input");
+                inputs.forEach(input => {
+                    if (input.type === "file") input.name = `ArtisanWorks[${i}].ImageFile`;
+                    else if (input.placeholder.includes("Title")) input.name = `ArtisanWorks[${i}].Title`;
+                    else if (input.placeholder.includes("Caption")) input.name = `ArtisanWorks[${i}].Caption`;
+                });
+                const img = item.querySelector("img");
+                if (img) img.id = `workPreview_${i}`;
+            });
+            workIndex = items.length;
+        };
+
+        // ====================== Duration Numeric Only ======================
+        const durationInput = document.getElementById("Course_DurationValue");
+        if (durationInput) {
+            durationInput.addEventListener("input", () => { durationInput.value = durationInput.value.replace(/\D/g, ''); });
+        }
+
+        // ====================== Form Validation ======================
+        const form = document.getElementById("edit-course-form");
+        const submitBtn = document.getElementById("editBtn");
+
+        if (submitBtn) submitBtn.disabled = true; // Disabled by default
+
+        function validateForm() {
+            let allValid = true;
+            if (!form || !submitBtn) return;
+
+            const requiredFields = form.querySelectorAll("input[required], select[required], textarea[required]");
+            requiredFields.forEach(field => {
+                if (field && field.offsetParent !== null && (!field.value || field.value.trim() === "")) {
+                    allValid = false;
+                }
+            });
+
+            const objectiveInputs = form.querySelectorAll("#objectives-container input");
+            objectiveInputs.forEach(input => {
+                if (!input.value || input.value.trim() === "") allValid = false;
+            });
+
+            const workItems = form.querySelectorAll(".artisan-work-item");
+            workItems.forEach(item => {
+                const title = item.querySelector('input[placeholder="Work Title"]');
+                const caption = item.querySelector('input[placeholder="Work Caption"]');
+                if (!title || !title.value.trim() || !caption || !caption.value.trim()) allValid = false;
+            });
+
+            submitBtn.disabled = !allValid;
+        }
+
+        validateForm();
+        form.addEventListener("input", validateForm);
+        form.addEventListener("change", validateForm);
+        if (objectivesContainer) objectivesContainer.addEventListener("input", validateForm);
+        if (worksContainer) worksContainer.addEventListener("input", validateForm);
+
+        const observer = new MutationObserver(validateForm);
+        if (objectivesContainer) observer.observe(objectivesContainer, { childList: true, subtree: true });
+        if (worksContainer) observer.observe(worksContainer, { childList: true, subtree: true });
+    });
+</script>

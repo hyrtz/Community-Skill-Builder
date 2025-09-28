@@ -9,7 +9,7 @@
     "Parameters": [
       {
         "Name": "model",
-        "Type": "SkillBuilder.Controllers.ModuleProgressController\u002BModuleProgressDto",
+        "Type": "SkillBuilder.Controllers.ModuleProgressDto",
         "IsRequired": true
       }
     ],

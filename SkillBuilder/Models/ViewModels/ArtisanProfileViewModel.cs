@@ -6,5 +6,6 @@
         public List<Course> Courses { get; set; } = new();
         public List<ArtisanWork> ArtisanWorks { get; set; } = new();
         public List<SupportSessionRequest> ArtisanSupportRequests { get; set; } = new();
+        public List<CourseProjectSubmission> ProjectSubmissions { get; set; }
     }
 }

@@ -6,6 +6,7 @@
     {
         "Learner" => $"/UserProfile/{userId}",
         "Artisan" => $"/ArtisanProfile/{userId}",
+        "Admin" => $"/AdminProfile/{userId}",
         _ => "#"
     };
 }
@@ -144,6 +145,282 @@
         .logout-modal-btn-cancel:hover {
             background: #bdbdbd;
         }
+
+    .notification-dropdown {
+        background: #fff;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        border-radius: 8px;
+        width: 450px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .notification-item {
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        word-break: break-word;
+    }
+
+        .notification-item:hover {
+            background: #f5f5f5;
+            cursor: pointer;
+        }
+
+    .notification-action-btn {
+        align-self: flex-start;
+        padding: 0.5rem;
+        background-color: #344aeb;
+        color: white;
+        font-weight: bold;
+        border: none;
+    }
+
+        .notification-action-btn:hover {
+            background-color: #2a34c6;
+        }
+
+    .notification-item:hover {
+        background: #f5f5f5;
+        cursor: pointer;
+    }
+
+
+    .notification-action-btn:disabled,
+    .logout-modal-btn-confirm:disabled {
+        background: #ccc !important;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    /* Overlay */
+    .logout-modal-overlay,
+    #sessionModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    /* Modal Box */
+    .reschedule-session-box,
+    .modal-box {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+        text-align: left;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        animation: fadeIn 0.3s ease-out;
+    }
+
+        /* Title */
+        .reschedule-session-title,
+        .modal-box h1 {
+            color: #344AEA;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        /* Labels */
+        .reschedule-session-box label,
+        .modal-box label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Inputs & textarea */
+        .reschedule-session-box input[type="date"],
+        .reschedule-session-box input[type="time"],
+        .reschedule-session-box textarea,
+        .modal-box input[type="date"],
+        .modal-box input[type="time"],
+        .modal-box textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .reschedule-session-box textarea,
+        .modal-box textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        /* Buttons */
+        .reschedule-session-actions,
+        .modal-box div:last-child {
+            text-align: right;
+        }
+
+            .reschedule-session-actions button {
+                padding: 0.6rem 1.5rem;
+                border-radius: 6px;
+                border: none;
+                cursor: pointer;
+                font-size: 0.95rem;
+                transition: background 0.2s ease;
+            }
+
+                /* Cancel button */
+                .reschedule-session-actions button:first-child {
+                    background: #e0e0e0;
+                    color: #333;
+                    margin-right: 0.5rem;
+                }
+
+                    .reschedule-session-actions button:first-child:hover {
+                        background: #bdbdbd;
+                    }
+
+    /* Send Request / primary button */
+    .session-launch-btn {
+        padding: 0.6rem 1.5rem;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        background: #3b44f6;
+        color: #fff;
+        transition: background 0.2s ease;
+    }
+
+        /* Hover effect only when enabled */
+        .session-launch-btn:not(:disabled):hover {
+            background: #2c5282;
+        }
+
+        /* Disabled state */
+        .session-launch-btn:disabled {
+            background: #ccc !important;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+    /* Resubmit Project Modal */
+    #resubmitProjectModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+        #resubmitProjectModal .logout-modal-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 90%;
+            text-align: left;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        #resubmitProjectModal h3.logout-modal-title {
+            font-size: 1.5rem;
+            color: #3b44f6;
+            margin-bottom: 0.5rem;
+        }
+
+        #resubmitProjectModal p.logout-modal-text {
+            font-size: 0.95rem;
+            color: #444;
+            margin-bottom: 1.5rem;
+        }
+
+        #resubmitProjectModal label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        #resubmitProjectModal input[type="text"],
+        #resubmitProjectModal textarea,
+        #resubmitProjectModal input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        #resubmitProjectModal textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        #resubmitProjectModal #resubmitProjectPreview img {
+            max-width: 100%;
+            max-height: 150px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+        }
+
+        #resubmitProjectModal .logout-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        #resubmitProjectModal .logout-modal-btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s ease;
+        }
+
+        #resubmitProjectModal .logout-modal-btn-confirm {
+            background: #3b44f6;
+            color: #fff;
+        }
+
+            #resubmitProjectModal .logout-modal-btn-confirm:hover:not(:disabled) {
+                background: #2c5282;
+            }
+
+        #resubmitProjectModal .logout-modal-btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+            #resubmitProjectModal .logout-modal-btn-cancel:hover:not(:disabled) {
+                background: #bdbdbd;
+            }
+
+        /* Disabled buttons */
+        #resubmitProjectModal .logout-modal-btn:disabled {
+            background: #ccc !important;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
 </style>
 
 <nav class="custom-navbar">
@@ -181,17 +458,39 @@
     <div class="navbar-right">
         @if (User.Identity.IsAuthenticated && userRole == "Artisan")
         {
-            <a href="/ArtisanActions/CreateCourse" class="navbar-item create-course-btn">Create Course</a>
+            var isApproved = User.FindFirst("IsApproved")?.Value == "True";
+            var isVerified = User.FindFirst("IsVerified")?.Value == "True";
+
+            if (isApproved && isVerified)
+            {
+                <a href="/ArtisanActions/CreateCourse" class="navbar-item create-course-btn">
+                    Create Course
+                </a>
+            }
+            else
+            {
+                <a class="navbar-item create-course-btn disabled" style="pointer-events:none; opacity:0.5;">
+                    Create Course (Pending Approval/Verification)
+                </a>
+            }
         }
+
         <div class="notification-wrapper">
-            <a href="javascript:void(0);" class="navbar-item nav-notification-icon" onclick="toggleNotificationDropdown()" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none")">
+            <a href="javascript:void(0);" class="navbar-item nav-notification-icon" onclick="toggleNotificationDropdown()" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none"); position: relative;">
                 <img src="/assets/icons/Bell.ico" style="width: 2rem;" />
+                <span id="notifCount" class="notif-count-badge" style="display:none;position:absolute;top:0;right:0;background:red;color:white; border-radius:50%;padding:2px 6px;font-size:0.75rem;">
+                </span>
             </a>
             <div id="notificationDropdown" class="notification-dropdown" style="display: none;">
                 <h5>Notifications</h5>
-                <p style="padding: 0.5rem;">No notifications at the moment.</p>
+                <div id="notificationItems"></div>
+                <div style="text-align:center; padding:0.5rem;">
+                    <a href="javascript:void(0);" onclick="openNotificationModal()">See all notifications</a>
+                </div>
             </div>
         </div>
+
+
 
         @if (!string.IsNullOrEmpty(userId))
         {
@@ -208,7 +507,7 @@
                         <span class="profile-menu-arrow">▸</span>
                     </button>
 
-                    <div id="profileNotificationToggle" class="profile-menu-sub">
+                    @* <div id="profileNotificationToggle" class="profile-menu-sub">
                         <label class="profile-menu-sub-option">
                             <input type="radio" name="notifSetting" checked onchange="setProfileNotif(true)" />
                             On
@@ -217,7 +516,7 @@
                             <input type="radio" name="notifSetting" onchange="setProfileNotif(false)" />
                             Off
                         </label>
-                    </div>
+                    </div> *@
 
                     @if (userRole == "Artisan")
                     {
@@ -264,19 +563,294 @@
     </div>
 </nav>
 
+<div id="resubmitModal" class="logout-modal-overlay">
+    <div class="logout-modal-content">
+        <h3 class="logout-modal-title">Resubmit Application</h3>
+        <p class="logout-modal-text">Please upload your new application file.</p>
+        <form id="resubmitForm" enctype="multipart/form-data">
+            <input type="file" name="file"
+                   accept=".pdf,.doc,.docx,.jpeg,.jpg,.png"
+                   required />
+            <div id="resubmitPreview" style="margin-top: 0.5rem;"></div>
+            <div class="logout-modal-actions" style="margin-top: 1rem;">
+                <button type="submit" class="logout-modal-btn logout-modal-btn-confirm">Resubmit</button>
+                <button type="button" class="logout-modal-btn logout-modal-btn-cancel" onclick="closeResubmitModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="resubmitProjectModal" class="logout-modal-overlay">
+    <div class="logout-modal-content">
+        <h3 class="logout-modal-title">Resubmit Project</h3>
+        <p class="logout-modal-text">Please upload your revised project file and update its title and description.</p>
+        <form id="resubmitProjectForm" enctype="multipart/form-data">
+            <label for="projectTitle">Project Title</label>
+            <input type="text" id="projectTitle" name="Title" required />
+
+            <label for="projectDescription">Project Description</label>
+            <textarea id="projectDescription" name="Description" required></textarea>
+
+            <label for="projectFile">Project File</label>
+            <input type="file" name="projectFile" accept=".jpg,.jpeg,.png" required />
+
+            <div id="resubmitProjectPreview" style="margin-top: 0.5rem;"></div>
+
+            <div class="logout-modal-actions" style="margin-top: 1rem;">
+                <button type="submit" class="logout-modal-btn logout-modal-btn-confirm">Resubmit</button>
+                <button type="button" class="logout-modal-btn logout-modal-btn-cancel" onclick="closeResubmitProjectModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="rescheduleSessionModal" class="logout-modal-overlay" style="display:none;">
+    <div class="reschedule-session-box">
+        <h3 class="reschedule-session-title">Schedule a Live Session</h3>
+
+        <form id="rescheduleSessionForm">
+            <label for="rescheduleSessionDate">Date</label>
+            <input type="date" id="rescheduleSessionDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+
+            <label for="rescheduleSessionTime">Time</label>
+            <input type="time" id="rescheduleSessionTime" />
+
+            <label for="rescheduleSessionMessage">Message</label>
+            <textarea id="rescheduleSessionMessage"></textarea>
+
+            <div class="reschedule-session-actions">
+                <button type="button" onclick="closeRescheduleSessionModal()">Cancel</button>
+                <button type="button" id="sendRescheduleSessionRequest" class="session-launch-btn" disabled>
+                    Send Request
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="congratsModal" class="logout-modal-overlay">
+    <div class="logout-modal-content">
+        <h3 class="logout-modal-title">🎉 Congratulations!</h3>
+        <p id="congratsModalText" class="logout-modal-text">Your action was successful.</p>
+        <div class="logout-modal-actions">
+            <button type="button" class="logout-modal-btn logout-modal-btn-confirm" onclick="closeCongratsModal()">OK</button>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // --- Notification Dropdown ---
+
+        // --- Resubmit Application preview ---
+        const resubmitFileInput = document.querySelector("#resubmitForm input[type='file']");
+        const resubmitPreview = document.getElementById("resubmitPreview");
+
+        if (resubmitFileInput) {
+            resubmitFileInput.addEventListener("change", () => {
+                const file = resubmitFileInput.files[0];
+                const submitBtn = document.querySelector("#resubmitForm .logout-modal-btn-confirm");
+                resubmitPreview.innerHTML = ""; // Clear previous preview
+
+                if (!file) {
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                // Allowed types
+                const allowedTypes = [
+                    "application/pdf",
+                    "application/msword", // .doc
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+                    "image/jpeg",
+                    "image/jpg",
+                    "image/png"
+                ];
+
+                if (!allowedTypes.includes(file.type)) {
+                    alert("Invalid file type. Allowed types: PDF, DOC, DOCX, JPG, JPEG, PNG.");
+                    resubmitFileInput.value = ""; // Reset input
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                // Preview only if image
+                if (file.type.startsWith("image/")) {
+                    const img = document.createElement("img");
+                    img.src = URL.createObjectURL(file);
+                    img.style.maxWidth = "100%";
+                    img.style.maxHeight = "150px";
+                    img.style.border = "1px solid #ccc";
+                    img.style.borderRadius = "6px";
+                    resubmitPreview.appendChild(img);
+                } else {
+                    // For PDF/DOC/DOCX just show the filename
+                    const fileName = document.createElement("p");
+                    fileName.textContent = `Selected file: ${file.name}`;
+                    resubmitPreview.appendChild(fileName);
+                }
+
+                submitBtn.disabled = false;
+            });
+        }
+
+        // --- Resubmit Project preview ---
+        const resubmitProjectInput = document.querySelector("#resubmitProjectForm input[type='file']");
+        const resubmitProjectPreview = document.getElementById("resubmitProjectPreview");
+
+        if (resubmitProjectInput) {
+            resubmitProjectInput.addEventListener("change", () => {
+                const file = resubmitProjectInput.files[0];
+                const submitBtn = document.querySelector("#resubmitProjectForm .logout-modal-btn-confirm");
+                resubmitProjectPreview.innerHTML = "";
+
+                if (!file) {
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                // Accept only jpg, jpeg, png
+                const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+                if (!allowedTypes.includes(file.type)) {
+                    alert("Only JPG, JPEG, and PNG files are allowed.");
+                    resubmitProjectInput.value = ""; // Reset file input
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                // Show preview
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.style.maxWidth = "100%";
+                img.style.maxHeight = "150px";
+                img.style.border = "1px solid #ccc";
+                img.style.borderRadius = "6px";
+                resubmitProjectPreview.appendChild(img);
+
+                submitBtn.disabled = false;
+            });
+        }
+
+        const profileTrigger = document.querySelector(".profile-menu-trigger");
+        const profileDropdown = document.querySelector(".profile-menu-dropdown");
+
+        if (profileTrigger && profileDropdown) {
+            // Toggle dropdown on click
+            profileTrigger.addEventListener("click", function(e) {
+                e.stopPropagation(); // Prevents closing immediately
+                profileDropdown.classList.toggle("show");
+            });
+
+            // Close dropdown if clicked outside
+            document.addEventListener("click", function(e) {
+                if (!profileDropdown.contains(e.target) && !profileTrigger.contains(e.target)) {
+                    profileDropdown.classList.remove("show");
+                }
+            });
+        }
+
+        window.currentUserId = '@User.FindFirst("UserId")?.Value';
+        window.resubmittedApps = new Set();       // Track apps already resubmitted
+        window.resubmittedNotifIds = new Set();   // Track notification IDs already clicked
+
+        // --- Load notifications ---
+        async function loadNotifications() {
+            const userId = window.currentUserId;
+            if (!userId) return;
+
+            try {
+                const res = await fetch(`/api/notification/${userId}`);
+                const notifications = await res.json();
+                const container = document.getElementById("notificationItems");
+                container.innerHTML = "";
+
+                if (notifications.length === 0) {
+                    container.innerHTML = "<p style='padding:0.5rem;'>No notifications yet.</p>";
+                    return;
+                }
+
+                // Sort newest first
+                notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                const shownButtonApps = new Set();
+
+                notifications.forEach(n => {
+                    const item = document.createElement("div");
+                    item.className = "notification-item";
+
+                    const notifId = n.id;
+                    const appId = n.actionUrl ? n.actionUrl.split("/").pop() : null;
+
+                    let html = `
+                        <div class="message">${n.message}</div>
+                        <div class="timestamp">${new Date(n.createdAt).toLocaleString()}</div>
+                    `;
+
+                    if (
+                        n.actionUrl && n.actionText &&
+                        !n.isActioned &&
+                        appId && !window.resubmittedApps.has(appId) &&
+                        !shownButtonApps.has(appId)
+                    ) {
+                        let btnType;
+                        if (n.actionUrl.includes("ResubmitFinalProject")) btnType = "project";
+                        else if (n.actionUrl.includes("RequestSession")) btnType = "reschedule";
+                        else btnType = "artisan";
+
+                        html += `<button class="notification-action-btn"
+                            data-app-id="${appId}"
+                            data-notif-id="${notifId}"
+                            data-type="${btnType}">
+                            ${n.actionText}
+                        </button>`;
+
+                        shownButtonApps.add(appId);
+                    }
+
+                    item.innerHTML = html;
+                    container.appendChild(item);
+                });
+
+            } catch (err) {
+                console.error("Failed to load notifications", err);
+            }
+        }
+
+        async function loadUnreadCount() {
+            const userId = window.currentUserId;
+            if (!userId) return;
+
+            try {
+                const unreadRes = await fetch(`/api/notification/unread-count/${userId}`);
+                const unreadCount = await unreadRes.json();
+                const badge = document.getElementById("notifCount");
+                if (badge) {
+                    badge.style.display = unreadCount > 0 ? "inline-block" : "none";
+                    badge.innerText = unreadCount > 0 ? unreadCount : "";
+                }
+            } catch (err) {
+                console.error("Failed to load unread count", err);
+            }
+        }
+
         function toggleNotificationDropdown() {
             const dropdown = document.getElementById("notificationDropdown");
             if (!dropdown) return;
-            dropdown.style.display =
-                dropdown.style.display === "none" || dropdown.style.display === ""
-                    ? "block"
-                    : "none";
+            const isOpening = dropdown.style.display === "none" || dropdown.style.display === "";
+            dropdown.style.display = isOpening ? "block" : "none";
+
+            if (isOpening) {
+                loadNotifications();
+                const userId = window.currentUserId;
+                if (userId) {
+                    fetch(`/api/notification/mark-all-read/${userId}`, { method: "POST" })
+                        .then(() => loadUnreadCount())
+                        .catch(err => console.error("Failed to mark all as read", err));
+                }
+            }
         }
         window.toggleNotificationDropdown = toggleNotificationDropdown;
 
+        // --- Profile notification toggle ---
         function toggleProfileNotifMenu() {
             const menu = document.getElementById("profileNotificationToggle");
             if (!menu) return;
@@ -293,57 +867,310 @@
         const searchInput = document.getElementById("searchInput");
         if (searchInput) {
             searchInput.addEventListener("keypress", function (e) {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSearch();
-                }
+                if (e.key === "Enter") { e.preventDefault(); handleSearch(); }
             });
         }
-
         function handleSearch() {
             if (!searchInput) return;
             const query = searchInput.value.trim();
-            if (!query) {
-                alert("Please enter a search term.");
-                return;
-            }
-            const url = `/Courses?search=${encodeURIComponent(query)}`;
-            window.location.href = url;
+            if (!query) { alert("Please enter a search term."); return; }
+            window.location.href = `/Courses?search=${encodeURIComponent(query)}`;
         }
         window.handleSearch = handleSearch;
 
-        // --- Logout Modal ---
+        // --- Logout modal ---
         const logoutModalOverlay = document.getElementById("logout-modal-overlay");
-
-        function logoutModalOpen() {
-            if (logoutModalOverlay) logoutModalOverlay.style.display = "flex";
-        }
-        function logoutModalClose() {
-            if (logoutModalOverlay) logoutModalOverlay.style.display = "none";
-        }
-        function logoutModalConfirm() {
-            window.location.href = "/force-logout";
-        }
-
-        // expose globally so buttons in HTML can use them
+        function logoutModalOpen() { if (logoutModalOverlay) logoutModalOverlay.style.display = "flex"; }
+        function logoutModalClose() { if (logoutModalOverlay) logoutModalOverlay.style.display = "none"; }
+        function logoutModalConfirm() { window.location.href = "/force-logout"; }
         window.logoutModalOpen = logoutModalOpen;
         window.logoutModalClose = logoutModalClose;
         window.logoutModalConfirm = logoutModalConfirm;
 
         if (logoutModalOverlay) {
-            // Close modal when clicking outside content
-            logoutModalOverlay.addEventListener("click", function (e) {
-                if (e.target === logoutModalOverlay) {
-                    logoutModalClose();
-                }
-            });
+            logoutModalOverlay.addEventListener("click", e => { if (e.target === logoutModalOverlay) logoutModalClose(); });
         }
+        document.addEventListener("keydown", e => { if (e.key === "Escape" && logoutModalOverlay?.style.display === "flex") logoutModalClose(); });
+        document.addEventListener("click", e => {
+            const dropdown = document.getElementById("notificationDropdown");
+            const bellIcon = document.querySelector(".nav-notification-icon");
+            if (!dropdown || !bellIcon) return;
+            if (!dropdown.contains(e.target) && !bellIcon.contains(e.target)) dropdown.style.display = "none";
+        });
 
-        // Close modal with Esc key
-        document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape" && logoutModalOverlay?.style.display === "flex") {
-                logoutModalClose();
+        // --- Resubmit modal ---
+        window.openResubmitModal = function(appId, type, notifId) {
+            const modal = document.getElementById("resubmitModal");
+            const form = document.getElementById("resubmitForm");
+            const submitBtn = form.querySelector(".logout-modal-btn-confirm");
+            const fileInput = form.querySelector("input[type='file']");
+
+            form.setAttribute("data-app-id", appId);
+            form.setAttribute("data-type", type); // "artisan" or "project"
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Resubmit";
+            fileInput.value = "";
+            modal.style.display = "flex";
+
+            if (notifId) submitBtn.dataset.notifId = notifId;
+
+            fileInput.onchange = () => { submitBtn.disabled = fileInput.files.length === 0; };
+        };
+
+        window.closeResubmitModal = () => {
+            const modal = document.getElementById("resubmitModal");
+            modal.style.display = "none";
+        };
+
+        window.closeCongratsModal = () => document.getElementById("congratsModal").style.display = "none";
+
+        window.openCongratsModal = function(message) {
+            const modal = document.getElementById("congratsModal");
+            const textElem = document.getElementById("congratsModalText");
+            if (textElem) textElem.innerText = message;
+            modal.style.display = "flex";
+        };
+
+        window.openResubmitProjectModal = function(appId, notifId) {
+            const modal = document.getElementById("resubmitProjectModal");
+            const form = document.getElementById("resubmitProjectForm");
+            const submitBtn = form.querySelector(".logout-modal-btn-confirm");
+            const fileInput = form.querySelector("input[type='file']");
+
+            form.setAttribute("data-app-id", appId);
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Resubmit";
+            fileInput.value = "";
+            modal.style.display = "flex";
+
+            if (notifId) submitBtn.dataset.notifId = notifId;
+
+            fileInput.onchange = () => { submitBtn.disabled = fileInput.files.length === 0; };
+        };
+
+        window.closeResubmitProjectModal = () => {
+            const modal = document.getElementById("resubmitProjectModal");
+            modal.style.display = "none";
+        };
+
+        const sendBtn = document.getElementById("sendRescheduleSessionRequest");
+        const dateInput = document.getElementById("rescheduleSessionDate");
+        const timeInput = document.getElementById("rescheduleSessionTime");
+        const messageInput = document.getElementById("rescheduleSessionMessage");
+        const rescheduleModal = document.getElementById("rescheduleSessionModal");
+
+        [dateInput, timeInput, messageInput].forEach(el =>
+            el.addEventListener("input", () => {
+                sendBtn.disabled = !(dateInput.value && timeInput.value && messageInput.value.trim());
+            })
+        );
+
+
+        window.openRescheduleSessionModal = function(courseId, notifId) {
+            rescheduleModal.style.display = "flex";
+
+            // Reset inputs and button
+            dateInput.value = "";
+            timeInput.value = "";
+            messageInput.value = "";
+            sendBtn.disabled = true;
+            sendBtn.innerText = "Send Request";
+
+            // Store courseId on button dataset
+            sendBtn.dataset.courseId = courseId;
+            if (notifId) sendBtn.dataset.notifId = notifId;
+        };
+
+        window.closeRescheduleSessionModal = () => {
+            rescheduleModal.style.display = "none";
+            dateInput.value = "";
+            timeInput.value = "";
+            messageInput.value = "";
+        };
+
+        document.getElementById("sendRescheduleSessionRequest").addEventListener("click", async function() {
+            const btn = this;
+            const courseId = btn.dataset.courseId;
+            const notifId = btn.dataset.notifId;
+            const newDate = dateInput.value;
+            const newTime = timeInput.value;
+            const message = messageInput.value;
+
+            btn.disabled = true;
+            btn.innerText = "Submitting...";
+
+            try {
+                const res = await fetch(`/UserProfile/RescheduleSessionByCourse/${courseId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ newDate, newTime, message })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    closeRescheduleSessionModal();
+                    openCongratsModal(result.message || "Your session was successfully rescheduled!");
+
+                    // ✅ Only mark notification as actioned after successful submission
+                    if (notifId) {
+                        try {
+                            await fetch(`/api/notification/mark-actioned/${notifId}`, { method: "POST" });
+                            const notifBtn = document.querySelector(`button[data-notif-id="${notifId}"]`);
+                            if (notifBtn) notifBtn.style.display = "none";
+                        } catch (err) {
+                            console.error("Failed to mark notification as actioned:", err);
+                        }
+                    }
+
+                    window.resubmittedApps.add(courseId);
+
+                    await loadNotifications();
+                    await loadUnreadCount();
+                } else {
+                    alert(result.message || "Something went wrong");
+                    btn.disabled = false;
+                    btn.innerText = "Send Request";
+                }
+            } catch (err) {
+                console.error("Reschedule error:", err);
+                alert("Failed to reschedule session.");
+                btn.disabled = false;
+                btn.innerText = "Send Request";
             }
         });
+
+        // --- Event delegation for notification buttons ---
+        document.getElementById("notificationItems").addEventListener("click", function(e) {
+            const btn = e.target.closest("button[data-notif-id]");
+            if (!btn || btn.disabled) return;
+
+            handleNotificationClick(btn);
+        });
+
+        document.getElementById("resubmitForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const appId = this.getAttribute("data-app-id");
+            const type = this.getAttribute("data-type"); // "artisan" or "project"
+            const submitBtn = this.querySelector(".logout-modal-btn-confirm");
+            const notifId = submitBtn.dataset.notifId;
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting...";
+
+            let endpoint = type === "artisan"
+                ? `/Artisan/Resubmit/${appId}`
+                : `/UserProfile/ResubmitFinalProject/${appId}`;
+
+            try {
+                const response = await fetch(endpoint, { method: "POST", body: new FormData(this) });
+                const result = await response.json();
+
+                if (result.success) {
+                    closeResubmitModal();
+                    openCongratsModal("Application Resubmitted");
+
+                    if (notifId) {
+                        const btn = document.querySelector(`button[data-notif-id="${notifId}"]`);
+                        if (btn) btn.style.display = "none";
+
+                        try {
+                            await fetch(`/api/notification/mark-actioned/${notifId}`, { method: "POST" });
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }
+
+                    window.resubmittedApps.add(appId);
+
+                    await loadNotifications();
+                    await loadUnreadCount();
+                } else {
+                    alert(result.message);
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Resubmit";
+                }
+            } catch (err) {
+                console.error("Submit failed", err);
+                alert("Something went wrong. Please try again.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Resubmit";
+            }
+        });
+
+        document.getElementById("resubmitProjectForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const appId = this.getAttribute("data-app-id");
+            const submitBtn = this.querySelector(".logout-modal-btn-confirm");
+            const notifId = submitBtn.dataset.notifId;
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting...";
+
+            const formData = new FormData();
+            formData.append("Title", document.getElementById("projectTitle").value);
+            formData.append("Description", document.getElementById("projectDescription").value);
+
+            const fileInput = document.querySelector("#resubmitProjectForm input[type='file']");
+            if (fileInput.files.length > 0) formData.append("projectFile", fileInput.files[0]);
+
+            try {
+                const response = await fetch(`/UserProfile/ResubmitFinalProject/${appId}`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    closeResubmitProjectModal();
+                    openCongratsModal("Project Resubmitted");
+
+                    if (notifId) {
+                        const btn = document.querySelector(`button[data-notif-id="${notifId}"]`);
+                        if (btn) btn.style.display = "none";
+                        try { await fetch(`/api/notification/mark-actioned/${notifId}`, { method: "POST" }); }
+                        catch (err) { console.error(err); }
+                    }
+
+                    window.resubmittedApps.add(appId);
+                    await loadNotifications();
+                    await loadUnreadCount();
+                } else {
+                    alert(result.message);
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Resubmit";
+                }
+            } catch (err) {
+                console.error("Submit failed", err);
+                alert("Something went wrong. Please try again.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Resubmit";
+            }
+        });
+
+        // --- Initial load ---
+        loadNotifications();
+        loadUnreadCount();
+        setInterval(loadNotifications, 60000);
     });
+
+    window.handleNotificationClick = function(btn) {
+        const notifId = btn.getAttribute("data-notif-id");
+        const appId = btn.getAttribute("data-app-id");
+        const type = btn.getAttribute("data-type");
+
+        if (!notifId || !appId || !type) return;
+
+        // Open the appropriate modal without marking as actioned yet
+        if (type === "project") {
+            openResubmitProjectModal(appId, notifId);
+        } else if (type === "reschedule") {
+            openRescheduleSessionModal(appId, notifId);
+        } else {
+            openResubmitModal(appId, type, notifId);
+        }
+    };
 </script>

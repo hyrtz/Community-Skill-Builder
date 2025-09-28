@@ -7,6 +7,8 @@
             public List<User> AllUsers { get; set; }
             public List<ArtisanApplication> PendingApplications { get; set; }
             public List<ArtisanApplication> AllPendingApplications { get; set; }
+            public List<ArtisanApplication> AllApprovedApplications { get; set; }
+            public List<ArtisanApplication> AllRejectedApplications { get; set; }
             public List<Course> SubmittedCourses { get; set; }
             public List<Course> AllSubmittedCourses { get; set; }
             public List<Community> Communities { get; set; }

@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Community Hub";
     var isDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
+    var isVerified = User.FindFirst("IsVerified")?.Value == "True";
 }
 
 <style>
@@ -455,6 +456,15 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
+
+    #bannerPreview {
+        width: 100%;
+        max-width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        display: none;
+    }
 </style>
 
 <div class="community-page-wrapper">
@@ -489,7 +499,16 @@
                 <input type="text" placeholder="Search Tahi" />
                 <button><img src="/assets/Icons/Search.ico" width="20" height="20" /></button>
             </div>
-            <button class="create-post-btn">＋ Create Post</button>
+            @if (isDeactivated || !isVerified)
+            {
+                <button class="create-post-btn" disabled style="opacity:0.5; cursor:not-allowed;">
+                    ＋ Create Post
+                </button>
+            }
+            else
+            {
+                <button class="create-post-btn">＋ Create Post</button>
+            }
         </div>
 
         <div class="community-body">
@@ -544,11 +563,11 @@
                     <button class="see-more-btn">See more communities</button>
                 </div>
 
-                @if (isDeactivated)
+                @if (isDeactivated || !isVerified)
                 {
                     <div class="create-community-card" style="opacity:0.5; pointer-events:none; cursor:not-allowed;">
                         <p style="color:#d00; font-size:0.85rem; margin-top:0.5rem;">
-                            Can't Create Community, Your account is deactivated.
+                            Can't Create Community, your account is either not verified or deactivated.
                         </p>
                     </div>
                 }
@@ -622,12 +641,13 @@
                         <div class="community-posts-field">
                             <label>Select a category.</label>
                             <div class="community-posts-categories">
-                                <button type="button" class="community-posts-category" data-value="Weaving">Weaving</button>
                                 <button type="button" class="community-posts-category" data-value="Pottery">Pottery</button>
+                                <button type="button" class="community-posts-category" data-value="Weaving">Weaving</button>
                                 <button type="button" class="community-posts-category" data-value="Wood Carving">Wood Carving</button>
+                                <button type="button" class="community-posts-category" data-value="Paper Crafts">Paper Crafts</button>
                                 <button type="button" class="community-posts-category" data-value="Shoemaking">Shoemaking</button>
+                                <button type="button" class="community-posts-category" data-value="Embroidery">Embroidery</button>
                             </div>
-                            <a href="#" class="community-posts-other">Choose a different category →</a>
                         </div>
 
                         <!-- Actions -->
@@ -705,14 +725,15 @@
                         <!-- Step 3: Choose Category -->
                         <div class="modal-step" id="step3" style="display:none;">
                             <h2>Choose your category</h2>
-                            <p class="modal-subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                            <p class="modal-subtitle">please select a category for your community.</p>
 
                             <div id="categoryCards" style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2rem;">
                                 <div class="category-card" data-category="Pottery">Pottery</div>
                                 <div class="category-card" data-category="Weaving">Weaving</div>
-                                <div class="category-card" data-category="Wood Crafts">Wood Crafts</div>
-                                <div class="category-card" data-category="Embroidery">Embroidery</div>
+                                <div class="category-card" data-category="Wood Carving">Wood Crafts</div>
                                 <div class="category-card" data-category="Paper Crafts">Paper Crafts</div>
+                                <div class="category-card" data-category="Shoemaking">Shoemaking</div>
+                                <div class="category-card" data-category="Embroidery">Embroidery</div>
                             </div>
 
                             <input type="hidden" name="Category" id="selectedCategory" />
@@ -839,7 +860,9 @@
                     reader.readAsDataURL(file);
                 });
 
-                deleteBtn.addEventListener("click", () => {
+                deleteBtn.addEventListener("click", e => {
+                    e.preventDefault();
+                    e.stopPropagation(); // <- prevents any parent handlers
                     input.value = "";
                     previewImg.src = "";
                     previewImg.style.display = "none";
@@ -981,70 +1004,65 @@
             submitPostBtn.disabled = !(title && content && category);
         };
 
-        document.querySelectorAll(".community-posts-category").forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.getElementById("communityPostsCategory").value = btn.dataset.value;
-                document.getElementById("communityPostsSubmit").disabled = false; // enable submit
-            });
-        });
+        const communityPostsForm = document.getElementById("communityPostsForm");
 
-        // Form submit with fetch
-        document.getElementById("communityPostsForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
+        if (communityPostsForm) {
+            communityPostsForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const formData = new FormData(form);
 
-            try {
-                const response = await fetch(form.action, {
-                    method: "POST",
-                    body: formData
-                });
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: formData
+                    });
 
-                const result = await response.json();
+                    const result = await response.json();
 
-                if (result.success) {
-                    // ✅ Create new post element
-                    const newPost = document.createElement("div");
-                    newPost.classList.add("post-card"); // match your Razor class
-                    newPost.innerHTML = `
-                        <div class="post-card-header">
-                            <div class="avatar" style="background-image:url('${result.post.authorAvatarUrl || '/assets/Images/default-avatar.png'}')"></div>
-                            <div class="community-info">
-                                <h5>${result.post.authorName}</h5>
-                                <h6>${result.post.communityName} • ${new Date(result.post.submittedAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</h6>
+                    if (result.success) {
+                        // ✅ Create new post element
+                        const newPost = document.createElement("div");
+                        newPost.classList.add("post-card"); // match your Razor class
+                        newPost.innerHTML = `
+                            <div class="post-card-header">
+                                <div class="avatar" style="background-image:url('${result.post.authorAvatarUrl}')"></div>
+                                <div class="community-info">
+                                    <h5>${result.post.authorName}</h5>
+                                    <h6>${result.post.communityName} • ${new Date(result.post.submittedAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</h6>
+                                </div>
                             </div>
-                        </div>
-                        <div class="post-card-content">
-                            <p>${result.post.content}</p>
-                            ${result.post.imageUrl ? `<img src="${result.post.imageUrl}" alt="Post image" />` : ""}
-                            <div class="community-meta">
-                                <span>❤️ 0</span>
-                                <span>💬 0</span>
+                            <div class="post-card-content">
+                                <p>${result.post.content}</p>
+                                ${result.post.imageUrl ? `<img src="${result.post.imageUrl}" alt="Post image" />` : ""}
+                                <div class="community-meta">
+                                    <span>❤️ 0</span>
+                                    <span>💬 0</span>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
 
-                    // ✅ Insert into the Razor-generated container
-                    const postsContainer = document.querySelector('.community-posts-list');
-                    if (postsContainer) {
-                        // If "No posts" message exists, remove it first
-                        const noPosts = postsContainer.querySelector('.no-posts');
-                        if (noPosts) noPosts.remove();
+                        // ✅ Insert into the Razor-generated container
+                        const postsContainer = document.querySelector('.community-posts-list');
+                        if (postsContainer) {
+                            const noPosts = postsContainer.querySelector('.no-posts');
+                            if (noPosts) noPosts.remove();
 
-                        postsContainer.prepend(newPost);
+                            postsContainer.prepend(newPost);
+                        }
+
+                        // ✅ Reset form and close modal
+                        form.reset();
+                        if (typeof closePostModal === "function") closePostModal();
+                    } else {
+                        alert(result.message || "Something went wrong while creating the post.");
                     }
-
-                    // ✅ Reset form and close modal
-                    form.reset();
-                    closePostModal();
-                } else {
-                    alert(result.message || "Something went wrong while creating the post.");
+                } catch (error) {
+                    console.error("Error creating post:", error);
+                    alert("Failed to create post. Please try again.");
                 }
-            } catch (error) {
-                console.error("Error creating post:", error);
-                alert("Failed to create post. Please try again.");
-            }
-        });
+            });
+        }
 
 
         // Initial disable state

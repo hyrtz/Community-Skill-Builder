@@ -1,14 +1,14 @@
 ﻿@model SkillBuilder.Models.Course
 
 <style>
-    .materials-lessons-header {
+    .course-material-view-header {
         font-size: 1.75rem;
         font-weight: 700;
         margin-bottom: 1.5rem;
         color: #222;
     }
 
-    .materials-lesson-item {
+    .course-material-view-lesson-item {
         margin-left: 2rem;
         padding: 1rem 0;
         border-top: 1px solid #000;
@@ -17,22 +17,28 @@
         color: #333;
     }
 
-        .materials-lesson-item:not(:first-child) {
+        .course-material-view-lesson-item:not(:first-child) {
             border-top: none;
         }
+
+    .course-material-view-download-link {
+        color: #344AEA;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
 </style>
 
-<div class="tab-section">
+<div class="course-material-view-tab-section">
     @if (Model.Materials != null && Model.Materials.Any())
     {
         foreach (var material in Model.Materials)
         {
-            <div class="materials-lesson-item">
+            <div class="course-material-view-lesson-item">
                 <strong>@material.Title</strong> <br />
                 <span style="font-size: 0.9rem; color: #555;">@material.Description</span><br />
                 @if (!string.IsNullOrWhiteSpace(material.FilePath))
                 {
-                    <a href="@material.FilePath" download style="color: #344AEA; font-weight: 600;">
+                    <a href="@material.FilePath" download class="course-material-view-download-link">
                         📥 Download File (@(material.FileSize / 1024.0):F1 KB)
                     </a>
                 }

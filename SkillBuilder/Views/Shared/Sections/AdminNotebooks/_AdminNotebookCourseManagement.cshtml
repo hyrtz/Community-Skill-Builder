@@ -1,6 +1,11 @@
 ﻿@using SkillBuilder.Models.ViewModels
 @model AdminProfileViewModel
 
+@{
+    var existingCourses = Model.AllSubmittedCourses?.Where(c => !c.IsArchived).ToList() ?? new List<Course>();
+    var deletedCourses = Model.AllSubmittedCourses?.Where(c => c.IsArchived).ToList() ?? new List<Course>();
+}
+
 <style>
     /* =======================
                Layout / Sections
@@ -114,6 +119,7 @@
             text-align: center;
             display: table-cell;
             vertical-align: middle;
+            font-weight: 600;
         }
 
         .course-mgmt-cell.course-actions {
@@ -146,26 +152,18 @@
     }
 
     .course-mgmt-action-btn {
-        padding: 0.55rem 1rem;
-        border: none;
-        border-radius: 8px;
+        background-color: #FEE4E2;
+        color: #B42318;
+        padding: 0.8rem 0.8rem;
+        border: solid #B42318 1px;
+        border-radius: 6px;
         cursor: pointer;
         font-size: 0.9rem;
         font-weight: bold;
-        color: #fff;
-        transition: background-color 0.25s ease, transform 0.15s ease;
     }
-
-        .course-mgmt-action-btn:hover {
-            transform: translateY(-1px);
-        }
-
-    .course-mgmt-delete-btn {
-        background-color: #e74c3c;
-    }
-
         .course-mgmt-delete-btn:hover {
-            background-color: #c0392b;
+            background-color: #e74c3c;
+            color: white;
         }
 
     /* Backdrop */
@@ -250,7 +248,15 @@
         color: #fff;
     }
 
-        .course-mgmt-modal-confirm:hover {
+        .course-mgmt-modal-confirm:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6; 
+            transform: none !important;
+        }
+
+        .course-mgmt-modal-confirm:not(:disabled):hover {
+            transform: scale(1.05);
             background-color: #c0392b;
         }
 
@@ -261,6 +267,32 @@
 
         .course-mgmt-modal-cancel:hover {
             background-color: #a0a7ad;
+        }
+
+    /* Tabs */ .course-mgmt-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .course-mgmt-tab {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #555;
+    }
+
+        .course-mgmt-tab.active {
+            border-bottom-color: #344AEA; /* blue underline */
+            color: #344AEA;
+        }
+
+        .course-mgmt-tab:hover {
+            color: #344AEA;
         }
 </style>
 
@@ -276,7 +308,18 @@
         </div>
     </div>
 
+    <!-- Tabs -->
+    <div class="course-mgmt-tabs" style="display:flex; gap:1rem; margin-bottom:1.5rem;">
+        <button class="course-mgmt-tab active" data-tab="existing">Existing</button>
+        <button class="course-mgmt-tab" data-tab="deleted">Deleted</button>
+    </div>
+
     <table class="course-mgmt-table">
+            <colgroup>
+                <col style="width: 33%;">
+                <col style="width: 33%; text-align:center;">
+                <col style="width: 33%; text-align:right;">
+            </colgroup>
         <thead>
             <tr>
                 <th>Course Name</th>
@@ -287,60 +330,183 @@
         <tbody>
             @if (Model.AllSubmittedCourses != null && Model.AllSubmittedCourses.Any())
             {
-                foreach (var course in Model.AllSubmittedCourses.Where(c => !c.IsArchived))
+                @* Existing courses *@
+                @if (existingCourses.Any())
                 {
-                    <tr class="course-mgmt-row">
-                        <td class="course-mgmt-cell course-mgmt-name">
-                            <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })">
-                                @course.Title
-                            </a>
+                    foreach (var course in existingCourses)
+                    {
+                        <tr class="course-mgmt-row" data-tab="existing">
+                            <td class="course-mgmt-cell course-mgmt-name">
+                                <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })">
+                                    @course.Title
+                                </a>
+                            </td>
+                            <td class="course-mgmt-cell course-author">
+                                @course.Artisan?.User?.FirstName @course.Artisan?.User?.LastName
+                            </td>
+                            <td class="course-mgmt-cell course-actions">
+                                <div class="course-mgmt-action-buttons">
+                                    <form asp-action="DeleteCourse"
+                                          asp-route-id="@course.Id"
+                                          asp-route-adminId="@Model.Admin.UserId"
+                                          method="post"
+                                          onsubmit="return courseMgmtOpenDeleteModal(this, '@course.Title');">
+                                        <button type="submit" class="course-mgmt-action-btn course-mgmt-delete-btn">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr class="course-mgmt-row" data-tab="existing">
+                        <td colspan="3" class="course-mgmt-cell" style="text-align:center; font-style:italic; color:#888;">
+                            No existing courses yet.
                         </td>
-                        <td class="course-mgmt-cell course-author">
-                            @course.Artisan?.User?.FirstName @course.Artisan?.User?.LastName
-                        </td>
-                        <td class="course-mgmt-cell course-actions">
-                            <div class="course-mgmt-action-buttons">
-                                <form asp-action="DeleteCourse"
-                                      asp-route-id="@course.Id"
-                                      asp-route-adminId="@Model.Admin.UserId"
-                                      method="post"
-                                      onsubmit="return courseMgmtOpenDeleteModal(this, '@course.Title');">
-                                    <button type="submit" class="course-mgmt-action-btn course-mgmt-delete-btn">
-                                        Delete
-                                    </button>
-                                </form>
-                            </div>
+                    </tr>
+                }
+
+                @* Deleted courses *@
+                @if (deletedCourses.Any())
+                {
+                    foreach (var course in deletedCourses)
+                    {
+                        <tr class="course-mgmt-row" data-tab="deleted" style="display:none; opacity:0.6;">
+                            <td class="course-mgmt-cell course-mgmt-name">
+                                <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })">
+                                    @course.Title
+                                </a>
+                            </td>
+                            <td class="course-mgmt-cell course-author">
+                                @course.Artisan?.User?.FirstName @course.Artisan?.User?.LastName
+                            </td>
+                            <td class="course-mgmt-cell course-actions">
+                                <div class="course-mgmt-action-buttons" style="opacity:0.6;">
+                                    Deleted
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr class="course-mgmt-row" data-tab="deleted" style="display:none;">
+                        <td colspan="3" class="course-mgmt-cell" style="text-align:center; font-style:italic; color:#888;">
+                            No deleted courses yet.
                         </td>
                     </tr>
                 }
             }
-            else
-            {
-                <tr>
-                    <td colspan="3" class="course-mgmt-cell" style="text-align: center; padding: 2rem; color: #888;">
-
-                        No submitted courses available.
-                    </td>
-                </tr>
-            }
         </tbody>
     </table>
+</div>
 
-    <!-- Backdrop -->
-    <div class="course-mgmt-modal-backdrop" id="courseMgmtModalBackdrop"></div>
+<!-- Backdrop -->
+<div class="course-mgmt-modal-backdrop" id="courseMgmtModalBackdrop"></div>
 
-    <!-- Delete confirmation modal -->
-    <div class="course-mgmt-modal" id="courseMgmtDeleteModal">
-        <h3>Confirm Deletion</h3>
-        <p id="courseMgmtDeleteMessage"></p>
-        <div class="course-mgmt-modal-buttons">
-            <button class="course-mgmt-modal-cancel" onclick="courseMgmtCloseModal()">Cancel</button>
-            <button class="course-mgmt-modal-confirm" id="courseMgmtConfirmDelete">Delete</button>
-        </div>
+<!-- Delete confirmation modal -->
+<div class="course-mgmt-modal" id="courseMgmtDeleteModal">
+    <h3>Confirm Deletion</h3>
+    <p id="courseMgmtDeleteMessage"></p>
+    <textarea id="courseMgmtDeleteReason" placeholder="Enter reason for deletion (optional)"
+              style="width:100%; min-height:80px; margin-bottom:1rem; padding:0.5rem; border-radius:6px; border:1px solid #ccc; resize: none;"></textarea>
+    <div class="course-mgmt-modal-buttons">
+        <button class="course-mgmt-modal-cancel" onclick="courseMgmtCloseModal()">Cancel</button>
+        <button class="course-mgmt-modal-confirm" id="courseMgmtConfirmDelete" disabled>Delete</button>
     </div>
 </div>
 
 <script>
+    const courseTabs = document.querySelectorAll(".course-mgmt-tab");
+    const courseRows = document.querySelectorAll(".course-mgmt-row");
+
+    const courseSearchInput = document.querySelector(".course-mgmt-search-bar input");
+    const courseSearchButton = document.querySelector(".course-mgmt-search-bar button");
+
+    // Add a "No courses found" row
+    const tbody = courseRows[0]?.parentElement;
+    let noCoursesRow = document.getElementById("noCoursesMessage");
+    if (!noCoursesRow) {
+        noCoursesRow = document.createElement("tr");
+        noCoursesRow.id = "noCoursesMessage";
+        noCoursesRow.style.display = "none";
+        noCoursesRow.innerHTML = `<td colspan="3" class="course-mgmt-cell" style="text-align:center; font-style:italic; color:#888;">
+            No courses found.
+        </td>`;
+        tbody.appendChild(noCoursesRow);
+    }
+
+    function filterCourses() {
+        const filter = courseSearchInput.value.toLowerCase().trim();
+        const activeTab = document.querySelector(".course-mgmt-tab.active").dataset.tab;
+
+        let anyVisible = false;
+
+        courseRows.forEach(row => {
+            if (row.dataset.tab !== activeTab) {
+                row.style.display = "none";
+                return;
+            }
+
+            // Skip placeholder rows like "No existing courses yet"
+            const isEmptyRow = row.querySelector(".course-mgmt-cell")?.innerText.includes("No");
+            if (isEmptyRow) {
+                row.style.display = !filter ? "table-row" : "none";
+                return;
+            }
+
+            const title = row.querySelector(".course-mgmt-name")?.innerText.toLowerCase() || "";
+            const author = row.querySelector(".course-author")?.innerText.toLowerCase() || "";
+            if (!filter || title.includes(filter) || author.includes(filter)) {
+                row.style.display = "table-row";
+                anyVisible = true;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        noCoursesRow.style.display = filter && !anyVisible ? "table-row" : "none";
+    }
+
+    // Trigger search on Enter
+    courseSearchInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            filterCourses();
+        }
+    });
+
+    // Trigger search on button click
+    courseSearchButton.addEventListener("click", filterCourses);
+
+    // Tab switching
+    courseTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            // Highlight active tab
+            courseTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            const selectedTab = tab.dataset.tab;
+
+            // Show/hide rows
+            courseRows.forEach(row => {
+                row.style.display = (row.dataset.tab === selectedTab) ? "table-row" : "none";
+            });
+
+            filterCourses(); // Apply search after switching tab
+        });
+    });
+
+    const courseReasonInput = document.getElementById("courseMgmtDeleteReason");
+    const courseConfirmBtn = document.getElementById("courseMgmtConfirmDelete");
+
+    courseReasonInput.addEventListener("input", () => {
+        courseConfirmBtn.disabled = courseReasonInput.value.trim() === "";
+    });
+
     let courseMgmtCurrentForm = null;
 
     function courseMgmtOpenDeleteModal(form, courseTitle) {
@@ -348,13 +514,28 @@
         document.getElementById("courseMgmtDeleteMessage").innerText =
             `Are you sure you want to delete the course "${courseTitle}"?`;
 
+        courseReasonInput.value = "";         // clear previous reason
+        courseConfirmBtn.disabled = true;     // disable confirm button
+
         document.getElementById("courseMgmtModalBackdrop").classList.add("active");
         document.getElementById("courseMgmtDeleteModal").classList.add("active");
-        return false; // prevent auto submit
+        return false;
     }
 
     function courseMgmtConfirmDeleteAction() {
-        if (courseMgmtCurrentForm) courseMgmtCurrentForm.submit();
+        if (!courseMgmtCurrentForm) return;
+
+        // Add reason to the form
+        let reasonInput = courseMgmtCurrentForm.querySelector("input[name='reason']");
+        if (!reasonInput) {
+            reasonInput = document.createElement("input");
+            reasonInput.type = "hidden";
+            reasonInput.name = "reason";
+            courseMgmtCurrentForm.appendChild(reasonInput);
+        }
+        reasonInput.value = document.getElementById("courseMgmtDeleteReason").value;
+
+        courseMgmtCurrentForm.submit();
     }
 
     function courseMgmtCloseModal() {

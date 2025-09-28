@@ -92,6 +92,149 @@
         display: block;
         font-weight: 500;
     }
+
+    #forgot-email-stage h2{
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    #forgot-email-stage p {
+        font-weight: 500;
+        font-size: 0.80rem;
+        margin-bottom: 1rem;
+    }
+
+    #send-otp-btn {
+        background-color: #aaa;
+        color: #666;
+        cursor: not-allowed;
+        opacity: 0.6;
+        padding: 0.5rem 1rem;
+        border: none;
+    }
+
+        #send-otp-btn:disabled:hover {
+            background-color: #aaa;
+        }
+
+        #send-otp-btn:enabled {
+            color: white;
+            background: #364BE9;
+            cursor: pointer;
+            opacity: 1;
+            transition: all 0.2s ease;
+        }
+
+        #send-otp-btn:enabled:hover {
+            background: #2a34c6;
+        }
+
+    #otp-stage {
+        display:none;
+    }
+
+    #otp-stage h2{
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    #otp-stage p {
+        font-weight: 500;
+        font-size: 0.80rem;
+        margin-bottom: 1rem;
+    }
+
+    #otp-submit-btn {
+        background-color: #aaa;
+        color: #666;
+        cursor: not-allowed;
+        opacity: 0.6;
+        padding: 0.5rem 1rem;
+        border: none;
+    }
+
+        #otp-submit-btn:enabled {
+            color: white;
+            background: #364BE9;
+            cursor: pointer;
+            opacity: 1;
+            transition: all 0.2s ease;
+        }
+
+        #otp-submit-btn:enabled:hover {
+            background: #2a34c6;
+        }
+
+    #reset-password-stage {
+        display:none;
+    }
+
+    #reset-password-stage h2 {
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    #reset-password-enter {
+        font-weight: 500;
+        font-size: 0.80rem;
+        margin-bottom: 1rem;
+    }
+
+    #reset-password-btn {
+        background-color: #aaa;
+        color: #666;
+        cursor: not-allowed;
+        opacity: 0.6;
+        padding: 0.5rem 1rem;
+        border: none;
+    }
+    
+        #reset-password-btn:enabled {
+            color: white;
+            background: #364BE9;
+            cursor: pointer;
+            opacity: 1;
+            transition: all 0.2s ease;
+        }
+
+        #reset-password-btn:enabled:hover {
+            background: #2a34c6;
+        }
+
+    #back-to-login-btn {
+        margin-top:1rem; 
+        padding:0.5rem 1rem; 
+        background:#364BE9; 
+        color:white; 
+        border:none; 
+        cursor:pointer;
+    }
+
+    #reset-success-stage {
+        display:none; 
+        text-align:center; 
+        padding: -2rem;
+    }
+
+    #resend-otp {
+        background: none;
+        color: #666;
+        cursor: not-allowed;
+        opacity: 0.6;
+        padding: 0.5rem 1rem;
+        border: none;
+        transition: all 0.2s ease;
+    }
+
+        #resend-otp:enabled {
+            color: black;
+            cursor: pointer;
+            opacity: 1;
+        }
+
 </style>
 
 <div id="login-modal" class="auth-modal">
@@ -103,7 +246,7 @@
 
         <!-- Right Side -->
         <div class="auth-modal-right">
-            <span class="auth-close-btn" onclick="closeModal('login-modal', true)">&times;</span>
+            <span id ="login-close-btn" class="auth-close-btn" onclick="closeModal('login-modal', true)">&times;</span>
 
             <div id="login-main-content">
                 <h2>Log in to <span style="color: #364BE9">Tahi</span></h2>
@@ -142,39 +285,39 @@
             <div id="forgot-password-form" style="display:none; position:relative;">
                 <!-- Back Button -->
                 <button type="button" class="back-social-btn" onclick="showLoginForm(event)">←</button>
-
+                
                 <!-- Email Stage -->
                 <div id="forgot-email-stage">
                     <h2>Forgot Password</h2>
                     <p>Enter your email and we'll send you instructions to reset your password.</p>
 
                     <input type="email" id="forgot-email" placeholder="Email" />
-                    <button type="button" id="send-otp-btn" disabled style="background:#364BE9;color:white;margin-top:1rem;">Send Instruction</button>
+                    <p id="password-email-error" class="reset-error" style="display: none;">⚠️ Please enter a valid email.</p>
+                    <button type="button" id="send-otp-btn" disabled>Send Instruction</button>
 
                     <p class="forgot-error-message" style="color:red;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
-                    <p class="forgot-success-message" style="color:green;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
                 </div>
 
                 <!-- OTP Stage -->
-                <div id="otp-stage" style="display:none;">
+                <div id="otp-stage">
                     <h2>Forgot Password</h2>
                     <p>If the email is valid, you will receive a One Time Password (OTP) via email. Enter it below.</p>
 
                     <input type="text" id="otp-input" placeholder="Enter 6-digit OTP" maxlength="6" />
-                    <button type="button" id="otp-submit-btn" style="background:#364BE9;color:white;margin-top:1rem;" disabled>Submit</button>
+                    <p id="password-number-error" class="reset-error" style="display: none;">⚠️ Only letters are allowed.</p>
+                    <button type="button" id="otp-submit-btn" disabled>Submit</button>
 
                     <p style="text-align:center;margin-top:1rem;">
-                        Didn’t receive code? <a href="#" id="resend-otp">Resend</a>
+                        Didn’t receive code? <button type="button" id="resend-otp">Resend</button>
                     </p>
 
                     <p class="otp-error-message" style="color:red;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
-                    <p class="otp-success-message" style="color:green;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
                 </div>
 
                 <!-- Reset Password Stage -->
-                <div id="reset-password-stage" style="display:none;">
+                <div id="reset-password-stage">
                     <h2>Reset Password</h2>
-                    <p>Enter your new password below.</p>
+                    <p id="reset-password-enter">Enter your new password below.</p>
 
                     <!-- New Password -->
                     <div class="password-wrapper">
@@ -183,7 +326,7 @@
                     </div>
 
                     <!-- Password Requirements (under new password only) -->
-                    <div id="reset-password-requirements" class="password-requirements" style="display: none;">
+                    <div id="reset-password-requirements" class="password-requirements" style="display: none; margin-top: -1.5rem;">
                         <p id="req-length-reset" data-text="Minimum 8 characters">❌ Minimum 8 characters</p>
                         <p id="req-uppercase-reset" data-text="At least one uppercase letter">❌ At least one uppercase letter</p>
                         <p id="req-number-reset" data-text="At least one number">❌ At least one number</p>
@@ -197,12 +340,18 @@
                     </div>
 
                     <!-- Warning for mismatch -->
-                    <p id="reset-confirm-warning" class="reset-error" style="display: none;">⚠️ Passwords do not match.</p>
+                    <p id="reset-confirm-warning" class="reset-error" style="display: none; margin-top: -1.5rem;">⚠️ Passwords do not match.</p>
 
                     <button type="button" id="reset-password-btn" disabled>Reset Password</button>
                     <p class="reset-error-message" style="color:red;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
-                    <p class="reset-success-message" style="color:green;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
                 </div>
+
+                <!-- Password Reset Success Stage -->
+                <div id="reset-success-stage">
+                    <h2>Password Successfully Updated!</h2>
+                    <button type="button" id="back-to-login-btn">Great!</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -211,35 +360,35 @@
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         // ---------- Initialize Appwrite ----------
-        if (!window.appwriteClient) {
-            window.appwriteClient = new Appwrite.Client()
-                .setEndpoint("https://fra.cloud.appwrite.io/v1")
-                .setProject("689ad4040030d8902c02");
-            window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
-        }
+        // if (!window.appwriteClient) {
+        //     window.appwriteClient = new Appwrite.Client()
+        //         .setEndpoint("https:fra.cloud.appwrite.io/v1")
+        //         .setProject("689ad4040030d8902c02");
+        //     window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
+        // }
 
-        const SUCCESS_URL = "https://localhost:7049/oauth/success";
+        // const SUCCESS_URL = "https:localhost:7049/oauth/success";
 
         // ---------- OAuth Buttons ----------
-        const googleBtn = document.getElementById("btn-google-login");
-        const facebookBtn = document.getElementById("btn-facebook-login");
+        // const googleBtn = document.getElementById("btn-google-login");
+        // const facebookBtn = document.getElementById("btn-facebook-login");
 
-        googleBtn?.addEventListener("click", () => {
-            window.appwriteAccount.createOAuth2Session(
-                "google",
-                SUCCESS_URL,
-                "https://localhost:7049/?error=OAuthFailed",
-                ["openid", "email", "profile"]
-            );
-        });
+        // googleBtn?.addEventListener("click", () => {
+        //     window.appwriteAccount.createOAuth2Session(
+        //         "google",
+        //         SUCCESS_URL,
+        //         "https:localhost:7049/?error=OAuthFailed",
+        //         ["openid", "email", "profile"]
+        //     );
+        // });
 
-        facebookBtn?.addEventListener("click", () => {
-            window.appwriteAccount.createOAuth2Session(
-                "facebook",
-                SUCCESS_URL,
-                "https://localhost:7049/?error=OAuthFailed"
-            );
-        });
+        // facebookBtn?.addEventListener("click", () => {
+        //     window.appwriteAccount.createOAuth2Session(
+        //         "facebook",
+        //         SUCCESS_URL,
+        //         "https:localhost:7049/?error=OAuthFailed"
+        //     );
+        // });
 
         // ---------- Login ----------
         const emailInput = document.getElementById('login-email');
@@ -301,34 +450,57 @@
         const resendOtpLink = document.getElementById('resend-otp');
 
         const otpErrorMsg = document.querySelector('.otp-error-message');
-        const otpSuccessMsg = document.querySelector('.otp-success-message');
         const forgotErrorMsg = document.querySelector('.forgot-error-message');
-        const forgotSuccessMsg = document.querySelector('.forgot-success-message');
 
         const resetStage = document.getElementById('reset-password-stage');
         const resetPasswordInput = document.getElementById('reset-password');
         const confirmResetInput = document.getElementById('reset-confirm');
         const resetBtn = document.getElementById('reset-password-btn');
         const resetErrorMsg = document.querySelector('.reset-error-message');
-        const resetSuccessMsg = document.querySelector('.reset-success-message');
+        const emailErrorMsg = document.getElementById('password-email-error');
+        const otpErrorMsgInline = document.getElementById('password-number-error');
 
         // Enable Send OTP
         forgotEmailInput?.addEventListener('input', () => {
-            sendOtpBtn.disabled = !forgotEmailInput.value.trim().match(/\S+\S+\.\S+/);
+            const email = forgotEmailInput.value.trim();
+            const isValidEmail = new RegExp("^[^\\s]+@@[^\\s]+\\.[^\\s]+$").test(email);
+
+            if (email.length > 0 && !isValidEmail) {
+                emailErrorMsg.style.display = 'block';
+            } else {
+                emailErrorMsg.style.display = 'none';
+            }
+
+            sendOtpBtn.disabled = !isValidEmail;
         });
 
         // Enable OTP submit
         otpInput?.addEventListener('input', () => {
-            otpSubmitBtn.disabled = otpInput.value.trim().length !== 6 || !/^\d{6}$/.test(otpInput.value.trim());
+            const otp = otpInput.value.trim();
+            const isNumeric = /^\d*$/.test(otp);
+
+            if (!isNumeric) {
+                otpErrorMsgInline.style.display = 'block';
+            } else {
+                otpErrorMsgInline.style.display = 'none';
+            }
+
+            if (otp.length === 6 && /^\d{6}$/.test(otp)) {
+                otpSubmitBtn.disabled = false;
+            } else {
+                otpSubmitBtn.disabled = true;
+            }
         });
 
         // Send OTP
         sendOtpBtn?.addEventListener('click', async () => {
             const email = forgotEmailInput.value.trim();
             forgotErrorMsg.textContent = '';
-            forgotSuccessMsg.textContent = '';
 
             if (!email) return (forgotErrorMsg.textContent = 'Please enter your email.');
+
+            sendOtpBtn.disabled = true;
+            sendOtpBtn.innerText = "Sending...";
 
             try {
                 const res = await fetch('/forgot-password', {
@@ -339,15 +511,20 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    forgotSuccessMsg.textContent = data.message || 'Instructions sent. Check your email.';
                     document.getElementById('forgot-email-stage').style.display = 'none';
                     document.getElementById('otp-stage').style.display = 'block';
+                    toggleCloseButton();
+
                 } else {
                     forgotErrorMsg.textContent = data.message || 'Failed to send instructions.';
+                    sendOtpBtn.disabled = false;
+                    sendOtpBtn.innerText = "Send Instruction";
                 }
             } catch (err) {
                 console.error(err);
                 forgotErrorMsg.textContent = 'Something went wrong. Try again.';
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.innerText = "Send Instruction";
             }
         });
 
@@ -356,9 +533,11 @@
             const email = forgotEmailInput.value.trim();
             const otp = otpInput.value.trim();
             otpErrorMsg.textContent = '';
-            otpSuccessMsg.textContent = '';
 
             if (otp.length !== 6 || !/^\d{6}$/.test(otp)) return (otpErrorMsg.textContent = 'OTP must be 6 digits.');
+
+            otpSubmitBtn.disabled = true;
+            otpSubmitBtn.innerText = "Verifying...";
 
             try {
                 const res = await fetch('/verify-otp', {
@@ -369,9 +548,9 @@
                 const data = await res.json();
 
                 if (res.ok && data.success) {
-                    otpSuccessMsg.textContent = 'OTP verified! Enter your new password below.';
                     document.getElementById('otp-stage').style.display = 'none';
                     resetStage.style.display = 'block';
+                    toggleCloseButton();
                     initializeResetPassword(email);
                 } else {
                     otpErrorMsg.textContent = data.message || 'Invalid OTP. Please try again.';
@@ -379,8 +558,64 @@
             } catch (err) {
                 console.error(err);
                 otpErrorMsg.textContent = 'Something went wrong. Try again.';
+                otpSubmitBtn.disabled = false; 
+                otpSubmitBtn.innerText = "Submit";
             }
         });
+
+        resendOtpLink?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = forgotEmailInput.value.trim();
+            if (!email) {
+                forgotErrorMsg.textContent = "Please enter your email first.";
+                return;
+            }
+
+            // Show "Resending..."
+            resendOtpLink.textContent = "Resending...";
+            resendOtpLink.style.pointerEvents = "none"; // temporarily prevent double-click
+
+            try {
+                const res = await fetch('/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    otpErrorMsg.textContent = '';
+                    startResendCooldown(60); // Only now we disable for 60s
+                } else {
+                    otpErrorMsg.textContent = data.message || "Failed to resend OTP.";
+                    resendOtpLink.textContent = "Resend";
+                    resendOtpLink.style.pointerEvents = "auto";
+                }
+            } catch (err) {
+                console.error(err);
+                otpErrorMsg.textContent = "Something went wrong. Try again.";
+                resendOtpLink.textContent = "Resend";
+                resendOtpLink.style.pointerEvents = "auto";
+            }
+        });
+
+        // Cooldown function
+        function startResendCooldown(seconds) {
+            let remaining = seconds;
+            resendOtpLink.textContent = `Resend (${remaining}s)`;
+            resendOtpLink.style.pointerEvents = "none";
+
+            const interval = setInterval(() => {
+                remaining--;
+                resendOtpLink.textContent = `Resend (${remaining}s)`;
+
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    resendOtpLink.textContent = "Resend";
+                    resendOtpLink.style.pointerEvents = "auto";
+                }
+            }, 1000);
+        }
 
         // ---------- Reset Password Logic ----------
         function initializeResetPassword(email) {
@@ -438,8 +673,14 @@
             // Reset Button Click
             resetBtn.addEventListener('click', async () => {
                 const newPassword = resetPasswordInput.value.trim();
+
+                if(newPassword === window.oldPassword) { // oldPassword could be fetched when starting reset
+                    resetErrorMsg.textContent = "⚠️ You cannot use your previous password.";
+                    return;
+                }
+
+                resetBtn.disabled = true;
                 resetErrorMsg.textContent = '';
-                resetSuccessMsg.textContent = '';
 
                 try {
                     const res = await fetch('/reset-password', {
@@ -450,26 +691,121 @@
                     const data = await res.json();
 
                     if (res.ok && data.success) {
-                        // Show success text
-                        resetSuccessMsg.innerHTML = `Password reset successful!<br><button id="reset-complete" style="margin-top: 0.5rem;">Great</button>`;
-                        resetErrorMsg.textContent = "";
+                        resetStage.style.display = 'none';
+                        forgotEmailInput.value = '';
+                        otpInput.value = '';
+                        resetPasswordInput.value = '';
+                        confirmResetInput.value = '';
 
-                        // Add click listener to refresh page when clicking "Great"
-                        const loginBtn = document.getElementById("reset-complete");
-                        loginBtn.addEventListener("click", (e) => {
-                            e.preventDefault();
-                            location.reload(); // refresh the page
+                        // Show success stage
+                        document.getElementById('reset-success-stage').style.display = 'block';
+                        toggleCloseButton();
+
+                        // Back to Login button
+                        document.getElementById('back-to-login-btn').addEventListener('click', () => {
+                            document.getElementById('reset-success-stage').style.display = 'none';
                         });
                     } else {
                         resetErrorMsg.textContent = data.message || "Error resetting password.";
-                        resetSuccessMsg.textContent = "";
+                        resetBtn.disabled = false;
                     }
                 } catch (err) {
                     console.error(err);
                     resetErrorMsg.textContent = "Something went wrong. Try again.";
-                    resetSuccessMsg.textContent = "";
+                    resetBtn.disabled = false;
                 }
             });
         }
+
+        function toggleCloseButton() {
+            const closeBtn = document.getElementById('login-close-btn');
+            const otpStage = document.getElementById('otp-stage');
+            const successStage = document.getElementById('reset-success-stage');
+
+            // Use getComputedStyle to reliably check if element is visible
+            function isVisible(el) {
+                return el && window.getComputedStyle(el).display !== 'none';
+            }
+
+            if (isVisible(otpStage) || isVisible(resetStage) || isVisible(successStage)) {
+                closeBtn.style.display = 'none';
+            } else {
+                closeBtn.style.display = 'block';
+            }
+        }
+
+        function showForgotPasswordForm(e) {
+            e.preventDefault();
+            document.getElementById('login-main-content').style.display = 'none';
+            document.getElementById('forgot-password-form').style.display = 'block';
+            document.getElementById('forgot-email-stage').style.display = 'block';
+            document.getElementById('otp-stage').style.display = 'none';
+            document.getElementById('reset-password-stage').style.display = 'none';
+            document.getElementById('reset-success-stage').style.display = 'none';
+            toggleCloseButton();
+        }
+
+        function showLoginForm(e) {
+            if (e) e.preventDefault();
+            document.getElementById('login-main-content').style.display = 'block';
+            document.getElementById('forgot-password-form').style.display = 'none';
+            toggleCloseButton(); // ensures close button shows correctly
+        }
+
+        const loginCloseBtn = document.getElementById('login-close-btn');
+            const otpStage = document.getElementById('otp-stage');
+            const successStage = document.getElementById('reset-success-stage');
+
+        document.addEventListener("keydown", (e) => {
+            const isOtpVisible = window.getComputedStyle(otpStage).display !== 'none';
+            const isResetVisible = window.getComputedStyle(resetStage).display !== 'none';
+            const isSuccessVisible = window.getComputedStyle(successStage).display !== 'none';
+
+            // Disable Escape key only for OTP, Reset, Success stages
+            if (e.key === "Escape" && (isOtpVisible || isResetVisible || isSuccessVisible)) {
+                e.preventDefault();  // prevent default
+                e.stopPropagation(); // stop propagation to any modal handler
+            }
+        });
+
+        // Flag to ignore beforeunload temporarily
+        let ignoreBeforeUnload = false;
+
+        window.addEventListener("beforeunload", (e) => {
+            if (ignoreBeforeUnload) return; // skip if flag is set
+
+            const otpStage = document.getElementById("otp-stage");
+            const resetStage = document.getElementById("reset-password-stage");
+            const successStage = document.getElementById("reset-success-stage");
+
+            const isOtpVisible = otpStage && window.getComputedStyle(otpStage).display !== 'none';
+            const isResetVisible = resetStage && window.getComputedStyle(resetStage).display !== 'none';
+            const isSuccessVisible = successStage && window.getComputedStyle(successStage).display !== 'none';
+
+            if (isOtpVisible || isResetVisible || isSuccessVisible) {
+                e.preventDefault();
+                e.returnValue = ''; // triggers confirmation
+            }
+        });
+
+        // Example: when clicking Back to Login in success stage
+        const backToLoginBtn = document.getElementById('back-to-login-btn');
+        backToLoginBtn.addEventListener('click', () => {
+            ignoreBeforeUnload = true;
+            window.location.reload();
+        });
+
+        // ---------- Update close button visibility ----------
+        function toggleCloseButton() {
+            const isOtpVisible = window.getComputedStyle(otpStage).display !== 'none';
+            const isResetVisible = window.getComputedStyle(resetStage).display !== 'none';
+            const isSuccessVisible = window.getComputedStyle(successStage).display !== 'none';
+
+            loginCloseBtn.style.display = (isOtpVisible || isResetVisible || isSuccessVisible) ? 'none' : 'block';
+        }
+
+        // Call toggleCloseButton whenever stages change
+        const observer = new MutationObserver(toggleCloseButton);
+        [otpStage, resetStage, successStage].forEach(stage => observer.observe(stage, { attributes: true, attributeFilter: ['style'] }));
     });
 </script>

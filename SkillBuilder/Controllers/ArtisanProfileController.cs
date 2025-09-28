@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
 using SkillBuilder.Models.ViewModels;
+using SkillBuilder.Services;
 using System.Security.Claims;
 
 namespace SkillBuilder.Controllers
@@ -16,11 +17,15 @@ namespace SkillBuilder.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IEmailService _emailService;
+        private readonly INotificationService _notificationService;
 
-        public ArtisanProfileController(AppDbContext context, IPasswordHasher<User> passwordHasher)
+        public ArtisanProfileController(AppDbContext context, IPasswordHasher<User> passwordHasher, IEmailService emailService, INotificationService notificationService)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _emailService = emailService;
+            _notificationService = notificationService;
         }
 
         // Artisan Dashboard (Self view)
@@ -52,18 +57,26 @@ namespace SkillBuilder.Controllers
                 .Where(r => r.Course != null && r.Course.CreatedBy == artisan.UserId)
                 .ToList();
 
+            var projectSubmissions = _context.CourseProjectSubmissions
+                .Include(p => p.User)
+                .Include(p => p.Course)
+                .Where(p => courses.Select(c => c.Id).Contains(p.CourseId)) // only from artisan's courses
+                .ToList();
+
             var viewModel = new ArtisanProfileViewModel
             {
                 Artisan = artisan,
                 Courses = courses,
                 ArtisanWorks = works,
-                ArtisanSupportRequests = artisanSupportRequests
+                ArtisanSupportRequests = artisanSupportRequests,
+                ProjectSubmissions = projectSubmissions
             };
 
             return View("~/Views/Profile/ArtisanProfile.cshtml", viewModel);
         }
 
         // Public view as Mentor
+        [AllowAnonymous]
         [HttpGet("/ArtisanViewAsMentor/{id}")]
         public IActionResult ViewAsMentor(string id)
         {
@@ -145,62 +158,61 @@ namespace SkillBuilder.Controllers
 
             bool hasChanges = false;
 
-            // --- Sync basic fields between Artisan and User ---
-            void SyncField(ref string artisanField, ref string userField, string newValue)
-            {
-                if (artisanField != newValue)
-                {
-                    artisanField = newValue;
-                    if (userField != null) userField = newValue;
-                    hasChanges = true;
-                }
-            }
-
-            // --- Sync Artisan + User fields where applicable ---
+            // --- Sync fields ---
             if (artisan.FirstName != FirstName)
             {
                 artisan.FirstName = FirstName;
-                if (artisan.User != null)
-                    artisan.User.FirstName = FirstName;
+                if (artisan.User != null) artisan.User.FirstName = FirstName;
                 hasChanges = true;
             }
 
             if (artisan.LastName != LastName)
             {
                 artisan.LastName = LastName;
-                if (artisan.User != null)
-                    artisan.User.LastName = LastName;
+                if (artisan.User != null) artisan.User.LastName = LastName;
                 hasChanges = true;
             }
 
-            // Artisan-only fields
-            if (artisan.Profession != Profession)
-            {
-                artisan.Profession = Profession;
-                hasChanges = true;
-            }
+            if (artisan.Profession != Profession) { artisan.Profession = Profession; hasChanges = true; }
+            if (artisan.Hometown != Hometown) { artisan.Hometown = Hometown; hasChanges = true; }
+            if (artisan.Introduction != Introduction) { artisan.Introduction = Introduction; hasChanges = true; }
 
-            if (artisan.Hometown != Hometown)
-            {
-                artisan.Hometown = Hometown;
-                hasChanges = true;
-            }
-
-            if (artisan.Introduction != Introduction)
-            {
-                artisan.Introduction = Introduction;
-                hasChanges = true;
-            }
-
-            // --- Update email only in User ---
+            // --- Email update ---
             if (artisan.User != null && artisan.User.Email != Email)
             {
+                bool emailExists = await _context.Users.AnyAsync(u => u.Email == Email && u.Id != artisan.User.Id);
+                if (emailExists)
+                {
+                    TempData["ErrorMessage"] = "This email is already in use.";
+                    return RedirectToAction("EditProfileArtisan");
+                }
+
                 artisan.User.Email = Email;
+                artisan.User.IsVerified = false;
+                var verificationToken = Guid.NewGuid().ToString();
+                artisan.User.EmailVerificationToken = verificationToken;
+
                 _context.Entry(artisan.User).State = EntityState.Modified;
-                hasChanges = true;
+                await _context.SaveChangesAsync();
+
+                // Send verification email
+                var verificationLink = Url.Action("VerifyEmail", "ArtisanProfile", new { token = verificationToken }, Request.Scheme);
+                await _emailService.SendVerificationEmailWithLink(Email, verificationLink);
+
+                // Sign out
+                await HttpContext.SignOutAsync("TahiAuth");
+
+                // Add notification BEFORE log out
+                if (_notificationService != null)
+                {
+                    await _notificationService.AddNotificationAsync(artisan.User.Id, "Your profile and email was updated. Please verify it to continue using your account.");
+                }
+
+                TempData["SuccessMessage"] = "Email changed. Please verify your new email to log in.";
+                return RedirectToAction("Index", "Home");
             }
 
-            // --- Update avatar (sync Artisan + User) ---
+            // --- Avatar ---
             if (UserAvatar != null && UserAvatar.Length > 0 && artisan.User != null)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/avatars");
@@ -221,7 +233,7 @@ namespace SkillBuilder.Controllers
                 hasChanges = true;
             }
 
-            // --- Password change ---
+            // --- Password ---
             if (!string.IsNullOrEmpty(NewPassword) && NewPassword == ConfirmPassword && !string.IsNullOrEmpty(CurrentPassword))
             {
                 if (!string.IsNullOrEmpty(artisan.User.PasswordHash))
@@ -232,6 +244,12 @@ namespace SkillBuilder.Controllers
                         artisan.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
                         _context.Entry(artisan.User).State = EntityState.Modified;
                         hasChanges = true;
+
+                        // Add notification for password change
+                        if (_notificationService != null)
+                        {
+                            await _notificationService.AddNotificationAsync(artisan.User.Id, "Your password has been updated successfully.");
+                        }
                     }
                     else
                     {
@@ -241,10 +259,17 @@ namespace SkillBuilder.Controllers
                 }
             }
 
-            // --- Save changes if anything changed ---
+            // --- Save changes ---
             if (hasChanges)
             {
                 await _context.SaveChangesAsync();
+
+                // Add general notification
+                if (_notificationService != null)
+                {
+                    await _notificationService.AddNotificationAsync(artisan.User.Id, "Your profile has been updated successfully.");
+                }
+
                 TempData["SuccessMessage"] = "Profile updated successfully.";
             }
             else
@@ -253,6 +278,45 @@ namespace SkillBuilder.Controllers
             }
 
             return RedirectToAction("EditProfileArtisan");
+        }
+
+        [AllowAnonymous]
+        [HttpGet("CheckEmailExist")]
+        public JsonResult CheckEmailExist(string email)
+        {
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; // may be null
+            bool exists = false;
+
+            if (!string.IsNullOrEmpty(currentUserId))
+            {
+                exists = _context.Users.Any(u => u.Email == email && u.Id != currentUserId);
+            }
+            else
+            {
+                exists = _context.Users.Any(u => u.Email == email);
+            }
+
+            return Json(new { exists });
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/ArtisanProfile/VerifyEmail")]
+        public async Task<IActionResult> VerifyArtisanEmail(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return BadRequest("Invalid verification token.");
+
+            var artisan = await _context.Users.FirstOrDefaultAsync(u => u.EmailVerificationToken == token && u.Artisan != null);
+            if (artisan == null)
+                return NotFound("Invalid or expired token.");
+
+            artisan.IsVerified = true;
+            artisan.EmailVerificationToken = null;
+
+            _context.Users.Update(artisan);
+            await _context.SaveChangesAsync();
+
+            return Content("✅ Your email has been verified successfully!");
         }
 
         [HttpGet("VerifyOldPassword")]

@@ -1,20 +1,20 @@
 ﻿@model SkillBuilder.Models.Course
 
 <style>
-    .mentor-heading {
+    .course-mentor-view-heading {
         font-size: 2rem;
         margin-bottom: 2rem;
         color: #222;
     }
 
-    .mentor-profile {
+    .course-mentor-view-profile {
         display: flex;
         align-items: center;
         gap: 2rem;
         margin-bottom: 2rem;
     }
 
-    .mentor-avatar {
+    .course-mentor-view-avatar {
         width: 120px;
         height: 120px;
         object-fit: cover;
@@ -22,29 +22,29 @@
         border: 4px solid #ccc;
     }
 
-    .mentor-info {
+    .course-mentor-view-info {
         display: flex;
         flex-direction: column;
         justify-content: center;
     }
 
-    .mentor-name {
+    .course-mentor-view-name {
         font-size: 1.5rem;
         font-weight: bold;
         color: #344AEA;
         text-decoration: none;
     }
 
-        .mentor-name:hover {
+        .course-mentor-view-name:hover {
             text-decoration: underline;
         }
 
-    .mentor-sub {
+    .course-mentor-view-sub {
         font-size: 1rem;
         color: #555;
     }
 
-    .mentor-bio {
+    .course-mentor-view-bio {
         font-size: 1rem;
         color: #333;
         line-height: 1.7;
@@ -56,19 +56,19 @@
     var fullName = $"{artisan.FirstName} {artisan.LastName}";
 }
 
-<h1 class="mentor-heading">Get to know your mentor</h1>
+<h1 class="course-mentor-view-heading">Get to know your mentor</h1>
 
 @if (artisan != null)
 {
-    <div class="mentor-profile">
-        <img src="/assets/Avatar/Sample10.svg" class="mentor-avatar" />
-        <div class="mentor-info">
-            <a href="/ArtisanViewAsMentor/@artisan.ArtisanId" class="mentor-name">@fullName</a>
-            <p class="mentor-sub">@artisan.Profession from @artisan.Hometown</p>
+    <div class="course-mentor-view-profile">
+        <img src="/assets/Avatar/Sample10.svg" class="course-mentor-view-avatar" />
+        <div class="course-mentor-view-info">
+            <a href="/ArtisanViewAsMentor/@artisan.ArtisanId" class="course-mentor-view-name">@fullName</a>
+            <p class="course-mentor-view-sub">@artisan.Profession from @artisan.Hometown</p>
         </div>
     </div>
 
-    <p class="mentor-bio">
+    <p class="course-mentor-view-bio">
         @artisan.Introduction
     </p>
 }

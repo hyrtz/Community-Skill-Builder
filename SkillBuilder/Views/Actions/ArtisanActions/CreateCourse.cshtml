@@ -224,21 +224,28 @@
             }
         });
 
-        // Check at least 1 module exists
-        const modules = document.querySelectorAll(".curriculum-module");
-        if (modules.length === 0) {
+        // Modules validation
+        const modules = document.querySelectorAll(".curriculum-module:not(#final-project-module)");
+        const moduleWarning = document.getElementById("module-warning");
+
+        if (modules.length < 2) {
             allValid = false;
+            if (moduleWarning) moduleWarning.style.display = "block";
         } else {
-            // Check that each module has at least 1 lesson
-            modules.forEach(module => {
-                const lessons = module.querySelectorAll(".curriculum-lesson-block");
-                if (lessons.length === 0) {
-                    allValid = false;
-                }
-            });
+            if (moduleWarning) moduleWarning.style.display = "none";
         }
+
+        // Check that each module has at least 1 lesson
+        modules.forEach(module => {
+            const lessons = module.querySelectorAll(".curriculum-lesson-block");
+            if (lessons.length === 0) {
+                allValid = false;
+            }
+        });
 
         const createBtn = document.getElementById("createBtn");
         if (createBtn) createBtn.disabled = !allValid;
+
+        return allValid;
     }
 </script>

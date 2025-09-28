@@ -1,0 +1,227 @@
+﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
+
+<style>
+    /* ------------------ Edit Course Styles ------------------ */
+    .edit-course-container {
+        padding: 5rem 8.5rem 2rem 8rem;
+    }
+
+    .edit-course-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem 0;
+    }
+
+    .edit-course-back-link {
+        font-size: 0.9rem;
+        color: #555;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+        .edit-course-back-link:hover {
+            color: #000;
+        }
+
+    .edit-course-top-buttons button {
+        padding: 0.6rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+        border-radius: 2px;
+        margin-left: 0.5rem;
+        cursor: pointer;
+    }
+
+    .edit-course-btn-cancel {
+        background-color: white;
+        border: solid 1px;
+    }
+
+        .edit-course-btn-cancel:hover {
+            background-color: #ccc;
+            border: none;
+        }
+
+    .edit-course-btn-save {
+        background-color: #1957d2;
+        color: white;
+    }
+
+        .edit-course-btn-save:hover {
+            background-color: #1349b3;
+        }
+
+    .edit-course-title {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .edit-course-tabs {
+        display: flex;
+        gap: 3rem;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 2rem;
+    }
+
+    .edit-course-tab {
+        padding: 0.75rem 1.25rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        border-bottom: 4px solid transparent;
+        transition: all 0.2s ease;
+        color: #333;
+    }
+
+        .edit-course-tab:hover {
+            background-color: #D6EBFF;
+        }
+
+        .edit-course-tab.active {
+            border-bottom-color: #344AEA;
+            background-color: #D6EBFF;
+            color: #344AEA;
+        }
+
+    .edit-course-tab-panel {
+        display: none;
+    }
+
+        .edit-course-tab-panel.active {
+            display: block;
+        }
+
+    .edit-course-btn-save:disabled {
+        background-color: #A0A0A0;
+        color: #ddd;
+        cursor: not-allowed;
+        pointer-events: none;
+        border: none;
+        opacity: 0.7;
+    }
+</style>
+
+@using (Html.BeginForm(
+        "EditCourse",
+        "ArtisanActions",
+        FormMethod.Post,
+        new { enctype = "multipart/form-data", id = "edit-course-form" }
+    ))
+{
+    <input type="hidden" name="courseId" value="@Model.Course.Id" />
+
+    <div class="edit-course-container">
+        <a href="javascript:history.back()" class="edit-course-back-link">&larr; Back</a>
+
+        <div class="edit-course-top-bar">
+            <h1 class="edit-course-title">Edit Course</h1>
+            <div class="edit-course-top-buttons">
+                <button type="button" class="edit-course-btn-cancel" onclick="history.back()">Cancel</button>
+                <button type="submit" class="edit-course-btn-save" id="editBtn" disabled>Save Changes</button>
+            </div>
+        </div>
+
+        <div class="edit-course-tabs">
+            <button type="button" class="edit-course-tab active" data-tab="basic">Basic Info</button>
+            <button type="button" class="edit-course-tab" data-tab="curriculum">Curriculum</button>
+            <button type="button" class="edit-course-tab" data-tab="materials">Materials</button>
+        </div>
+
+        <div class="edit-course-tab-panel" data-tab="basic">
+            <partial name="~/Views/Shared/Sections/EditCourseNotebooks/_EditCourseBasicInfo.cshtml" model="Model" />
+        </div>
+        <div class="edit-course-tab-panel" data-tab="curriculum">
+            <partial name="~/Views/Shared/Sections/EditCourseNotebooks/_EditCourseCurriculum.cshtml" model="Model" />
+        </div>
+        <div class="edit-course-tab-panel" data-tab="materials">
+            <partial name="~/Views/Shared/Sections/EditCourseNotebooks/_EditCourseMaterials.cshtml" model="Model" />
+        </div>
+    </div>
+}
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("edit-course-form");
+        const submitBtn = document.getElementById("editBtn");
+
+        // ----- Tabs -----
+        const tabs = document.querySelectorAll(".edit-course-tab");
+        const panels = document.querySelectorAll(".edit-course-tab-panel");
+        function activateTab(tabName) {
+            localStorage.setItem("editCourseSelectedTab", tabName);
+            tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
+            panels.forEach(p => p.classList.toggle("active", p.dataset.tab === tabName));
+        }
+        const savedTab = localStorage.getItem("editCourseSelectedTab") || "basic";
+        activateTab(savedTab);
+        tabs.forEach(tab => tab.addEventListener("click", () => activateTab(tab.dataset.tab)));
+
+        // ----- Enable Save Changes dynamically -----
+        function enableSaveChanges() { if(submitBtn) submitBtn.disabled = false; }
+        form.addEventListener("input", enableSaveChanges);
+        form.addEventListener("change", enableSaveChanges);
+        form.addEventListener("click", enableSaveChanges);
+
+        // ----- Observe curriculum for changes -----
+        const moduleList = document.getElementById("curriculum-modules");
+        if(moduleList){
+            const observer = new MutationObserver(enableSaveChanges);
+            observer.observe(moduleList, { childList: true, subtree: true });
+        }
+
+        // ----- Validate required fields -----
+        function checkRequiredFields() {
+            const requiredInputs = form.querySelectorAll("[required]");
+            let allValid = true;
+            requiredInputs.forEach(input => {
+                const isVisible = input.offsetParent !== null;
+                if(input.type !== "radio" && isVisible && input.value.trim() === ""){
+                    input.classList.add("input-invalid"); allValid = false;
+                } else input.classList.remove("input-invalid");
+            });
+
+            // Radio buttons
+            const requiredRadioNames = new Set();
+            requiredInputs.forEach(input => { if(input.type === "radio") requiredRadioNames.add(input.name); });
+            requiredRadioNames.forEach(name => {
+                const radios = form.querySelectorAll(`input[name="${name}"]`);
+                const isVisible = Array.from(radios).some(r => r.offsetParent !== null);
+                const isChecked = Array.from(radios).some(r => r.checked);
+                if(isVisible && !isChecked) { allValid = false; radios.forEach(r => r.classList.add("input-invalid")); }
+                else radios.forEach(r => r.classList.remove("input-invalid"));
+            });
+
+            // Modules check
+            const modules = document.querySelectorAll(".curriculum-module:not(#final-project-module)");
+            const moduleWarning = document.getElementById("module-warning");
+            if(modules.length < 2){ allValid = false; if(moduleWarning) moduleWarning.style.display="block"; }
+            else if(moduleWarning) moduleWarning.style.display="none";
+
+            modules.forEach(module => {
+                const lessons = module.querySelectorAll(".curriculum-lesson-block");
+                if(lessons.length === 0) allValid = false;
+            });
+
+            if(submitBtn) submitBtn.disabled = !allValid;
+            return allValid;
+        }
+        checkRequiredFields();
+        if(moduleList){
+            const observer = new MutationObserver(checkRequiredFields);
+            observer.observe(moduleList, { childList: true, subtree: true });
+        }
+
+        // ----- Remove saved tab on submit -----
+        form.addEventListener("submit", () => {
+            localStorage.removeItem("editCourseSelectedTab");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting...";
+        });
+    });
+</script>

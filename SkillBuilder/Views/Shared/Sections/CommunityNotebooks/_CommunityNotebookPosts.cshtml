@@ -1,5 +1,20 @@
 ﻿@model List<SkillBuilder.Models.ViewModels.CommunityPostViewModel>
 
+@{
+    var currentUserId = User.FindFirst("UserId")?.Value ?? "";
+    var fullName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "";
+
+    // Split full name into first and last (basic split on first space)
+    var nameParts = fullName.Split(' ', 2);
+    var currentUserFirstName = nameParts.Length > 0 ? nameParts[0] : "";
+    var currentUserLastName = nameParts.Length > 1 ? nameParts[1] : "";
+
+    var currentUserAvatar = User.FindFirst("AvatarUrl")?.Value ?? "/assets/Avatar/Sample10.svg";
+    var currentUserIsVerified = User.FindFirst("IsVerified")?.Value == "True";
+    var currentUserIsDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
+    var userDisabled = !currentUserIsVerified || currentUserIsDeactivated;
+}
+
 <style>
     /* Scope everything under .community-posts-list */
     .community-posts-list {
@@ -69,6 +84,138 @@
             color: #555;
             margin-top: 0.5rem;
         }
+
+    .comment {
+        background: #f3f4f6;
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .comments-section textarea {
+        width: 100%;
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .comments-section button {
+        margin-top: 0.25rem;
+        padding: 0.3rem 0.75rem;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .like-btn {
+        background: none;
+        border: none;
+    }
+
+    .comment-btn {
+        background: none;
+        border: none;
+    }
+
+    /* Comments Section */
+    .comments-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        max-height: 200px; /* scroll if too many comments */
+        overflow-y: auto;
+        padding-right: 0.25rem;
+    }
+
+    /* Each comment */
+    .comment {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-start;
+        background: #f3f4f6; /* light gray background */
+        border-radius: 8px;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        word-break: break-word;
+    }
+
+        /* Avatar inside comment */
+        .comment .avatar {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+        }
+
+    /* Content wrapper */
+    .comment-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        flex: 1;
+    }
+
+        /* Header: user name + timestamp */
+        .comment-content .comment-header {
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .comment-content .comment-header .timestamp {
+                font-weight: 400;
+                font-size: 0.75rem;
+                color: #555;
+            }
+
+        /* The comment text */
+        .comment-content .comment-text {
+            font-size: 0.875rem;
+            color: #333;
+        }
+
+    /* Textarea for new comments */
+    .comments-section textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        resize: none;
+        font-size: 0.9rem;
+    }
+
+    /* Post comment button */
+    .comments-section button {
+        align-self: flex-end;
+        margin-top: 0.25rem;
+        padding: 0.3rem 0.75rem;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: background 0.2s;
+    }
+
+        .comments-section button:hover {
+            background: #1e40af;
+        }
 </style>
 
 <div class="community-posts-list">
@@ -82,7 +229,7 @@
     {
         @foreach (var post in Model)
         {
-            <div class="post-card">
+            <div class="post-card" data-post-id="@post.Id">
                 <!-- Header -->
                 <div class="post-card-header">
                     <div class="avatar" style="background-image:url('@post.AuthorAvatarUrl')"></div>
@@ -101,12 +248,207 @@
                         <img src="@post.ImageUrl" alt="Post image" />
                     }
 
+                    <!-- Meta (Likes + Comments) -->
                     <div class="community-meta">
-                        <span>❤️ @post.Likes</span>
-                        <span>💬 @post.CommentsCount</span>
+                        <button class="like-btn" onclick="likePost(@post.Id)">❤️ <span id="like-count-@post.Id">@post.Likes</span></button>
+                        <button class="comment-btn" onclick="toggleComments(@post.Id)">💬 <span id="comment-count-@post.Id">@post.CommentsCount</span></button>
                     </div>
+                </div>
+
+                <!-- Comment Section (Initially Hidden) -->
+                <div class="comments-section" id="comments-section-@post.Id" style="display:none; margin-top:1rem;">
+                    <div class="comments-list" id="comments-list-@post.Id"></div>
+                    <textarea id="comment-input-@post.Id" placeholder="Write a comment..." rows="2"></textarea>
+                    <button onclick="addComment(@post.Id)">Post</button>
                 </div>
             </div>
         }
     }
 </div>
+
+<script>
+    const currentUserId = "@currentUserId";
+    const currentUserFirstName = "@currentUserFirstName";
+    const currentUserLastName = "@currentUserLastName";
+    const currentUserAvatar = "@currentUserAvatar";
+    const userDisabled = @userDisabled.ToString().ToLower();
+
+    // ----- LocalStorage helpers ---- //
+    function getUserId() {
+        return document.body.dataset.userId;
+    }
+
+    function getLikedPostsByUser() {
+        return JSON.parse(localStorage.getItem("likedPostsByUser")) || {};
+    }
+
+    function setLikedPostsByUser(data) {
+        localStorage.setItem("likedPostsByUser", JSON.stringify(data));
+    }
+
+    function getLikeCounts() {
+        return JSON.parse(localStorage.getItem("likeCounts")) || {};
+    }
+
+    function setLikeCounts(counts) {
+        localStorage.setItem("likeCounts", JSON.stringify(counts));
+    }
+
+    function getPostComments() {
+        return JSON.parse(localStorage.getItem("postComments")) || {};
+    }
+
+    function setPostComments(comments) {
+        localStorage.setItem("postComments", JSON.stringify(comments));
+    }
+
+    // ----- Like a post -----
+    function likePost(postId) {
+        if (userDisabled) return; // do nothing if user is restricted
+
+        const userId = getUserId();
+        const btn = document.querySelector(`.post-card[data-post-id="${postId}"] .like-btn`);
+        const countEl = document.getElementById(`like-count-${postId}`);
+
+        let likedPostsByUser = getLikedPostsByUser();
+        let likeCounts = getLikeCounts();
+
+        if (!likedPostsByUser[userId]) likedPostsByUser[userId] = [];
+
+        let currentLikes = likeCounts[postId] || 0;
+
+        if (likedPostsByUser[userId].includes(postId)) {
+            likedPostsByUser[userId] = likedPostsByUser[userId].filter(id => id !== postId);
+            currentLikes = Math.max(0, currentLikes - 1);
+            btn.classList.remove("liked");
+        } else {
+            likedPostsByUser[userId].push(postId);
+            currentLikes += 1;
+            btn.classList.add("liked");
+        }
+
+        likeCounts[postId] = currentLikes;
+
+        setLikedPostsByUser(likedPostsByUser);
+        setLikeCounts(likeCounts);
+
+        countEl.innerText = currentLikes;
+    }
+
+    // ----- Toggle comment section -----
+    function toggleComments(postId) {
+        const section = document.getElementById(`comments-section-${postId}`);
+        section.style.display = section.style.display === "none" ? "block" : "none";
+    }
+
+    function timeAgo(timestamp) {
+        const now = new Date();
+        const diff = Math.floor((now - new Date(timestamp)) / 1000); // in seconds
+
+        if (diff < 60) return `${diff} seconds ago`;
+        if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
+        return `${Math.floor(diff / 604800)} weeks ago`;
+    }
+
+    // ----- Add comment -----
+    function addComment(postId) {
+        if (userDisabled) return;
+
+        const input = document.getElementById(`comment-input-${postId}`);
+        const list = document.getElementById(`comments-list-${postId}`);
+        const commentText = input.value.trim();
+        if (!commentText) return;
+
+        const commentData = {
+            userId: currentUserId,
+            firstName: currentUserFirstName,  // use Razor variable
+            lastName: currentUserLastName,    // use Razor variable
+            avatarUrl: currentUserAvatar,     // use Razor variable
+            text: commentText,
+            createdAt: new Date().toISOString()
+        };
+
+        // Save to localStorage
+        let savedComments = getPostComments();
+        if (!savedComments[postId]) savedComments[postId] = [];
+        savedComments[postId].push(commentData);
+        setPostComments(savedComments);
+
+        renderComment(list, commentData);
+
+        // Update count
+        const countEl = document.getElementById(`comment-count-${postId}`);
+        countEl.innerText = savedComments[postId].length;
+
+        input.value = "";
+    }
+
+    function renderComment(list, commentData) {
+        const commentEl = document.createElement("div");
+        commentEl.classList.add("comment");
+        commentEl.style.display = "flex";
+        commentEl.style.gap = "0.5rem";
+        commentEl.style.alignItems = "flex-start";
+
+        commentEl.innerHTML = `
+            <div class="avatar" style="width:32px;height:32px;border-radius:50%;background-image:url('${commentData.avatarUrl}');background-size:cover;background-position:center;"></div>
+            <div style="flex:1">
+                <div style="font-weight:600;font-size:0.9rem;">${commentData.firstName} ${commentData.lastName} <span style="font-weight:400;color:#555;font-size:0.75rem;margin-left:0.5rem;">${timeAgo(commentData.createdAt)}</span></div>
+                <div style="font-size:0.875rem;margin-top:0.25rem;">${commentData.text}</div>
+            </div>
+        `;
+        list.appendChild(commentEl);
+    }
+
+    // ----- Disable buttons for restricted users on page load -----
+    document.addEventListener("DOMContentLoaded", () => {
+        if (userDisabled) {
+            document.querySelectorAll(".like-btn, .comment-btn").forEach(btn => {
+                btn.disabled = true;
+                btn.style.cursor = "not-allowed";
+            });
+
+            document.querySelectorAll(".comments-section textarea, .comments-section button").forEach(el => {
+                el.disabled = true;
+                el.style.cursor = "not-allowed";
+            });
+        }
+
+        // Restore likes
+        const likedPostsByUser = getLikedPostsByUser();
+        const likeCounts = getLikeCounts();
+        const userId = currentUserId;
+        const likedPosts = likedPostsByUser[userId] || [];
+
+        likedPosts.forEach(postId => {
+            const btn = document.querySelector(`.post-card[data-post-id="${postId}"] .like-btn`);
+            if (btn) btn.classList.add("liked");
+        });
+
+        for (let postId in likeCounts) {
+            const countEl = document.getElementById(`like-count-${postId}`);
+            if (countEl) countEl.innerText = likeCounts[postId];
+        }
+
+        // Restore comments
+        const savedComments = getPostComments();
+        for (let postId in savedComments) {
+            const list = document.getElementById(`comments-list-${postId}`);
+            if (!list) continue;
+
+            savedComments[postId].forEach(commentData => {
+                // Fallback to current user info if old data missing
+                commentData.firstName = commentData.firstName || "Unknown";
+                commentData.lastName = commentData.lastName || "";
+                commentData.avatarUrl = commentData.avatarUrl || "/assets/Avatar/Sample10.svg";
+
+                renderComment(list, commentData);
+            });
+
+            const countEl = document.getElementById(`comment-count-${postId}`);
+            if (countEl) countEl.innerText = savedComments[postId].length;
+        }
+    });
+</script>

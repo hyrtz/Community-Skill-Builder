@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Models;
+using System.Text.Json;
 
 namespace SkillBuilder.Data
 {
@@ -29,6 +30,7 @@ namespace SkillBuilder.Data
         public DbSet<CommunityPost> CommunityPosts { get; set; }
         public DbSet<Community> Communities { get; set; }
         public DbSet<CommunityMembership> CommunityMemberships { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -118,8 +120,9 @@ namespace SkillBuilder.Data
                     Thumbnail = "/assets/Courses Pics/Pottery.png",
                     WhatToLearn = "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques.",
                     FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery...",
-                    ProjectDetails = "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.",
                     Requirements = "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.",
+                    FinalProjectTitle = "Create Your Own Clay Vase",                      // ✅ Seeded
+                    FinalProjectDescription = "Design, shape, and glaze a personalized vase as your final pottery project.", // ✅ Seeded
                     CreatedBy = "A1111111", // Alice
                     CreatedAt = new DateTime(2024, 6, 1),
                     IsArchived = false
@@ -134,12 +137,13 @@ namespace SkillBuilder.Data
                     Duration = "29 hours",
                     Category = "Wood Carving",
                     Difficulty = "Intermediate",
-                    Video = "/assets/Videos/WoodCarving.mp4",
+                    Video = "/assets/Videos/Wood Carving.mp4",
                     Thumbnail = "/assets/Courses Pics/Woodcarving.png",
                     WhatToLearn = "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing.",
                     FullDescription = "Explore the detailed world of woodcarving through this course...",
-                    ProjectDetails = "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.",
                     Requirements = "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).",
+                    FinalProjectTitle = "Carve a Wooden Animal Figurine",                 // ✅ Seeded
+                    FinalProjectDescription = "Apply your skills by carving a detailed animal figurine as your capstone project.", // ✅ Seeded
                     CreatedBy = "A1111112", // Bob
                     CreatedAt = new DateTime(2024, 6, 1),
                     IsArchived = false
@@ -158,8 +162,9 @@ namespace SkillBuilder.Data
                     Thumbnail = "/assets/Courses Pics/Weaving.png",
                     WhatToLearn = "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation.",
                     FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design...",
-                    ProjectDetails = "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.",
                     Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
+                    FinalProjectTitle = "Design a Handwoven Wall Hanging",                // ✅ Seeded
+                    FinalProjectDescription = "Plan and weave a wall hanging using advanced techniques to showcase your weaving skills.", // ✅ Seeded
                     CreatedBy = "A1111113", // Charlie
                     CreatedAt = new DateTime(2024, 6, 1),
                     IsArchived = false
@@ -569,40 +574,39 @@ namespace SkillBuilder.Data
                 new CourseModule { Id = 2, CourseId = 1, Title = "History" },
                 new CourseModule { Id = 3, CourseId = 1, Title = "Session" },
                 new CourseModule { Id = 4, CourseId = 1, Title = "Quiz" },
-                new CourseModule { Id = 5, CourseId = 1, Title = "Final Activity" },
 
                 new CourseModule { Id = 6, CourseId = 2, Title = "Introduction" },
                 new CourseModule { Id = 7, CourseId = 2, Title = "History" },
                 new CourseModule { Id = 8, CourseId = 2, Title = "Session" },
                 new CourseModule { Id = 9, CourseId = 2, Title = "Quiz" },
-                new CourseModule { Id = 10, CourseId = 2, Title = "Final Activity" },
 
                 new CourseModule { Id = 11, CourseId = 3, Title = "Introduction" },
                 new CourseModule { Id = 12, CourseId = 3, Title = "History" },
                 new CourseModule { Id = 13, CourseId = 3, Title = "Session" },
-                new CourseModule { Id = 14, CourseId = 3, Title = "Quiz" },
-                new CourseModule { Id = 15, CourseId = 3, Title = "Final Activity" }
+                new CourseModule { Id = 14, CourseId = 3, Title = "Quiz" }
             );
 
             modelBuilder.Entity<ModuleContent>().HasData(
-                // Pottery Modules
+                // Pottery Modules (CourseModuleId = 1)
                 new ModuleContent { Id = 1, CourseModuleId = 1, Title = "Welcome to Pottery", ContentType = "Video", ContentText = "Pottery intro content something anything.", MediaUrl = "/assets/Videos/Pottery.mp4" },
-                new ModuleContent { Id = 2, CourseModuleId = 2, Title = "History of Pottery", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Pottery.png" },
-                new ModuleContent { Id = 3, CourseModuleId = 3, Title = "Live Pottery Session", ContentType = "Session"},
-                new ModuleContent { Id = 4, CourseModuleId = 5, Title = "Pottery Final Activity", ContentType = "Activity", ContentText = "Create your own pottery something anything." },
+                new ModuleContent { Id = 16, CourseModuleId = 2, Title = "Pottery Materials", ContentType = "Image + Text", ContentText = "Learn about clay, tools, and equipment.", MediaUrl = "/assets/Courses Pics/Pottery.png" },
+                new ModuleContent { Id = 17, CourseModuleId = 2, Title = "Basic Pottery Techniques", ContentType = "Image + Text", ContentText = "Step by step techniques for beginners.", MediaUrl = "/assets/Courses Pics/Pottery1.png" },
+                new ModuleContent { Id = 2, CourseModuleId = 2, Title = "History of Pottery", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Pottery2.png" },
+                new ModuleContent { Id = 3, CourseModuleId = 3, Title = "Live Pottery Session", ContentType = "Session" },
 
-                // Woodcarving Modules
+                // Woodcarving Modules (CourseModuleId = 6)
                 new ModuleContent { Id = 5, CourseModuleId = 6, Title = "Welcome to Woodcarving", ContentType = "Video", ContentText = "Woodcarving intro content something anything.", MediaUrl = "/assets/Videos/Wood Carving.mp4" },
-                new ModuleContent { Id = 6, CourseModuleId = 7, Title = "History of Woodcarving", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Woodcarving.png" },
-                new ModuleContent { Id = 7, CourseModuleId = 8, Title = "Live Woodcarving Session", ContentType = "Session"},
-                new ModuleContent { Id = 8, CourseModuleId = 10, Title = "Woodcarving Final Activity", ContentType = "Activity", ContentText = "Carve a wooden spoon something anything." },
+                new ModuleContent { Id = 18, CourseModuleId = 7, Title = "Wood Types", ContentType = "Image + Text", ContentText = "Learn about wood types suitable for carving.", MediaUrl = "/assets/Courses Pics/Woodcarving.png" },
+                new ModuleContent { Id = 19, CourseModuleId = 7, Title = "Basic Carving Tools", ContentType = "Image + Text", ContentText = "Introduction to essential carving tools.", MediaUrl = "/assets/Courses Pics/Woodcarving1.png" },
+                new ModuleContent { Id = 6, CourseModuleId = 7, Title = "History of Woodcarving", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Woodcarving2.png" },
+                new ModuleContent { Id = 7, CourseModuleId = 8, Title = "Live Woodcarving Session", ContentType = "Session" },
 
-
-                // Weaving Modules
+                // Weaving Modules (CourseModuleId = 11)
                 new ModuleContent { Id = 9, CourseModuleId = 11, Title = "Welcome to Weaving", ContentType = "Video", ContentText = "Weaving intro content something anything.", MediaUrl = "/assets/Videos/Weaving.mp4" },
-                new ModuleContent { Id = 10, CourseModuleId = 12, Title = "History of Weaving", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Weaving.png" },
-                new ModuleContent { Id = 11, CourseModuleId = 13, Title = "Live Weaving Session", ContentType = "Session"},
-                new ModuleContent { Id = 12, CourseModuleId = 15, Title = "Weaving Final Activity", ContentType = "Activity", ContentText = "Weave a basic pattern something anything." }
+                new ModuleContent { Id = 20, CourseModuleId = 12, Title = "Weaving Materials", ContentType = "Image + Text", ContentText = "Learn about threads, yarns, and tools.", MediaUrl = "/assets/Courses Pics/Weaving.png" },
+                new ModuleContent { Id = 21, CourseModuleId = 12, Title = "Basic Weaving Techniques", ContentType = "Image + Text", ContentText = "Step by step weaving techniques.", MediaUrl = "/assets/Courses Pics/Weaving1.png" },
+                new ModuleContent { Id = 10, CourseModuleId = 12, Title = "History of Weaving", ContentType = "Image + Text", ContentText = "History content something anything.", MediaUrl = "/assets/Courses Pics/Weaving2.png" },
+                new ModuleContent { Id = 11, CourseModuleId = 13, Title = "Live Weaving Session", ContentType = "Session" }
             );
 
             // QUIZ ModuleContent (shared pattern)

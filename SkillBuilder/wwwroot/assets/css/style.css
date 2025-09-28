@@ -232,6 +232,7 @@ html {
 }
 
 .profile-menu-dropdown {
+    display: none;
     position: absolute;
     top: 100%;
     right: 0;
@@ -245,9 +246,9 @@ html {
     z-index: 999;
 }
 
-.profile-menu-wrapper:hover .profile-menu-dropdown {
-    display: flex;
-}
+    .profile-menu-dropdown.show {
+        display: flex;
+    }
 
 .profile-menu-item {
     padding: 0.75rem 1rem;
@@ -456,7 +457,7 @@ html {
 .auth-modal input[type="password"] {
     width: 100%;
     padding: 0.7rem;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.8rem !important;
     border: 1px solid #ccc;
     border-radius: 0.5rem;
 }
@@ -544,7 +545,7 @@ html {
     right: 0;
     top: 2.5rem;
     background-color: white;
-    width: 250px;
+    width: 450px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     border-radius: 0.5rem;
     z-index: 1000;

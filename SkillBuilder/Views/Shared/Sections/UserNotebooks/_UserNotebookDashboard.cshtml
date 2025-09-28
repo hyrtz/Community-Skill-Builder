@@ -73,7 +73,7 @@
         </div>
     </div>
 
-    @if (!Model.User.IsDeactivated)
+    @if (!Model.User.IsDeactivated && Model.User.IsVerified)
     {
         if (Model.CourseProgresses != null && Model.CourseProgresses.Any())
         {
@@ -83,6 +83,13 @@
         {
             @await Html.PartialAsync("Sections/_RecommendedCourses", Model.RecommendedCourses)
         }
+    }
+    else if (!Model.User.IsVerified)
+    {
+        <div style="margin-top: 2rem; padding: 1.5rem; background-color: #fff3e6; border-radius: 12px; text-align: center;">
+            <h3 style="color: #e67e22; margin-bottom: 0.5rem;">Email Not Verified</h3>
+            <p style="color: #555;">You must verify your email before you can resume or enroll in courses. Please check your inbox for the verification link.</p>
+        </div>
     }
     else
     {

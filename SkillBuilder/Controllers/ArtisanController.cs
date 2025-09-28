@@ -1,18 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
+using SkillBuilder.Models;
+using SkillBuilder.Models.ViewModels;
+using SkillBuilder.Services;
 
 namespace SkillBuilder.Controllers
 {
-    public class ArtisansController : Controller
+    [Authorize(Roles = "Artisan")]
+    [Route("Artisan")]
+    public class ArtisanController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _env;
+        private readonly INotificationService _notificationService;
 
-        public ArtisansController(AppDbContext context)
+        public ArtisanController(AppDbContext context, IWebHostEnvironment env, INotificationService notificationService)
         {
             _context = context;
+            _env = env;
+            _notificationService = notificationService;
         }
 
+        [AllowAnonymous]
+        [HttpGet("")] 
+        [HttpGet("List")] 
         public async Task<IActionResult> ArtisanList(string? search)
         {
             var query = _context.Artisans
@@ -28,7 +41,133 @@ namespace SkillBuilder.Controllers
 
             var artisans = await query.ToListAsync();
             return View(artisans);
+        }
 
+        // GET: /Artisan/Resubmit/2
+        [HttpGet("Resubmit/{applicationId}")]
+        public async Task<IActionResult> Resubmit(int applicationId)
+        {
+            var app = await _context.ArtisanApplications
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.Id == applicationId && a.Status == "Rejected");
+
+            if (app == null)
+                return NotFound();
+
+            return View("ResubmitApplication", app);
+        }
+
+        // POST: /Artisan/Resubmit/2
+        [HttpPost("Resubmit/{applicationId}")]
+        public async Task<IActionResult> Resubmit(int applicationId, IFormFile file)
+        {
+            var app = await _context.ArtisanApplications
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.Id == applicationId);
+
+            if (app == null)
+                return Json(new { success = false, message = "Application not found." });
+
+            if (file != null && file.Length > 0)
+            {
+                var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsDir))
+                    Directory.CreateDirectory(uploadsDir);
+
+                var filePath = Path.Combine(uploadsDir, file.FileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await file.CopyToAsync(stream);
+
+                app.ApplicationFile = "/uploads/" + file.FileName;
+                app.Status = "Pending"; // reset to pending
+                await _context.SaveChangesAsync();
+
+                // --- Get last rejection reason ---
+                var lastRejection = await _context.Notifications
+                    .Where(n => n.UserId == app.UserId &&
+                                n.ActionUrl == $"/Artisan/Resubmit/{app.Id}" &&
+                                n.ActionText == "Reject")
+                    .OrderByDescending(n => n.CreatedAt)
+                    .FirstOrDefaultAsync();
+
+                string rejectionReason = lastRejection?.Message ?? "Please submit another Application.";
+
+                // --- Notification to user ---
+                _context.Notifications.Add(new Models.Notification
+                {
+                    UserId = app.UserId,
+                    Message = "Your application has been resubmitted successfully.",
+                    ActionUrl = null,
+                    ActionText = null,
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
+                });
+
+                await _context.SaveChangesAsync();
+            }
+
+            return Json(new { success = true, message = "Application resubmitted successfully." });
+        }
+
+        [HttpPost("AddWork")]
+        public async Task<IActionResult> AddWork(string Title, string Caption, IFormFile ImageFile)
+        {
+            if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(Caption) || ImageFile == null)
+                return BadRequest("Invalid input");
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var artisan = await _context.Artisans
+                .Include(a => a.Works)
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.UserId == userId);
+
+            if (artisan == null)
+                return Unauthorized();
+
+            // Save file
+            var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "works");
+            if (!Directory.Exists(uploadsDir))
+                Directory.CreateDirectory(uploadsDir);
+
+            var projectSubmissions = await _context.CourseProjectSubmissions
+                .Include(p => p.Course)
+                .Where(p => p.UserId == artisan.UserId)
+                .ToListAsync();
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
+            var filePath = Path.Combine(uploadsDir, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await ImageFile.CopyToAsync(stream);
+            }
+
+            var newWork = new ArtisanWork
+            {
+                ArtisanId = artisan.ArtisanId,
+                Title = Title,
+                Caption = Caption,
+                ImageUrl = "/uploads/works/" + fileName,
+                PublishDate = DateTime.UtcNow
+            };
+
+            _context.ArtisanWorks.Add(newWork);
+            await _context.SaveChangesAsync();
+
+            // ✅ Notification
+            await _notificationService.AddNotificationAsync(
+                artisan.UserId,
+                $"🎉 You successfully added a new work: '{newWork.Title}'."
+            );
+
+            var viewModel = new ArtisanProfileViewModel
+            {
+                Artisan = artisan,
+                ArtisanWorks = artisan.Works.OrderByDescending(w => w.PublishDate).ToList(),
+                ProjectSubmissions = projectSubmissions
+            };
+
+            return View("~/Views/Profile/ArtisanProfile.cshtml", viewModel);
         }
     }
 }

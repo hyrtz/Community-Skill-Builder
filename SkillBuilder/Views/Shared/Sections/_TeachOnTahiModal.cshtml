@@ -140,7 +140,8 @@
 
     .password-checklist {
         font-size: 0.7rem;
-        margin: 0.5rem 0;
+        margin-top: -0.5rem;
+        margin-bottom: 0.5rem;
         line-height: 1.2rem;
     }
 
@@ -325,26 +326,29 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // ---------- Initialize Appwrite ----------
-        if (!window.appwriteClient) {
-            window.appwriteClient = new Appwrite.Client()
-                .setEndpoint("https://fra.cloud.appwrite.io/v1")
-                .setProject("689ad4040030d8902c02");
-            window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
-        }
+        // ---------- Global variable for email ----------
+        let teachSignupEmail = "";
 
-        const googleBtn = document.getElementById("btn-google-teach");
-        const facebookBtn = document.getElementById("btn-facebook-teach");
-        const SUCCESS_URL = "https://localhost:7049/oauth/success";
+        // ---------- Initialize Appwrite ----------
+        // if (!window.appwriteClient) {
+        //     window.appwriteClient = new Appwrite.Client()
+        //         .setEndpoint("https:fra.cloud.appwrite.io/v1")
+        //         .setProject("689ad4040030d8902c02");
+        //     window.appwriteAccount = new Appwrite.Account(window.appwriteClient);
+        // }
+
+        // const googleBtn = document.getElementById("btn-google-teach");
+        // const facebookBtn = document.getElementById("btn-facebook-teach");
+        // const SUCCESS_URL = "https:localhost:7049/oauth/success";
 
         // ---------- OAuth ----------
-        googleBtn?.addEventListener("click", () => {
-            window.appwriteAccount.createOAuth2Session("google", SUCCESS_URL, "https://localhost:7049/?error=OAuthFailed", ["openid", "email", "profile"]);
-        });
+        // googleBtn?.addEventListener("click", () => {
+        //     window.appwriteAccount.createOAuth2Session("google", SUCCESS_URL, "https:localhost:7049/?error=OAuthFailed", ["openid", "email", "profile"]);
+        // });
 
-        facebookBtn?.addEventListener("click", () => {
-            window.appwriteAccount.createOAuth2Session("facebook", SUCCESS_URL, "https://localhost:7049/?error=OAuthFailed");
-        });
+        // facebookBtn?.addEventListener("click", () => {
+        //     window.appwriteAccount.createOAuth2Session("facebook", SUCCESS_URL, "https:localhost:7049/?error=OAuthFailed");
+        // });
 
         // ---------- Modal Open/Close ----------
         function openModal(modalId) {
@@ -365,11 +369,12 @@
 
         const closeBtn = document.getElementById("teach-close-btn");
         closeBtn?.addEventListener("click", () => closeModal("teach-modal", true));
-
+        
         // ---------- Show/Hide Signup Form ----------
         window.showTeachForm = function() {
             document.querySelector("#teach-form").style.display = "flex";
             document.querySelector(".teach-back-btn").style.display = "flex";
+            document.querySelector(".auth-close-btn").style.display = "flex";
             document.querySelector(".social-login").style.display = "none";
             document.querySelector(".teach-email-btn").style.display = "none";
             document.querySelector(".separator").style.display = "none";
@@ -378,6 +383,7 @@
         window.hideTeachForm = function() {
             document.querySelector("#teach-form").style.display = "none";
             document.querySelector(".teach-back-btn").style.display = "none";
+            document.querySelector(".auth-close-btn").style.display = "none";
             document.querySelector(".social-login").style.display = "flex";
             document.querySelector(".teach-email-btn").style.display = "flex";
             document.querySelector(".separator").style.display = "flex";
@@ -490,9 +496,11 @@
                 const result = await response.json().catch(() => ({ message: "Unexpected response" }));
 
                 if (response.ok) {
+                    // Save email globally for later verification
+                    teachSignupEmail = data.Email;
+
                     document.getElementById("teach-form").style.display = "none";
-                    document.getElementById("teach-verification").style.display = "flex";
-                    document.getElementById("teach-ob-email").textContent = data.Email;
+                    document.getElementById("artisan-application").style.display = "flex";
                 } else {
                     error.textContent = result.message || "Submission failed.";
                 }
@@ -508,8 +516,18 @@
 
         // ---------- Skip Verification ----------
         window.handleTeachSkipVerification = function() {
+            // Hide the verification panel
             document.getElementById("teach-verification").style.display = "none";
-            document.getElementById("artisan-application").style.display = "flex";
+
+            // Optionally, show a success message instead of reopening the application
+            const successPanel = document.getElementById("artisan-success");
+            if (successPanel) {
+                successPanel.style.display = "flex";
+                document.getElementById("artisan-success-btn").onclick = () => {
+                    closeModal("teach-modal", true);
+                    window.location.reload();
+                };
+            }
         };
 
         // ---------- Artisan Application ----------
@@ -521,16 +539,19 @@
         const artisanFile = document.getElementById("artisan-file");
 
         function validateArtisanForm() {
-                const valid = artisanProfession.value.trim() && artisanHometown.value.trim() && artisanIntroduction.value.trim() && artisanFile.files.length > 0;
-                artisanSubmitBtn.disabled = !valid;
-                if (valid) artisanErrorMsg.textContent = "";
-            }
-            [artisanProfession, artisanHometown, artisanIntroduction, artisanFile].forEach(el => {
-                el.addEventListener("input", validateArtisanForm);
-                el.addEventListener("change", validateArtisanForm);
-            });
+            const valid = artisanProfession.value.trim() && artisanHometown.value.trim() && artisanIntroduction.value.trim() && artisanFile.files.length > 0;
+            artisanSubmitBtn.disabled = !valid;
+            if (valid) artisanErrorMsg.textContent = "";
+        }
+        [artisanProfession, artisanHometown, artisanIntroduction, artisanFile].forEach(el => {
+            el.addEventListener("input", validateArtisanForm);
+            el.addEventListener("change", validateArtisanForm);
+        });
 
-                artisanSubmitBtn.addEventListener("click", async () => {
+        artisanSubmitBtn.addEventListener("click", async () => {
+            artisanSubmitBtn.disabled = true;
+            artisanSubmitBtn.textContent = "Submitting...";
+
             if (!artisanProfession.value.trim() ||
                 !artisanHometown.value.trim() ||
                 !artisanIntroduction.value.trim() ||
@@ -552,12 +573,23 @@
                 });
                 const result = await response.json();
                 if (response.ok) {
-                    // Hide the application form
-                    document.getElementById("artisan-application").style.display = "none";
+                    try {
+                        await fetch("/send-verification", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(teachSignupEmail) // use global email
+                        });
 
-                    // Show the success UI
-                    const successPanel = document.getElementById("artisan-success");
-                    successPanel.style.display = "flex";
+                        // Hide application form and show verification panel
+                        document.getElementById("artisan-application").style.display = "none";
+                        const verificationPanel = document.getElementById("teach-verification");
+                        verificationPanel.style.display = "flex";
+                        document.getElementById("teach-ob-email").textContent = teachSignupEmail;
+
+                    } catch (err) {
+                        console.error("Failed to send verification email:", err);
+                        artisanErrorMsg.textContent = "Your application was submitted, but email verification failed. Please try resending later.";
+                    }
 
                     // Handle the "Great" button
                     document.getElementById("artisan-success-btn").onclick = () => {

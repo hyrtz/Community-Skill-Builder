@@ -1,5 +1,9 @@
 ﻿@model List<SkillBuilder.Models.CourseProjectSubmission>
 
+@{
+    var activeProjectTab = ViewData["ActiveProjectTab"] as string ?? "pending";
+}
+
 <style>
     .user-projects-section {
         display: flex;
@@ -13,6 +17,41 @@
         margin-bottom: 1rem;
     }
 
+    /* Tabs styling (copied from reference) */
+    .user-projects-tabs {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .user-projects-tab {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .user-projects-tab.active {
+            border-bottom: 3px solid #344AEA;
+            color: #344AEA;
+        }
+
+        .user-projects-tab:hover {
+            color: #344AEA;
+        }
+
+    .user-projects-content .user-projects-panel {
+        display: none;
+    }
+
+        .user-projects-content .user-projects-panel.active {
+            display: block;
+        }
+
+    /* Grid and cards (same as your original) */
     .user-projects-grid {
         display: flex;
         flex-wrap: wrap;
@@ -54,23 +93,41 @@
 <section class="user-projects-section">
     <h2 class="user-projects-header">Projects</h2>
 
-    @if (Model != null && Model.Any())
-    {
-        <div class="user-projects-grid">
-            @foreach (var project in Model)
-            {
-                <div class="user-projects-card">
-                    <img src="@project.ImageUrl" alt="Project from @project.Course?.Title" />
-                    <div class="user-projects-course-name">@project.Course?.Title</div>
-                </div>
-            }
+    <!-- Tabs -->
+    <div class="user-projects-tabs">
+        <button class="user-projects-tab @(activeProjectTab == "pending" ? "active" : "")" data-tab="pending">Pending</button>
+        <button class="user-projects-tab @(activeProjectTab == "approved" ? "active" : "")" data-tab="approved">Approved</button>
+        <button class="user-projects-tab @(activeProjectTab == "rejected" ? "active" : "")" data-tab="rejected">Rejected</button>
+    </div>
+
+    <!-- Panels -->
+    <div class="user-projects-content">
+        <div class="user-projects-panel @(activeProjectTab == "pending" ? "active" : "")" data-tab="pending">
+            @await Html.PartialAsync("Sections/UserNotebooks/MyProjectsNotebooks/_ProjectsNotebookPending", Model.Where(p => p.Status == "Pending").ToList())
         </div>
-    }
-    else
-    {
-        <div class="user-projects-empty">
-            You haven't submitted any projects yet.<br />
-            Once you complete a course by uploading your work, it will show up here.
+        <div class="user-projects-panel @(activeProjectTab == "approved" ? "active" : "")" data-tab="approved">
+            @await Html.PartialAsync("Sections/UserNotebooks/MyProjectsNotebooks/_ProjectsNotebookApproved", Model.Where(p => p.Status == "Approved").ToList())
         </div>
-    }
+        <div class="user-projects-panel @(activeProjectTab == "rejected" ? "active" : "")" data-tab="rejected">
+            @await Html.PartialAsync("Sections/UserNotebooks/MyProjectsNotebooks/_ProjectsNotebookRejected", Model.Where(p => p.Status == "Rejected").ToList())
+        </div>
+    </div>
 </section>
+
+<script>
+    const projectTabs = document.querySelectorAll('.user-projects-tab');
+    const projectPanels = document.querySelectorAll('.user-projects-panel');
+
+    projectTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const selected = tab.dataset.tab;
+
+            projectTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            projectPanels.forEach(panel => {
+                panel.classList.toggle('active', panel.dataset.tab === selected);
+            });
+        });
+    });
+</script>

@@ -339,7 +339,7 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CourseId")
+                    b.Property<int?>("CourseId")
                         .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
@@ -708,6 +708,14 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FinalProjectDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FinalProjectTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FullDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -725,10 +733,6 @@ namespace SkillBuilder.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Overview")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProjectDetails")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -764,13 +768,14 @@ namespace SkillBuilder.Migrations
                             CreatedBy = "A1111111",
                             Difficulty = "Beginner",
                             Duration = "15 hours",
+                            FinalProjectDescription = "Design, shape, and glaze a personalized vase as your final pottery project.",
+                            FinalProjectTitle = "Create Your Own Clay Vase",
                             FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery...",
                             ImageUrl = "/assets/Courses Pics/Pottery.png",
                             IsArchived = false,
                             IsPublished = false,
                             Link = "pottery",
                             Overview = "Pottery is the art and craft of shaping and firing clay...",
-                            ProjectDetails = "You'll complete a personal project: creating a glazed bowl or cup using wheel-throwing techniques.",
                             Requirements = "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.",
                             Thumbnail = "/assets/Courses Pics/Pottery.png",
                             Title = "Pottery",
@@ -785,17 +790,18 @@ namespace SkillBuilder.Migrations
                             CreatedBy = "A1111112",
                             Difficulty = "Intermediate",
                             Duration = "29 hours",
+                            FinalProjectDescription = "Apply your skills by carving a detailed animal figurine as your capstone project.",
+                            FinalProjectTitle = "Carve a Wooden Animal Figurine",
                             FullDescription = "Explore the detailed world of woodcarving through this course...",
                             ImageUrl = "/assets/Courses Pics/Woodcarving.png",
                             IsArchived = false,
                             IsPublished = false,
                             Link = "woodcarving",
                             Overview = "Woodcarving is the art of shaping and sculpting wood...",
-                            ProjectDetails = "Create your own carved decorative panel or wooden sculpture using techniques learned throughout the modules.",
                             Requirements = "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).",
                             Thumbnail = "/assets/Courses Pics/Woodcarving.png",
                             Title = "Woodcarving",
-                            Video = "/assets/Videos/WoodCarving.mp4",
+                            Video = "/assets/Videos/Wood Carving.mp4",
                             WhatToLearn = "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing."
                         },
                         new
@@ -806,13 +812,14 @@ namespace SkillBuilder.Migrations
                             CreatedBy = "A1111113",
                             Difficulty = "Professional",
                             Duration = "18 hours",
+                            FinalProjectDescription = "Plan and weave a wall hanging using advanced techniques to showcase your weaving skills.",
+                            FinalProjectTitle = "Design a Handwoven Wall Hanging",
                             FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design...",
                             ImageUrl = "/assets/Courses Pics/Weaving.png",
                             IsArchived = false,
                             IsPublished = false,
                             Link = "weaving",
                             Overview = "Weaving is the craft of interlacing threads or fibers...",
-                            ProjectDetails = "You’ll complete a full-sized tapestry or wearable woven piece using your own pattern and chosen materials.",
                             Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
                             Thumbnail = "/assets/Courses Pics/Weaving.png",
                             Title = "Weaving",
@@ -910,13 +917,6 @@ namespace SkillBuilder.Migrations
                         },
                         new
                         {
-                            Id = 5,
-                            CourseId = 1,
-                            Order = 0,
-                            Title = "Final Activity"
-                        },
-                        new
-                        {
                             Id = 6,
                             CourseId = 2,
                             Order = 0,
@@ -945,13 +945,6 @@ namespace SkillBuilder.Migrations
                         },
                         new
                         {
-                            Id = 10,
-                            CourseId = 2,
-                            Order = 0,
-                            Title = "Final Activity"
-                        },
-                        new
-                        {
                             Id = 11,
                             CourseId = 3,
                             Order = 0,
@@ -977,13 +970,6 @@ namespace SkillBuilder.Migrations
                             CourseId = 3,
                             Order = 0,
                             Title = "Quiz"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            CourseId = 3,
-                            Order = 0,
-                            Title = "Final Activity"
                         });
                 });
 
@@ -998,12 +984,24 @@ namespace SkillBuilder.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MediaUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("SubmittedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -1163,11 +1161,31 @@ namespace SkillBuilder.Migrations
                         },
                         new
                         {
+                            Id = 16,
+                            ContentText = "Learn about clay, tools, and equipment.",
+                            ContentType = "Image + Text",
+                            CourseModuleId = 2,
+                            MediaUrl = "/assets/Courses Pics/Pottery.png",
+                            Order = 0,
+                            Title = "Pottery Materials"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            ContentText = "Step by step techniques for beginners.",
+                            ContentType = "Image + Text",
+                            CourseModuleId = 2,
+                            MediaUrl = "/assets/Courses Pics/Pottery1.png",
+                            Order = 0,
+                            Title = "Basic Pottery Techniques"
+                        },
+                        new
+                        {
                             Id = 2,
                             ContentText = "History content something anything.",
                             ContentType = "Image + Text",
                             CourseModuleId = 2,
-                            MediaUrl = "/assets/Courses Pics/Pottery.png",
+                            MediaUrl = "/assets/Courses Pics/Pottery2.png",
                             Order = 0,
                             Title = "History of Pottery"
                         },
@@ -1181,15 +1199,6 @@ namespace SkillBuilder.Migrations
                         },
                         new
                         {
-                            Id = 4,
-                            ContentText = "Create your own pottery something anything.",
-                            ContentType = "Activity",
-                            CourseModuleId = 5,
-                            Order = 0,
-                            Title = "Pottery Final Activity"
-                        },
-                        new
-                        {
                             Id = 5,
                             ContentText = "Woodcarving intro content something anything.",
                             ContentType = "Video",
@@ -1200,11 +1209,31 @@ namespace SkillBuilder.Migrations
                         },
                         new
                         {
+                            Id = 18,
+                            ContentText = "Learn about wood types suitable for carving.",
+                            ContentType = "Image + Text",
+                            CourseModuleId = 7,
+                            MediaUrl = "/assets/Courses Pics/Woodcarving.png",
+                            Order = 0,
+                            Title = "Wood Types"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            ContentText = "Introduction to essential carving tools.",
+                            ContentType = "Image + Text",
+                            CourseModuleId = 7,
+                            MediaUrl = "/assets/Courses Pics/Woodcarving1.png",
+                            Order = 0,
+                            Title = "Basic Carving Tools"
+                        },
+                        new
+                        {
                             Id = 6,
                             ContentText = "History content something anything.",
                             ContentType = "Image + Text",
                             CourseModuleId = 7,
-                            MediaUrl = "/assets/Courses Pics/Woodcarving.png",
+                            MediaUrl = "/assets/Courses Pics/Woodcarving2.png",
                             Order = 0,
                             Title = "History of Woodcarving"
                         },
@@ -1218,15 +1247,6 @@ namespace SkillBuilder.Migrations
                         },
                         new
                         {
-                            Id = 8,
-                            ContentText = "Carve a wooden spoon something anything.",
-                            ContentType = "Activity",
-                            CourseModuleId = 10,
-                            Order = 0,
-                            Title = "Woodcarving Final Activity"
-                        },
-                        new
-                        {
                             Id = 9,
                             ContentText = "Weaving intro content something anything.",
                             ContentType = "Video",
@@ -1237,11 +1257,31 @@ namespace SkillBuilder.Migrations
                         },
                         new
                         {
+                            Id = 20,
+                            ContentText = "Learn about threads, yarns, and tools.",
+                            ContentType = "Image + Text",
+                            CourseModuleId = 12,
+                            MediaUrl = "/assets/Courses Pics/Weaving.png",
+                            Order = 0,
+                            Title = "Weaving Materials"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            ContentText = "Step by step weaving techniques.",
+                            ContentType = "Image + Text",
+                            CourseModuleId = 12,
+                            MediaUrl = "/assets/Courses Pics/Weaving1.png",
+                            Order = 0,
+                            Title = "Basic Weaving Techniques"
+                        },
+                        new
+                        {
                             Id = 10,
                             ContentText = "History content something anything.",
                             ContentType = "Image + Text",
                             CourseModuleId = 12,
-                            MediaUrl = "/assets/Courses Pics/Weaving.png",
+                            MediaUrl = "/assets/Courses Pics/Weaving2.png",
                             Order = 0,
                             Title = "History of Weaving"
                         },
@@ -1252,15 +1292,6 @@ namespace SkillBuilder.Migrations
                             CourseModuleId = 13,
                             Order = 0,
                             Title = "Live Weaving Session"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            ContentText = "Weave a basic pattern something anything.",
-                            ContentType = "Activity",
-                            CourseModuleId = 15,
-                            Order = 0,
-                            Title = "Weaving Final Activity"
                         },
                         new
                         {
@@ -1321,6 +1352,44 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("CourseModuleId");
 
                     b.ToTable("ModuleProgress");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActionText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActionUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActioned")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.QuizQuestion", b =>
@@ -1596,6 +1665,9 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EmailVerificationToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1790,8 +1862,7 @@ namespace SkillBuilder.Migrations
                     b.HasOne("SkillBuilder.Models.Course", "Course")
                         .WithMany("ArtisanWorks")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Artisan");
 
@@ -1938,6 +2009,17 @@ namespace SkillBuilder.Migrations
                         .IsRequired();
 
                     b.Navigation("CourseModule");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.Notification", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.QuizQuestion", b =>

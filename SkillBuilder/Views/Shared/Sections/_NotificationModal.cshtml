@@ -1,0 +1,132 @@
+﻿<style>
+    .notification-modal {
+        position: fixed;
+        z-index: 1001;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .notification-modal-content {
+        width: 80vh; 
+        max-width: 90%;
+        background: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        animation: fadeIn 0.3s ease-out;
+        position: relative;
+    }
+
+        .notification-modal-content h4 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .notification-modal-content .close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #333;
+        }
+
+    .notification-item {
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item .message {
+            font-size: 0.9rem;
+        }
+
+        .notification-item .timestamp {
+            font-size: 0.7rem;
+            color: #888;
+        }
+</style>
+
+<div id="notificationModal" class="notification-modal">
+    <div class="notification-modal-content">
+        <span class="close" onclick="closeNotificationModal()">&times;</span>
+        <h4>All Notifications</h4>
+        <div id="allNotificationItems" style="max-height:400px; overflow-y:auto;"></div>
+    </div>
+</div>
+
+<script>
+    // Expose globally so buttons/links can call these
+    window.openNotificationModal = function () {
+        const modal = document.getElementById("notificationModal");
+        modal.style.display = "flex"; // flex so it centers
+        loadAllNotifications();
+    };
+
+    window.closeNotificationModal = function () {
+        const modal = document.getElementById("notificationModal");
+        modal.style.display = "none";
+    };
+
+    // Close modal when clicking outside the content
+    window.addEventListener("click", function (event) {
+        const modal = document.getElementById("notificationModal");
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
+    async function loadAllNotifications() {
+        const userId = window.currentUserId;
+        if (!userId) return;
+
+        try {
+            const res = await fetch(`/api/notification/${userId}?all=true`);
+            const notifications = await res.json();
+
+            const container = document.getElementById("allNotificationItems");
+            container.innerHTML = "";
+
+            if (notifications.length === 0) {
+                container.innerHTML = "<p>No notifications yet.</p>";
+            } else {
+                notifications.forEach(n => {
+                    const item = document.createElement("div");
+                    item.className = "notification-item";
+
+                    const message = document.createElement("div");
+                    message.className = "message";
+                    message.innerText = n.message;
+
+                    const timestamp = document.createElement("div");
+                    timestamp.className = "timestamp";
+                    timestamp.innerText = new Date(n.createdAt).toLocaleString();
+
+                    item.appendChild(message);
+                    item.appendChild(timestamp);
+                    container.appendChild(item);
+                });
+            }
+        } catch (err) {
+            console.error("Failed to load all notifications", err);
+        }
+    }
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            const modal = document.getElementById("notificationModal");
+            if (modal && modal.style.display === "flex") {
+                modal.style.display = "none";
+            }
+        }
+    });
+</script>

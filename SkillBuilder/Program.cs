@@ -1,11 +1,13 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
+using SkillBuilder.Services;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IEmailService, SkillBuilder.Services.EmailService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<CertificateService>();
 
 builder.Services.AddAuthentication("TahiAuth")
     .AddCookie("TahiAuth", options =>
@@ -50,6 +55,9 @@ builder.Services.AddAuthentication("TahiAuth")
             }
         };
     });
+
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 

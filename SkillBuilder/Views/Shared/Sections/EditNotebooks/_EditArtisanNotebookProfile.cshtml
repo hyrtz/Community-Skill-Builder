@@ -47,6 +47,7 @@
     border-radius: 8px;
     font-size: 0.95rem;
     width: 100%;
+    margin-bottom: 1rem;
 }
 
 /* --- Buttons --- */
@@ -169,7 +170,8 @@
     color: red;
     font-size: 0.8rem;
     display: none;
-    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    margin-top: -1rem;
 }
 
 /* --- Password checklist --- */
@@ -186,10 +188,20 @@
         <form class="eap-form" method="post" enctype="multipart/form-data" asp-controller="ArtisanProfile" asp-action="EditProfileArtisan">
             
             <!-- Email -->
-            <div class="eap-field">
+            <div class="eap-field" id="eap-email-section" style="display:none;">
                 <label for="Email">Email</label>
-                <input type="email" id="Email" name="Email" class="eap-input" value="@Model.Artisan.User?.Email" required />
+                <input type="email" id="Email" name="Email" class="eap-input" value="@Model.Artisan.User?.Email" />
                 <p class="eap-warning" id="eap-email-warning">⚠️ Please enter a valid email.</p>
+                <p class="eap-warning" id="eap-email-exist-warning" style="display:none;">⚠️ This email already exists.</p>
+            </div>
+
+            <!-- Change Email Warning Modal -->
+            <div class="eap-modal-overlay" id="eap-email-modal-overlay">
+                <div class="eap-modal">
+                    <p>Are you sure you want to edit your email? Upon saving, your account will become unverified and you will receive a verification email immediately.</p>
+                    <button type="button" class="eap-modal-confirm" id="eap-email-confirm">Yes, proceed</button>
+                    <button type="button" class="eap-modal-cancel" id="eap-email-cancel">Cancel</button>
+                </div>
             </div>
 
             <!-- First Name -->
@@ -273,6 +285,7 @@
         <label>Profile Picture</label>
         <img src="@Model.Artisan.UserAvatar" class="eap-avatar-preview" id="eap-avatar-preview" />
         <button type="button" class="eap-change-avatar-btn" id="eap-change-avatar-btn">Change Avatar</button>
+        <button type="button" class="eap-toggle-password-btn" id="eap-toggle-email-btn">Change Email</button>
         <button type="button" class="eap-toggle-password-btn" id="eap-toggle-password-btn">Change Password</button>
     </div>
 </div>
@@ -393,4 +406,65 @@
     form.addEventListener('submit', e => { e.preventDefault(); modalOverlay.style.display='flex'; });
     modalConfirm.addEventListener('click', () => { modalOverlay.style.display='none'; form.submit(); });
     modalCancel.addEventListener('click', () => { modalOverlay.style.display='none'; });
+
+    const emailToggleBtn = document.getElementById('eap-toggle-email-btn');
+    const emailSection = document.getElementById('eap-email-section');
+    const emailModal = document.getElementById('eap-email-modal-overlay');
+    const emailConfirm = document.getElementById('eap-email-confirm');
+    const emailCancel = document.getElementById('eap-email-cancel');
+
+    // Show warning modal when clicking "Change Email"
+    emailToggleBtn.addEventListener('click', () => {
+        emailModal.style.display = 'flex';
+    });
+
+    // Confirm modal
+    emailConfirm.addEventListener('click', () => {
+        emailModal.style.display = 'none';
+        emailSection.style.display = 'block';
+        emailInput.setAttribute('required', 'required');
+        emailInput.focus(); 
+    });
+
+    // Cancel modal
+    emailCancel.addEventListener('click', () => {
+        emailModal.style.display = 'none';
+        emailInput.removeAttribute('required');
+    });
+
+    // Disable Save Changes upon confirmation
+    const mainModalConfirm = document.getElementById('eap-modal-confirm');
+    mainModalConfirm.addEventListener('click', () => {
+        modalOverlay.style.display = 'none';
+        submitBtn.disabled = true;         
+        submitBtn.textContent = 'Saving...';
+        form.submit();                      
+    });
+
+    const emailExistWarning = document.getElementById('eap-email-exist-warning');
+
+    emailInput.addEventListener('input', () => {
+    if(emailSection.style.display === 'none') return; // skip if hidden
+
+        const email = emailInput.value.trim();
+        const emailRegex = new RegExp("^[^\\s]+@@[^\\s]+\\.[^\\s]+$");
+
+        // Validate format first
+        const formatInvalid = email && !emailRegex.test(email);
+        emailWarning.style.display = formatInvalid ? 'block' : 'none';
+
+        if(emailRegex.test(email)) {
+            // Check if email exists
+            fetch(`/ArtisanProfile/CheckEmailExist?email=${encodeURIComponent(email)}`)
+                .then(res => res.json())
+                .then(data => {
+                    emailExistWarning.style.display = data.exists ? 'block' : 'none';
+                    // Disable button if format invalid OR email exists
+                    submitBtn.disabled = formatInvalid || data.exists;
+                });
+        } else {
+            emailExistWarning.style.display = 'none';
+            submitBtn.disabled = !!email; // disable if anything typed but invalid
+        }
+    });
 </script>

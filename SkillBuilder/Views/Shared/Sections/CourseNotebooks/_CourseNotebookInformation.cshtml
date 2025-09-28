@@ -1,14 +1,37 @@
-﻿<style>
+﻿@model SkillBuilder.Models.Course
 
-    h1 {
+<style>
+    .course-info-view h1 {
         margin-bottom: 0.5rem;
     }
 
+    .course-info-view-video {
+        margin-bottom: 2rem;
+    }
+
+    .course-info-view-learn-list {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .course-info-view-learn-item {
+        margin-bottom: 0.5rem;
+    }
+
+        .course-info-view-learn-item span {
+            color: #344AEA;
+            font-weight: bold;
+        }
+
+    .course-info-view-description,
+    .course-info-view-requirements {
+        margin-top: 2rem;
+    }
 </style>
 
-<div>
+<div class="course-info-view">
     <!-- Video -->
-    <div class="course-information-video" style="margin-bottom: 2rem;">
+    <div class="course-info-view-video">
         <video width="100%" height="auto" controls poster="@Model.Thumbnail">
             <source src="@Url.Content(Model.Video)" type="video/mp4">
             Your browser does not support the video tag.
@@ -19,13 +42,13 @@
     @if (!string.IsNullOrWhiteSpace(Model.WhatToLearn))
     {
         <h1>What You'll Learn</h1>
-        <ul style="list-style: none; padding-left: 0;">
+        <ul class="course-info-view-learn-list">
             @foreach (var item in Model.WhatToLearn.Split("||"))
             {
                 if (!string.IsNullOrWhiteSpace(item))
                 {
-                    <li style="margin-bottom: 0.5rem;">
-                        <span style="color: #344AEA; font-weight: bold;">&gt;</span> @item
+                    <li class="course-info-view-learn-item">
+                        <span>&gt;</span> @item
                     </li>
                 }
             }
@@ -33,19 +56,13 @@
     }
 
     <!-- Full Description -->
-    <div class="course-information-description" style="margin-top: 2rem;">
+    <div class="course-info-view-description">
         <h1>Course Description</h1>
         <p>@Model.FullDescription</p>
     </div>
 
-    <!-- Project Details -->
-    <div class="course-information-project" style="margin-top: 2rem;">
-        <h1>What is this course's project?</h1>
-        <p>@Model.ProjectDetails</p>
-    </div>
-
     <!-- Requirements -->
-    <div class="course-information-requirements" style="margin-top: 2rem;">
+    <div class="course-info-view-requirements">
         <h1>Requirements and Materials</h1>
         <p>@Model.Requirements</p>
     </div>

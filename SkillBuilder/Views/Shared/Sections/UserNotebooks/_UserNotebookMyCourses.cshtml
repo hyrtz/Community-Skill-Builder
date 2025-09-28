@@ -1,4 +1,6 @@
-﻿@{
+﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
+
+@{
     var activeTab = ViewData["ActiveCourseTab"] as string ?? "in-progress";
 }
 
@@ -56,10 +58,10 @@
 
     <div class="user-courses-content">
         <div class="user-courses-panel @(activeTab == "in-progress" ? "active" : "")" data-tab="in-progress">
-            @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookInProgress", (List<SkillBuilder.Models.Course>)Model.EnrolledCourses)
+            @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookInProgress", Model.User.Enrollments)
         </div>
         <div class="user-courses-panel @(activeTab == "completed" ? "active" : "")" data-tab="completed">
-            @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookCompleted", (List<SkillBuilder.Models.Course>)Model.EnrolledCourses)
+            @await Html.PartialAsync("Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookCompleted", Model.User.Enrollments)
         </div>
     </div>
 </div>

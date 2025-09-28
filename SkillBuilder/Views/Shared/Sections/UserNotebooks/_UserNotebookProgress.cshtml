@@ -98,9 +98,9 @@
 <section class="user-progress-section">
     <div class="user-progress-header">
         <h2>Keep Learning</h2>
-        <a asp-controller="UserProfile" asp-action="Courses" asp-route-id="@Model.FirstOrDefault()?.UserId">
+        @* <a asp-controller="UserProfile" asp-action="Courses" asp-route-id="@Model.FirstOrDefault()?.UserId">
             View all courses in progress &rarr;
-        </a>
+        </a> *@
     </div>
 
     @foreach (var course in Model)
@@ -108,9 +108,9 @@
         var progress = Math.Round(course.ProgressPercentage, 0);
         <div class="user-progress-card">
             <!-- Progress Bar -->
-            <div class="user-progress-bar-container">
+            @* <div class="user-progress-bar-container">
                 <div class="user-progress-bar-fill" style="width:@progress%">@($"{progress}%")</div>
-            </div>
+            </div> *@
 
             <!-- Course Info -->
             <div class="user-progress-card-content">

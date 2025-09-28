@@ -1,5 +1,10 @@
 ﻿@model SkillBuilder.Models.ViewModels.AdminProfileViewModel
 
+@{
+    var existingCommunities = Model.AllCommunities?.Where(c => !c.IsArchived).ToList() ?? new List<Community>();
+    var deletedCommunities = Model.AllCommunities?.Where(c => c.IsArchived).ToList() ?? new List<Community>();
+
+}
 <style>
     .community-mgmt-section {
         padding: 2rem;
@@ -23,7 +28,7 @@
     .community-mgmt-search-bar {
         display: flex;
         width: 100%;
-        border: 1px solid #bbb;
+        border: 1px solid #ccc;
         border-radius: 8px;
         overflow: hidden;
         background: #fff;
@@ -43,7 +48,15 @@
             border: none;
             padding: 0.6rem 1rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
         }
+
+            .community-mgmt-search-bar button:hover {
+                background-color: #2a3bcf;
+            }
 
             .community-mgmt-search-bar button img {
                 width: 1.2rem;
@@ -98,10 +111,9 @@
     }
 
     .community-mgmt-creator {
-        font-size: 0.95rem;
         color: #222;
         text-align: center;
-        font-weight: 500;
+        font-weight: 600;
     }
 
     .community-mgmt-action-buttons {
@@ -110,22 +122,19 @@
     }
 
     .community-mgmt-action-btn {
-        padding: 0.6rem 1.2rem;
-        border: none;
-        border-radius: 8px;
+        background-color: #FEE4E2;
+        color: #B42318;
+        padding: 0.8rem 0.8rem;
+        border: solid #B42318 1px;
+        border-radius: 6px;
         cursor: pointer;
         font-size: 0.9rem;
         font-weight: bold;
-        color: #fff;
-        transition: background-color 0.2s ease;
-    }
-
-    .community-mgmt-delete-btn {
-        background-color: #E74C3C;
     }
 
         .community-mgmt-delete-btn:hover {
-            background-color: #C0392B;
+            background-color: #E74C3C;
+            color: white;
         }
 
     /* Modal & backdrop */
@@ -176,22 +185,66 @@
     }
 
         .community-mgmt-modal-buttons button {
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.2rem;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 0.95rem;
+            transition: background-color 0.2s ease, transform 0.15s ease;
         }
 
+            .community-mgmt-modal-buttons button:hover {
+                transform: scale(1.05);
+            }
+
     .community-mgmt-modal-cancel {
-        background-color: #ccc;
-        color: #333;
+        background-color: #bdc3c7;
+        color: #2c3e50;
     }
 
     .community-mgmt-modal-confirm {
-        background-color: #E74C3C;
-        color: white;
+        background-color: #e74c3c;
+        color: #fff;
     }
+
+        .community-mgmt-modal-confirm:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none !important;
+        }
+
+        .community-mgmt-modal-confirm:not(:disabled):hover {
+            transform: scale(1.05);
+            background-color: #c0392b;
+        }
+
+    .community-mgmt-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .community-mgmt-tab {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #555;
+    }
+
+        .community-mgmt-tab.active {
+            border-bottom-color: #344AEA;
+            color: #344AEA;
+        }
+
+        .community-mgmt-tab:hover {
+            color: #344AEA;
+        }
 </style>
 
 <div class="community-mgmt-section">
@@ -206,7 +259,18 @@
         </div>
     </div>
 
+    <!-- Tabs -->
+    <div class="community-mgmt-tabs">
+        <button class="community-mgmt-tab active" data-tab="existing">Existing</button>
+        <button class="community-mgmt-tab" data-tab="deleted">Deleted</button>
+    </div>
+
     <table class="community-mgmt-table">
+            <colgroup>
+                <col style="width: 33%;">
+                <col style="width: 33%; text-align:center;">
+                <col style="width: 33%; text-align:right;">
+            </colgroup>
         <thead>
             <tr>
                 <th>Community Name</th>
@@ -215,21 +279,20 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model.AllCommunities != null && Model.AllCommunities.Any())
+            @* Existing Communities *@
+            @if (existingCommunities.Any())
             {
-                foreach (var community in Model.AllCommunities.Where(c => !c.IsArchived))
+                foreach (var community in existingCommunities)
                 {
-                    <tr class="community-mgmt-row">
+                    <tr class="community-mgmt-row" data-tab="existing">
                         <td class="community-mgmt-cell community-mgmt-name">
                             <a href="@Url.Action("CommunityDetails", "AdminProfile", new { id = community.Id })">
                                 @community.Name
                             </a>
                         </td>
-
                         <td class="community-mgmt-cell community-mgmt-creator">
                             @community.Creator.FirstName @community.Creator.LastName
                         </td>
-
                         <td class="community-mgmt-cell community-mgmt-actions">
                             <div class="community-mgmt-action-buttons">
                                 <form asp-action="DeleteCommunity"
@@ -248,30 +311,88 @@
             }
             else
             {
-                <tr>
-                    <td colspan="3" class="community-mgmt-cell" style="text-align: center; padding: 2rem; color: #888;">
-                        No communities available.
+                <tr class="community-mgmt-row" data-tab="existing">
+                    <td colspan="3" class="community-mgmt-cell" style="text-align:center; font-style:italic; color:#888;">
+                        No existing communities.
+                    </td>
+                </tr>
+            }
+
+            @* Deleted Communities *@
+            @if (deletedCommunities.Any())
+            {
+                foreach (var community in deletedCommunities)
+                {
+                    <tr class="community-mgmt-row deleted-community" data-tab="deleted" style="display:none; opacity:0.6;">
+                        <td class="community-mgmt-cell community-mgmt-name">
+                            <a href="@Url.Action("CommunityDetails", "AdminProfile", new { id = community.Id })">
+                                @community.Name
+                            </a>
+                        </td>
+                        <td class="community-mgmt-cell community-mgmt-creator">
+                            @community.Creator.FirstName @community.Creator.LastName
+                        </td>
+                        <td class="community-mgmt-cell community-mgmt-actions">
+                            <div class="community-mgmt-action-buttons">
+                                Deleted
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr class="community-mgmt-row" data-tab="deleted" style="display:none;">
+                    <td colspan="3" class="community-mgmt-cell" style="text-align:center; font-style:italic; color:#888;">
+                        No deleted communities.
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+</div>
 
-    <!-- Backdrop -->
-    <div class="community-mgmt-modal-backdrop" id="communityMgmtModalBackdrop"></div>
+<!-- Backdrop -->
+<div class="community-mgmt-modal-backdrop" id="communityMgmtModalBackdrop"></div>
 
-    <!-- Delete confirmation modal -->
-    <div class="community-mgmt-modal" id="communityMgmtDeleteModal">
-        <h3>Confirm Deletion</h3>
-        <p id="communityMgmtDeleteMessage">Are you sure you want to delete this community?</p>
-        <div class="community-mgmt-modal-buttons">
-            <button class="community-mgmt-modal-cancel" onclick="communityMgmtCloseModal()">Cancel</button>
-            <button class="community-mgmt-modal-confirm" id="communityMgmtConfirmDelete">Delete</button>
-        </div>
+<!-- Delete confirmation modal -->
+<div class="community-mgmt-modal" id="communityMgmtDeleteModal">
+    <h3>Confirm Deletion</h3>
+    <p id="communityMgmtDeleteMessage">Are you sure you want to delete this community?</p>
+    <textarea id="communityMgmtDeleteReason" placeholder="Enter reason for deletion (optional)"
+              style="width:100%; min-height:80px; margin-bottom:1rem; padding:0.5rem; border-radius:6px; border:1px solid #ccc; resize: none;"></textarea>
+    <div class="community-mgmt-modal-buttons">
+        <button class="community-mgmt-modal-cancel" onclick="communityMgmtCloseModal()">Cancel</button>
+        <button class="community-mgmt-modal-confirm" id="communityMgmtConfirmDelete" disabled>Delete</button>
     </div>
 </div>
 
 <script>
+    const communityTabs = document.querySelectorAll(".community-mgmt-tab");
+    const communityRows = document.querySelectorAll(".community-mgmt-row");
+
+    communityTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            communityTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            const selectedTab = tab.dataset.tab;
+
+            communityRows.forEach(row => {
+                row.style.display = (row.dataset.tab === selectedTab) ? "table-row" : "none";
+            });
+
+            // Apply search after tab switch
+            filterCommunities();
+        });
+    });
+
+    const communityReasonInput = document.getElementById("communityMgmtDeleteReason");
+    const communityConfirmBtn = document.getElementById("communityMgmtConfirmDelete");
+
+    communityReasonInput.addEventListener("input", () => {
+        communityConfirmBtn.disabled = communityReasonInput.value.trim() === "";
+    });
+
     let communityMgmtCurrentForm = null;
 
     function communityMgmtOpenDeleteModal(form, communityName) {
@@ -279,13 +400,28 @@
         document.getElementById("communityMgmtDeleteMessage").innerText =
             `Are you sure you want to delete the community "${communityName}"?`;
 
+        communityReasonInput.value = "";
+        communityConfirmBtn.disabled = true;
+
         document.getElementById("communityMgmtModalBackdrop").style.display = "block";
         document.getElementById("communityMgmtDeleteModal").style.display = "block";
         return false;
     }
 
     function communityMgmtConfirmDeleteAction() {
-        if (communityMgmtCurrentForm) communityMgmtCurrentForm.submit();
+        if (!communityMgmtCurrentForm) return;
+
+        // Add reason to the form
+        let reasonInput = communityMgmtCurrentForm.querySelector("input[name='reason']");
+        if (!reasonInput) {
+            reasonInput = document.createElement("input");
+            reasonInput.type = "hidden";
+            reasonInput.name = "reason";
+            communityMgmtCurrentForm.appendChild(reasonInput);
+        }
+        reasonInput.value = document.getElementById("communityMgmtDeleteReason").value;
+
+        communityMgmtCurrentForm.submit();
     }
 
     function communityMgmtCloseModal() {
@@ -299,4 +435,66 @@
         if (e.key === "Escape") communityMgmtCloseModal();
     });
     document.getElementById("communityMgmtConfirmDelete").addEventListener("click", communityMgmtConfirmDeleteAction);
+
+    // ----------------------
+    // Community Search Feature
+    // ----------------------
+    const communitySearchInput = document.querySelector(".community-mgmt-search-bar input");
+    const communitySearchButton = document.querySelector(".community-mgmt-search-bar button");
+
+    // Add "No communities found" row
+    const communityTbody = communityRows[0]?.parentElement;
+    let noCommunityRow = document.getElementById("noCommunitiesMessage");
+    if (!noCommunityRow) {
+        noCommunityRow = document.createElement("tr");
+        noCommunityRow.id = "noCommunitiesMessage";
+        noCommunityRow.style.display = "none";
+        noCommunityRow.innerHTML = `<td colspan="3" class="community-mgmt-cell" style="text-align:center; font-style:italic; color:#888;">
+            No communities found.
+        </td>`;
+        communityTbody.appendChild(noCommunityRow);
+    }
+
+    function filterCommunities() {
+        const filter = communitySearchInput.value.toLowerCase().trim();
+        const activeTab = document.querySelector(".community-mgmt-tab.active").dataset.tab;
+
+        let anyVisible = false;
+
+        communityRows.forEach(row => {
+            if (row.dataset.tab !== activeTab) {
+                row.style.display = "none";
+                return;
+            }
+
+            const isEmptyRow = row.querySelector(".community-mgmt-cell")?.innerText.includes("No");
+            if (isEmptyRow) {
+                row.style.display = !filter ? "table-row" : "none";
+                return;
+            }
+
+            const name = row.querySelector(".community-mgmt-name")?.innerText.toLowerCase() || "";
+            const creator = row.querySelector(".community-mgmt-creator")?.innerText.toLowerCase() || "";
+
+            if (!filter || name.includes(filter) || creator.includes(filter)) {
+                row.style.display = "table-row";
+                anyVisible = true;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        noCommunityRow.style.display = filter && !anyVisible ? "table-row" : "none";
+    }
+
+    // Trigger search on Enter
+    communitySearchInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            filterCommunities();
+        }
+    });
+
+    // Trigger search on button click
+    communitySearchButton.addEventListener("click", filterCommunities);
 </script>

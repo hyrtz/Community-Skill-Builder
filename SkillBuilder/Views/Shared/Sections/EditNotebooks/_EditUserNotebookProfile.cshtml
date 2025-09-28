@@ -46,6 +46,7 @@
     border-radius: 8px;
     font-size: 0.95rem;
     width: 100%;
+    margin-bottom: 1rem;
 }
 
 .epf-submit-btn {
@@ -166,7 +167,8 @@
     color: red;
     font-size: 0.8rem;
     display: none;
-    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    margin-top: -1rem;
 }
 
 .password-checklist {
@@ -176,16 +178,35 @@
 }
 </style>
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="padding:10px; background-color:#f8d7da; color:#721c24; border-radius:5px; margin-bottom:10px;">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
 <div class="epf-container-wrapper">
     <!-- Left Panel -->
     <div class="epf-left-panel">
         <form class="epf-form" method="post" enctype="multipart/form-data" asp-controller="UserProfile" asp-action="EditProfile">
 
             <!-- Email -->
-            <div class="epf-field">
-                <label for="Email">Email</label>
-                <input type="email" id="Email" name="Email" class="epf-input" value="@Model.User.Email" required />
-                <p class="epf-warning" id="epf-email-warning">⚠️ Please enter a valid email.</p>
+            <div class="epf-email-section" id="epf-email-section" style="display:none;">
+                <div class="epf-field">
+                    <label for="Email">Email</label>
+                    <input type="email" id="Email" name="Email" class="epf-input" value="@Model.User.Email" />
+                    <p class="epf-warning" id="epf-email-warning">⚠️ Please enter a valid email.</p>
+                    <p class="epf-warning" id="epf-email-exists-warning" style="display:none;">⚠️ This email is already in use.</p>
+                </div>
+            </div>
+
+            <!-- Change Email Warning Modal -->
+            <div class="epf-modal-overlay" id="epf-email-modal-overlay">
+                <div class="epf-modal">
+                    <p>Are you want to edit your Email? Upon successful editing of email you will become unverified again and must verify through Email. We will send the verification immediately.</p>
+                    <button type="button" class="epf-modal-confirm" id="epf-email-confirm">Yes, proceed</button>
+                    <button type="button" class="epf-modal-cancel" id="epf-email-cancel">Cancel</button>
+                </div>
             </div>
 
             <!-- First Name -->
@@ -206,13 +227,13 @@
             <div class="epf-password-section" id="epf-password-section">
                 <div class="epf-password-field">
                     <label for="CurrentPassword">Old Password</label>
-                    <input type="password" id="CurrentPassword" name="CurrentPassword" class="epf-input" placeholder="Enter current password" />
+                    <input type="password" id="CurrentPassword" name="CurrentPassword" class="epf-input" placeholder="Enter current password"   />
                     <span class="epf-toggle-eye" onclick="togglePassword('CurrentPassword', this)">👁️‍🗨️</span>
                     <p class="epf-warning" id="epf-current-warning" style="display:none;">⚠️ Wrong password</p>
                 </div>
                 <div class="epf-password-field">
                     <label for="NewPassword">New Password</label>
-                    <input type="password" id="NewPassword" name="NewPassword" class="epf-input" placeholder="Enter new password" />
+                    <input type="password" id="NewPassword" name="NewPassword" class="epf-input" placeholder="Enter new password"   />
                     <span class="epf-toggle-eye" onclick="togglePassword('NewPassword', this)">👁️‍🗨️</span>
                     <!-- Password checklist -->
                     <div class="password-checklist" id="epf-password-checklist">
@@ -249,6 +270,7 @@
                 <label>Profile Picture</label>
                 <img src="@Model.User.UserAvatar" class="epf-avatar-preview" id="epf-avatar-preview" />
                 <button type="button" class="epf-change-avatar-btn" id="epf-change-avatar-btn">Change Avatar</button>
+                <button type="button" class="epf-toggle-password-btn" id="epf-toggle-email-btn">Change Email</button>
                 <button type="button" class="epf-toggle-password-btn" id="epf-toggle-password-btn">Change Password</button>
             </div>
 
@@ -257,6 +279,11 @@
 </div>
 
 <script>
+
+    setTimeout(() => {
+        document.querySelectorAll('.temp-message').forEach(el => el.remove());
+    }, 5000);
+
     const avatarInput = document.getElementById('UserAvatar');
     const avatarPreview = document.getElementById('epf-avatar-preview');
     const changeAvatarBtn = document.getElementById('epf-change-avatar-btn');
@@ -397,11 +424,67 @@
         e.preventDefault();
         modalOverlay.style.display = 'flex';
     });
+
     modalConfirm.addEventListener('click', () => {
         modalOverlay.style.display = 'none';
+
+        // Disable submit button to prevent multiple clicks
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...'; // optional: indicate loading
+
         form.submit();
     });
+
     modalCancel.addEventListener('click', () => {
         modalOverlay.style.display = 'none';
+    });
+
+    const emailToggleBtn = document.getElementById('epf-toggle-email-btn');
+    const emailSection = document.getElementById('epf-email-section');
+    const emailModal = document.getElementById('epf-email-modal-overlay');
+    const emailConfirm = document.getElementById('epf-email-confirm');
+    const emailCancel = document.getElementById('epf-email-cancel');
+
+    // Change Email flow
+    emailToggleBtn.addEventListener('click', () => {
+        emailModal.style.display = 'flex'; // show warning modal
+    });
+
+    // Confirm
+    emailConfirm.addEventListener('click', () => {
+        emailModal.style.display = 'none';
+        emailSection.style.display = 'block';
+        emailInput.setAttribute('required', 'required'); // make required only when shown
+        emailInput.focus(); // autofocus for better UX
+        markFormChanged();
+    });
+
+    emailCancel.addEventListener('click', () => {
+        emailModal.style.display = 'none';
+        emailInput.removeAttribute('required'); // remove required if user cancels
+    });
+
+        let emailExistsTimeout;
+    emailInput.addEventListener('input', () => {
+        const emailWarning = document.getElementById('epf-email-exists-warning');
+
+        // Reset warning and enable button initially
+        emailWarning.style.display = 'none';
+        submitBtn.disabled = false;
+
+        // Only check if input is not empty and matches email pattern
+        if (!emailInput.value || !emailRegex.test(emailInput.value)) return;
+
+        fetch(`/UserProfile/CheckEmailExist?email=${encodeURIComponent(emailInput.value)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.exists) {
+                emailWarning.style.display = 'block';
+                submitBtn.disabled = true; // disable Save Changes
+            } else {
+                emailWarning.style.display = 'none';
+                submitBtn.disabled = false; // enable Save Changes
+            }
+        });
     });
 </script>
