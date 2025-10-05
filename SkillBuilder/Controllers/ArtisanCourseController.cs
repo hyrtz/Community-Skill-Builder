@@ -236,19 +236,50 @@ namespace SkillBuilder.Controllers
         }
 
         private async Task<string> SaveFileAsync(IFormFile file, string folderName)
-        {
-            var uploadsRoot = Path.Combine(_env.WebRootPath, "uploads", folderName);
-            if (!Directory.Exists(uploadsRoot))
-                Directory.CreateDirectory(uploadsRoot);
+{
+    if (file == null || file.Length == 0)
+        throw new InvalidOperationException("File is empty or missing.");
 
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var filePath = Path.Combine(uploadsRoot, fileName);
+    // ---------------- VALIDATION ----------------
+    var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
-                await file.CopyToAsync(stream);
+    if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif")
+    {
+        if (file.Length > 5 * 1024 * 1024) // 5 MB
+            throw new InvalidOperationException("Image files must be under 5 MB.");
+    }
+    else if (extension == ".pdf" || extension == ".docx" || extension == ".txt")
+    {
+        if (file.Length > 10 * 1024 * 1024) // 10 MB
+            throw new InvalidOperationException("Document files must be under 10 MB.");
+    }
+    else if (extension == ".mp4" || extension == ".mov" || extension == ".avi")
+    {
+        if (file.Length > 200 * 1024 * 1024) // 200 MB
+            throw new InvalidOperationException("Video files must be under 200 MB.");
+    }
+    else
+    {
+        throw new InvalidOperationException("Unsupported file type.");
+    }
 
-            return $"/uploads/{folderName}/{fileName}";
-        }
+    // ---------------- SAVE SECTION ----------------
+    // Ensure folder exists
+    var uploadsRoot = Path.Combine(_env.WebRootPath, "uploads", folderName);
+    if (!Directory.Exists(uploadsRoot))
+        Directory.CreateDirectory(uploadsRoot);
+
+    // Generate unique filename
+    var fileName = $"{Guid.NewGuid()}{extension}";
+    var filePath = Path.Combine(uploadsRoot, fileName);
+
+    // Save file to disk
+    using (var stream = new FileStream(filePath, FileMode.Create))
+        await file.CopyToAsync(stream);
+
+    // Return relative path for database
+    return $"/uploads/{folderName}/{fileName}";
+}
 
         [HttpGet("EditCourse/{courseId}")]
         public async Task<IActionResult> EditCourse(int courseId)
