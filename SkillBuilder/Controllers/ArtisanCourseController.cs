@@ -39,6 +39,7 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpPost("CreateCourse")]
+        [RequestSizeLimit(200 * 1024 * 1024)] // Allow up to 200 MB for this action
         public async Task<IActionResult> CreateCourse(CourseBuilderViewModel model)
         {
             if (!ModelState.IsValid)
@@ -56,15 +57,36 @@ namespace SkillBuilder.Controllers
 
             course.Duration = $"{model.DurationValue} {model.DurationUnit}";
 
-            // Save course media
+            // File Validation + Save
             if (model.ImageFile != null)
-                course.ImageUrl = await SaveFileAsync(model.ImageFile, "course-images");
+    {
+        if (model.ImageFile.Length > 5 * 1024 * 1024) // 5 MB
+        {
+            ModelState.AddModelError("ImageFile", "Image file must be under 5 MB.");
+            return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
+        }
+        course.ImageUrl = await SaveFileAsync(model.ImageFile, "course-images");
+    }
 
-            if (model.VideoFile != null)
-                course.Video = await SaveFileAsync(model.VideoFile, "course-videos");
+    if (model.VideoFile != null)
+    {
+        if (model.VideoFile.Length > 200 * 1024 * 1024) // 200 MB
+        {
+            ModelState.AddModelError("VideoFile", "Video file must be under 200 MB.");
+            return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
+        }
+        course.Video = await SaveFileAsync(model.VideoFile, "course-videos");
+    }
 
-            if (model.ThumbnailFile != null)
-                course.Thumbnail = await SaveFileAsync(model.ThumbnailFile, "course-thumbnails");
+    if (model.ThumbnailFile != null)
+    {
+        if (model.ThumbnailFile.Length > 5 * 1024 * 1024) // 5 MB
+        {
+            ModelState.AddModelError("ThumbnailFile", "Thumbnail must be under 5 MB.");
+            return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
+        }
+        course.Thumbnail = await SaveFileAsync(model.ThumbnailFile, "course-thumbnails");
+    }
 
             // Generate course link if missing
             course.Link = string.IsNullOrWhiteSpace(course.Link)
