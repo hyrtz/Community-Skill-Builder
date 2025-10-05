@@ -299,6 +299,7 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpPost("SubmitFinalProject")]
+        [RequestSizeLimit(200 * 1024 * 1024)] // allow larger uploads for final projects
         public async Task<IActionResult> SubmitFinalProject([FromForm] FinalProjectDto dto)
         {
             var userId = User.FindFirstValue("UserId");
