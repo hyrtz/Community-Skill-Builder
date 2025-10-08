@@ -8,7 +8,6 @@
         public string Avatar { get; set; }
         public string Comment { get; set; }
         public string Image { get; set; }
-        public int Likes { get; set; }
         public int Comments { get; set; }
     }
 }

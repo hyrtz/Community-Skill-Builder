@@ -245,6 +245,56 @@
         .community-mgmt-tab:hover {
             color: #344AEA;
         }
+
+
+    .community-mgmt-action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+        .community-mgmt-action-buttons button {
+            background-color: #FEE4E2;
+            color: #B42318;
+            padding: 0.8rem 0.8rem;
+            border: solid #B42318 1px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            max-width: 110px;
+            min-width: 110px;
+        }
+
+
+    .community-mgmt-delete-btn {
+        background-color: #e74c3c;
+    }
+
+        .community-mgmt-delete-btn:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+    .community-mgmt-unpublish-btn {
+        background-color: #e74c3c;
+    }
+
+        .community-mgmt-unpublish-btn:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+    .community-mgmt-publish-btn {
+        background-color: #A5D6A7 !important;
+        color: #4CAF50 !important;
+    }
+
+        .community-mgmt-publish-btn:hover {
+            background-color: #3d8e41 !important;
+            color: white !important;
+        }
 </style>
 
 <div class="community-mgmt-section">
@@ -262,7 +312,7 @@
     <!-- Tabs -->
     <div class="community-mgmt-tabs">
         <button class="community-mgmt-tab active" data-tab="existing">Existing</button>
-        <button class="community-mgmt-tab" data-tab="deleted">Deleted</button>
+        <!-- <button class="community-mgmt-tab" data-tab="deleted">Deleted</button> -->
     </div>
 
     <table class="community-mgmt-table">
@@ -295,6 +345,7 @@
                         </td>
                         <td class="community-mgmt-cell community-mgmt-actions">
                             <div class="community-mgmt-action-buttons">
+                                <!-- Delete button -->
                                 <form asp-action="DeleteCommunity"
                                       asp-route-id="@community.Id"
                                       asp-route-adminId="@Model.Admin.UserId"
@@ -303,6 +354,22 @@
                                     <button type="submit" class="community-mgmt-action-btn community-mgmt-delete-btn">
                                         Delete
                                     </button>
+                                </form>
+
+                                <!-- Publish/Unpublish button -->
+                                <form asp-action="ToggleCommunityStatus"
+                                      asp-route-id="@community.Id"
+                                      asp-route-adminId="@Model.Admin.UserId"
+                                      method="post"
+                                      onsubmit="return communityMgmtOpenToggleModal(this, '@(community.IsPublished ? "Unpublish" : "Publish")');">
+                                    @if (community.IsPublished)
+                                    {
+                                        <button type="submit" class="community-mgmt-action-btn community-mgmt-unpublish-btn">Unpublish</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="community-mgmt-action-btn community-mgmt-publish-btn">Publish</button>
+                                    }
                                 </form>
                             </div>
                         </td>
@@ -367,7 +434,83 @@
     </div>
 </div>
 
+<div class="community-mgmt-modal" id="communityMgmtToggleModal">
+    <h3>Confirm Action</h3>
+    <p id="communityMgmtToggleMessage"></p>
+    <textarea id="communityMgmtToggleReason" placeholder="Enter reason (optional for unpublish)"
+              style="width:100%; min-height:80px; margin-bottom:1rem; padding:0.5rem; border-radius:6px; border:1px solid #ccc; resize: none;"></textarea>
+    <div class="community-mgmt-modal-buttons">
+        <button class="community-mgmt-modal-cancel" onclick="communityMgmtCloseToggleModal()">Cancel</button>
+        <button class="community-mgmt-modal-confirm" id="communityMgmtConfirmToggle">Yes</button>
+    </div>
+</div>
+
 <script>
+
+    let communityMgmtCurrentToggleForm = null;
+
+    function communityMgmtOpenToggleModal(form, action) {
+        communityMgmtCurrentToggleForm = form;
+
+        document.getElementById("communityMgmtToggleMessage").innerText =
+            `Are you sure you want to ${action.toLowerCase()} this community?`;
+
+        const confirmBtn = document.getElementById("communityMgmtConfirmToggle");
+        const reasonTextarea = document.getElementById("communityMgmtToggleReason");
+
+        if (action === "Publish") {
+            confirmBtn.style.backgroundColor = "#4CAF50"; // green
+            confirmBtn.innerText = "Publish";
+            reasonTextarea.style.display = "none";
+            reasonTextarea.value = "";
+            confirmBtn.disabled = false;
+        } else { // Unpublish
+            reasonTextarea.style.display = "block";
+            reasonTextarea.value = "";
+            confirmBtn.innerText = "Unpublish";
+            confirmBtn.disabled = true;
+
+            reasonTextarea.addEventListener("input", () => {
+                confirmBtn.disabled = reasonTextarea.value.trim() === "";
+            });
+        }
+
+        document.getElementById("communityMgmtModalBackdrop").style.display = "block";
+        document.getElementById("communityMgmtToggleModal").style.display = "block";
+
+        return false; // prevent immediate form submission
+    }
+
+    function communityMgmtConfirmToggleAction() {
+        if (!communityMgmtCurrentToggleForm) return;
+
+        const action = document.getElementById("communityMgmtConfirmToggle").innerText;
+        let hiddenInput = communityMgmtCurrentToggleForm.querySelector("input[name='reason']");
+
+        if (action === "Publish") {
+            if (hiddenInput) hiddenInput.remove();
+        } else {
+            const reason = document.getElementById("communityMgmtToggleReason").value;
+            if (!hiddenInput) {
+                hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "reason";
+                communityMgmtCurrentToggleForm.appendChild(hiddenInput);
+            }
+            hiddenInput.value = reason;
+        }
+
+        communityMgmtCurrentToggleForm.submit();
+    }
+
+    function communityMgmtCloseToggleModal() {
+        document.getElementById("communityMgmtModalBackdrop").style.display = "none";
+        document.getElementById("communityMgmtToggleModal").style.display = "none";
+        communityMgmtCurrentToggleForm = null;
+    }
+
+    document.getElementById("communityMgmtConfirmToggle").addEventListener("click", communityMgmtConfirmToggleAction);
+
     const communityTabs = document.querySelectorAll(".community-mgmt-tab");
     const communityRows = document.querySelectorAll(".community-mgmt-row");
 

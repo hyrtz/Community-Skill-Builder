@@ -4,6 +4,7 @@ using SkillBuilder.Data;
 using SkillBuilder.Models;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SkillBuilder.Controllers
 {
@@ -18,8 +19,8 @@ namespace SkillBuilder.Controllers
             _context = context;
         }
 
-        [HttpPost("CompleteModule")]
-        public IActionResult CompleteModule([FromBody] ModuleProgressDto model)
+        [HttpPost("AddPoints")]
+        public async Task<IActionResult> AddPoints([FromBody] ModuleProgressDto model)
         {
             try
             {
@@ -27,77 +28,71 @@ namespace SkillBuilder.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return Unauthorized();
 
-                // Get modules for the course
-                var courseModules = _context.CourseModules
-                    .Where(cm => cm.CourseId == model.CourseId)
-                    .Include(cm => cm.Contents)
-                    .OrderBy(cm => cm.Order)
-                    .ToList();
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                    return NotFound("User not found.");
 
-                if (model.ModuleIndex < 0 || model.ModuleIndex >= courseModules.Count)
-                    return BadRequest("Invalid module index.");
-
-                var courseModule = courseModules[model.ModuleIndex];
-                if (courseModule == null)
-                    return NotFound("Course module not found.");
-
-                if (string.IsNullOrEmpty(model.LessonType))
-                    return BadRequest("Lesson type is required.");
-
-                // Check if user already completed this module
-                var existing = _context.ModuleProgress
-                    .FirstOrDefault(mp => mp.UserId == userId && mp.CourseModuleId == courseModule.Id);
-
-                bool isNewCompletion = false;
-
-                if (existing == null)
+                // Determine points
+                int points = model.LessonType switch
                 {
-                    var progress = new ModuleProgress
+                    "Text" => 10,
+                    "Image + Text" => 15,
+                    "Video" => 20,
+                    "Quiz" => 80,
+                    "Session" => 60,
+                    "FinalProject" => 100,
+                    _ => 5
+                };
+
+                // Check if module progress already exists
+                if (model.ModuleIndex >= 0)
+                {
+                    var courseModules = await _context.CourseModules
+                        .Where(cm => cm.CourseId == model.CourseId)
+                        .OrderBy(cm => cm.Order)
+                        .ToListAsync();
+
+                    if (model.ModuleIndex >= courseModules.Count)
+                        return BadRequest("Invalid module index.");
+
+                    var courseModule = courseModules[model.ModuleIndex];
+
+                    var existing = await _context.ModuleProgress
+                        .FirstOrDefaultAsync(mp => mp.UserId == userId && mp.CourseModuleId == courseModule.Id);
+
+                    if (existing == null)
                     {
-                        UserId = userId,
-                        CourseModuleId = courseModule.Id,
-                        IsCompleted = true,
-                        CompletedAt = DateTime.UtcNow
-                    };
-                    _context.ModuleProgress.Add(progress);
-                    isNewCompletion = true;
-                }
-                else if (!existing.IsCompleted)
-                {
-                    existing.IsCompleted = true;
-                    existing.CompletedAt = DateTime.UtcNow;
-                    _context.ModuleProgress.Update(existing);
-                    isNewCompletion = true;
-                }
-
-                // Award points if newly completed
-                if (isNewCompletion)
-                {
-                    var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-                    if (user == null)
-                        return NotFound("User not found.");
-
-                    int points = model.LessonType switch
+                        _context.ModuleProgress.Add(new ModuleProgress
+                        {
+                            UserId = userId,
+                            CourseModuleId = courseModule.Id,
+                            IsCompleted = true,
+                            CompletedAt = DateTime.UtcNow
+                        });
+                        user.Points += points;
+                    }
+                    else if (!existing.IsCompleted)
                     {
-                        "Text" => 10,
-                        "Image + Text" => 15,
-                        "Video" => 20,
-                        "Quiz" => 80,
-                        "Session" => 60,
-                        _ => 5
-                    };
-
+                        existing.IsCompleted = true;
+                        existing.CompletedAt = DateTime.UtcNow;
+                        _context.ModuleProgress.Update(existing);
+                        user.Points += points;
+                    }
+                }
+                else
+                {
+                    // Final Project
                     user.Points += points;
-                    _context.Users.Update(user);
-                    _context.SaveChanges();
                 }
 
-                _context.SaveChanges();
-                return Ok();
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { totalPoints = user.Points });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Server error: {ex.Message}\n{ex.StackTrace}");
+                return StatusCode(500, $"Server error: {ex.Message}");
             }
         }
     }
@@ -105,7 +100,7 @@ namespace SkillBuilder.Controllers
     public class ModuleProgressDto
     {
         public int CourseId { get; set; }
-        public int ModuleIndex { get; set; }
+        public int ModuleIndex { get; set; } // use -1 for FinalProject
         public string LessonType { get; set; }
     }
 }

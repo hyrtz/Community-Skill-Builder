@@ -93,6 +93,19 @@
         .user-progress-resume-button:hover {
             background-color: #1f36b6;
         }
+
+    .user-progress-unpublished-button {
+        background-color: #e74c3c; /* red */
+        color: white;
+        width: 100%;
+        text-align: center;
+        padding: 1rem;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        cursor: not-allowed;
+        opacity: 0.9;
+    }
 </style>
 
 <section class="user-progress-section">
@@ -119,10 +132,19 @@
                 <p>@course.CourseDescription</p>
             </div>
 
-            <!-- Resume Button -->
-            <form asp-controller="Courses" asp-action="CourseModule" asp-route-id="@course.CourseId" method="get">
-                <button type="submit" class="user-progress-resume-button">Resume</button>
-            </form>
+            <!-- Resume / Unpublished Button -->
+            @if (course.IsPublished)
+            {
+                <form asp-controller="Courses" asp-action="CourseModule" asp-route-id="@course.CourseId" method="get">
+                    <button type="submit" class="user-progress-resume-button">Resume</button>
+                </form>
+            }
+            else
+            {
+                <button type="button" class="user-progress-unpublished-button" disabled>
+                    This course is currently unpublished
+                </button>
+            }
         </div>
     }
 </section>

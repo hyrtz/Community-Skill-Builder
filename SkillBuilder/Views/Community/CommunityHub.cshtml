@@ -48,7 +48,7 @@
         }
 
         .community-search button {
-            background-color: #3182ce;
+            background-color: #344aeb;
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -375,11 +375,6 @@
             font-size: .95rem;
         }
 
-        .community-posts-field textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
     .community-posts-charcount {
         font-size: .8rem;
         color: #888;
@@ -465,6 +460,31 @@
         border-radius: 8px;
         display: none;
     }
+
+    /* Hover effect for Create Post button */
+    .create-post-btn:hover {
+        background-color: #344aeb; /* blue background */
+        color: white;
+        transition: all 0.2s ease;
+    }
+
+    /* Hover effect for Create Community card */
+    #createCommunityModal,
+    #createCommunityModal:hover {
+    }
+
+        /* Specifically for the card */
+        #createCommunityModal + .create-community-card,
+        #createCommunityModal + .create-community-card:hover,
+        #createCommunityModal + .create-community-card:focus {
+        }
+
+    .create-community-card:hover {
+        background-color: #344aeb;
+        color: white;
+        transition: all 0.2s ease;
+    }
+
 </style>
 
 <div class="community-page-wrapper">
@@ -528,41 +548,7 @@
             </div>
 
             <div class="right-section">
-                <div class="right-card">
-                    <h4>Popular Communities</h4>
-                    <ul class="popular-communities">
-                        <li>
-                            <div class="community-avatar"></div>
-                            <div class="community-info">
-                                <span>Community name</span>
-                                <span class="members-count">100 members</span>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="community-avatar"></div>
-                            <div class="community-info">
-                                <span>Community name</span>
-                                <span class="members-count">100 members</span>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="community-avatar"></div>
-                            <div class="community-info">
-                                <span>Community name</span>
-                                <span class="members-count">100 members</span>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="community-avatar"></div>
-                            <div class="community-info">
-                                <span>Community name</span>
-                                <span class="members-count">100 members</span>
-                            </div>
-                        </li>
-                    </ul>
-                    <button class="see-more-btn">See more communities</button>
-                </div>
-
+                
                 @if (isDeactivated || !isVerified)
                 {
                     <div class="create-community-card" style="opacity:0.5; pointer-events:none; cursor:not-allowed;">
@@ -582,14 +568,33 @@
                 <div class="right-card">
                     <h4>Your Communities</h4>
                     <ul class="user-communities">
-                        <li>
-                            <div class="community-avatar"></div>
-                            <span>Community name</span>
-                        </li>
-                        <li>
-                            <div class="community-avatar"></div>
-                            <span>Community name</span>
-                        </li>
+                        @{
+                            var currentUserId = User.FindFirst("UserId")?.Value;
+                            var ownedCommunities = Model.Communities?
+                            .Where(c => c.CreatorId == currentUserId)
+                            .ToList() ?? new List<SkillBuilder.Models.ViewModels.CommunitiesViewModel>();
+                        }
+
+                        @if (ownedCommunities.Any())
+                        {
+                            foreach (var community in ownedCommunities)
+                            {
+                                <li>
+                                    <div class="community-avatar">
+                                        <img src="@(!string.IsNullOrEmpty(community.AvatarUrl)
+                                            ? community.AvatarUrl
+                                            : "/uploads/community-profile/default-community.png")"
+                                 alt="@community.Name"
+                                 style="width:40px; height:40px; border-radius:50%;" />
+                        </div>
+                        <span>@community.Name</span>
+                    </li>
+                                        }
+                        }
+                        else
+                        {
+                            <li>No communities owned yet.</li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -1036,7 +1041,6 @@
                                 <p>${result.post.content}</p>
                                 ${result.post.imageUrl ? `<img src="${result.post.imageUrl}" alt="Post image" />` : ""}
                                 <div class="community-meta">
-                                    <span>❤️ 0</span>
                                     <span>💬 0</span>
                                 </div>
                             </div>
@@ -1054,6 +1058,8 @@
                         // ✅ Reset form and close modal
                         form.reset();
                         if (typeof closePostModal === "function") closePostModal();
+
+                        window.location.reload();
                     } else {
                         alert(result.message || "Something went wrong while creating the post.");
                     }

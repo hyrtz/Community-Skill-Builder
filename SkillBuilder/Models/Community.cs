@@ -18,5 +18,6 @@
         public List<CommunityPost> Posts { get; set; } = new();
 
         public bool IsArchived { get; set; } = false;
+        public bool IsPublished { get; set; } = true;
     }
 }

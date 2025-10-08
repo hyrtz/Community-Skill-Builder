@@ -124,7 +124,10 @@
         <div class="artisan-dashboard-latest">
             <div class="artisan-dashboard-latest-title">Latest Course: @latest.Title</div>
             <div class="artisan-dashboard-latest-overview">@latest.Overview</div>
-            <a class="artisan-dashboard-latest-link" href="/Courses/@latest.Link">View Course</a>
+            <a class="artisan-dashboard-latest-link"
+               href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = latest.Link })">
+                View Course
+            </a>    
         </div>
     }
 

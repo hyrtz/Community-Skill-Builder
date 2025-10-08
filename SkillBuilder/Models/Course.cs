@@ -22,7 +22,7 @@ namespace SkillBuilder.Models
 
         public string CreatedBy { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public bool IsPublished { get; set; } = false;
+        public bool IsPublished { get; set; } = true;
 
         [ForeignKey("CreatedBy")]
         public Artisan? Artisan { get; set; }

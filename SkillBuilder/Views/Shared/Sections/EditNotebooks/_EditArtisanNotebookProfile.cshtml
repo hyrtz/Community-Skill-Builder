@@ -1,6 +1,10 @@
 ﻿@using SkillBuilder.Models.ViewModels
 @model ArtisanProfileViewModel
 
+@{
+    var professions = new List<string> { "Potter", "Weaver", "Shoemaker", "Paper Crafter", "Embroiderer", "WoodCarver", "Others" };
+
+}
 <style>
 /* --- Container --- */
 .eap-container-wrapper {
@@ -221,7 +225,14 @@
             <!-- Profession -->
             <div class="eap-field">
                 <label for="Profession">Profession</label>
-                <input type="text" id="Profession" name="Profession" class="eap-input" value="@Model.Artisan.Profession" required />
+                <select id="Profession" name="Profession" class="eap-input" required>
+                    <option value="">Select your profession</option>
+                    @foreach (var prof in professions)
+                    {
+                        <option value="@prof" selected="@(Model.Artisan.Profession == prof ? "selected" : null)">@prof</option>
+                    }
+                </select>
+                <p class="eap-warning" id="eap-profession-warning">⚠️ Please select your profession.</p>
             </div>
 
             <!-- Hometown -->
@@ -356,6 +367,9 @@
 
     // --- Enable save on any input ---
     form.querySelectorAll('input, textarea').forEach(input => input.addEventListener('input', markFormChanged));
+
+    // Enable save on select change
+    form.querySelectorAll('select').forEach(el => el.addEventListener('change', markFormChanged));
 
     // --- Validation functions ---
     function validateText(input, warning, pattern) {

@@ -145,25 +145,53 @@
         font-weight: 500;
     }
 
-    /* Actions alignment */
     .course-mgmt-action-buttons {
         display: flex;
+        gap: 0.5rem;
         justify-content: flex-end;
+        align-items: center;
     }
 
-    .course-mgmt-action-btn {
-        background-color: #FEE4E2;
-        color: #B42318;
-        padding: 0.8rem 0.8rem;
-        border: solid #B42318 1px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: bold;
+        .course-mgmt-action-buttons button {
+            background-color: #FEE4E2;
+            color: #B42318;
+            padding: 0.8rem 0.8rem;
+            border: solid #B42318 1px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            max-width: 110px;
+            min-width: 110px;
+        }
+
+
+    .course-mgmt-delete-btn {
+        background-color: #e74c3c;
     }
+
         .course-mgmt-delete-btn:hover {
-            background-color: #e74c3c;
+            background-color: #c0392b;
             color: white;
+        }
+
+    .course-mgmt-unpublish-btn {
+        background-color: #e74c3c;
+    }
+
+        .course-mgmt-unpublish-btn:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+    .course-mgmt-publish-btn {
+        background-color: #A5D6A7 !important;
+        color: #4CAF50 !important;
+    }
+
+        .course-mgmt-publish-btn:hover {
+            background-color: #3d8e41 !important;
+            color: white !important;
         }
 
     /* Backdrop */
@@ -294,6 +322,7 @@
         .course-mgmt-tab:hover {
             color: #344AEA;
         }
+
 </style>
 
 <div class="course-mgmt-section">
@@ -311,7 +340,7 @@
     <!-- Tabs -->
     <div class="course-mgmt-tabs" style="display:flex; gap:1rem; margin-bottom:1.5rem;">
         <button class="course-mgmt-tab active" data-tab="existing">Existing</button>
-        <button class="course-mgmt-tab" data-tab="deleted">Deleted</button>
+        <!-- <button class="course-mgmt-tab" data-tab="deleted">Deleted</button> -->
     </div>
 
     <table class="course-mgmt-table">
@@ -346,6 +375,7 @@
                             </td>
                             <td class="course-mgmt-cell course-actions">
                                 <div class="course-mgmt-action-buttons">
+                                    <!-- Delete button -->
                                     <form asp-action="DeleteCourse"
                                           asp-route-id="@course.Id"
                                           asp-route-adminId="@Model.Admin.UserId"
@@ -354,6 +384,22 @@
                                         <button type="submit" class="course-mgmt-action-btn course-mgmt-delete-btn">
                                             Delete
                                         </button>
+                                    </form>
+
+                                    <!-- Publish/Unpublish button -->
+                                    <form asp-action="ToggleCourseStatus"
+                                          asp-route-id="@course.Id"
+                                          asp-route-adminId="@Model.Admin.UserId"
+                                          method="post"
+                                          onsubmit="return courseMgmtOpenToggleModal(this, '@(course.IsPublished ? "Unpublish" : "Publish")');">
+                                        @if (course.IsPublished)
+                                        {
+                                            <button type="submit" class="course-mgmt-action-btn course-mgmt-unpublish-btn">Unpublish</button>
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="course-mgmt-action-btn course-mgmt-publish-btn">Publish</button>
+                                        }
                                     </form>
                                 </div>
                             </td>
@@ -419,7 +465,84 @@
     </div>
 </div>
 
+<!-- Publish/Unpublish confirmation modal -->
+<div class="course-mgmt-modal" id="courseMgmtToggleModal">
+    <h3>Confirm Action</h3>
+    <p id="courseMgmtToggleMessage"></p>
+    <textarea id="courseMgmtToggleReason" placeholder="Enter reason (optional for unpublish)"
+              style="width:100%; min-height:80px; margin-bottom:1rem; padding:0.5rem; border-radius:6px; border:1px solid #ccc; resize: none;"></textarea>
+    <div class="course-mgmt-modal-buttons">
+        <button class="course-mgmt-modal-cancel" onclick="courseMgmtCloseToggleModal()">Cancel</button>
+        <button class="course-mgmt-modal-confirm" id="courseMgmtConfirmToggle">Yes</button>
+    </div>
+</div>
+
 <script>
+
+    let courseMgmtCurrentToggleForm = null;
+
+    function courseMgmtOpenToggleModal(form, action) {
+        courseMgmtCurrentToggleForm = form;
+
+        const msg = `Are you sure you want to ${action.toLowerCase()} this course?`;
+        document.getElementById("courseMgmtToggleMessage").innerText = msg;
+
+        const confirmBtn = document.getElementById("courseMgmtConfirmToggle");
+        const reasonTextarea = document.getElementById("courseMgmtToggleReason");
+
+        if (action === "Publish") {
+            confirmBtn.style.backgroundColor = "#4CAF50"; // green
+            confirmBtn.innerText = "Publish";
+            reasonTextarea.style.display = "none";
+            reasonTextarea.value = "";
+            confirmBtn.disabled = false;
+        } else { // Unpublish
+            reasonTextarea.style.display = "block";
+            reasonTextarea.value = "";
+            confirmBtn.innerText = "Unpublish";
+            confirmBtn.disabled = true;
+
+            reasonTextarea.addEventListener("input", () => {
+                confirmBtn.disabled = reasonTextarea.value.trim() === "";
+            });
+        }
+
+        document.getElementById("courseMgmtModalBackdrop").classList.add("active");
+        document.getElementById("courseMgmtToggleModal").classList.add("active");
+
+        return false; // prevent immediate form submission
+    }
+
+    function courseMgmtConfirmToggleAction() {
+        if (!courseMgmtCurrentToggleForm) return;
+
+        const action = document.getElementById("courseMgmtConfirmToggle").innerText; // Publish/Unpublish
+        let hiddenInput = courseMgmtCurrentToggleForm.querySelector("input[name='reason']");
+
+        if (action === "Publish") {
+            if (hiddenInput) hiddenInput.remove();
+        } else { // Unpublish
+            const reason = document.getElementById("courseMgmtToggleReason").value;
+            if (!hiddenInput) {
+                hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "reason";
+                courseMgmtCurrentToggleForm.appendChild(hiddenInput);
+            }
+            hiddenInput.value = reason;
+        }
+
+        courseMgmtCurrentToggleForm.submit();
+    }
+
+    function courseMgmtCloseToggleModal() {
+        document.getElementById("courseMgmtModalBackdrop").classList.remove("active");
+        document.getElementById("courseMgmtToggleModal").classList.remove("active");
+        courseMgmtCurrentToggleForm = null;
+    }
+
+    document.getElementById("courseMgmtConfirmToggle").addEventListener("click", courseMgmtConfirmToggleAction);
+
     const courseTabs = document.querySelectorAll(".course-mgmt-tab");
     const courseRows = document.querySelectorAll(".course-mgmt-row");
 

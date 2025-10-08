@@ -28,6 +28,7 @@ namespace SkillBuilder.Data
         public DbSet<CommunityTestimonial> CommunityTestimonials { get; set; }
         public DbSet<CommunityHighlight> CommunityHighlights { get; set; }
         public DbSet<CommunityPost> CommunityPosts { get; set; }
+        public DbSet<CommunityPostReport> CommunityPostReports { get; set; }
         public DbSet<Community> Communities { get; set; }
         public DbSet<CommunityMembership> CommunityMemberships { get; set; }
         public DbSet<Notification> Notifications { get; set; }
@@ -322,7 +323,6 @@ namespace SkillBuilder.Data
                     Avatar = "/assets/Avatar/Sample1.ico",
                     Comment = "Lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet.",
                     Image = "/assets/Community Pics/Pottery.png",
-                    Likes = 128,
                     Comments = 36
                 },
                 new CommunityHighlight
@@ -333,7 +333,6 @@ namespace SkillBuilder.Data
                     Avatar = "/assets/Avatar/Sample9.ico",
                     Comment = "Lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet.",
                     Image = "/assets/Community Pics/Weaving.png",
-                    Likes = 89,
                     Comments = 18
                 },
                 new CommunityHighlight
@@ -344,7 +343,6 @@ namespace SkillBuilder.Data
                     Avatar = "/assets/Avatar/Sample5.ico",
                     Comment = "Lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet.",
                     Image = "/assets/Community Pics/Woodcarving.png",
-                    Likes = 212,
                     Comments = 41
                 }
             );

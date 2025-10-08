@@ -2,9 +2,9 @@
 
 @{
     var currentUserId = User.FindFirst("UserId")?.Value ?? "";
+    var currentUserIsAdmin = User.IsInRole("Admin");
     var fullName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "";
 
-    // Split full name into first and last (basic split on first space)
     var nameParts = fullName.Split(' ', 2);
     var currentUserFirstName = nameParts.Length > 0 ? nameParts[0] : "";
     var currentUserLastName = nameParts.Length > 1 ? nameParts[1] : "";
@@ -16,37 +16,28 @@
 }
 
 <style>
-    /* Scope everything under .community-posts-list */
-    .community-posts-list {
+    /* ---------------- Post Cards ---------------- */
+    .posts-only-list {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
     }
 
-        .community-posts-list .no-posts {
-            text-align: center;
-            padding: 2rem;
-            background: #f9fafb;
-            border-radius: 10px;
-            color: #666;
-            font-size: 1rem;
-        }
-
-        .community-posts-list .post-card {
+        .posts-only-list .post-card {
             background: #fff;
             border-radius: 10px;
             padding: 1rem;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
-        .community-posts-list .post-card-header {
+        .posts-only-list .post-card-header {
             display: flex;
             align-items: center;
             gap: 0.75rem;
             margin-bottom: 1rem;
         }
 
-        .community-posts-list .avatar {
+        .posts-only-list .avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -54,30 +45,30 @@
             background-position: center;
         }
 
-        .community-posts-list .community-info h5 {
+        .posts-only-list .community-info h5 {
             margin: 0;
             font-size: 0.95rem;
             font-weight: 600;
         }
 
-        .community-posts-list .community-info h6 {
+        .posts-only-list .community-info h6 {
             margin: 0;
             font-size: 0.8rem;
             color: #777;
         }
 
-        .community-posts-list .post-card-content p {
+        .posts-only-list .post-card-content p {
             margin: 0.5rem 0;
             line-height: 1.5;
         }
 
-        .community-posts-list .post-card-content img {
+        .posts-only-list .post-card-content img {
             max-width: 100%;
             border-radius: 8px;
             margin: 0.5rem 0;
         }
 
-        .community-posts-list .community-meta {
+        .posts-only-list .community-meta {
             display: flex;
             gap: 1rem;
             font-size: 0.85rem;
@@ -85,43 +76,7 @@
             margin-top: 0.5rem;
         }
 
-    .comment {
-        background: #f3f4f6;
-        border-radius: 6px;
-        padding: 0.5rem 0.75rem;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
-    }
-
-    .comments-section textarea {
-        width: 100%;
-        margin: 0.5rem 0;
-        padding: 0.5rem;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-    }
-
-    .comments-section button {
-        margin-top: 0.25rem;
-        padding: 0.3rem 0.75rem;
-        background: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    .like-btn {
-        background: none;
-        border: none;
-    }
-
-    .comment-btn {
-        background: none;
-        border: none;
-    }
-
-    /* Comments Section */
+    /* ---------------- Comments ---------------- */
     .comments-section {
         display: flex;
         flex-direction: column;
@@ -133,24 +88,20 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        max-height: 200px; /* scroll if too many comments */
+        max-height: 200px;
         overflow-y: auto;
-        padding-right: 0.25rem;
     }
 
-    /* Each comment */
     .comment {
         display: flex;
         gap: 0.5rem;
         align-items: flex-start;
-        background: #f3f4f6; /* light gray background */
+        background: #f3f4f6;
         border-radius: 8px;
         padding: 0.5rem;
         font-size: 0.9rem;
-        word-break: break-word;
     }
 
-        /* Avatar inside comment */
         .comment .avatar {
             flex-shrink: 0;
             width: 32px;
@@ -160,7 +111,6 @@
             background-position: center;
         }
 
-    /* Content wrapper */
     .comment-content {
         display: flex;
         flex-direction: column;
@@ -168,7 +118,6 @@
         flex: 1;
     }
 
-        /* Header: user name + timestamp */
         .comment-content .comment-header {
             font-weight: 600;
             font-size: 0.9rem;
@@ -183,13 +132,11 @@
                 color: #555;
             }
 
-        /* The comment text */
         .comment-content .comment-text {
             font-size: 0.875rem;
             color: #333;
         }
 
-    /* Textarea for new comments */
     .comments-section textarea {
         width: 100%;
         padding: 0.5rem;
@@ -199,7 +146,6 @@
         font-size: 0.9rem;
     }
 
-    /* Post comment button */
     .comments-section button {
         align-self: flex-end;
         margin-top: 0.25rem;
@@ -216,49 +162,352 @@
         .comments-section button:hover {
             background: #1e40af;
         }
+
+    /* ---------------- Post Options ---------------- */
+    .post-options {
+        position: relative;
+        margin-left: auto;
+    }
+
+    .post-options-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #555;
+    }
+
+    .post-options-menu {
+        display: none;
+        position: absolute;
+        top: 25px;
+        right: 0;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        min-width: 130px;
+        z-index: 100;
+    }
+
+        .post-options-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+            .post-options-menu button:hover {
+                background-color: #f3f3f3;
+            }
+
+            .post-options-menu button.report {
+                color: #d33;
+            }
+
+                .post-options-menu button.report:hover {
+                    background-color: #feeaea;
+                }
+
+    /* ---------------- Modals ---------------- */
+    .community-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .community-modal-box {
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        width: 400px;
+        max-width: 90%;
+        box-shadow: 0 0 12px rgba(0,0,0,0.15);
+        position: relative;
+        text-align: left;
+    }
+
+        .community-modal-box h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+    .community-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .community-modal-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        font-size: 0.95rem;
+    }
+
+        .community-modal-btn.confirm {
+            background: #344AEA;
+            color: #fff;
+        }
+
+        .community-modal-btn.cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .community-modal-btn.confirm:hover {
+            background: #1e33c9;
+        }
+
+        .community-modal-btn.cancel:hover {
+            background: #ddd;
+        }
+
+    /* Edit Modal textarea */
+    #editPostContent {
+        width: 100%;
+        min-height: 120px;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        font-size: 0.95rem;
+        resize: vertical;
+    }
+
+    /* Success Modal */
+    #successModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+        #successModal .success-modal-box {
+            background: #fff;
+            padding: 2rem 2.5rem;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+            #successModal .success-modal-box h3 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            #successModal .success-modal-box button {
+                margin-top: 1rem;
+                padding: 0.5rem 1.5rem;
+                border: none;
+                border-radius: 8px;
+                background: #344AEA;
+                color: #fff;
+                cursor: pointer;
+            }
+
+    /* ---------------- Modal Overlay ---------------- */
+    .community-details-posts-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none; /* Hidden by default */
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    /* ---------------- Modal Box ---------------- */
+    .community-details-posts-modal-content {
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        width: 400px;
+        max-width: 90%;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        position: relative;
+        text-align: left;
+        animation: fadeIn 0.2s ease-in-out;
+    }
+
+    /* Modal Header */
+    .community-details-posts-title {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    /* Modal Subtitle / Description */
+    .community-details-posts-subtitle {
+        margin-bottom: 1.25rem;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    /* Modal Form Fields */
+    .community-details-posts-field {
+        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+        .community-details-posts-field label {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .community-details-posts-field input,
+        .community-details-posts-field textarea,
+        .community-details-posts-field select {
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+            width: 100%;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+    /* Character Count */
+    .community-details-posts-charcount {
+        font-size: 0.75rem;
+        color: #777;
+    }
+
+    /* Modal Actions (Buttons) */
+    .community-details-posts-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .community-details-posts-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        font-size: 0.95rem;
+        transition: background 0.2s ease;
+    }
+
+        .community-details-posts-btn.primary {
+            background: #344AEA;
+            color: #fff;
+        }
+
+            .community-details-posts-btn.primary:hover {
+                background: #1e33c9;
+            }
+
+        .community-details-posts-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+            .community-details-posts-btn.secondary:hover {
+                background: #ddd;
+            }
 </style>
 
-<div class="community-posts-list">
+<div class="posts-only-list">
     @if (Model == null || !Model.Any())
     {
-        <div class="no-posts">
-            <p>No posts yet. Be the first to share something!</p>
+        <div class="post-card">
+            <p style="text-align:center; color:#777;">
+                @if (currentUserIsAdmin)
+                {
+                    @:No posts yet.
+                }
+                else
+                {
+                    @:No posts yet. Be the first to share something!
+                }
+            </p>
         </div>
     }
     else
     {
         @foreach (var post in Model)
         {
-            <div class="post-card" data-post-id="@post.Id">
-                <!-- Header -->
+            <div class="post-card"
+                 data-post-id="@post.Id"
+                 data-title="@post.Title"
+                 data-image="@post.ImageUrl">
                 <div class="post-card-header">
                     <div class="avatar" style="background-image:url('@post.AuthorAvatarUrl')"></div>
                     <div class="community-info">
                         <h5>@post.AuthorName</h5>
                         <h6>@post.CommunityName • @post.SubmittedAt.ToString("MMM dd, yyyy")</h6>
                     </div>
+                    <div class="post-options">
+                        <button class="post-options-btn" onclick="togglePostMenu(@post.Id)">⋮</button>
+                        <div class="post-options-menu" id="post-menu-@post.Id">
+                            @if (currentUserIsAdmin)
+                            {
+                                <button onclick="openAdminDeleteModal(@post.Id)">Delete Post (Admin)</button>
+                            }
+                            else if (post.AuthorId == currentUserId)
+                            {
+                                <button onclick="openEditPostModal(@post.Id)">Edit Post</button>
+                                <button onclick="openDeletePostModal(@post.Id)">Delete Post</button>
+                            }
+                            else
+                            {
+                                <button class="report" onclick="reportPost(@post.Id)">Report Post</button>
+                            }
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Content -->
                 <div class="post-card-content">
+                    @if (!string.IsNullOrEmpty(post.Title))
+                    {
+                        <h4 style="margin:0 0 0.5rem 0; font-weight:600;">@post.Title</h4>
+                    }
                     <p>@post.Content</p>
-
                     @if (!string.IsNullOrEmpty(post.ImageUrl))
                     {
                         <img src="@post.ImageUrl" alt="Post image" />
                     }
-
-                    <!-- Meta (Likes + Comments) -->
                     <div class="community-meta">
-                        <button class="like-btn" onclick="likePost(@post.Id)">❤️ <span id="like-count-@post.Id">@post.Likes</span></button>
-                        <button class="comment-btn" onclick="toggleComments(@post.Id)">💬 <span id="comment-count-@post.Id">@post.CommentsCount</span></button>
+                        <button class="comment-btn" style="background: none; border: none;" onclick="toggleComments(@post.Id)">💬 <span id="comment-count-@post.Id">@post.CommentsCount</span></button>
                     </div>
                 </div>
 
-                <!-- Comment Section (Initially Hidden) -->
-                <div class="comments-section" id="comments-section-@post.Id" style="display:none; margin-top:1rem;">
+                <div class="comments-section" id="comments-section-@post.Id" style="display:none;">
                     <div class="comments-list" id="comments-list-@post.Id"></div>
-                    <textarea id="comment-input-@post.Id" placeholder="Write a comment..." rows="2"></textarea>
+                    <textarea id="comment-input-@post.Id" style="resize: none;" placeholder="Write a comment..." rows="2"></textarea>
                     <button onclick="addComment(@post.Id)">Post</button>
                 </div>
             </div>
@@ -266,189 +515,383 @@
     }
 </div>
 
+<!-- REPORT POST MODAL -->
+<div id="communityDetailsReportModal" class="community-details-posts-modal-overlay" style="display:none;">
+    <div class="community-details-posts-modal-content">
+        <h2 class="community-details-posts-title">Report Post</h2>
+        <p class="community-details-posts-subtitle">Please select the reason for reporting this post:</p>
+
+        <form id="communityDetailsReportForm" class="community-details-posts-form">
+            <div class="community-details-posts-field">
+                <label for="communityDetailsReportReason">Reason</label>
+                <select id="communityDetailsReportReason" name="Reason" required>
+                    <option value="">-- Select Reason --</option>
+                    <option value="Spam">Spam</option>
+                    <option value="Inappropriate Content">Inappropriate Content</option>
+                    <option value="Harassment">Harassment</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="community-details-posts-field">
+                <label for="communityDetailsReportDetails">Additional details (optional)</label>
+                <textarea id="communityDetailsReportDetails" name="Details" class="communityDetailsModalTextarea" placeholder="Provide more details..." rows="4"></textarea>
+            </div>
+
+            <div class="community-details-posts-actions">
+                <button type="button" id="communityDetailsReportCancelBtn" class="community-details-posts-btn secondary">Cancel</button>
+                <button type="submit" id="communityDetailsReportSubmitBtn" class="community-details-posts-btn primary">Submit Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- EDIT POST MODAL -->
+<div id="communityDetailsEditPostModal" class="community-details-posts-modal-overlay" style="display:none;">
+    <div class="community-details-posts-modal-content">
+        <h2 class="community-details-posts-title">Edit Post</h2>
+        <p class="community-details-posts-subtitle">Update your post content below.</p>
+
+        <form id="communityDetailsEditPostForm" class="community-details-posts-form"
+              enctype="multipart/form-data" method="post">
+
+            <!-- Hidden PostId -->
+            <input type="hidden" id="communityDetailsEditPostId" name="PostId" />
+
+            <!-- Title -->
+            <div class="community-details-posts-field">
+                <label for="communityDetailsEditPostTitle">Edit title.</label>
+                <input type="text" name="Title" id="communityDetailsEditPostTitle" maxlength="100" placeholder="Update the title :)" required />
+                <small class="community-details-posts-charcount" id="communityDetailsEditPostTitleCount">0/100 maximum characters</small>
+            </div>
+
+            <!-- Content -->
+            <div class="community-details-posts-field">
+                <label for="communityDetailsEditPostContent">Edit details.</label>
+                <textarea name="Content" id="communityDetailsEditPostContent" maxlength="1000" placeholder="Update your post..." required></textarea>
+                <small class="community-details-posts-charcount" id="communityDetailsEditPostContentCount">0/1000 maximum characters</small>
+            </div>
+
+            <!-- Image -->
+            <div class="community-details-posts-field">
+                <label for="communityDetailsEditPostImage">Update image (optional)</label>
+                <input type="file" name="Image" id="communityDetailsEditPostImage" accept="image/*" />
+                <div id="communityDetailsEditPostImagePreviewContainer" style="margin-top:0.5rem;">
+                    <img id="communityDetailsEditPostImagePreview" style="max-width:100%; border-radius:8px; display:none;" />
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="community-details-posts-actions">
+                <button type="submit" class="community-details-posts-btn primary" id="communityDetailsEditSaveBtn">Save Changes</button>
+                <button type="button" class="community-details-posts-btn secondary" id="communityDetailsEditCancelBtn">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DELETE POST MODAL -->
+<div id="communityDetailsDeletePostModal" class="community-details-posts-modal-overlay" style="display:none;">
+    <div class="community-details-posts-modal-content">
+        <h2 class="community-details-posts-title">Delete Post</h2>
+        <p class="community-details-posts-subtitle">Are you sure you want to delete this post? This action cannot be undone.</p>
+        <input type="hidden" id="communityDetailsDeletePostId" />
+        <div class="community-details-posts-actions">
+            <button type="button" class="community-details-posts-btn secondary" onclick="communityDetailsCloseDeletePostModal()">Cancel</button>
+            <button type="button" class="community-details-posts-btn primary" onclick="communityDetailsConfirmDeletePost()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ADMIN DELETE POST MODAL -->
+<div id="adminDeletePostModal" class="community-details-posts-modal-overlay" style="display:none;">
+    <div class="community-details-posts-modal-content">
+        <h2 class="community-details-posts-title">Delete Post</h2>
+        <p class="community-details-posts-subtitle">Are you sure you want to delete this post as an admin? This will notify the author.</p>
+        <input type="hidden" id="adminDeletePostId" />
+        <div class="community-details-posts-actions">
+            <button type="button" class="community-details-posts-btn secondary">Cancel</button>
+            <button type="button" class="community-details-posts-btn primary">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div id="successModal" class="community-details-posts-modal-overlay" style="display:none;">
+    <div class="community-details-posts-modal-content">
+        <h2 class="community-details-posts-title" id="successModalTitle">Success!</h2>
+        <p id="successModalMessage">Your action was successful.</p>
+        <div class="community-details-posts-actions">
+            <button type="button" class="community-details-posts-btn primary" id="successModalBtn">Great!</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    let selectedPostId = null;
+    let selectedAdminPostId = null;
+    let reportPostId = null;
+
+    // ---------------- Post Options Menu ----------------
+    function togglePostMenu(postId) {
+        const menu = document.getElementById(`post-menu-${postId}`);
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // ---------------- Comments ----------------
+    function toggleComments(postId) {
+        const section = document.getElementById(`comments-section-${postId}`);
+        section.style.display = section.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    // ---------------- Add Comment ----------------
     const currentUserId = "@currentUserId";
     const currentUserFirstName = "@currentUserFirstName";
     const currentUserLastName = "@currentUserLastName";
     const currentUserAvatar = "@currentUserAvatar";
     const userDisabled = @userDisabled.ToString().ToLower();
 
-    // ----- LocalStorage helpers ---- //
-    function getUserId() {
-        return document.body.dataset.userId;
-    }
+    function getPostComments(){ return JSON.parse(localStorage.getItem("postComments")) || {}; }
+    function setPostComments(comments){ localStorage.setItem("postComments", JSON.stringify(comments)); }
 
-    function getLikedPostsByUser() {
-        return JSON.parse(localStorage.getItem("likedPostsByUser")) || {};
-    }
-
-    function setLikedPostsByUser(data) {
-        localStorage.setItem("likedPostsByUser", JSON.stringify(data));
-    }
-
-    function getLikeCounts() {
-        return JSON.parse(localStorage.getItem("likeCounts")) || {};
-    }
-
-    function setLikeCounts(counts) {
-        localStorage.setItem("likeCounts", JSON.stringify(counts));
-    }
-
-    function getPostComments() {
-        return JSON.parse(localStorage.getItem("postComments")) || {};
-    }
-
-    function setPostComments(comments) {
-        localStorage.setItem("postComments", JSON.stringify(comments));
-    }
-
-    // ----- Like a post -----
-    function likePost(postId) {
-        if (userDisabled) return; // do nothing if user is restricted
-
-        const userId = getUserId();
-        const btn = document.querySelector(`.post-card[data-post-id="${postId}"] .like-btn`);
-        const countEl = document.getElementById(`like-count-${postId}`);
-
-        let likedPostsByUser = getLikedPostsByUser();
-        let likeCounts = getLikeCounts();
-
-        if (!likedPostsByUser[userId]) likedPostsByUser[userId] = [];
-
-        let currentLikes = likeCounts[postId] || 0;
-
-        if (likedPostsByUser[userId].includes(postId)) {
-            likedPostsByUser[userId] = likedPostsByUser[userId].filter(id => id !== postId);
-            currentLikes = Math.max(0, currentLikes - 1);
-            btn.classList.remove("liked");
-        } else {
-            likedPostsByUser[userId].push(postId);
-            currentLikes += 1;
-            btn.classList.add("liked");
-        }
-
-        likeCounts[postId] = currentLikes;
-
-        setLikedPostsByUser(likedPostsByUser);
-        setLikeCounts(likeCounts);
-
-        countEl.innerText = currentLikes;
-    }
-
-    // ----- Toggle comment section -----
-    function toggleComments(postId) {
-        const section = document.getElementById(`comments-section-${postId}`);
-        section.style.display = section.style.display === "none" ? "block" : "none";
-    }
-
-    function timeAgo(timestamp) {
-        const now = new Date();
-        const diff = Math.floor((now - new Date(timestamp)) / 1000); // in seconds
-
-        if (diff < 60) return `${diff} seconds ago`;
-        if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-        if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
-        return `${Math.floor(diff / 604800)} weeks ago`;
-    }
-
-    // ----- Add comment -----
-    function addComment(postId) {
-        if (userDisabled) return;
-
+    function addComment(postId){
+        if(userDisabled) return;
         const input = document.getElementById(`comment-input-${postId}`);
-        const list = document.getElementById(`comments-list-${postId}`);
-        const commentText = input.value.trim();
-        if (!commentText) return;
-
-        const commentData = {
+        const text = input.value.trim();
+        if(!text) return;
+        const comment = {
             userId: currentUserId,
-            firstName: currentUserFirstName,  // use Razor variable
-            lastName: currentUserLastName,    // use Razor variable
-            avatarUrl: currentUserAvatar,     // use Razor variable
-            text: commentText,
+            firstName: currentUserFirstName,
+            lastName: currentUserLastName,
+            avatarUrl: currentUserAvatar,
+            text,
             createdAt: new Date().toISOString()
         };
-
-        // Save to localStorage
-        let savedComments = getPostComments();
-        if (!savedComments[postId]) savedComments[postId] = [];
-        savedComments[postId].push(commentData);
-        setPostComments(savedComments);
-
-        renderComment(list, commentData);
-
-        // Update count
-        const countEl = document.getElementById(`comment-count-${postId}`);
-        countEl.innerText = savedComments[postId].length;
-
-        input.value = "";
+        let saved = getPostComments();
+        if(!saved[postId]) saved[postId]=[];
+        saved[postId].push(comment);
+        setPostComments(saved);
+        renderComment(document.getElementById(`comments-list-${postId}`), comment);
+        document.getElementById(`comment-count-${postId}`).innerText = saved[postId].length;
+        input.value='';
     }
 
-    function renderComment(list, commentData) {
-        const commentEl = document.createElement("div");
-        commentEl.classList.add("comment");
-        commentEl.style.display = "flex";
-        commentEl.style.gap = "0.5rem";
-        commentEl.style.alignItems = "flex-start";
-
-        commentEl.innerHTML = `
-            <div class="avatar" style="width:32px;height:32px;border-radius:50%;background-image:url('${commentData.avatarUrl}');background-size:cover;background-position:center;"></div>
-            <div style="flex:1">
-                <div style="font-weight:600;font-size:0.9rem;">${commentData.firstName} ${commentData.lastName} <span style="font-weight:400;color:#555;font-size:0.75rem;margin-left:0.5rem;">${timeAgo(commentData.createdAt)}</span></div>
-                <div style="font-size:0.875rem;margin-top:0.25rem;">${commentData.text}</div>
-            </div>
-        `;
-        list.appendChild(commentEl);
+    function renderComment(list, comment){
+        const el = document.createElement('div');
+        el.classList.add('comment');
+        el.innerHTML = `
+            <div class="avatar" style="background-image:url('${comment.avatarUrl}')"></div>
+            <div class="comment-content">
+                <div class="comment-header">
+                    ${comment.firstName} ${comment.lastName}
+                    <span class="timestamp">${timeAgo(comment.createdAt)}</span>
+                </div>
+                <div class="comment-text">${comment.text}</div>
+            </div>`;
+        list.appendChild(el);
     }
 
-    // ----- Disable buttons for restricted users on page load -----
-    document.addEventListener("DOMContentLoaded", () => {
-        if (userDisabled) {
-            document.querySelectorAll(".like-btn, .comment-btn").forEach(btn => {
-                btn.disabled = true;
-                btn.style.cursor = "not-allowed";
-            });
+    function timeAgo(timestamp){
+        const diff = Math.floor((new Date() - new Date(timestamp))/1000);
+        if(diff<60) return `${diff} seconds ago`;
+        if(diff<3600) return `${Math.floor(diff/60)} minutes ago`;
+        if(diff<86400) return `${Math.floor(diff/3600)} hours ago`;
+        if(diff<604800) return `${Math.floor(diff/86400)} days ago`;
+        return `${Math.floor(diff/604800)} weeks ago`;
+    }
 
-            document.querySelectorAll(".comments-section textarea, .comments-section button").forEach(el => {
-                el.disabled = true;
-                el.style.cursor = "not-allowed";
-            });
+    // Restore comments on load
+    document.addEventListener('DOMContentLoaded', ()=>{
+        const saved = getPostComments();
+        for(let pid in saved){
+            const list = document.getElementById(`comments-list-${pid}`);
+            if(!list) continue;
+            saved[pid].forEach(c => renderComment(list,c));
+            const countEl = document.getElementById(`comment-count-${pid}`);
+            if(countEl) countEl.innerText = saved[pid].length;
         }
 
-        // Restore likes
-        const likedPostsByUser = getLikedPostsByUser();
-        const likeCounts = getLikeCounts();
-        const userId = currentUserId;
-        const likedPosts = likedPostsByUser[userId] || [];
+        if(userDisabled){
+            document.querySelectorAll(".comment-btn, .comments-section textarea, .comments-section button").forEach(el=>{
+                el.disabled=true; el.style.cursor='not-allowed';
+            });
+        }
+    });
 
-        likedPosts.forEach(postId => {
-            const btn = document.querySelector(`.post-card[data-post-id="${postId}"] .like-btn`);
-            if (btn) btn.classList.add("liked");
-        });
+    // ---------------- Edit Post ----------------
+    function openEditPostModal(postId){
+        selectedPostId = postId;
 
-        for (let postId in likeCounts) {
-            const countEl = document.getElementById(`like-count-${postId}`);
-            if (countEl) countEl.innerText = likeCounts[postId];
+        const postCard = document.querySelector(`.post-card[data-post-id='${postId}']`);
+
+        // Set hidden PostId
+        document.getElementById('communityDetailsEditPostId').value = postId;
+        // Set title
+        const title = postCard.dataset.title || '';
+        document.getElementById('communityDetailsEditPostTitle').value = title;
+        document.getElementById('communityDetailsEditPostTitleCount').innerText = `${title.length}/100 maximum characters`;
+
+        // Set content
+        const contentEl = postCard.querySelector('.post-card-content p');
+        const content = contentEl ? contentEl.innerText : '';
+        document.getElementById('communityDetailsEditPostContent').value = content;
+        document.getElementById('communityDetailsEditPostContentCount').innerText = `${content.length}/1000 maximum characters`;
+
+        // Set image preview
+        const imageUrl = postCard.dataset.image;
+        const imagePreview = document.getElementById('communityDetailsEditPostImagePreview');
+        if(imageUrl){
+            imagePreview.src = imageUrl;
+            imagePreview.style.display = 'block';
+        } else {
+            imagePreview.src = '';
+            imagePreview.style.display = 'none';
         }
 
-        // Restore comments
-        const savedComments = getPostComments();
-        for (let postId in savedComments) {
-            const list = document.getElementById(`comments-list-${postId}`);
-            if (!list) continue;
+        // Show modal
+        document.getElementById('communityDetailsEditPostModal').style.display = 'flex';
+    }
 
-            savedComments[postId].forEach(commentData => {
-                // Fallback to current user info if old data missing
-                commentData.firstName = commentData.firstName || "Unknown";
-                commentData.lastName = commentData.lastName || "";
-                commentData.avatarUrl = commentData.avatarUrl || "/assets/Avatar/Sample10.svg";
+    document.getElementById('communityDetailsEditCancelBtn').addEventListener('click', ()=>{
+        document.getElementById('communityDetailsEditPostModal').style.display='none';
+    });
 
-                renderComment(list, commentData);
+    document.getElementById('communityDetailsEditPostForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const title = document.getElementById('communityDetailsEditPostTitle').value.trim();
+        const content = document.getElementById('communityDetailsEditPostContent').value.trim();
+        const imageFile = document.getElementById('communityDetailsEditPostImage').files[0];
+
+        if (!title || !content) return;
+
+        const formData = new FormData();
+        formData.append('PostId', selectedPostId);
+        formData.append('Title', title);
+        formData.append('Content', content);
+        if (imageFile) formData.append('Image', imageFile);
+
+        try {
+            const res = await fetch('/Community/EditPost', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                document.getElementById('communityDetailsEditPostModal').style.display = 'none';
+                showSuccessModal('Post updated successfully!');
+
+            } else {
+                alert(data.message || 'Failed to update post');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error editing post');
+        }
+    });
+
+    // ---------------- Delete Post ----------------
+    function openDeletePostModal(postId){
+        selectedPostId = postId;
+        document.getElementById('communityDetailsDeletePostModal').style.display='flex';
+    }
+
+    function communityDetailsCloseDeletePostModal(){
+        document.getElementById('communityDetailsDeletePostModal').style.display='none';
+    }
+
+    async function communityDetailsConfirmDeletePost(){
+        try{
+            const res = await fetch('/Community/DeletePost', {
+                method:'POST',
+                body: new URLSearchParams({ PostId:selectedPostId })
             });
+            const data = await res.json();
+            if(data.success){
+                communityDetailsCloseDeletePostModal();
+                showSuccessModal('Post deleted successfully!');
+            } else alert(data.message || 'Failed to delete post');
+        } catch(e){ console.error(e); alert('Error deleting post'); }
+    }
 
-            const countEl = document.getElementById(`comment-count-${postId}`);
-            if (countEl) countEl.innerText = savedComments[postId].length;
+    // ---------------- Admin Delete Post ----------------
+    function openAdminDeleteModal(postId){
+        selectedAdminPostId = postId;
+        document.getElementById('adminDeletePostModal').style.display='flex';
+    }
+
+    async function confirmAdminDeletePost(){
+        try{
+            const res = await fetch('/Community/DeletePost', {
+                method:'POST',
+                body: new URLSearchParams({ PostId:selectedAdminPostId })
+            });
+            const data = await res.json();
+            if(data.success){
+                document.querySelector(`.post-card[data-post-id='${selectedAdminPostId}']`).remove();
+                document.getElementById('adminDeletePostModal').style.display='none';
+                showSuccessModal('Post deleted successfully!');
+            } else alert(data.message || 'Failed');
+        } catch(e){ console.error(e); alert('Error deleting post'); }
+    }
+
+    // ---------------- Report Post ----------------
+    function reportPost(postId){
+        reportPostId = postId;
+        document.getElementById('communityDetailsReportModal').style.display='flex';
+    }
+
+    document.getElementById('communityDetailsReportCancelBtn').addEventListener('click', ()=>{
+        document.getElementById('communityDetailsReportModal').style.display='none';
+    });
+
+    document.getElementById('communityDetailsReportForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const reason = document.getElementById('communityDetailsReportReason').value.trim();
+        const details = document.getElementById('communityDetailsReportDetails').value.trim();
+        if(!reason) return alert('Please select a reason');
+        try{
+            const res = await fetch('/Community/ReportPost', {
+                method:'POST',
+                body: new URLSearchParams({ PostId: reportPostId, Reason: reason, Details: details })
+            });
+            const data = await res.json();
+            if(data.success){
+                document.getElementById('communityDetailsReportModal').style.display='none';
+                showSuccessModal('Post reported successfully!');
+            } else alert(data.message || 'Failed to report post');
+        } catch(e){ console.error(e); alert('Error reporting post'); }
+    });
+
+    // ---------------- Success Modal ----------------
+    function showSuccessModal(message){
+        const modal = document.getElementById('successModal');
+        document.getElementById('successModalTitle').innerText = 'Success!';
+        document.getElementById('successModalMessage').innerText = message;
+        modal.style.display='flex';
+    }
+
+    // Replace the previous click handler
+    document.getElementById('successModalBtn').addEventListener('click', ()=>{
+        document.getElementById('successModal').style.display='none';
+        // Reload after modal is closed
+        window.location.reload();
+    });
+
+        // ---------------- Image Preview for Edit Post ----------------
+    const editPostImageInput = document.getElementById('communityDetailsEditPostImage');
+    const editPostImagePreview = document.getElementById('communityDetailsEditPostImagePreview');
+
+    editPostImageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                editPostImagePreview.src = e.target.result;
+                editPostImagePreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            editPostImagePreview.src = '';
+            editPostImagePreview.style.display = 'none';
         }
     });
 </script>

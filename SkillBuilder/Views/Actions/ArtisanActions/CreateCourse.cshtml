@@ -126,7 +126,7 @@
         <div class="create-course-tabs">
             <button type="button" class="create-course-tab active" data-tab="basic">Basic Info</button>
             <button type="button" class="create-course-tab" data-tab="curriculum">Curriculum</button>
-            <button type="button" class="create-course-tab" data-tab="materials">Materials</button>
+            @* <button type="button" class="create-course-tab" data-tab="materials">Materials</button> *@
         </div>
 
         <div class="create-course-tab-panel" data-tab="basic">
@@ -135,9 +135,9 @@
         <div class="create-course-tab-panel" data-tab="curriculum">
             <partial name="Sections/CreateCourseNotebooks/_CreateCourseCurriculum" model="Model" />
         </div>
-        <div class="create-course-tab-panel" data-tab="materials">
+        @* <div class="create-course-tab-panel" data-tab="materials">
             <partial name="Sections/CreateCourseNotebooks/_CreateCourseMaterials" model="Model" />
-        </div>
+        </div> *@
     </div>
 }
 
@@ -241,6 +241,12 @@
             if (lessons.length === 0) {
                 allValid = false;
             }
+        });
+
+        const quizQuestions = form.querySelectorAll(".quiz-question");
+        quizQuestions.forEach(q => {
+            const hasDuplicates = checkDuplicateOptions(q);
+            if (hasDuplicates) allValid = false;
         });
 
         const createBtn = document.getElementById("createBtn");

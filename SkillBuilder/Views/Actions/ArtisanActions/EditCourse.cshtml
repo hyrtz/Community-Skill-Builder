@@ -130,7 +130,7 @@
         <div class="edit-course-tabs">
             <button type="button" class="edit-course-tab active" data-tab="basic">Basic Info</button>
             <button type="button" class="edit-course-tab" data-tab="curriculum">Curriculum</button>
-            <button type="button" class="edit-course-tab" data-tab="materials">Materials</button>
+            @* <button type="button" class="edit-course-tab" data-tab="materials">Materials</button> *@
         </div>
 
         <div class="edit-course-tab-panel" data-tab="basic">
@@ -139,9 +139,9 @@
         <div class="edit-course-tab-panel" data-tab="curriculum">
             <partial name="~/Views/Shared/Sections/EditCourseNotebooks/_EditCourseCurriculum.cshtml" model="Model" />
         </div>
-        <div class="edit-course-tab-panel" data-tab="materials">
+        @* <div class="edit-course-tab-panel" data-tab="materials">
             <partial name="~/Views/Shared/Sections/EditCourseNotebooks/_EditCourseMaterials.cshtml" model="Model" />
-        </div>
+        </div> *@
     </div>
 }
 

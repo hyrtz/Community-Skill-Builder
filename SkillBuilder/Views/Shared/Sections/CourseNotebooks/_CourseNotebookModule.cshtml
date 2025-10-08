@@ -72,9 +72,10 @@
                 {
                     <li class="course-module-view-lesson-item">
                         <span class="course-module-view-lesson-title">@lesson.Title</span> -
-                        <span class="course-module-view-lesson-duration">
-                            @lesson.Duration ?? "N/A"
-                        </span>
+                        @if (!string.IsNullOrWhiteSpace(lesson.Duration))
+                        {
+                            <span class="course-module-view-lesson-duration"> - @lesson.Duration</span>
+                        }
                     </li>
                 }
             </ul>

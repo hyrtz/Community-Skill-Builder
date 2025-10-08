@@ -75,7 +75,8 @@ namespace SkillBuilder.Controllers
                     CourseId = course.Id,
                     CourseTitle = course.Title,
                     CourseDescription = course.Overview,
-                    ProgressPercentage = Math.Round(progress, 0)
+                    ProgressPercentage = Math.Round(progress, 0),
+                    IsPublished = course.IsPublished
                 };
             }).ToList();
 
@@ -572,6 +573,33 @@ namespace SkillBuilder.Controllers
             );
 
             return Ok(new { success = true, message = "Session successfully rescheduled" });
+        }
+
+        [HttpPost("CancelSession/{requestId}")]
+        public async Task<IActionResult> CancelSession(int requestId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var request = await _context.SupportSessionRequests
+                .Include(r => r.Course)
+                .FirstOrDefaultAsync(r => r.Id == requestId && r.UserId == userId);
+
+            if (request == null)
+                return NotFound(new { success = false, message = "Session request not found." });
+
+            request.Status = "Cancelled";
+            await _context.SaveChangesAsync();
+
+            // Notify learner with reschedule action
+            await AddNotificationAsync(
+                userId,
+                $"✅ You have successfully cancelled your session request for '{request.Course?.Title}'.",
+                "Reschedule Session",
+                $"/Support/RequestSession/{request.Course?.Id}"
+            );
+
+            return Ok(new { success = true, message = "Session cancelled successfully!" });
         }
 
     }

@@ -7,6 +7,136 @@
         .ToList();
 }
 
+
+<style>
+    /* Cancel button */
+    .btn-cancel {
+        background-color: #FF4B5C;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .btn-cancel:hover {
+            background-color: #e03d4b;
+        }
+
+    /* Modal background */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    /* Modal box */
+    .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        animation: slideDown 0.3s ease;
+    }
+
+    /* Modal buttons */
+    .modal-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn-confirm-cancel {
+        background-color: #FF4B5C;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .btn-confirm-cancel:hover {
+            background-color: #e03d4b;
+        }
+
+    .btn-close-modal {
+        background-color: #ccc;
+        color: #333;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .btn-close-modal:hover {
+            background-color: #bbb;
+        }
+
+    .user-support-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.5rem;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        background: #fff;
+        position: relative;
+        min-height: 180px;
+    }
+
+    .support-card-footer {
+        display: flex;
+        justify-content: space-between; /* positions badge left, button right */
+        align-items: center; /* vertically center */
+        margin-top: 1rem;
+    }
+
+    /* Status badge */
+    .support-status-badge {
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        background-color: #f0ad4e;
+        color: white;
+    }
+
+    /* Cancel button */
+    .btn-cancel {
+        background-color: #FF4B5C;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .btn-cancel:hover {
+            background-color: #e03d4b;
+        }
+</style>
+
+
 @if (!pendingRequests.Any())
 {
     <div class="user-support-empty">
@@ -17,7 +147,7 @@ else
 {
     foreach (var request in pendingRequests)
     {
-        <div class="user-support-card">
+        <div class="user-support-card" data-request-id="@request.Id">
             <div class="user-support-title">@request.Title</div>
             <div class="user-support-message">@request.Message</div>
 
@@ -26,14 +156,60 @@ else
                 <div>
                     <i class="fas fa-clock"></i>
                     @(request.SessionTime != null
-                                ? (DateTime.Today + (TimeSpan)request.SessionTime).ToString("h:mm tt")
-                                : "N/A")
+                        ? (DateTime.Today + (TimeSpan)request.SessionTime).ToString("h:mm tt")
+                        : "N/A")
                 </div>
             </div>
 
-            <div>
+            <!-- Footer: Cancel button + Status badge inline -->
+            <div class="support-card-footer">
                 <span class="support-status-badge status-pending">Pending</span>
+                <button class="btn-cancel" data-request-id="@request.Id">Cancel</button>
             </div>
         </div>
     }
 }
+
+<!-- Cancel Confirmation Modal -->
+<div id="cancelModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h3>Confirm Cancellation</h3>
+        <p>Are you sure you want to cancel this session request? This action cannot be undone.</p>
+        <div class="modal-actions">
+            <button id="confirmCancelBtn" class="btn-confirm-cancel">Yes, Cancel</button>
+            <button id="closeCancelModal" class="btn-close-modal">No, Keep</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let cancelRequestId = null;
+
+    document.querySelectorAll('.btn-cancel').forEach(btn => {
+        btn.addEventListener('click', () => {
+            cancelRequestId = btn.dataset.requestId;
+            document.getElementById('cancelModal').style.display = 'flex';
+        });
+    });
+
+    document.getElementById('closeCancelModal').addEventListener('click', () => {
+        cancelRequestId = null;
+        document.getElementById('cancelModal').style.display = 'none';
+    });
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+        if (!cancelRequestId) return;
+
+        const response = await fetch(`/UserProfile/CancelSession/${cancelRequestId}`, {
+            method: 'POST'
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            location.reload(); // refresh the list
+        } else {
+            alert(result.message || "Something went wrong.");
+        }
+    });
+</script>

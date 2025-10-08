@@ -31,12 +31,23 @@ public class CertificateController : Controller
         if (enrollment == null || !enrollment.IsCompleted)
             return BadRequest("You must complete this course before downloading a certificate.");
 
+        // ✅ Ensure final project is approved
+        if (enrollment.FinalProjectStatus != "Approved")
+            return BadRequest("Your final project must be approved before downloading a certificate.");
+
         var learnerName = $"{enrollment.User.FirstName} {enrollment.User.LastName}";
         var courseTitle = enrollment.Course.Title;
         var artisanName = $"{enrollment.Course.Artisan.FirstName} {enrollment.Course.Artisan.LastName}";
         var artisanSkill = enrollment.Course.Artisan.Profession;
 
-        var pdfBytes = _certificateService.GenerateCertificate(learnerName, courseTitle, artisanName, artisanSkill);
+        // ✅ Pass the artisan's digital signature URL to the certificate service
+        var pdfBytes = _certificateService.GenerateCertificate(
+            learnerName,
+            courseTitle,
+            artisanName,
+            artisanSkill,
+            enrollment.DigitalSignatureUrl // <-- added here
+        );
 
         return File(pdfBytes, "application/pdf", $"Certificate-{learnerName.Replace(" ", "_")}.pdf");
     }

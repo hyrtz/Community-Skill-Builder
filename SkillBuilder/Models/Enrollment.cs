@@ -14,5 +14,8 @@
 
         public bool IsCompleted { get; set; } = false;
         public DateTime? CompletedAt { get; set; }
+
+        public string? FinalProjectStatus { get; set; }
+        public string? DigitalSignatureUrl { get; set; }
     }
 }

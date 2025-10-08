@@ -26,8 +26,8 @@
     }
 
     .course-review-view-card {
-        min-width: 250px;
-        max-width: 250px;
+        min-width: 300px;
+        max-width: 300px;
         background-color: #fff;
         border-radius: 12px;
         padding: 1.5rem;
@@ -37,9 +37,10 @@
 
     .course-review-view-card-top {
         display: flex;
-        justify-content: space-between;
+        align-items: flex-start;
         margin-bottom: 1rem;
     }
+
 
     .course-review-view-user {
         display: flex;
@@ -70,6 +71,7 @@
     .course-review-view-date {
         font-size: 0.85rem;
         color: #777;
+        margin-top: 0.25rem; /* small spacing */
     }
 
     .course-review-view-text {
@@ -166,34 +168,44 @@
     }
 
     .course-review-view-modal-card {
-        background-color: #f9f9f9;
+        background-color: #fff; /* white like main cards */
         border-radius: 12px;
-        padding: 1rem 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
+        .course-review-view-modal-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
 
         .course-review-view-modal-card .course-review-view-user {
             display: flex;
+            align-items: center;
             gap: 0.75rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .course-review-view-modal-card .course-review-view-avatar {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             object-fit: cover;
+            border: 2px solid #eee;
         }
 
         .course-review-view-modal-card .course-review-view-name {
             margin: 0;
             font-size: 1rem;
-            font-weight: bold;
+            font-weight: 600;
+            color: #222;
         }
 
         .course-review-view-modal-card .course-review-view-stars {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: #ccc;
+            margin: 0.25rem 0;
         }
 
             .course-review-view-modal-card .course-review-view-stars .star.filled {
@@ -203,12 +215,14 @@
         .course-review-view-modal-card .course-review-view-date {
             font-size: 0.8rem;
             color: #777;
+            margin-top: 0.25rem;
         }
 
         .course-review-view-modal-card .course-review-view-text {
             font-size: 0.95rem;
             color: #333;
-            line-height: 1.4;
+            line-height: 1.5;
+            margin-top: 0.5rem;
         }
 </style>
 
@@ -233,10 +247,11 @@
                                         }
                                     }
                                 </div>
+
+                                <div class="course-review-view-date">
+                                    <p>@review.CreatedAt.ToString("MMMM dd, yyyy")</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="course-review-view-date">
-                            <p>@review.CreatedAt.ToString("MMMM dd, yyyy")</p>
                         </div>
                     </div>
                     <p class="course-review-view-text">@review.Comment</p>

@@ -199,6 +199,13 @@
         cursor: not-allowed;
         opacity: 0.6;
     }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: none; /* hidden by default */
+    }
 </style>
 
 <div id="pendingSupportContainer">
@@ -249,16 +256,9 @@
 <div id="sessionLinkModal" class="modal" style="display:none;">
     <div class="modal-content">
         <h3>Add Meeting Details</h3>
-        <label for="meetingPlatform">Platform</label>
-        <select id="meetingPlatform" class="curriculum-form-control">
-            <option value="Zoom">Zoom</option>
-            <option value="Google Meet">Google Meet</option>
-            <option value="Messenger">Messenger</option>
-            <option value="Others">Others</option>
-        </select>
-
-        <label for="meetingLink">Meeting Link</label>
+        <p>Paste the meeting link for this session:</p>
         <input type="text" id="meetingLink" class="curriculum-form-control" placeholder="https://..." />
+        <span id="meetingLinkError" class="error-message" style="display:none; color:red; font-size:0.85rem; margin-top:0.25rem;"></span>
         <input type="hidden" id="confirmSessionId" />
 
         <div class="modal-actions">
@@ -369,32 +369,57 @@
         modal.style.display = 'none';
         currentSessionId = null;
         document.getElementById('meetingLink').value = '';
-        document.getElementById('meetingPlatform').value = 'Zoom';
         isModalOpen = false;
     }
 
     async function submitSessionLink() {
         if (!currentSessionId) return;
-        const platform = document.getElementById('meetingPlatform').value;
-        const link = document.getElementById('meetingLink').value.trim();
-        if (!link) { alert('Please enter a meeting link.'); return; }
+
+        const linkInput = document.getElementById('meetingLink');
+        const errorSpan = document.getElementById('meetingLinkError');
+        const link = linkInput.value.trim();
+
+        // Reset previous error
+        errorSpan.style.display = 'none';
+        errorSpan.textContent = '';
+
+        if (!link) {
+            errorSpan.textContent = 'Please enter a meeting link.';
+            errorSpan.style.display = 'block';
+            linkInput.focus();
+            return;
+        }
+
+        // ===== URL validation =====
+        try {
+            const url = new URL(link); // will throw if invalid
+            if (!['http:', 'https:'].includes(url.protocol)) {
+                throw new Error('Invalid protocol');
+            }
+        } catch (err) {
+            errorSpan.textContent = 'Please enter a valid URL.';
+            errorSpan.style.display = 'block';
+            linkInput.focus();
+            return;
+        }
 
         try {
             const res = await fetch('/SupportSession/Confirm', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ Id: currentSessionId, Platform: platform, Link: link })
+                body: JSON.stringify({ Id: currentSessionId, Link: link })
             });
             if (!res.ok) throw new Error('Failed to confirm session.');
 
             closeSessionModal();
 
-            // Refresh both pending and upcoming lists
             await refreshPendingRequests();
             await refreshUpcomingSessions();
         } catch (err) {
             console.error(err);
-            alert('Something went wrong. Please try again.');
+            errorSpan.textContent = 'Something went wrong. Please try again.';
+            errorSpan.style.display = 'block';
+            linkInput.focus();
         }
     }
 

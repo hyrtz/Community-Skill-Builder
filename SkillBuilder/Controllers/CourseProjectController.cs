@@ -25,18 +25,48 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpPost("Approve")]
-        public async Task<IActionResult> Approve([FromBody] ApproveRequest data)
+        public async Task<IActionResult> Approve([FromForm] int id, [FromForm] IFormFile? signature)
         {
             var project = await _context.CourseProjectSubmissions
                 .Include(p => p.User)
                 .Include(p => p.Course)
-                .FirstOrDefaultAsync(p => p.Id == data.Id);
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (project == null)
                 return NotFound();
 
+            // ✅ Save uploaded signature if provided
+            if (signature != null && signature.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "signatures");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = $"signature_project{project.Id}_{Guid.NewGuid()}{Path.GetExtension(signature.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await signature.CopyToAsync(fileStream);
+                }
+
+                // Store relative path in the database
+                project.SignatureUrl = $"/signatures/{fileName}";
+            }
+
             // Update project status
             project.Status = "Approved";
+
+            // ✅ Update enrollment with final project info
+            var enrollment = await _context.Enrollments
+                .FirstOrDefaultAsync(e => e.UserId == project.UserId && e.CourseId == project.CourseId);
+
+            if (enrollment != null)
+            {
+                enrollment.FinalProjectStatus = "Approved";
+                enrollment.DigitalSignatureUrl = project.SignatureUrl;
+            }
+
             await _context.SaveChangesAsync();
 
             // Notification for learner (project owner)
@@ -59,7 +89,8 @@ namespace SkillBuilder.Controllers
                 project.Title,
                 project.Description,
                 courseTitle = project.Course?.Title,
-                project.MediaUrl
+                project.MediaUrl,
+                project.SignatureUrl
             });
         }
 
@@ -82,6 +113,18 @@ namespace SkillBuilder.Controllers
 
             // Update project status
             project.Status = "Rejected";
+
+
+            // ✅ Update enrollment
+            var enrollment = await _context.Enrollments
+                .FirstOrDefaultAsync(e => e.UserId == project.UserId && e.CourseId == project.CourseId);
+
+            if (enrollment != null)
+            {
+                enrollment.FinalProjectStatus = "Rejected";
+                enrollment.DigitalSignatureUrl = null; // optional: remove signature if any
+            }
+
             await _context.SaveChangesAsync();
 
             // Notification for learner (project owner) with Resubmit button

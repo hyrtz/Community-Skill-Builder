@@ -620,7 +620,6 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\ne
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\0gx45vrrv5-oz3fg9rowa.gz
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\4bkq6dqe57-obylf5y6nw.gz
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\gwr47kqyb5-grf2t32idv.gz
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\kui8okoj2m-7dcwp109ph.gz
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\LatoFont\Lato-Black.ttf
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\LatoFont\Lato-BlackItalic.ttf
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\LatoFont\Lato-Bold.ttf
@@ -663,3 +662,4 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\ne
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\runtimes\win-x86\native\libwinpthread-1.dll
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\runtimes\win-x86\native\qpdf.dll
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\runtimes\win-x86\native\zlib1.dll
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\kui8okoj2m-e4qxbfpsid.gz

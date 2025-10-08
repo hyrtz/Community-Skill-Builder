@@ -16,12 +16,13 @@
         color: #344AEA;
         margin-top: 4rem;
         margin-bottom: 2rem;
+        text-align: center;
     }
 
     .leaderboard-table {
         width: 100%;
         border-collapse: separate;
-        border-spacing: 0 0.8rem;
+        border-spacing: 0 1rem;
     }
 
         .leaderboard-table td,
@@ -33,7 +34,12 @@
         background-color: #f9f9f9;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease;
     }
+
+        .leaderboard-row:hover {
+            transform: scale(1.02);
+        }
 
     .leaderboard-cell {
         padding: 1rem;
@@ -51,6 +57,7 @@
             height: 50px;
             object-fit: cover;
             border-radius: 50%;
+            transition: transform 0.2s ease;
         }
 
     .leaderboard-user-details {
@@ -59,21 +66,66 @@
         justify-content: center;
     }
 
-    .leaderboard-user-name a {
+    .leaderboard-user-name span {
         font-weight: bold;
         font-size: 1rem;
         color: #333;
-        text-decoration: none;
     }
-
-        .leaderboard-user-name a:hover {
-            text-decoration: underline;
-        }
 
     .leaderboard-points {
         font-weight: bold;
         color: #344AEA;
     }
+
+    /* Top Learner Cards */
+    .top-1 {
+        background: linear-gradient(90deg, #FFD700, #FFC107); /* golden */
+        color: white;
+        transform: scale(1.15);
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+        .top-1 .leaderboard-user-info img {
+            width: 70px;
+            height: 70px;
+        }
+
+        .top-1 .rank-icon {
+            font-size: 1.8rem;
+        }
+
+    .top-2 {
+        background: linear-gradient(90deg, #C0C0C0, #B0B0B0); /* silver */
+        color: white;
+        transform: scale(1.08);
+        font-weight: bold;
+    }
+
+        .top-2 .leaderboard-user-info img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .top-2 .rank-icon {
+            font-size: 1.5rem;
+        }
+
+    .top-3 {
+        background: linear-gradient(90deg, #CD7F32, #B87333); /* bronze */
+        color: white;
+        transform: scale(1.05);
+        font-weight: bold;
+    }
+
+        .top-3 .leaderboard-user-info img {
+            width: 55px;
+            height: 55px;
+        }
+
+        .top-3 .rank-icon {
+            font-size: 1.4rem;
+        }
 </style>
 
 <div class="leaderboard-container">
@@ -81,11 +133,21 @@
 
     <table class="leaderboard-table">
         <tbody>
-            @foreach (var user in Model.OrderByDescending(u => u.Points))
+            @for (int i = 0; i < Model.Count; i++)
             {
-                <tr class="leaderboard-row">
+                var user = Model.OrderByDescending(u => u.Points).ToList()[i];
+                var rowClass = "";
+                var icon = "";
+                if (i == 0) { rowClass = "top-1"; icon = "👑"; }
+                else if (i == 1) { rowClass = "top-2"; icon = "🥈"; }
+                else if (i == 2) { rowClass = "top-3"; icon = "🥉"; }
+                <tr class="leaderboard-row @rowClass">
                     <td class="leaderboard-cell">
                         <div class="leaderboard-user-info">
+                            @if (!string.IsNullOrEmpty(icon))
+                            {
+                                <span class="rank-icon">@icon</span>
+                            }
                             <img src="@user.UserAvatar" alt="User Avatar" />
                             <div class="leaderboard-user-details">
                                 <div class="leaderboard-user-name">
@@ -94,7 +156,7 @@
                             </div>
                         </div>
                     </td>
-                    <td class="leaderboard-cell">enrolled course: @((user.Enrollments?.Count() ?? 0))</td>
+                    <td class="leaderboard-cell">Enrolled courses: @((user.Enrollments?.Count() ?? 0))</td>
                     <td class="leaderboard-cell leaderboard-points">@user.Points pts</td>
                 </tr>
             }

@@ -192,6 +192,14 @@
     .duration-unit {
         flex: 1; 
     }
+
+    .file-error {
+        display: block;
+        color: red;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        margin-left: 2px;
+    }
 </style>
 
 <div class="basicinfo-form-wrapper">
@@ -240,7 +248,6 @@
                 <select name="DurationUnit" id="Course_DurationUnit" class="basicinfo-form-select duration-unit" required>
                     <option value="minutes">Minutes</option>
                     <option value="hours">Hours</option>
-                    <option value="days">Days</option>
                 </select>
             </div>
         </div>
@@ -315,26 +322,85 @@
         </div>
     </div>
 
-    <!-- Artisan Works -->
-    <div class="basicinfo-form-group">
-        <label>Artisan Works *</label>
-        <div id="artisan-works-container"></div>
-
-        <button type="button" id="add-work" class="basicinfo-add-btn">+ Add Work</button>
-    </div>
-
 </div>
 
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
-        // Image Preview
+        // -------------------- FILE VALIDATION SETTINGS --------------------
+        const fileRules = {
+            image: {
+                maxSize: 5 * 1024 * 1024, // 5 MB
+                allowed: [".jpg", ".jpeg", ".png", ".gif", ".webp"]
+            },
+            video: {
+                maxSize: 200 * 1024 * 1024, // 200 MB
+                allowed: [".mp4", ".mov", ".avi"]
+            }
+        };
+
+        // Add error message containers below each file input
+        const fileInputs = [
+            { id: "ImageFile", type: "image" },
+            { id: "ThumbnailFile", type: "image" },
+            { id: "VideoFile", type: "video" }
+        ];
+
+        fileInputs.forEach(f => {
+            const input = document.getElementById(f.id);
+            if (input && !input.parentElement.querySelector(".file-error")) {
+                const error = document.createElement("span");
+                error.className = "file-error";
+                error.style.color = "red";
+                error.style.fontSize = "0.85rem";
+                error.style.display = "none";
+                error.style.marginTop = "4px";
+                error.style.marginLeft = "2px";
+                error.style.display = "block"; // ensure it's below
+                input.insertAdjacentElement("afterend", error);
+            }
+        });
+
+        function validateFile(input, type) {
+            const file = input.files[0];
+            const errorEl = input.parentElement.querySelector(".file-error");
+            if (!file || !errorEl) return true;
+
+            errorEl.textContent = "";
+            errorEl.style.display = "none";
+
+            const { maxSize, allowed } = fileRules[type];
+            const ext = file.name.toLowerCase().substring(file.name.lastIndexOf("."));
+
+            // Validate extension
+            if (!allowed.includes(ext)) {
+                errorEl.textContent = `Invalid file type. Allowed: ${allowed.join(", ")}`;
+                errorEl.style.display = "block";
+                input.value = "";
+                return false;
+            }
+
+            // Validate file size
+            if (file.size > maxSize) {
+                const sizeMB = (maxSize / (1024 * 1024)).toFixed(0);
+                errorEl.textContent = `File too large. Max ${sizeMB} MB allowed.`;
+                errorEl.style.display = "block";
+                input.value = "";
+                return false;
+            }
+
+            return true;
+        }
+
+        // -------------------- IMAGE PREVIEW --------------------
         const imageInput = document.getElementById("ImageFile");
         const imagePreview = document.getElementById("imagePreview");
 
         imageInput.addEventListener("change", function () {
             const file = this.files[0];
+            if (!validateFile(this, "image")) return;
+
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
@@ -345,12 +411,14 @@
             }
         });
 
-        // Video Preview
+        // -------------------- VIDEO PREVIEW --------------------
         const videoInput = document.getElementById("VideoFile");
         const videoPreview = document.getElementById("videoPreview");
 
         videoInput.addEventListener("change", function () {
             const file = this.files[0];
+            if (!validateFile(this, "video")) return;
+
             if (file) {
                 const videoURL = URL.createObjectURL(file);
                 videoPreview.src = videoURL;
@@ -358,12 +426,14 @@
             }
         });
 
-        // Thumbnail Preview
+        // -------------------- THUMBNAIL PREVIEW --------------------
         const thumbInput = document.getElementById("ThumbnailFile");
         const thumbPreview = document.getElementById("thumbPreview");
 
         thumbInput.addEventListener("change", function () {
             const file = this.files[0];
+            if (!validateFile(this, "image")) return;
+
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
@@ -374,6 +444,7 @@
             }
         });
 
+        // -------------------- OBJECTIVES ADD/REMOVE --------------------
         const container = document.getElementById("objectives-container");
         const addBtn = document.getElementById("add-objective");
         let objectiveIndex = container.children.length; // initial count
@@ -420,7 +491,7 @@
             objectiveIndex = items.length;
         }
 
-        // Button enable logic
+        // -------------------- BUTTON ENABLE LOGIC --------------------
         const form = document.getElementById("create-course-form");
         const submitBtn = form?.querySelector(".create-course-btn-publish");
         if (!form || !submitBtn) return;
@@ -435,92 +506,7 @@
         form.addEventListener("change", checkRequiredFields);
         checkRequiredFields(); // initial check
 
-        const worksContainer = document.getElementById("artisan-works-container");
-        const addWorkBtn = document.getElementById("add-work");
-        let workIndex = 0;
-
-        function createWorkItem(index) {
-            const wrapper = document.createElement("div");
-            wrapper.className = "artisan-work-item";
-
-            wrapper.innerHTML = `
-                <button type="button" class="delete-work-btn" title="Remove Work">🗑️</button>
-
-                <div class="artisan-work-preview">
-                    <img id="workPreview_${index}" style="display:none;" />
-                </div>
-
-                <div class="artisan-work-fields">
-                    <input type="file" name="ArtisanWorks[${index}].ImageFile" 
-                           accept="image/*" required 
-                           onchange="previewWorkImage(event, ${index})" />
-
-                    <input type="text" name="ArtisanWorks[${index}].Title" 
-                           placeholder="Work Title" required />
-
-                    <input type="text" name="ArtisanWorks[${index}].Caption" 
-                           placeholder="Work Caption" required />
-                </div>
-            `;
-
-            wrapper.querySelector(".delete-work-btn").addEventListener("click", () => {
-                wrapper.remove();
-                renumberWorks();
-                checkRequiredWorks();
-            });
-
-            return wrapper;
-        }
-
-        addWorkBtn.addEventListener("click", () => {
-            const newItem = createWorkItem(workIndex++);
-            worksContainer.appendChild(newItem);
-            checkRequiredWorks();
-        });
-
-        window.previewWorkImage = function (event, index) {
-            const file = event.target.files[0];
-            const preview = document.getElementById(`workPreview_${index}`);
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    preview.src = e.target.result;
-                    preview.style.display = "block";
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-
-        function renumberWorks() {
-            const items = worksContainer.querySelectorAll(".artisan-work-item");
-            items.forEach((item, i) => {
-                const inputs = item.querySelectorAll("input");
-                inputs.forEach(input => {
-                    if (input.type === "file") {
-                        input.name = `ArtisanWorks[${i}].ImageFile`;
-                    }
-                    if (input.placeholder.includes("Title")) {
-                        input.name = `ArtisanWorks[${i}].Title`;
-                    }
-                    if (input.placeholder.includes("Caption")) {
-                        input.name = `ArtisanWorks[${i}].Caption`;
-                    }
-                });
-                item.querySelector("img").id = `workPreview_${i}`;
-            });
-            workIndex = items.length;
-        }
-
-        function checkRequiredWorks() {
-            const items = worksContainer.querySelectorAll(".artisan-work-item");
-            const createBtn = document.getElementById("createBtn");
-            if (createBtn) {
-                createBtn.disabled = items.length === 0;
-            }
-        }
-
-        checkRequiredWorks();
-
+        // -------------------- DURATION VALIDATION --------------------
         const durationInput = document.getElementById("Course_DurationValue");
         if (durationInput) {
             durationInput.addEventListener("input", () => {

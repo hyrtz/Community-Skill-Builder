@@ -7,6 +7,8 @@
 
     var userEnrollment = Model.Enrollments.FirstOrDefault(e => e.UserId == userId);
     var isEnrolled = userEnrollment != null;
+    var projectStatus = userEnrollment?.FinalProjectStatus;
+    var signatureUrl = userEnrollment?.DigitalSignatureUrl;
 
     // ✅ Show completion button if enrollment exists and is marked completed
     bool showCompletionBtn = userEnrollment != null && userEnrollment.IsCompleted;
@@ -328,19 +330,25 @@
             <span class="course-detail-cc-close" id="completion-modal-close">&times;</span>
             <h2 class="course-detail-cc-title">Course Completion Status</h2>
 
-            @if (userEnrollment?.IsCompleted == true)
+            @if (userEnrollment?.IsCompleted == true && projectStatus == "Approved")
             {
                 <p style="text-align:center; font-size:1rem; margin-top:1rem; margin-bottom: 2rem;">
-                    🎉 Congratulations! You've successfully completed this course.
+                    🎉 Congratulations! Your final project has been approved.
                 </p>
                 <a href="/Courses/DownloadCertificate/@Model.Id" class="course-detail-enroll-btn" style="text-decoration: none;">
                     Download Certificate
                 </a>
             }
+            else if (userEnrollment?.IsCompleted == true && projectStatus != "Approved")
+            {
+                <p style="text-align:center; font-size:1rem; margin-top:1rem;">
+                    Your final project is submitted but not yet approved. Please wait for approval to download the certificate.
+                </p>
+            }
             else
             {
                 <p style="text-align:center; font-size:1rem; margin-top:1rem;">
-                    Wait for the artisan to check your final project.
+                    You have not completed the course yet.
                 </p>
             }
         </div>
@@ -351,7 +359,7 @@
         <nav class="course-detail-notebook-tabs">
             <a class="notebook-tab active" data-tab="info">Information</a>
             <a class="notebook-tab" data-tab="modules">Modules</a>
-            <a class="notebook-tab" data-tab="materials">Materials</a>
+            @* <a class="notebook-tab" data-tab="materials">Materials</a> *@
             <a class="notebook-tab" data-tab="mentor">Mentor</a>
             <a class="notebook-tab" data-tab="reviews">Reviews</a>
         </nav>
@@ -363,9 +371,9 @@
             <div class="tab-content" data-tab="modules">
                 @Html.Partial("Sections/CourseNotebooks/_CourseNotebookModule", Model)
             </div>
-            <div class="tab-content" data-tab="materials">
+            @* <div class="tab-content" data-tab="materials">
                 @Html.Partial("Sections/CourseNotebooks/_CourseNotebookMaterials", Model)
-            </div>
+            </div> *@
             <div class="tab-content" data-tab="mentor">
                 @Html.Partial("Sections/CourseNotebooks/_CourseNotebookMentor", Model)
             </div>
@@ -482,10 +490,13 @@
         const modal = document.getElementById("celebration-modal");
         modal.classList.remove("show");
 
-        // Re-enable navbar
         document.querySelector("nav").classList.remove("celebration-navbar-disabled");
 
-        location.reload();
+        if (window.afterCelebrationRedirect) {
+            window.location.href = window.afterCelebrationRedirect;
+        } else {
+            location.reload();
+        }
     }
 
     const completionBtn = document.getElementById("view-completion-btn");
@@ -533,7 +544,22 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = `/Courses/CourseModule/${courseId}`;
+                    // 🔥 Hide confirmation modal first
+                    modal.style.display = "none";
+
+                    if (data.showAchievement) {
+                        const firstAchievement = data.achievements[0];
+                        document.querySelector(".celebration-title").textContent = `🎉 ${firstAchievement}`;
+                        document.querySelector(".celebration-text").textContent =
+                            firstAchievement === "Lifelong Learner"
+                                ? "You've enrolled in 3 courses — keep going!"
+                                : "You’ve successfully enrolled in your first course.";
+
+                        showAchievementCelebration();
+                        window.afterCelebrationRedirect = `/Courses/CourseModule/${courseId}`;
+                    } else {
+                        window.location.href = `/Courses/CourseModule/${courseId}`;
+                    }
                 } else {
                     console.error("Enrollment failed");
                 }

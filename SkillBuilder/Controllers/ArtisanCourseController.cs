@@ -39,12 +39,11 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpPost("CreateCourse")]
+        [RequestSizeLimit(200 * 1024 * 1024)] // Allow up to 200 MB for this action
         public async Task<IActionResult> CreateCourse(CourseBuilderViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
-            }
 
             var userId = User.FindFirst("UserId")?.Value;
             var artisan = await _context.Artisans.FirstOrDefaultAsync(a => a.UserId == userId);
@@ -53,18 +52,38 @@ namespace SkillBuilder.Controllers
             var course = model.Course!;
             course.CreatedBy = artisan.ArtisanId;
             course.CreatedAt = DateTime.UtcNow;
-
             course.Duration = $"{model.DurationValue} {model.DurationUnit}";
 
-            // Save course media
+            // ✅ File Uploads with Validation
             if (model.ImageFile != null)
+            {
+                if (model.ImageFile.Length > 5 * 1024 * 1024) // 5 MB
+                {
+                    ModelState.AddModelError("ImageFile", "Image file must be under 5 MB.");
+                    return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
+                }
                 course.ImageUrl = await SaveFileAsync(model.ImageFile, "course-images");
+            }
 
             if (model.VideoFile != null)
+            {
+                if (model.VideoFile.Length > 200 * 1024 * 1024) // 200 MB
+                {
+                    ModelState.AddModelError("VideoFile", "Video file must be under 200 MB.");
+                    return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
+                }
                 course.Video = await SaveFileAsync(model.VideoFile, "course-videos");
+            }
 
             if (model.ThumbnailFile != null)
+            {
+                if (model.ThumbnailFile.Length > 5 * 1024 * 1024) // 5 MB
+                {
+                    ModelState.AddModelError("ThumbnailFile", "Thumbnail must be under 5 MB.");
+                    return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
+                }
                 course.Thumbnail = await SaveFileAsync(model.ThumbnailFile, "course-thumbnails");
+            }
 
             // Generate course link if missing
             course.Link = string.IsNullOrWhiteSpace(course.Link)
@@ -73,7 +92,7 @@ namespace SkillBuilder.Controllers
                   ).Trim('-') + "-" + Guid.NewGuid().ToString("N")[..8]
                 : course.Link;
 
-            // Save learning objectives
+            // Learning objectives
             course.WhatToLearn = model.LearningObjectives != null
                 ? string.Join("||", model.LearningObjectives.Where(o => !string.IsNullOrWhiteSpace(o)))
                 : null;
@@ -87,33 +106,7 @@ namespace SkillBuilder.Controllers
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
 
-            //// ✅ Save Artisan Works
-            //if (model.ArtisanWorks != null && model.ArtisanWorks.Any())
-            //{
-            //    foreach (var workVm in model.ArtisanWorks)
-            //    {
-            //        if (workVm.ImageFile != null)
-            //        {
-            //            var imageUrl = await SaveFileAsync(workVm.ImageFile, "artisan-works");
-
-            //            var work = new ArtisanWork
-            //            {
-            //                ArtisanId = artisan.ArtisanId,
-            //                CourseId = course.Id,
-            //                Title = workVm.Title ?? string.Empty,
-            //                Caption = workVm.Caption ?? string.Empty,
-            //                ImageUrl = imageUrl,
-            //                PublishDate = DateTime.UtcNow
-            //            };
-
-            //            _context.ArtisanWorks.Add(work);
-            //        }
-            //    }
-
-            //    await _context.SaveChangesAsync();
-            //}
-
-            // ✅ Save Modules
+            // ✅ Modules
             if (model.Modules != null)
             {
                 for (int i = 0; i < model.Modules.Count; i++)
@@ -142,15 +135,10 @@ namespace SkillBuilder.Controllers
                             ContentText = lesson.ContentText
                         };
 
-                        // Fix MediaUrl: prefer Video over Image
                         if (lesson.VideoFile != null)
-                        {
                             moduleContent.MediaUrl = await SaveFileAsync(lesson.VideoFile, "lesson-videos");
-                        }
                         else if (lesson.ImageFile != null)
-                        {
                             moduleContent.MediaUrl = await SaveFileAsync(lesson.ImageFile, "lesson-images");
-                        }
 
                         _context.ModuleContents.Add(moduleContent);
                         await _context.SaveChangesAsync();
@@ -178,7 +166,7 @@ namespace SkillBuilder.Controllers
                 }
             }
 
-            // ✅ Save Materials
+            // ✅ Materials
             if (model.Materials != null)
             {
                 foreach (var mat in model.Materials)
@@ -206,20 +194,43 @@ namespace SkillBuilder.Controllers
                 $"✅ Your course '{course.Title}' has been successfully created!"
             );
 
-            var redirectUrl = Url.Action("ArtisanProfile", "ArtisanProfile", new { id = artisan.ArtisanId });
-            if (string.IsNullOrEmpty(redirectUrl))
-                return BadRequest("Redirect URL failed to generate.");
-
             return Redirect($"/ArtisanProfile/{artisan.ArtisanId}");
         }
 
         private async Task<string> SaveFileAsync(IFormFile file, string folderName)
         {
+            if (file == null || file.Length == 0)
+                throw new InvalidOperationException("File is empty or missing.");
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            // ✅ File type and size validation (added .webp)
+            if (extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp")
+            {
+                if (file.Length > 5 * 1024 * 1024)
+                    throw new InvalidOperationException("Image files must be under 5 MB.");
+            }
+            else if (extension is ".pdf" or ".docx" or ".txt")
+            {
+                if (file.Length > 10 * 1024 * 1024)
+                    throw new InvalidOperationException("Document files must be under 10 MB.");
+            }
+            else if (extension is ".mp4" or ".mov" or ".avi")
+            {
+                if (file.Length > 200 * 1024 * 1024)
+                    throw new InvalidOperationException("Video files must be under 200 MB.");
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported file type.");
+            }
+
+            // ✅ Save file to uploads folder
             var uploadsRoot = Path.Combine(_env.WebRootPath, "uploads", folderName);
             if (!Directory.Exists(uploadsRoot))
                 Directory.CreateDirectory(uploadsRoot);
 
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var fileName = $"{Guid.NewGuid()}{extension}";
             var filePath = Path.Combine(uploadsRoot, fileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -309,15 +320,6 @@ namespace SkillBuilder.Controllers
                     Title = course.FinalProjectTitle,
                     Description = course.FinalProjectDescription
                 },
-                //ArtisanWorks = course.ArtisanWorks
-                //    .Select(w => new ArtisanWorkViewModel
-                //    {
-                //        Id = w.Id,
-                //        CourseId = w.CourseId,
-                //        Title = w.Title,
-                //        Caption = w.Caption,
-                //        ImageUrl = w.ImageUrl // ✅ preload existing image URL
-                //    }).ToList()
             };
 
             return View("~/Views/Actions/ArtisanActions/EditCourse.cshtml", viewModel);

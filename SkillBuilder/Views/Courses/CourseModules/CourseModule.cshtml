@@ -395,7 +395,7 @@
     .points-popup {
         display: none;
         position: fixed;
-        bottom: 2rem;
+        top: 5rem;
         left: 50%;
         transform: translateX(-50%);
         z-index: 9999;
@@ -1501,6 +1501,14 @@
             if (nextBtn) nextBtn.disabled = false;
         }
 
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
         function loadDynamicQuestion() {
             const q = dynamicQuizQuestions[currentQ];
             selected = null;
@@ -1513,7 +1521,10 @@
             const progress = Math.round((currentQ / dynamicQuizQuestions.length) * 100);
             document.getElementById("quizProgressFilled").style.width = `${progress}%`;
 
-            q.options.forEach((option, i) => {
+            // ✅ Shuffle options before rendering
+            const shuffledOptions = shuffleArray([...q.options]);
+
+            shuffledOptions.forEach((option, i) => {
                 const btn = document.createElement("div");
                 btn.innerText = option;
                 btn.className = "quiz-option";
@@ -1525,6 +1536,9 @@
                 };
                 document.getElementById("quizOptions").appendChild(btn);
             });
+
+            // Store the correct answer index relative to shuffled options
+            q.shuffledOptions = shuffledOptions; // add this
         }
 
         function showFeedback(correct) {
@@ -1560,7 +1574,8 @@
 
         function submitAnswer() {
             const q = dynamicQuizQuestions[currentQ];
-            const isCorrect = q.options[selected] === q.correctAnswer;
+            const chosenOption = q.shuffledOptions[selected]; // use shuffled options
+            const isCorrect = chosenOption === q.correctAnswer;
 
             if (isCorrect) score++;
             showFeedback(isCorrect);
@@ -1581,24 +1596,49 @@
 
         function showQuizComplete() {
             document.getElementById("quizModal").classList.remove("show");
-            document.getElementById("quizCompleteModal").style.display = "flex";
-
-            if (!quizCompleted) {
-                showPointsPopup(80);
-                quizCompleted = true;
-            }
-
-            document.getElementById("quizScore").innerText =
-                `${score} / ${dynamicQuizQuestions.length} (${Math.round((score / dynamicQuizQuestions.length) * 100)}%)`;
-
-            document.getElementById("quizProgressFilled").style.width = `100%`;
+            const modal = document.getElementById("quizCompleteModal");
+            modal.style.display = "flex";
 
             const nextBtn = document.getElementById("continueNextBtn");
-            if (nextBtn) nextBtn.disabled = false;
+            const scorePercent = Math.round((score / dynamicQuizQuestions.length) * 100);
 
-            // ✅ Use the stored index here
-            markQuizCompleted(currentQuizModuleIndex);
+            const header = modal.querySelector("h1");
+            const message = modal.querySelector("p:nth-of-type(1)");
+            const scoreDisplay = document.getElementById("quizScore");
+
+            scoreDisplay.innerText = `${score} / ${dynamicQuizQuestions.length} (${scorePercent}%)`;
+
+            document.getElementById("quizProgressFilled").style.width = `100%`;
             nextBtn.disabled = false;
+
+            if (scorePercent < 51) {
+                // ❌ User failed
+                header.innerText = "Quiz Failed!";
+                header.style.color = "#FF4B5C"; // red
+                message.innerText = "You did not reach the passing score. Please try again.";
+                nextBtn.innerText = "Try Again";
+                nextBtn.onclick = () => {
+                    modal.style.display = "none";
+                    startDynamicQuiz(dynamicQuizQuestions); // restart same quiz
+                };
+            } else {
+                // ✅ User passed
+                header.innerText = "Quiz Complete!";
+                header.style.color = "#344AEA"; // blue
+                message.innerText = "You've finished the quiz.";
+                nextBtn.innerText = "Continue Course";
+                nextBtn.onclick = () => {
+                    modal.style.display = "none";
+                    if (currentQuizModuleIndex !== null) goToNextTab(currentQuizModuleIndex);
+                };
+
+                // Only mark quiz completed if passed
+                markQuizCompleted(currentQuizModuleIndex);
+                if (!quizCompleted) {
+                    showPointsPopup(80); // award points
+                    quizCompleted = true;
+                }
+            }
         }
 
         function isQuizCompleted(index) {

@@ -1,8 +1,8 @@
 [
   {
     "ContainingType": "SkillBuilder.Controllers.ModuleProgressController",
-    "Method": "CompleteModule",
-    "RelativePath": "api/ModuleProgress/CompleteModule",
+    "Method": "AddPoints",
+    "RelativePath": "api/ModuleProgress/AddPoints",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,

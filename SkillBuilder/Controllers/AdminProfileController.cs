@@ -170,15 +170,38 @@ namespace SkillBuilder.Controllers
         [HttpGet("CommunityDetails/{id}")]
         public IActionResult CommunityDetails(int id)
         {
+            // Load the community with its creator and posts (including authors)
             var community = _context.Communities
                 .Include(c => c.Creator)
+                .Include(c => c.Posts)
+                    .ThenInclude(p => p.Author)  // <-- include Author for each post
                 .FirstOrDefault(c => c.Id == id);
 
             if (community == null)
                 return NotFound();
 
-            // Assuming you want a view showing details and courses of this community
-            return View("~/Views/Shared/Sections/_CommunityDetailsSection.cshtml", community);
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var viewModel = new CommunityDetailsViewModel
+            {
+                SelectedCommunity = community,
+                IsOwner = community.Creator != null && currentUserId == community.Creator.Id,
+                IsJoined = _context.CommunityMemberships
+                            .Any(m => m.CommunityId == id && m.UserId == currentUserId),
+                Posts = community.Posts?.Select(p => new CommunityPostViewModel
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    ImageUrl = p.ImageUrl,
+                    AuthorName = p.Author != null ? $"{p.Author.FirstName} {p.Author.LastName}" : "Unknown",
+                    SubmittedAt = p.SubmittedAt
+                }).ToList() ?? new List<CommunityPostViewModel>(),
+
+                IsAdmin = User.IsInRole("Admin")
+            };
+
+            return View("~/Views/Shared/Sections/_CommunityDetailsSection.cshtml", viewModel);
         }
 
         [HttpPost("ToggleUserStatus/{id}")]
@@ -308,6 +331,32 @@ namespace SkillBuilder.Controllers
             return RedirectToRoute(new { controller = "AdminProfile", action = "AdminProfile", id = adminId });
         }
 
+        [HttpPost("ToggleCourseStatus/{id}")]
+        public async Task<IActionResult> ToggleCourseStatus(int id, string adminId, string? reason)
+        {
+            var course = await _context.Courses
+                .Include(c => c.Artisan)
+                    .ThenInclude(a => a.User)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (course == null) return NotFound();
+
+            course.IsPublished = !course.IsPublished;
+            _context.Courses.Update(course);
+            await _context.SaveChangesAsync();
+
+            // Notify creator
+            if (course.Artisan?.User != null && !course.IsPublished)
+            {
+                await AddNotificationAsync(course.Artisan.User.Id, $"Your course '{course.Title}' has been unpublished. Reason: {reason}");
+            }
+
+            // Notify admin
+            await AddNotificationAsync(adminId, $"You have {(course.IsPublished ? "published" : "unpublished")} the course '{course.Title}'.");
+
+            return RedirectToRoute(new { controller = "AdminProfile", action = "AdminProfile", id = adminId });
+        }
+
         [HttpPost("DeleteCourse/{id}")]
         public async Task<IActionResult> DeleteCourse(int id, string adminId, string reason)
         {
@@ -341,6 +390,40 @@ namespace SkillBuilder.Controllers
             return RedirectToRoute(new { controller = "AdminProfile", action = "AdminProfile", id = adminId });
         }
 
+        [HttpPost("ToggleCommunityStatus/{id}")]
+        public async Task<IActionResult> ToggleCommunityStatus(int id, string adminId, string? reason)
+        {
+            var community = await _context.Communities
+                .Include(c => c.Creator)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (community == null)
+                return NotFound();
+
+            // Toggle publish status
+            community.IsPublished = !community.IsPublished;
+            _context.Communities.Update(community);
+            await _context.SaveChangesAsync();
+
+            // Notify the creator
+            if (community.Creator != null)
+            {
+                string message = community.IsPublished
+                    ? $"✅ Your community '{community.Name}' has been published by the admin."
+                    : $"⚠️ Your community '{community.Name}' has been unpublished by the admin. {(!string.IsNullOrWhiteSpace(reason) ? "Reason: " + reason : "")}";
+
+                await AddNotificationAsync(community.Creator.Id, message);
+            }
+
+            // Notify the admin
+            await AddNotificationAsync(
+                adminId,
+                $"You have {(community.IsPublished ? "published" : "unpublished")} the community '{community.Name}'."
+            );
+
+            return RedirectToRoute(new { controller = "AdminProfile", action = "AdminProfile", id = adminId });
+        }
+
         [HttpPost("DeleteCommunity/{id}")]
         public async Task<IActionResult> DeleteCommunity(int id, string adminId, string reason)
         {
@@ -369,6 +452,43 @@ namespace SkillBuilder.Controllers
             );
 
             return RedirectToRoute(new { controller = "AdminProfile", action = "AdminProfile", id = adminId });
+        }
+
+        [HttpPost("AdminDeletePost")]
+        [HttpPost("/Community/AdminDeletePost")]
+        public async Task<IActionResult> AdminDeletePost([FromForm] int postId, [FromForm] string? reason)
+        {
+            var adminId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var post = await _context.CommunityPosts
+                .Include(p => p.Author)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return Json(new { success = false, message = "Post not found" });
+
+            // Delete the post
+            _context.CommunityPosts.Remove(post);
+            await _context.SaveChangesAsync();
+
+            // Notify the author with reason
+            if (post.Author != null)
+            {
+                string authorMessage = $"⚠️ Your post '{post.Title}' has been deleted by an admin.";
+                if (!string.IsNullOrWhiteSpace(reason))
+                    authorMessage += $" Reason: {reason}";
+
+                await AddNotificationAsync(post.Author.Id, authorMessage);
+            }
+
+            // Notify the admin
+            string adminMessage = $"You deleted the post '{post.Title}' by {post.Author?.FirstName} {post.Author?.LastName ?? "Unknown"}.";
+            if (!string.IsNullOrWhiteSpace(reason))
+                adminMessage += $" Reason: {reason}";
+
+            await AddNotificationAsync(adminId, adminMessage);
+
+            return Json(new { success = true });
         }
     }
 }

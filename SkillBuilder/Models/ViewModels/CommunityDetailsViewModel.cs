@@ -6,5 +6,7 @@
         public bool IsOwner { get; set; }
         public bool IsJoined { get; set; }
         public List<CommunityPostViewModel> Posts { get; set; } = new();
+
+        public bool IsAdmin { get; set; }
     }
 }

@@ -101,6 +101,7 @@
 
         <div class="admin-tabs">
             <button class="admin-tab active" data-tab="users">User Management</button>
+            <button class="admin-tab" data-tab="artisans">Artisan Management</button>
             <button class="admin-tab" data-tab="applications">Artisan Applications</button>
             <button class="admin-tab" data-tab="courses">Course Management</button>
             <button class="admin-tab" data-tab="community">Community Management</button>
@@ -111,6 +112,9 @@
     <div class="admin-main">
         <div class="admin-panel active" data-tab="users">
             @Html.Partial("Sections/AdminNotebooks/_AdminNotebookUserManagement", Model)
+        </div>
+        <div class="admin-panel" data-tab="artisans">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookArtisanManagement", Model)
         </div>
         <div class="admin-panel" data-tab="applications">
             @Html.Partial("Sections/AdminNotebooks/_AdminNotebookArtisanApplicationManagement", Model)

@@ -67,6 +67,7 @@
     }
 
     .curriculum-add-btn {
+        margin-bottom: 1rem;
         padding: 0.5rem 1rem;
         font-size: 0.95rem;
         font-weight: 600;
@@ -109,6 +110,28 @@
     .curriculum-final-project {
         margin-top: 2rem;
     }
+
+    .curriculum-lesson-header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .quiz-question-header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .quiz-option-error {
+        color: red;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
 </style>
 
 <div class="curriculum-container" id="curriculum-modules"></div>
@@ -178,6 +201,10 @@
         lessonDiv.className = "curriculum-lesson-block";
 
         lessonDiv.innerHTML = `
+            <div class="curriculum-lesson-header">
+                <button type="button" class="curriculum-delete-btn lesson-delete-btn" onclick="removeCurriculumLesson(${moduleIndex}, this)">🗑️</button>
+            </div>
+
             <div class="curriculum-form-row">
                 <div class="curriculum-form-col curriculum-form-group">
                     <label>Lesson Title *</label>
@@ -215,7 +242,6 @@
             </div>
 
             <div class="lesson-config-container"></div>
-            <button type="button" class="curriculum-delete-btn lesson-delete-btn" onclick="removeCurriculumLesson(${moduleIndex}, this)">🗑️ Remove Lesson</button>
         `;
 
         lessonsContainer.appendChild(lessonDiv);
@@ -359,6 +385,10 @@
         questionBlock.style.marginTop = "1rem";
 
         questionBlock.innerHTML = `
+            <div class="quiz-question-header">
+                <button type="button" class="curriculum-delete-btn" onclick="removeQuizQuestion(this)">🗑️</button>
+            </div>
+
             <div class="curriculum-form-group">
                 <label>Question ${index + 1} *</label>
                 <input type="text" name="${nameBase}.QuizQuestions[${index}].QuestionText" class="curriculum-form-control" required />
@@ -367,7 +397,7 @@
                 <label>Options *</label>
                 <div class="curriculum-form-row">
                     ${["A","B","C","D"].map(letter => `
-                        <div style="flex:1;">
+                        <div style="flex:1; display:flex; flex-direction: column;">
                             <input type="text" name="${nameBase}.QuizQuestions[${index}].Option${letter}" class="curriculum-form-control quiz-option-input" placeholder="Option ${letter}" oninput="updateRadioValue(this)" required />
                             <label>
                                 <input type="radio" name="${nameBase}.QuizQuestions[${index}].CorrectAnswer" class="correct-answer-radio" value="Option${letter}" required /> Correct
@@ -375,8 +405,8 @@
                         </div>
                     `).join("")}
                 </div>
+                <span class="quiz-option-error" style="display:none;">Duplicate options are not allowed!</span>
             </div>
-            <button type="button" class="curriculum-delete-btn" onclick="removeQuizQuestion(this)">🗑️ Remove Question</button>
         `;
 
         container.appendChild(questionBlock);
@@ -384,9 +414,32 @@
     }
 
     function updateRadioValue(textInput) {
+        // Update the correct answer radio value
         const container = textInput.closest("div");
         const radio = container.querySelector("input.correct-answer-radio");
         if (radio) radio.value = textInput.value;
+
+        // Check duplicates immediately
+        const quizQuestion = textInput.closest(".quiz-question");
+        if (quizQuestion) checkDuplicateOptions(quizQuestion);
+    }
+
+    function checkDuplicateOptions(quizQuestion) {
+        const optionInputs = quizQuestion.querySelectorAll(".quiz-option-input");
+        const values = Array.from(optionInputs)
+                            .map(input => input.value.trim())
+                            .filter(v => v !== ""); // ignore blanks
+
+        // Check for duplicates
+        const duplicatesExist = values.some((item, index) => values.indexOf(item) !== index);
+
+        // Find the single error span for this question
+        const errorSpan = quizQuestion.querySelector(".quiz-option-error");
+        if (errorSpan) {
+            errorSpan.style.display = duplicatesExist ? "block" : "none";
+        }
+
+        return duplicatesExist;
     }
 
     document.addEventListener("input", (e) => {

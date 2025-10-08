@@ -6,8 +6,13 @@
     if (ViewBag.ShowArchived != null)
         showArchived = (bool)ViewBag.ShowArchived;
 
-    var existingUsers = Model.AllUsers.Where(u => !u.IsArchived).ToList();
-    var archivedUsers = Model.AllUsers.Where(u => u.IsArchived).ToList();
+    // Only learners (not Artisan or Admin)
+    var existingUsers = Model.AllUsers
+        .Where(u => !u.IsArchived && u.Role != "Admin" && u.Artisan == null)
+        .ToList();
+    var archivedUsers = Model.AllUsers
+        .Where(u => u.IsArchived && u.Role != "Admin" && u.Artisan == null)
+        .ToList();
 }
 
 
@@ -125,6 +130,8 @@
             cursor: pointer;
             font-size: 0.9rem;
             font-weight: bold;
+            max-width: 110px;
+            min-width: 110px;
         }
 
     .user-mgmt-delete-btn {
@@ -326,7 +333,7 @@
 
     <div class="user-mgmt-user-tabs">
         <button class="user-mgmt-user-tab active" data-tab="existing">Existing</button>
-        <button class="user-mgmt-user-tab" data-tab="archived">Deleted</button>
+        <!-- <button class="user-mgmt-user-tab" data-tab="archived">Deleted</button> -->
     </div>
 
     <table class="user-mgmt-user-table">

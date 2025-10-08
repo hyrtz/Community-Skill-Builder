@@ -19,7 +19,6 @@
         public string? AuthorProfession { get; set; } // only if Artisan
 
         // Engagement
-        public int Likes { get; set; }
         public int CommentsCount { get; set; }
 
         // (Optional) later when communities are real entities

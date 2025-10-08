@@ -74,10 +74,73 @@
         font-size: 0.85rem;
         color: #666;
     }
+
+    /* Search bar wrapper */
+    .artisan-search-bar-wrapper {
+        display: flex;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+        /* Input field */
+        .artisan-search-bar-wrapper input {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        /* Optional search button */
+        .artisan-search-bar-wrapper button {
+            flex: 0 0 auto;
+            background-color: #344AEA;
+            border: none;
+            padding: 0 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .artisan-search-bar-wrapper button img {
+                width: 1.2rem;
+                height: 1.2rem;
+            }
 </style>
 
 <div class="artisan-list-container">
     <div class="artisan-list-header">All Artisans</div>
+
+    <!-- Search bar + Filter dropdown -->
+    <div class="artisan-search-bar-wrapper" style="margin-bottom: 2rem; gap: 1rem;">
+        <input type="text" id="artisanSearchInput" placeholder="Search by name..." />
+
+        <!-- Filter dropdown -->
+        <select id="artisanProfessionFilter" style="
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        background-color: white;
+        cursor: pointer;
+    ">
+            <option value="">All Professions</option>
+            <option value="Potter">Potter</option>
+            <option value="Weaver">Weaver</option>
+            <option value="Woodcarver">Woodcarver</option>
+            <option value="Shoemaker">Shoemaker</option>
+            <option value="Paper Crafter">Paper Crafter</option>
+            <option value="Embroiderer">Embroiderer</option>
+        </select>
+
+        <button type="button">
+            <img src="/assets/Icons/Search.ico" alt="Search" />
+        </button>
+    </div>
 
     <table class="artisan-table">
         <tbody>
@@ -105,11 +168,35 @@
 </div>
 
 <script>
-    window.addEventListener('load', () => {
+    window.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('artisanSearchInput');
+        const professionFilter = document.getElementById('artisanProfessionFilter');
+        const artisanRows = document.querySelectorAll('.artisan-row');
+
+        function filterArtisans() {
+            const nameQuery = searchInput.value.toLowerCase().trim();
+            const professionQuery = professionFilter.value; // exact match or empty for all
+
+            artisanRows.forEach(row => {
+                const name = row.querySelector('.artisan-name a').innerText.toLowerCase();
+                const profession = row.cells[1].innerText;
+
+                const matchesName = name.includes(nameQuery);
+                const matchesProfession = !professionQuery || profession === professionQuery;
+
+                row.style.display = (matchesName && matchesProfession) ? 'table-row' : 'none';
+            });
+        }
+
+        // Trigger filter when typing or changing profession
+        searchInput.addEventListener('input', filterArtisans);
+        professionFilter.addEventListener('change', filterArtisans);
+
+        // Optional: Remove ?search= from URL on page load
         const url = new URL(window.location.href);
         if (url.searchParams.has('search')) {
             url.searchParams.delete('search');
-            window.history.replaceState({}, document.title, url.pathname); // Removes ?search=...
+            window.history.replaceState({}, document.title, url.pathname);
         }
     });
 </script>

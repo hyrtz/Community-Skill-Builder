@@ -64,13 +64,22 @@ else
         @foreach (var enrollment in Model.Where(e => !e.IsCompleted))
         {
             var course = enrollment.Course;
-            <a href="/Courses?selectedCourse=@course.Link" class="user-course-inprogress-link">
+            <a href="@(course.IsPublished ? $"/Courses?selectedCourse={course.Link}" : "#")"
+               class="user-course-inprogress-link">
                 <div class="user-course-inprogress-card">
                     <div class="user-course-inprogress-info">
                         <div class="user-course-inprogress-title">@course.Title</div>
                         <div class="user-course-inprogress-description">@course.Overview</div>
+                        @if (!course.IsPublished)
+                        {
+                            <div style="color: red; font-weight: bold; margin-top: 0.25rem;">
+                                This course is currently unpublished
+                            </div>
+                        }
                     </div>
-                    <div class="user-course-inprogress-status">In progress</div>
+                    <div class="user-course-inprogress-status">
+                        @(course.IsPublished ? "In progress" : "Unavailable")
+                    </div>
                 </div>
             </a>
         }

@@ -33,6 +33,13 @@ namespace SkillBuilder.Controllers
                 .Include(c => c.CourseModules).ThenInclude(m => m.Contents)
                 .AsQueryable();
 
+            // Only show published courses for normal users
+            if (!User.IsInRole("Admin"))
+            {
+                var userId = User.FindFirstValue("UserId");
+                courses = courses.Where(c => c.IsPublished || c.Artisan.UserId == userId);
+            }
+
             if (!string.IsNullOrEmpty(search))
             {
                 search = search.ToLower();
@@ -95,10 +102,10 @@ namespace SkillBuilder.Controllers
 
             // Step 1: Get courses that match interests (partial matching)
             var matchedCourses = _context.Courses
-                .Where(c => interestList.Any(interest =>
+                .Where(c => c.IsPublished && interestList.Any(interest =>
                     c.Category.ToLower().Contains(interest) ||
                     c.Title.ToLower().Contains(interest)))
-                .OrderBy(c => Guid.NewGuid()) // randomize
+                .OrderBy(c => Guid.NewGuid())
                 .Take(4)
                 .ToList();
 
@@ -225,6 +232,13 @@ namespace SkillBuilder.Controllers
 
             if (course == null) return NotFound();
 
+            // 🔒 Prevent access to unpublished courses for normal users
+            if (!course.IsPublished && course.Artisan.UserId != userId && !User.IsInRole("Admin"))
+            {
+                TempData["ErrorMessage"] = "You cannot access this course because it is not published.";
+                return RedirectToAction("CourseCatalog");
+            }
+
             var isEnrolled = _context.Enrollments
                 .Any(e => e.CourseId == id && e.UserId == userId);
 
@@ -299,6 +313,7 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpPost("SubmitFinalProject")]
+        [RequestSizeLimit(200 * 1024 * 1024)]
         public async Task<IActionResult> SubmitFinalProject([FromForm] FinalProjectDto dto)
         {
             var userId = User.FindFirstValue("UserId");

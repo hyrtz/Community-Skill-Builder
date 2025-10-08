@@ -421,6 +421,9 @@ namespace SkillBuilder.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MembersCount")
                         .HasColumnType("int");
 
@@ -444,6 +447,7 @@ namespace SkillBuilder.Migrations
                             CreatorId = "user-1",
                             Description = "A community for learners and artisans passionate about pottery and ceramics.",
                             IsArchived = false,
+                            IsPublished = true,
                             MembersCount = 125,
                             Name = "Pottery Enthusiasts"
                         },
@@ -456,6 +460,7 @@ namespace SkillBuilder.Migrations
                             CreatorId = "user-2",
                             Description = "Connecting artisans and learners who love weaving traditional and modern textiles.",
                             IsArchived = false,
+                            IsPublished = true,
                             MembersCount = 98,
                             Name = "Weaving Circle"
                         },
@@ -468,6 +473,7 @@ namespace SkillBuilder.Migrations
                             CreatorId = "user-3",
                             Description = "A space for woodcarvers to share projects, tips, and showcase craftsmanship.",
                             IsArchived = false,
+                            IsPublished = true,
                             MembersCount = 150,
                             Name = "Woodcarving Masters"
                         });
@@ -496,9 +502,6 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Likes")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -519,7 +522,6 @@ namespace SkillBuilder.Migrations
                             Comment = "Lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet.",
                             Comments = 36,
                             Image = "/assets/Community Pics/Pottery.png",
-                            Likes = 128,
                             Name = "Maria Santos",
                             Role = "Learner"
                         },
@@ -530,7 +532,6 @@ namespace SkillBuilder.Migrations
                             Comment = "Lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet.",
                             Comments = 18,
                             Image = "/assets/Community Pics/Weaving.png",
-                            Likes = 89,
                             Name = "James dela Cruz",
                             Role = "Artisan"
                         },
@@ -541,7 +542,6 @@ namespace SkillBuilder.Migrations
                             Comment = "Lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet, consectetur on adipiscing elit, eiusmod tempor incididunt lorem ipsum dolor sit amet.",
                             Comments = 41,
                             Image = "/assets/Community Pics/Woodcarving.png",
-                            Likes = 212,
                             Name = "Kim Navarro",
                             Role = "Researcher"
                         });
@@ -576,6 +576,38 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("CommunityMemberships");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.CommunityPostReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReportedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReporterId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("CommunityPostReports");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CommunityTestimonial", b =>
@@ -773,7 +805,7 @@ namespace SkillBuilder.Migrations
                             FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery...",
                             ImageUrl = "/assets/Courses Pics/Pottery.png",
                             IsArchived = false,
-                            IsPublished = false,
+                            IsPublished = true,
                             Link = "pottery",
                             Overview = "Pottery is the art and craft of shaping and firing clay...",
                             Requirements = "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.",
@@ -795,7 +827,7 @@ namespace SkillBuilder.Migrations
                             FullDescription = "Explore the detailed world of woodcarving through this course...",
                             ImageUrl = "/assets/Courses Pics/Woodcarving.png",
                             IsArchived = false,
-                            IsPublished = false,
+                            IsPublished = true,
                             Link = "woodcarving",
                             Overview = "Woodcarving is the art of shaping and sculpting wood...",
                             Requirements = "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).",
@@ -817,7 +849,7 @@ namespace SkillBuilder.Migrations
                             FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design...",
                             ImageUrl = "/assets/Courses Pics/Weaving.png",
                             IsArchived = false,
-                            IsPublished = false,
+                            IsPublished = true,
                             Link = "weaving",
                             Overview = "Weaving is the craft of interlacing threads or fibers...",
                             Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
@@ -992,6 +1024,9 @@ namespace SkillBuilder.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SignatureUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1093,8 +1128,14 @@ namespace SkillBuilder.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
+                    b.Property<string>("DigitalSignatureUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("EnrolledAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FinalProjectStatus")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
@@ -1897,6 +1938,17 @@ namespace SkillBuilder.Migrations
                     b.Navigation("Community");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.CommunityPostReport", b =>
+                {
+                    b.HasOne("CommunityPost", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.Course", b =>

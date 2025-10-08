@@ -1,0 +1,635 @@
+﻿@using SkillBuilder.Models.ViewModels
+@model AdminProfileViewModel
+
+@{
+    var showArchived = false;
+    if (ViewBag.ShowArchived != null)
+        showArchived = (bool)ViewBag.ShowArchived;
+
+    // Only artisans
+    var existingArtisans = Model.AllUsers
+        .Where(u => !u.IsArchived && u.Artisan != null)
+        .ToList();
+    var archivedArtisans = Model.AllUsers
+        .Where(u => u.IsArchived && u.Artisan != null)
+        .ToList();
+}
+
+<style>
+    /* Section */
+    .artisan-mgmt-user-section {
+        padding: 2rem;
+    }
+
+    .artisan-mgmt-user-header {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: #344AEA;
+    }
+
+    .artisan-mgmt-user-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Filter button */
+    .artisan-mgmt-filter-btn {
+        flex: 0 0 10%;
+        background-color: #eee;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    /* Table */
+    .artisan-mgmt-user-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 1.2rem;
+    }
+
+        .artisan-mgmt-user-table th {
+            text-align: left;
+            font-size: 1rem;
+            color: #666;
+            padding: 0.5rem 1rem;
+        }
+
+    .artisan-mgmt-user-row {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .artisan-mgmt-user-row:hover {
+            background-color: #e6e6e6;
+            transform: scale(1.01);
+        }
+
+    .artisan-mgmt-user-cell {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .artisan-mgmt-user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .artisan-mgmt-user-info img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+    .artisan-mgmt-user-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .artisan-mgmt-user-name {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .artisan-mgmt-user-email {
+        font-size: 0.85rem;
+        color: #777;
+    }
+
+    .artisan-mgmt-user-role {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #222;
+        text-align: center;
+    }
+
+    .artisan-mgmt-action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+        .artisan-mgmt-action-buttons button {
+            background-color: #FEE4E2;
+            color: #B42318;
+            padding: 0.8rem 0.8rem;
+            border: solid #B42318 1px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+    .artisan-mgmt-delete-btn {
+        background-color: #e74c3c;
+    }
+
+        .artisan-mgmt-delete-btn:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+    .artisan-mgmt-deactivate-btn {
+        background-color: #e74c3c;
+    }
+
+        .artisan-mgmt-deactivate-btn:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+    .artisan-mgmt-reactivate-btn {
+        background-color: #A5D6A7 !important;
+        color: #4CAF50 !important;
+    }
+
+        .artisan-mgmt-reactivate-btn:hover {
+            background-color: #3d8e41 !important;
+            color: white !important;
+        }
+
+    /* Backdrop */
+    .artisan-mgmt-admin-modal-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+
+    /* Modal box */
+    .artisan-mgmt-admin-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 1001;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+    }
+
+        .artisan-mgmt-admin-modal h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .artisan-mgmt-admin-modal p {
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            color: #555;
+        }
+
+    .artisan-mgmt-admin-modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+        .artisan-mgmt-admin-modal-buttons button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+    .artisan-mgmt-admin-modal-confirm {
+        background-color: #e74c3c;
+        color: #fff;
+    }
+
+        .artisan-mgmt-admin-modal-confirm:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none !important;
+        }
+
+        .artisan-mgmt-admin-modal-confirm:not(:disabled):hover {
+            transform: scale(1.05);
+            background-color: #c0392b;
+        }
+
+    .artisan-mgmt-admin-modal-cancel {
+        background-color: #ccc;
+        color: #333;
+    }
+
+    .artisan-mgmt-admin-modal-ok {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .artisan-mgmt-admin-action-btn {
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: white;
+        transition: background-color 0.2s ease;
+    }
+
+    .artisan-mgmt-search-bar-wrapper {
+        display: flex;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .artisan-mgmt-search-bar-wrapper input {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            cursor: text;
+        }
+
+        .artisan-mgmt-search-bar-wrapper button {
+            flex: 0 0 auto;
+            background-color: #344AEA;
+            border: none;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .artisan-mgmt-search-bar-wrapper button img {
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+
+    .artisan-mgmt-archived-user-greyed {
+        opacity: 0.5;
+    }
+
+    .artisan-mgmt-user-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .artisan-mgmt-user-tab {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .artisan-mgmt-user-tab.active {
+            border-bottom-color: #344AEA;
+            color: #344AEA;
+        }
+
+        .artisan-mgmt-user-tab:hover {
+            color: #344AEA;
+        }
+</style>
+<div class="artisan-mgmt-user-section">
+    <div class="artisan-mgmt-user-header">All Artisans</div>
+
+    <div class="artisan-mgmt-user-controls">
+        <div class="artisan-mgmt-search-bar-wrapper">
+            <input type="text" id="artisanSearchInput" placeholder="Search by name or email..." />
+            <button type="button" id="artisanSearchButton">
+                <img src="/assets/Icons/Search.ico" alt="Search" />
+            </button>
+        </div>
+    </div>
+
+    <div class="artisan-mgmt-user-tabs">
+        <button class="artisan-mgmt-user-tab active" data-tab="existing">Existing</button>
+        <!-- <button class="artisan-mgmt-user-tab" data-tab="archived">Deleted</button> -->
+    </div>
+
+    <table class="artisan-mgmt-user-table">
+        <colgroup>
+            <col style="width: 33%;">
+            <col style="width: 33%; text-align:center;">
+            <col style="width: 33%; text-align:right;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th style="text-align: center;">User Type</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @* Existing artisans *@
+            @foreach (var user in existingArtisans)
+            {
+                <tr class="artisan-mgmt-user-row" data-tab="existing">
+                    <td class="artisan-mgmt-user-cell">
+                        <div class="artisan-mgmt-user-info">
+                            <img src="@user.UserAvatar" alt="Avatar" />
+                            <div class="artisan-mgmt-user-details">
+                                <div class="artisan-mgmt-user-name">
+                                    <a asp-controller="AdminProfile" asp-action="UserProfileByAdmin" asp-route-id="@user.Id" style="text-decoration: none;">
+                                        @user.FirstName @user.LastName
+                                    </a>
+                                </div>
+                                <div class="artisan-mgmt-user-email">@user.Email</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="artisan-mgmt-user-cell artisan-mgmt-user-role">
+                        Artisan
+                    </td>
+
+                    <td class="artisan-mgmt-user-cell">
+                        <div class="artisan-mgmt-action-buttons">
+                            <!-- Delete button -->
+                            <form asp-action="DeleteUser" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
+                                  onsubmit="return adminOpenDeleteModal(this);">
+                                <button type="submit" class="artisan-mgmt-admin-action-btn artisan-mgmt-delete-btn">
+                                    Delete User
+                                </button>
+                            </form>
+
+                            <!-- Toggle Deactivation button -->
+                            <form asp-action="ToggleUserStatus" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
+                                  onsubmit="return adminOpenToggleModal(this, '@(user.IsDeactivated ? "Reactivate" : "Deactivate")');">
+                                @if (user.IsDeactivated)
+                                {
+                                    <button type="submit" class="artisan-mgmt-admin-action-btn artisan-mgmt-reactivate-btn">Reactivate</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="artisan-mgmt-admin-action-btn artisan-mgmt-deactivate-btn">Deactivate</button>
+                                }
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+
+            @* Archived artisans *@
+            @if (archivedArtisans.Any())
+            {
+                @foreach (var user in archivedArtisans)
+                {
+                    <tr class="artisan-mgmt-user-row" data-tab="archived" style="display:none;">
+                        <td class="artisan-mgmt-user-cell">
+                            <div class="artisan-mgmt-user-info archived-user-greyed">
+                                <img src="@user.UserAvatar" alt="Avatar" />
+                                <div class="artisan-mgmt-user-details">
+                                    <div class="artisan-mgmt-user-name">
+                                        <a asp-controller="AdminProfile" asp-action="UserProfileByAdmin" asp-route-id="@user.Id" style="text-decoration: none;">
+                                            @user.FirstName @user.LastName
+                                        </a>
+                                    </div>
+                                    <div class="artisan-mgmt-user-email">@user.Email</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="artisan-mgmt-user-cell artisan-mgmt-user-role archived-user-greyed">
+                            Artisan
+                        </td>
+
+                        <td class="artisan-mgmt-user-cell archived-user-greyed">
+                            <div class="artisan-mgmt-action-buttons">
+                                Deleted
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr class="artisan-mgmt-user-row" data-tab="archived" style="display:none;">
+                    <td colspan="3" class="artisan-mgmt-user-cell" style="text-align:center; font-style:italic; color:#777;">
+                        No deleted artisans yet.
+                    </td>
+                </tr>
+            }
+
+            <tr id="artisan-mgmt-no-users-message" style="display:none;">
+                <td colspan="3" class="artisan-mgmt-user-cell" style="text-align:center; font-style:italic; color:#777;">
+                    No artisans found.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal backdrop -->
+<div id="artisanModalBackdrop" class="artisan-mgmt-admin-modal-backdrop"></div>
+
+<!-- Delete confirmation modal -->
+<div id="artisanDeleteModal" class="artisan-mgmt-admin-modal">
+    <h3>Delete Artisan</h3>
+    <p>Are you sure you want to delete this artisan?</p>
+    <div class="artisan-mgmt-admin-modal-buttons">
+        <button id="artisanConfirmDelete" class="artisan-mgmt-admin-modal-confirm">Delete</button>
+        <button onclick="artisanCloseModal()" class="artisan-mgmt-admin-modal-cancel">Cancel</button>
+    </div>
+</div>
+
+<!-- Toggle status modal -->
+<div id="artisanToggleModal" class="artisan-mgmt-admin-modal">
+    <h3>Change Artisan Status</h3>
+    <p id="artisanToggleMessage"></p>
+    <textarea id="artisanToggleReason" placeholder="Reason for deactivation..." style="display:none; width:90%; margin-bottom:1rem;"></textarea>
+    <div class="artisan-mgmt-admin-modal-buttons">
+        <button id="artisanConfirmToggle" class="artisan-mgmt-admin-modal-confirm">Confirm</button>
+        <button onclick="artisanCloseModal()" class="artisan-mgmt-admin-modal-cancel">Cancel</button>
+    </div>
+</div>
+
+<script>
+    const artisanSearchInput = document.getElementById("artisanSearchInput");
+    const artisanSearchButton = document.getElementById("artisanSearchButton");
+
+    function filterArtisans() {
+        const filter = artisanSearchInput.value.toLowerCase().trim();
+        const rows = document.querySelectorAll(".artisan-mgmt-user-row");
+        const activeTab = document.querySelector(".artisan-mgmt-user-tab.active").dataset.tab;
+
+        let anyVisible = false;
+
+        rows.forEach(row => {
+            if (row.dataset.tab !== activeTab) {
+                row.style.display = "none";
+                return;
+            }
+
+            if (row.id === "noUsersMessage") return;
+
+            const isEmptyRow = row.querySelector(".artisan-mgmt-user-cell")?.innerText.includes("No");
+            if (isEmptyRow) {
+                row.style.display = !filter ? "table-row" : "none";
+                return;
+            }
+
+            const nameCell = row.querySelector(".artisan-mgmt-user-name");
+            const emailCell = row.querySelector(".artisan-mgmt-user-email");
+            const text = (nameCell?.innerText + " " + emailCell?.innerText).toLowerCase();
+
+            if (!filter || text.includes(filter)) {
+                row.style.display = "table-row";
+                anyVisible = true;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        const noUsersMessage = document.getElementById("noUsersMessage");
+        if (noUsersMessage) {
+            noUsersMessage.style.display = filter && !anyVisible ? "table-row" : "none";
+        }
+    }
+
+    artisanSearchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            filterArtisans();
+        }
+    });
+
+    artisanSearchButton.addEventListener("click", filterArtisans);
+
+    // ==========================
+    // Delete Artisan Modal
+    // ==========================
+    let artisanCurrentDeleteForm = null;
+
+    function adminOpenDeleteModal(form) {
+        artisanCurrentDeleteForm = form;
+        showModal("artisanDeleteModal");
+        return false;
+    }
+
+    function artisanConfirmDeleteAction() {
+        if (artisanCurrentDeleteForm) artisanCurrentDeleteForm.submit();
+    }
+
+    // ==========================
+    // Toggle Artisan Status Modal
+    // ==========================
+    let artisanCurrentToggleForm = null;
+
+    function adminOpenToggleModal(form, action) {
+        artisanCurrentToggleForm = form;
+
+        const msg = `Are you sure you want to ${action.toLowerCase()} this artisan?`;
+        document.getElementById("artisanToggleMessage").innerText = msg;
+
+        const confirmBtn = document.getElementById("artisanConfirmToggle");
+        const reasonTextarea = document.getElementById("artisanToggleReason");
+
+        if (action === "Reactivate") {
+            confirmBtn.style.backgroundColor = "#4CAF50";
+            confirmBtn.innerText = "Reactivate";
+            reasonTextarea.style.display = "none";
+            reasonTextarea.value = "";
+            confirmBtn.disabled = false;
+        } else {
+            reasonTextarea.style.display = "block";
+            reasonTextarea.value = "";
+            confirmBtn.innerText = "Deactivate";
+            confirmBtn.disabled = true;
+
+            reasonTextarea.addEventListener("input", () => {
+                confirmBtn.disabled = reasonTextarea.value.trim() === "";
+            });
+        }
+
+        showModal("artisanToggleModal");
+        return false;
+    }
+
+    function artisanConfirmToggleAction() {
+        if (!artisanCurrentToggleForm) return;
+
+        const action = document.getElementById("artisanConfirmToggle").innerText;
+        let hiddenInput = artisanCurrentToggleForm.querySelector("input[name='reason']");
+
+        if (action === "Reactivate") {
+            if (hiddenInput) hiddenInput.remove();
+        } else {
+            const reason = document.getElementById("artisanToggleReason").value;
+            if (!hiddenInput) {
+                hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "reason";
+                artisanCurrentToggleForm.appendChild(hiddenInput);
+            }
+            hiddenInput.value = reason;
+        }
+
+        artisanCurrentToggleForm.submit();
+    }
+
+    // ==========================
+    // Tab Switching
+    // ==========================
+    const artisanTabs = document.querySelectorAll(".artisan-mgmt-user-tab");
+    const artisanRows = document.querySelectorAll(".artisan-mgmt-user-row");
+
+    artisanTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            artisanTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            const selectedTab = tab.dataset.tab;
+            artisanRows.forEach(row => {
+                row.style.display = (row.dataset.tab === selectedTab) ? "table-row" : "none";
+            });
+
+            filterArtisans();
+        });
+    });
+
+    // ==========================
+    // Modal Utility
+    // ==========================
+    function showModal(modalId) {
+        document.getElementById("artisanModalBackdrop").style.display = "block";
+        document.getElementById(modalId).style.display = "block";
+    }
+
+    function artisanCloseModal() {
+        document.getElementById("artisanModalBackdrop").style.display = "none";
+        document.querySelectorAll(".artisan-mgmt-admin-modal").forEach(m => m.style.display = "none");
+        artisanCurrentDeleteForm = null;
+        artisanCurrentToggleForm = null;
+    }
+
+    document.getElementById("artisanModalBackdrop").addEventListener("click", artisanCloseModal);
+    document.addEventListener("keydown", e => { if (e.key === "Escape") artisanCloseModal(); });
+    document.getElementById("artisanConfirmDelete").addEventListener("click", artisanConfirmDeleteAction);
+    document.getElementById("artisanConfirmToggle").addEventListener("click", artisanConfirmToggleAction);
+</script>

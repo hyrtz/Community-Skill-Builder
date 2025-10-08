@@ -296,18 +296,32 @@ else
     </div>
 </div>
 
-<!-- Confirmation Modal -->
+<!-- Updated Confirmation Modal -->
 <div id="artisanPendingConfirmBackdrop" class="artisan-pending-confirm-backdrop"></div>
 <div id="artisanPendingConfirmModal" class="artisan-pending-confirm-modal">
     <h3 id="artisanPendingConfirmMessage">Confirm action</h3>
+
+    <!-- Digital Signature Upload for Approve -->
+    <div id="artisanPendingSignatureWrapper" style="display:none; margin-bottom:1rem;">
+        <label for="artisanPendingSignature" style="font-size:0.9rem; color:#555;">
+            Upload your digital signature (PNG, transparent background)
+        </label>
+        <input type="file" id="artisanPendingSignature" accept="image/png" style="width:100%; margin-top:0.5rem;">
+        <p id="artisanPendingSignatureWarning" style="color:#c0392b; font-size:0.8rem; display:none;">
+            Only PNG files with no background are allowed.
+        </p>
+    </div>
+
+    <!-- Reject Reason -->
     <div id="artisanPendingRejectReasonWrapper" style="display:none; margin-bottom:1rem;">
         <textarea id="artisanPendingRejectReason"
                   placeholder="Enter rejection reason..."
                   style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #ccc; resize:none;"></textarea>
     </div>
+
     <div class="artisan-pending-confirm-buttons">
         <button type="button" onclick="artisanPendingCloseModal()" class="artisan-pending-confirm-cancel">Cancel</button>
-        <button id="artisanPendingConfirmAction" class="artisan-pending-confirm-confirm">Confirm</button>
+        <button id="artisanPendingConfirmAction" class="artisan-pending-confirm-confirm" disabled>Confirm</button>
     </div>
 </div>
 
@@ -317,6 +331,9 @@ else
         const confirmBtn = document.getElementById("artisanPendingConfirmAction");
         const rejectWrapper = document.getElementById("artisanPendingRejectReasonWrapper");
         const rejectTextarea = document.getElementById("artisanPendingRejectReason");
+        const signatureWrapper = document.getElementById("artisanPendingSignatureWrapper");
+        const signatureInput = document.getElementById("artisanPendingSignature");
+        const signatureWarning = document.getElementById("artisanPendingSignatureWarning");
 
         if (rejectTextarea) {
             rejectTextarea.addEventListener("input", () => {
@@ -324,8 +341,23 @@ else
             });
         }
 
-        window.artisanPendingOpenModal = function(action, onConfirm) {
-            artisanPendingCurrentAction = { action, onConfirm };
+        if (signatureInput) {
+            signatureInput.addEventListener("change", () => {
+                const file = signatureInput.files[0];
+                if (file && file.type === "image/png") {
+                    signatureWarning.style.display = "none";
+                    confirmBtn.disabled = false;
+                } else {
+                    signatureWarning.style.display = "block";
+                    confirmBtn.disabled = true;
+                    signatureInput.value = "";
+                }
+            });
+        }
+
+        window.artisanPendingOpenModal = function(action, submissionId) {
+            artisanPendingCurrentAction = { action, submissionId };
+
             const message = action === "Approve"
                 ? "Are you sure you want to approve this submission?"
                 : "Are you sure you want to reject this submission?";
@@ -334,11 +366,14 @@ else
             if (action === "Approve") {
                 confirmBtn.style.backgroundColor = "#4CAF50";
                 confirmBtn.innerText = "Approve";
+                signatureWrapper.style.display = "block";
                 rejectWrapper.style.display = "none";
-                confirmBtn.disabled = false;
+                signatureInput.value = "";
+                confirmBtn.disabled = true;
             } else {
                 confirmBtn.style.backgroundColor = "#e74c3c";
                 confirmBtn.innerText = "Reject";
+                signatureWrapper.style.display = "none";
                 rejectWrapper.style.display = "block";
                 rejectTextarea.value = "";
                 confirmBtn.disabled = true;
@@ -356,8 +391,47 @@ else
 
         confirmBtn.addEventListener("click", () => {
             if (!artisanPendingCurrentAction) return;
-            let reason = artisanPendingCurrentAction.action === "Reject" ? rejectTextarea.value.trim() : null;
-            artisanPendingCurrentAction.onConfirm(reason);
+
+            const submissionId = artisanPendingCurrentAction.submissionId;
+
+            if (artisanPendingCurrentAction.action === "Approve") {
+                const formData = new FormData();
+                formData.append("id", submissionId);
+                if (signatureInput.files[0]) {
+                    formData.append("signature", signatureInput.files[0]);
+                }
+
+                fetch(`/CourseProject/Approve`, {
+                    method: "POST",
+                    body: formData
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("Server error");
+                    return res.json();
+                })
+                .then(() => location.reload())
+                .catch(err => {
+                    console.error("Error approving project:", err);
+                    alert("Something went wrong. Please try again.");
+                });
+            } else { // Reject
+                const payload = { id: submissionId, reason: rejectTextarea.value.trim() };
+                fetch(`/CourseProject/Reject`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("Server error");
+                    return res.json();
+                })
+                .then(() => location.reload())
+                .catch(err => {
+                    console.error("Error rejecting project:", err);
+                    alert("Something went wrong. Please try again.");
+                });
+            }
+
             artisanPendingCloseModal();
         });
 
@@ -393,27 +467,7 @@ else
                 const action = btn.classList.contains("artisan-pending-review-btn-approve") ? "Approve" : "Reject";
                 const submissionId = btn.dataset.id;
 
-                artisanPendingOpenModal(action, reason => {
-                    const payload = action === "Approve" ? { id: submissionId } : { id: submissionId, reason };
-
-                    fetch(`/CourseProject/${action}`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    })
-                    .then(res => {
-                        if (!res.ok) throw new Error("Server error");
-                        return res.json();
-                    })
-                    .then(() => {
-                        // Reload the page after successful approve/reject
-                        location.reload();
-                    })
-                    .catch(err => {
-                        console.error(`Error on ${action}:`, err);
-                        alert("Something went wrong. Please try again.");
-                    });
-                });
+                artisanPendingOpenModal(action, submissionId);
             });
         });
 

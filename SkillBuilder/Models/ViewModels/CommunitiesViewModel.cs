@@ -8,5 +8,6 @@
         public string AvatarUrl { get; set; }
         public int MembersCount { get; set; }
         public string CoverImageUrl { get; set; }
+        public string CreatorId { get; set; }
     }
 }

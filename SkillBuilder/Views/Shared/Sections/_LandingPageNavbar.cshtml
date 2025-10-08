@@ -481,7 +481,7 @@
                 <span id="notifCount" class="notif-count-badge" style="display:none;position:absolute;top:0;right:0;background:red;color:white; border-radius:50%;padding:2px 6px;font-size:0.75rem;">
                 </span>
             </a>
-            <div id="notificationDropdown" class="notification-dropdown" style="display: none;">
+            <div id="notificationDropdown" class="notification-dropdown" style="display: none; max-height: 350px;">
                 <h5>Notifications</h5>
                 <div id="notificationItems"></div>
                 <div style="text-align:center; padding:0.5rem;">
@@ -758,7 +758,7 @@
             if (!userId) return;
 
             try {
-                const res = await fetch(`/api/notification/${userId}`);
+                const res = await fetch(`/api/notification/${userId}?all=true`);
                 const notifications = await res.json();
                 const container = document.getElementById("notificationItems");
                 container.innerHTML = "";

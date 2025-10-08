@@ -24,58 +24,65 @@ namespace SkillBuilder.Controllers
         {
             ViewData["UseCourseNavbar"] = true;
 
-            var communitiesQuery = _context.Communities.AsQueryable();
+            var communitiesQuery = _context.Communities
+                .Where(c => c.IsPublished) // ✅ Only published communities
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
                 communitiesQuery = communitiesQuery.Where(c => c.Name.ToLower().Contains(search.ToLower()));
 
-            var communities = await communitiesQuery
-                .OrderByDescending(c => c.MembersCount)
-                .Take(20)
-                .Select(c => new CommunitiesViewModel
+                var communities = await communitiesQuery
+                    .OrderByDescending(c => c.MembersCount)
+                    .Take(20)
+                    .Select(c => new CommunitiesViewModel
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Description = c.Description,
+                        AvatarUrl = !string.IsNullOrEmpty(c.AvatarUrl) ? c.AvatarUrl : "/uploads/community-profile/default-community.png",
+                        CoverImageUrl = !string.IsNullOrEmpty(c.CoverImageUrl) ? c.CoverImageUrl : "/uploads/community-banner/default-banner.png",
+                        MembersCount = c.MembersCount,
+                        CreatorId = c.CreatorId
+                    })
+                    .ToListAsync();
+
+                Community selectedCommunity = null;
+                List<CommunityPostViewModel> posts = new List<CommunityPostViewModel>();
+
+                if (selectedCommunityId.HasValue)
                 {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Description = c.Description,
-                    AvatarUrl = !string.IsNullOrEmpty(c.AvatarUrl) ? c.AvatarUrl : "/uploads/community-profile/default-community.png",
-                    CoverImageUrl = !string.IsNullOrEmpty(c.CoverImageUrl) ? c.CoverImageUrl : "/uploads/community-banner/default-banner.png",
-                    MembersCount = c.MembersCount
-                })
-                .ToListAsync();
+                    selectedCommunity = await _context.Communities
+                        .Include(c => c.Memberships)
+                        .FirstOrDefaultAsync(c => c.Id == selectedCommunityId.Value && c.IsPublished); // Only published
 
-            Community selectedCommunity = null;
-            List<CommunityPostViewModel> posts = new List<CommunityPostViewModel>();
-
-            if (selectedCommunityId.HasValue)
-            {
-                selectedCommunity = await _context.Communities
-                    .Include(c => c.Memberships)
-                    .FirstOrDefaultAsync(c => c.Id == selectedCommunityId.Value);
-
-                if (selectedCommunity != null)
-                {
-                    posts = await _context.CommunityPosts
-                        .Include(p => p.Author)
-                        .Where(p => p.CommunityId == selectedCommunity.Id && p.IsPublished)
-                        .OrderByDescending(p => p.SubmittedAt)
-                        .Take(10)
-                        .Select(p => new CommunityPostViewModel
-                        {
-                            Id = p.Id,
-                            Title = p.Title,
-                            Content = p.Content,
-                            SubmittedAt = p.SubmittedAt,
-                            ImageUrl = p.ImageUrl,
-                            AuthorId = p.AuthorId,
-                            AuthorName = p.Author.FirstName,
-                            AuthorAvatarUrl = p.Author.UserAvatar,
-                            CommunityName = p.Community.Name,
-                            Likes = 0,
-                            CommentsCount = 0
-                        })
-                        .ToListAsync();
+                    if (selectedCommunity != null)
+                    {
+                        posts = await _context.CommunityPosts
+                            .Include(p => p.Author)
+                            .Where(p => p.CommunityId == selectedCommunity.Id && p.IsPublished)
+                            .OrderByDescending(p => p.SubmittedAt)
+                            .Take(10)
+                            .Select(p => new CommunityPostViewModel
+                            {
+                                Id = p.Id,
+                                Title = p.Title,
+                                Content = p.Content,
+                                SubmittedAt = p.SubmittedAt,
+                                ImageUrl = p.ImageUrl,
+                                AuthorId = p.AuthorId,
+                                AuthorName = p.Author.FirstName,
+                                AuthorAvatarUrl = p.Author.UserAvatar,
+                                CommunityName = p.Community.Name,
+                                CommentsCount = 0
+                            })
+                            .ToListAsync();
+                    }
+                    else
+                    {
+                        // Redirect if the community is unpublished or doesn't exist
+                        return RedirectToAction("CommunityHub");
+                    }
                 }
-            }
             else
             {
                 posts = await _context.CommunityPosts
@@ -94,7 +101,6 @@ namespace SkillBuilder.Controllers
                         AuthorName = p.Author.FirstName,
                         AuthorAvatarUrl = p.Author.UserAvatar,
                         CommunityName = "Public", 
-                        Likes = 0,
                         CommentsCount = 0
                     })
                     .ToListAsync();
@@ -261,6 +267,169 @@ namespace SkillBuilder.Controllers
                     communityName = community.Name
                 }
             });
+        }
+
+        public class EditCommunityPostViewModel
+        {
+            public int PostId { get; set; }
+            public string Title { get; set; } = string.Empty;
+            public string Content { get; set; } = string.Empty;
+            public IFormFile? Image { get; set; }
+        }
+
+        [HttpPost("EditPost")]
+        public async Task<IActionResult> EditPost([FromForm] EditCommunityPostViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Invalid post data." });
+
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var post = await _context.CommunityPosts
+                .Include(p => p.Author)
+                .Include(p => p.Community)
+                .FirstOrDefaultAsync(p => p.Id == model.PostId);
+
+            if (post == null)
+                return NotFound(new { success = false, message = "Post not found." });
+
+            if (post.AuthorId != userId)
+                return Forbid();
+
+            post.Title = model.Title;
+            post.Content = model.Content;
+
+            if (model.Image != null)
+                post.ImageUrl = await SaveImage(model.Image, "community-posts");
+
+            _context.CommunityPosts.Update(post);
+            await _context.SaveChangesAsync();
+
+            // ✅ Notify only the user who edited
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"✏️ Your post '{post.Title}' has been successfully updated."
+            );
+
+            return Ok(new
+            {
+                success = true,
+                message = "Post updated successfully!",
+                post = new
+                {
+                    id = post.Id,
+                    title = post.Title,
+                    content = post.Content,
+                    imageUrl = post.ImageUrl,
+                    submittedAt = post.SubmittedAt,
+                    authorName = post.Author.FirstName,
+                    communityName = post.Community?.Name ?? "Public"
+                }
+            });
+        }
+
+        public class ReportCommunityPostViewModel
+        {
+            public int PostId { get; set; }
+            public string Reason { get; set; } = string.Empty;
+            public string? Details { get; set; }
+        }
+
+        [HttpPost("ReportPost")]
+        public async Task<IActionResult> ReportPost([FromForm] ReportCommunityPostViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Invalid report data." });
+
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var post = await _context.CommunityPosts
+                .Include(p => p.Author)
+                .Include(p => p.Community)
+                .FirstOrDefaultAsync(p => p.Id == model.PostId);
+
+            if (post == null)
+                return NotFound(new { success = false, message = "Post not found." });
+
+            // Save report
+            var report = new CommunityPostReport
+            {
+                PostId = post.Id,
+                ReporterId = userId,
+                Reason = model.Reason,
+                Details = model.Details,
+                ReportedAt = DateTime.UtcNow
+            };
+            _context.CommunityPostReports.Add(report);
+            await _context.SaveChangesAsync();
+
+            // 🔔 Notify the reporting user
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"⚠️ You successfully reported the post '{post.Title}' for '{model.Reason}'."
+            );
+
+            // 🔔 Notify all admins
+            var adminIds = await _context.Users
+                .Where(u => u.Role == "Admin")
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            foreach (var adminId in adminIds)
+            {
+                await _notificationService.AddNotificationAsync(
+                    adminId,
+                    $"⚠️ Post '{post.Title}' has been reported by {post.Author.FirstName} {post.Author.LastName}. Reason: {model.Reason}"
+                );
+            }
+
+            return Ok(new { success = true, message = "Post reported successfully." });
+        }
+
+        [HttpPost("DeletePost")]
+        public async Task<IActionResult> DeletePost(int postId)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var post = await _context.CommunityPosts
+                .Include(p => p.Author)
+                .Include(p => p.Community)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return NotFound(new { success = false, message = "Post not found." });
+
+            var communityOwnerId = post.Community?.CreatorId;
+
+            // Only author or community owner can delete
+            if (post.AuthorId != userId && communityOwnerId != userId)
+                return Forbid();
+
+            _context.CommunityPosts.Remove(post);
+            await _context.SaveChangesAsync();
+
+            // 🔔 Notify the user who deleted the post
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"🗑️ You have successfully deleted the post '{post.Title}'."
+            );
+
+            // 🔔 Notify the community owner if different from the deleter
+            if (!string.IsNullOrEmpty(communityOwnerId) && communityOwnerId != userId)
+            {
+                await _notificationService.AddNotificationAsync(
+                    communityOwnerId,
+                    $"🗑️ The post '{post.Title}' in your community '{post.Community.Name}' was deleted by {post.Author.FirstName} {post.Author.LastName}."
+                );
+            }
+
+            return Ok(new { success = true, message = "Post deleted successfully." });
         }
 
         [HttpPost("Create")]

@@ -15,7 +15,13 @@ public class CertificateService
         _wwwroot = env.WebRootPath ?? throw new ArgumentNullException(nameof(env));
     }
 
-    public byte[] GenerateCertificate(string learnerName, string courseTitle, string artisanName, string artisanSkill)
+    public byte[] GenerateCertificate(
+    string learnerName,
+    string courseTitle,
+    string artisanName,
+    string artisanSkill,
+    string? digitalSignatureUrl // <-- pass this URL here
+)
     {
         var backgroundPath = Path.Combine(_wwwroot, "assets", "certificate", "certificate-template.png");
 
@@ -32,27 +38,22 @@ public class CertificateService
                 page.Margin(0);
                 page.PageColor(Colors.White);
 
-                // Background template
                 page.Background().Image(imageBytes, ImageScaling.FitArea);
 
-                // Overlay content
                 page.Content().PaddingHorizontal(56).Column(column =>
                 {
                     column.Item().PaddingTop(400);
 
-                    // Subtitle
                     column.Item().AlignCenter().Text("THIS CERTIFICATE IS AWARDED TO")
                         .FontSize(10)
                         .SemiBold()
                         .FontColor(BrandColor);
 
-                    // Big learner name
                     column.Item().PaddingTop(18).AlignCenter().Text(learnerName)
                         .FontSize(36)
                         .Bold()
                         .FontColor(BrandColor);
 
-                    // Description
                     column.Item().PaddingTop(12).AlignCenter().Text(
                         $"For successfully completing the {courseTitle} course under the guidance of {artisanName}, {artisanSkill}"
                     )
@@ -61,35 +62,43 @@ public class CertificateService
 
                     column.Item().PaddingTop(160);
 
-                    // Footer / signature row
-                    column.Item().Row(row =>
+                    // Footer: learner info + signature below
+                    column.Item().Column(col =>
                     {
-                        row.RelativeColumn().Column(left =>
-                        {
-                            left.Item().Text(learnerName)
-                                .FontSize(18)
-                                .Bold()
-                                .FontColor(BrandColor);
+                        // Learner info
+                        col.Item().Text(learnerName)
+                            .FontSize(18)
+                            .Bold()
+                            .FontColor(BrandColor);
 
-                            left.Item().PaddingTop(8).Element(elem =>
+                        col.Item().PaddingTop(8).Element(elem =>
+                        {
+                            elem.Height(1).Background(BrandColor);
+                        });
+
+                        col.Item().PaddingTop(8).Text(artisanName)
+                            .FontSize(10)
+                            .SemiBold()
+                            .FontColor(BrandColor);
+
+                        col.Item().Text(artisanSkill)
+                            .FontSize(9)
+                            .FontColor(BrandColor);
+
+                        // Signature (if exists) below learner info
+                        if (!string.IsNullOrWhiteSpace(digitalSignatureUrl))
+                        {
+                            var signaturePath = Path.Combine(_wwwroot, digitalSignatureUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+                            if (File.Exists(signaturePath))
                             {
-                                elem.Height(1).Background(BrandColor);
-                            });
-
-                            left.Item().PaddingTop(8).Text(artisanName)
-                                .FontSize(10)
-                                .SemiBold()
-                                .FontColor(BrandColor);
-
-                            left.Item().Text(artisanSkill)
-                                .FontSize(9)
-                                .FontColor(BrandColor);
-                        });
-
-                        row.ConstantColumn(180).Column(right =>
-                        {
-                            right.Item().AlignRight().Text(""); // placeholder
-                        });
+                                var signatureBytes = File.ReadAllBytes(signaturePath);
+                                col.Item()
+                                   .PaddingTop(12)       // spacing from learner info
+                                   .Height(60)           // reasonable height for signature
+                                   .AlignLeft()          // align to left
+                                   .Image(signatureBytes, ImageScaling.FitArea);
+                            }
+                        }
                     });
 
                     column.Item().PaddingBottom(20);

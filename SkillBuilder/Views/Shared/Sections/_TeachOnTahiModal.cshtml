@@ -294,8 +294,17 @@
                 <h2 class="teach-header">Complete Your Artisan Application</h2>
 
                 <label for="artisan-profession">Profession</label>
-                <input type="text" id="artisan-profession" required />
-                <p id="artisan-profession-error" class="teach-error" style="display:none;">⚠️ Please enter a valid profession.</p>
+                <select id="artisan-profession" required>
+                    <option value="">Select your profession</option>
+                    <option value="Potter">Potter</option>
+                    <option value="Weaver">Weaver</option>
+                    <option value="Shoemaker">Shoemaker</option>
+                    <option value="Paper Crafter">Paper Crafter</option>
+                    <option value="Embroiderer">Embroiderer</option>
+                    <option value="WoodCarver">WoodCarver</option>
+                    <option value="Others">Others</option>
+                </select>
+                <p id="artisan-profession-error" class="teach-error" style="display:none;">⚠️ Please select a profession.</p>
 
                 <label for="artisan-hometown">Hometown</label>
                 <input type="text" id="artisan-hometown" required />
