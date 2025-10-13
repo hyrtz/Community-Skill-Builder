@@ -200,7 +200,6 @@
         font-size: 0.85rem;
         border-radius: 6px;
         border: 1px solid #ccc;
-        resize: vertical;
     }
 </style>
 
@@ -304,6 +303,11 @@
                     <option value="WoodCarver">WoodCarver</option>
                     <option value="Others">Others</option>
                 </select>
+                <div id="artisan-other-profession-wrapper" style="display:none;">
+                    <label for="artisan-other-profession">Specify Profession</label>
+                    <input type="text" id="artisan-other-profession" />
+                    <p id="artisan-other-profession-error" class="teach-error" style="display:none;">⚠️ Please specify your profession.</p>
+                </div>
                 <p id="artisan-profession-error" class="teach-error" style="display:none;">⚠️ Please select a profession.</p>
 
                 <label for="artisan-hometown">Hometown</label>
@@ -546,6 +550,43 @@
         const artisanHometown = document.getElementById("artisan-hometown");
         const artisanIntroduction = document.getElementById("artisan-introduction");
         const artisanFile = document.getElementById("artisan-file");
+        const artisanProfessionSelect = document.getElementById("artisan-profession");
+        const artisanOtherWrapper = document.getElementById("artisan-other-profession-wrapper");
+        const artisanOtherInput = document.getElementById("artisan-other-profession");
+
+        artisanProfessionSelect.addEventListener("change", () => {
+            if (artisanProfessionSelect.value === "Others") {
+                artisanOtherWrapper.style.display = "block";
+            } else {
+                artisanOtherWrapper.style.display = "none";
+                artisanOtherInput.value = ""; // reset
+            }
+        });
+
+        // Include this in your validation function
+        function validateArtisanForm() {
+                let professionValue = artisanProfessionSelect.value === "Others" ? artisanOtherInput.value.trim() : artisanProfessionSelect.value;
+                    formData.append("profession", professionValue);
+            const valid = professionValid &&
+                          artisanHometown.value.trim() &&
+                          artisanIntroduction.value.trim() &&
+                          artisanFile.files.length > 0;
+            artisanSubmitBtn.disabled = !valid;
+
+            if (!professionValid && artisanProfessionSelect.value === "Others") {
+                document.getElementById("artisan-other-profession-error").style.display = "block";
+            } else {
+                document.getElementById("artisan-other-profession-error").style.display = "none";
+            }
+
+            if (valid) artisanErrorMsg.textContent = "";
+        }
+
+        [artisanProfessionSelect, artisanHometown, artisanIntroduction, artisanFile, artisanOtherInput].forEach(el => {
+            el.addEventListener("input", validateArtisanForm);
+            el.addEventListener("change", validateArtisanForm);
+        });
+
 
         function validateArtisanForm() {
             const valid = artisanProfession.value.trim() && artisanHometown.value.trim() && artisanIntroduction.value.trim() && artisanFile.files.length > 0;
@@ -571,7 +612,13 @@
 
             const formData = new FormData();
             formData.append("file", artisanFile.files[0]);
-            formData.append("profession", artisanProfession.value.trim());
+
+            const selectedProfession = artisanProfession.value.trim();
+            const finalProfession = selectedProfession === "Others"
+                ? artisanOtherInput.value.trim()
+                : selectedProfession;
+            formData.append("profession", finalProfession);
+
             formData.append("hometown", artisanHometown.value.trim());
             formData.append("introduction", artisanIntroduction.value.trim());
 

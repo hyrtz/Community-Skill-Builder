@@ -524,5 +524,50 @@ namespace SkillBuilder.Controllers
 
             return Ok(new { message = "Reset successful" });
         }
+
+        [HttpPost("SaveUserPoints")]
+        public async Task<IActionResult> SaveUserPoints([FromBody] SavePointsRequest request)
+        {
+            try
+            {
+                // Check if user is authenticated
+                var userId = User.FindFirstValue("UserId");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    Console.WriteLine("⚠️ SaveUserPoints: No user ID found (unauthenticated request).");
+                    return Unauthorized(new { success = false, message = "User not logged in." });
+                }
+
+                // Find user
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                {
+                    Console.WriteLine($"⚠️ SaveUserPoints: User not found for ID {userId}");
+                    return NotFound(new { success = false, message = "User not found." });
+                }
+
+                // Add points safely
+                user.Points += request.Points;
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"✅ SaveUserPoints: Added {request.Points} points for user {user.Email}. New total: {user.Points}");
+
+                return Ok(new
+                {
+                    success = true,
+                    totalPoints = user.Points
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ SaveUserPoints error: {ex.Message}\n{ex.StackTrace}");
+                return StatusCode(500, new { success = false, message = "Internal server error while saving points." });
+            }
+        }
+
+        public class SavePointsRequest
+        {
+            public int Points { get; set; }
+        }
     }
 }

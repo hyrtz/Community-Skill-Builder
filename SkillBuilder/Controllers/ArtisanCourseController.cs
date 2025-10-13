@@ -194,6 +194,19 @@ namespace SkillBuilder.Controllers
                 $"✅ Your course '{course.Title}' has been successfully created!"
             );
 
+            // ✅ Notify Admin(s)
+            var adminUsers = await _context.Users
+                .Where(u => u.Role == "Admin")
+                .ToListAsync();
+
+            foreach (var admin in adminUsers)
+            {
+                await _notificationService.AddNotificationAsync(
+                    admin.Id,
+                    $"📢 New course created: '{course.Title}' by {artisan.FirstName} {artisan.LastName}."
+                );
+            }
+
             return Redirect($"/ArtisanProfile/{artisan.ArtisanId}");
         }
 

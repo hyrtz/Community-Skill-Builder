@@ -1,0 +1,333 @@
+﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
+
+<style>
+    /* ---------------- My Communities Section ---------------- */
+    .user-communities-section {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 0;
+    }
+
+    .user-communities-header {
+        font-size: 1.8rem;
+        color: #344AEA;
+        margin-bottom: 1rem;
+    }
+
+    .user-community-search-wrapper {
+        display: flex;
+        margin-bottom: 1.5rem;
+    }
+
+        .user-community-search-wrapper input {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 8px 0 0 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .user-community-search-wrapper button {
+            background-color: #344AEA;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+            .user-community-search-wrapper button img {
+                width: 1rem;
+                height: 1rem;
+                filter: brightness(0) invert(1);
+            }
+
+    .user-community-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .user-community-link {
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        width: 100%;
+    }
+
+    .user-community-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 1rem;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+    }
+
+        .user-community-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+    .user-community-info-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .user-community-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .user-community-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .user-community-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .user-community-description {
+        font-size: 0.85rem;
+        color: #6B7280;
+        max-width: 250px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-community-members {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #374151;
+        flex-shrink: 0;
+    }
+
+    .user-community-empty {
+        text-align: center;
+        color: #777;
+        font-size: 1rem;
+        margin-top: 1rem;
+        display: none;
+    }
+
+        .user-community-empty.active {
+            display: block;
+        }
+
+    /* ---------------- Community Detail Section ---------------- */
+    .community-detail-container {
+        display: none;
+        flex-direction: column;
+    }
+
+    .community-back-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-weight: bold;
+        color: #344AEA;
+        margin-bottom: 1.5rem;
+        padding: 0.3rem 0.5rem;
+        border-radius: 8px;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+        .community-back-btn img {
+            width: 1.5rem;
+            height: 1.5rem;
+            background: #f7f7ff;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+        }
+            .community-back-btn:hover img {
+                background-color: #d0d4ff;
+            }
+
+    .community-title {
+        font-size: 1.6rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .community-tabs {
+        display: flex;
+        gap: 1rem;
+        border-bottom: 2px solid #E5E7EB;
+        margin-bottom: 1rem;
+    }
+
+    .community-tab {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6B7280;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+        .community-tab.active {
+            color: #344AEA;
+            border-bottom-color: #344AEA;
+        }
+
+    .community-tab-content {
+        display: none;
+    }
+
+        .community-tab-content.active {
+            display: block;
+        }
+</style>
+
+<div class="user-communities-section">
+    <h2 class="user-communities-header">My Communities</h2>
+
+    <!-- Search -->
+    <div class="user-community-search-wrapper">
+        <input type="text" id="userCommunitySearch" placeholder="Search communities..." />
+        <button type="button" id="userCommunitySearchBtn">
+            <img src="/assets/Icons/Search.ico" alt="Search" />
+        </button>
+    </div>
+
+    @if (!Model.MyCommunities.Any())
+    {
+        <div class="user-community-empty active">You haven't created any communities yet.</div>
+    }
+    else
+    {
+        <div class="user-community-grid">
+            @foreach (var community in Model.MyCommunities)
+            {
+                <div class="user-community-link">
+                    <div class="user-community-card">
+                        <div class="user-community-info-wrapper">
+                            <img class="user-community-avatar" src="@community.AvatarUrl" alt="Avatar" />
+                            <div class="user-community-info">
+                                <div class="user-community-title">@community.Name</div>
+                                <div class="user-community-description">@community.Description</div>
+                            </div>
+                        </div>
+                        <div class="user-community-members">@community.MembersCount members</div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="user-community-empty">No matching communities found.</div>
+    }
+</div>
+
+<!-- Community Detail Section -->
+<div class="community-detail-container" id="communityDetailContainer">
+    <div class="community-back-btn" id="communityBackBtn">
+        <img src="/assets/Icons/Back.ico" />
+    </div>
+
+    <div class="community-title" id="communityTitle">Community Name</div>
+
+    <div class="community-tabs">
+        <div class="community-tab active" data-tab="pending">Pending Member Requests</div>
+        <div class="community-tab" data-tab="all">All Members</div>
+    </div>
+
+    <div class="community-tab-content active" id="communityTabPending">
+        @await Html.PartialAsync("Sections/UserNotebooks/MyCommunityNotebooks/_MyCommunityNotebookPending", Model)
+    </div>
+
+    <div class="community-tab-content" id="communityTabAll">
+        @await Html.PartialAsync("Sections/UserNotebooks/MyCommunityNotebooks/_MyCommunityNotebookAllMembers", Model)
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // --- Search functionality ---
+        const searchInput = document.getElementById("userCommunitySearch");
+        const searchBtn = document.getElementById("userCommunitySearchBtn");
+        const rows = document.querySelectorAll(".user-community-card");
+        const emptyMsg = document.querySelector(".user-community-empty");
+
+        function filter() {
+            const query = searchInput.value.toLowerCase().trim();
+            let anyVisible = false;
+
+            rows.forEach(card => {
+                const title = card.querySelector(".user-community-title").innerText.toLowerCase();
+                const description = card.querySelector(".user-community-description").innerText.toLowerCase();
+                const isVisible = title.includes(query) || description.includes(query);
+
+                card.parentElement.style.display = isVisible ? "flex" : "none";
+                if (isVisible) anyVisible = true;
+            });
+
+            emptyMsg.classList.toggle("active", !anyVisible);
+        }
+
+        searchBtn.addEventListener("click", filter);
+        searchInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                filter();
+            }
+        });
+
+        // --- Community detail UI ---
+        const communityListContainer = document.querySelector(".user-communities-section");
+        const communityDetailContainer = document.getElementById("communityDetailContainer");
+        const communityTitle = document.getElementById("communityTitle");
+        const backBtn = document.getElementById("communityBackBtn");
+
+        const tabs = document.querySelectorAll(".community-tab");
+        const tabContents = {
+            pending: document.getElementById("communityTabPending"),
+            all: document.getElementById("communityTabAll")
+        };
+
+        rows.forEach(card => {
+            card.addEventListener("click", () => {
+                const name = card.querySelector(".user-community-title").innerText;
+                communityTitle.innerText = name;
+
+                communityListContainer.style.display = "none";
+                communityDetailContainer.style.display = "flex";
+
+                // Optionally load partial views via AJAX here
+            });
+        });
+
+        backBtn.addEventListener("click", () => {
+            communityDetailContainer.style.display = "none";
+            communityListContainer.style.display = "flex";
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                tabs.forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                const tabName = tab.dataset.tab;
+                for (const key in tabContents) {
+                    tabContents[key].classList.toggle("active", key === tabName);
+                }
+            });
+        });
+    });
+</script>

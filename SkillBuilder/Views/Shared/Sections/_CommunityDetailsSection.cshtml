@@ -114,8 +114,8 @@
         position: fixed;
         top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
+        width: 100%;
+        height: 100%;
         background: rgba(0,0,0,0.5);
         display: flex;
         justify-content: center;
@@ -125,12 +125,32 @@
 
     .community-details-modal-content {
         background: #fff;
-        padding: 2rem;
-        border-radius: 12px;
+        padding: 20px;
+        border-radius: 8px;
         width: 400px;
         max-width: 90%;
-        text-align: center;
-        position: relative;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .community-details-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        background: #344AEA;
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+        .community-details-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+    .community-details-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
     }
 
         .community-details-modal-content h2 {
@@ -504,7 +524,6 @@
         border-radius: 8px;
         border: 1px solid #ddd;
         font-size: 0.95rem;
-        resize: vertical;
     }
 
     /* ===== Report Post Modal ===== */
@@ -516,7 +535,6 @@
         border: 1px solid #ccc;
         margin-top: 0.5rem;
         font-size: 0.9rem;
-        resize: vertical;
     }
 
     #communityDetailsReportModal .communityDetailsModalBox select {
@@ -526,59 +544,6 @@
     #communityDetailsReportModal .communityDetailsModalActions {
         justify-content: flex-end;
     }
-
-    #successModal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5); /* semi-transparent overlay */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-
-        #successModal .community-details-posts-modal-content {
-            background: #fff;
-            padding: 2rem 2.5rem;
-            border-radius: 12px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            animation: fadeInScale 0.25s ease forwards;
-        }
-
-        #successModal .community-details-posts-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        #successModal #successModalMessage {
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        #successModal .community-details-posts-actions {
-            display: flex;
-            justify-content: center;
-        }
-
-        #successModal .community-details-posts-btn {
-            padding: 0.5rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-            #successModal .community-details-posts-btn:hover {
-                background-color: #2a34c6;
-            }
 
     /* Overlay */
     #adminDeletePostModal {
@@ -732,7 +697,7 @@
                         <div class="comments-section" id="comments-section-@post.Id" style="display:none; margin-top:0.5rem;">
                             <div class="comments-list" id="comments-list-@post.Id"></div>
                             <textarea id="comment-input-@post.Id" placeholder="Write a comment..." rows="2"></textarea>
-                            <button onclick="addComment(@post.Id)">Post</button>
+                            <button onclick="addComment(@post.Id)">Post Comment</button>
                         </div>
                     </div>
                 }
@@ -765,18 +730,7 @@
     </div>
 </section>
 
-<!-- Join & Policy Modals (same as before) -->
-<div id="communityDetailsJoinModal" class="community-details-modal-overlay" style="display:none;">
-    <div class="community-details-modal-content">
-        <h2>Join Community</h2>
-        <p>Join community to participate in this conversation</p>
-        <div class="community-details-modal-actions">
-            <button class="community-details-btn" id="communityDetailsConfirmJoinBtn">Join Now</button>
-            <button class="community-details-btn" id="communityDetailsCancelBtn" style="background:#ccc; color:#333;">Cancel</button>
-        </div>
-    </div>
-</div>
-
+<!-- Policy Modal -->
 <div id="communityDetailsPolicyModal" class="community-details-modal-overlay" style="display:none;">
     <div class="community-details-modal-content" style="max-width:600px; text-align:left; overflow-y:auto; max-height:80vh; padding:2rem;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
@@ -787,9 +741,7 @@
             Welcome! This is a space for pottery lovers of all skill levels to connect, learn, and grow.<br>
             To keep things positive and helpful, please follow these simple guidelines:
         </p>
-
         <hr style="margin:1rem 0;">
-
         <h3>Do:</h3>
         <ul>
             <li>Share your pottery (finished or in progress)</li>
@@ -798,7 +750,6 @@
             <li>Credit original artists when sharing work</li>
             <li>Share tips, tools, and inspiration</li>
         </ul>
-
         <h3>Don't:</h3>
         <ul>
             <li>Post hateful, offensive, or inappropriate content</li>
@@ -806,21 +757,28 @@
             <li>Steal or claim others’ work as your own</li>
             <li>Give unsafe advice—safety first with kilns, glazes, etc.</li>
         </ul>
-
         <h3>Breaking the Rules:</h3>
         <ul>
             <li>First: Reminder</li>
             <li>Second: Warning</li>
             <li>Third: Ban (temporary or permanent)</li>
         </ul>
-
-        <p>
-            By joining, you agree to keep this space respectful, creative, and safe.<br>
-            Thanks for being part of the clay-loving community!
-        </p>
-
+        <p>By joining, you agree to keep this space respectful, creative, and safe.<br>Thanks for being part of the clay-loving community!</p>
         <div class="community-details-modal-actions" style="justify-content:flex-end; margin-top:1.5rem;">
-            <button class="community-details-btn" id="communityDetailsFinalJoinBtn" style="background:#344AEA; color:#fff;">Join</button>
+            <button class="community-details-btn" id="communityDetailsAcceptPolicyBtn" style="background:#344AEA; color:#fff;">Accept & Next</button>
+        </div>
+    </div>
+</div>
+
+<!-- Join Modal (short message) -->
+<div id="communityDetailsJoinModal" class="community-details-modal-overlay" style="display:none;">
+    <div class="community-details-modal-content">
+        <h2>Join Community</h2>
+        <p>Tell us why you want to join this community:</p>
+        <textarea id="communityJoinMessage" placeholder="Write a short message..." style="width:100%; min-height:80px; padding:0.5rem; margin-bottom:1rem;"></textarea>
+        <div class="community-details-modal-actions">
+            <button class="community-details-btn" id="communityDetailsConfirmJoinBtn" disabled>Join Now</button>
+            <button class="community-details-btn" id="communityDetailsCancelBtn" style="background:#ccc; color:#333;">Cancel</button>
         </div>
     </div>
 </div>
@@ -889,8 +847,16 @@
             <div class="community-details-posts-field">
                 <label for="communityDetailsEditPostImage">Update image (optional)</label>
                 <input type="file" name="Image" id="communityDetailsEditPostImage" accept="image/*" />
-                <div id="communityDetailsEditPostImagePreviewContainer" style="margin-top:0.5rem;">
-                    <img id="communityDetailsEditPostImagePreview" style="max-width:100%; border-radius:8px; display:none;" />
+                <div id="editPostImageContainer" style="position: relative; display: none;">
+                    <img id="communityDetailsEditPostImagePreview"
+                         src=""
+                         alt="Post image preview"
+                         style="max-height: 200px; width: auto; display: block; border-radius: 8px; margin-top: 8px;">
+                    <button id="removeEditPostImageBtn"
+                            type="button"
+                            style="position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 4px; padding: 2px 6px; cursor: pointer;">
+                        ✕
+                    </button>
                 </div>
             </div>
 
@@ -926,17 +892,6 @@
         <div class="community-details-posts-actions">
             <button type="button" class="community-details-posts-btn secondary">Cancel</button>
             <button type="button" class="community-details-posts-btn primary">Delete</button>
-        </div>
-    </div>
-</div>
-
-<!-- SUCCESS MODAL -->
-<div id="successModal" class="community-details-posts-modal-overlay" style="display:none;">
-    <div class="community-details-posts-modal-content">
-        <h2 class="community-details-posts-title" id="successModalTitle">Success!</h2>
-        <p id="successModalMessage">Your action was successful.</p>
-        <div class="community-details-posts-actions">
-            <button type="button" class="community-details-posts-btn primary" id="successModalBtn">Great!</button>
         </div>
     </div>
 </div>
@@ -980,6 +935,11 @@
                 if (result.success) {
                     const postCard = document.querySelector(`.community-details-post-card[data-post-id='${selectedAdminPostId}']`);
                     if (postCard) postCard.remove();
+
+                    let savedComments = JSON.parse(localStorage.getItem("postComments")) || {};
+                    delete savedComments[selectedAdminPostId];
+                    localStorage.setItem("postComments", JSON.stringify(savedComments));
+
                     window.location.reload();
                 } else {
                     alert(result.message || "Failed to delete post");
@@ -992,61 +952,101 @@
             }
         });
 
-    function showSuccessModal(message = "Action completed successfully!") {
-        const modal = document.getElementById("successModal");
-        const msgElem = document.getElementById("successModalMessage");
-        msgElem.innerText = message;
-        modal.style.display = "flex";
-
-        // Refresh page when modal closed or button clicked
-        const closeModal = () => {
-            modal.style.display = "none";
-            window.location.reload();
-        };
-
-        document.getElementById("successModalBtn").onclick = closeModal;
-
-        // Close modal when clicking outside content
-        modal.onclick = (e) => {
-            if (e.target === modal) closeModal();
-        };
-    }
-
     // Toggle post menu
     function togglePostMenu(postId) {
         const menu = document.getElementById(`post-menu-${postId}`);
         menu.style.display = menu.style.display === "block" ? "none" : "block";
     }
 
+    document.addEventListener("click", (event) => {
+        const allMenus = document.querySelectorAll("[id^='post-menu-']");
+
+        allMenus.forEach(menu => {
+            // Skip if click is inside menu or its button
+            const postId = menu.id.replace("post-menu-", "");
+            const button = document.querySelector(`[onclick="togglePostMenu(${postId})"]`);
+
+            if (!menu.contains(event.target) && !button?.contains(event.target)) {
+                menu.style.display = "none";
+            }
+        });
+    });
+
+    function updateEditSaveButtonState() {
+        const saveBtn = document.getElementById("communityDetailsEditSaveBtn");
+        const titleEl = document.getElementById("communityDetailsEditPostTitle");
+        const contentEl = document.getElementById("communityDetailsEditPostContent");
+        const imageInput = document.getElementById("communityDetailsEditPostImage");
+
+        if (!saveBtn || !titleEl || !contentEl || !window._editOriginal) {
+            if (saveBtn) saveBtn.disabled = true;
+            return;
+        }
+
+        const curTitle = titleEl.value.trim();
+        const curContent = contentEl.value.trim();
+        const orig = window._editOriginal;
+
+        const titleChanged = curTitle !== orig.title;
+        const contentChanged = curContent !== orig.content;
+        const imageChanged = (imageInput.files && imageInput.files.length > 0);
+        const removed = orig.removeImage === true;
+
+        const dirty = titleChanged || contentChanged || imageChanged || removed;
+        saveBtn.disabled = !dirty;
+    }
+
     // Edit Post
     function editPost(postId) {
         selectedPostId = postId;
         const postCard = document.querySelector(`.community-details-post-card[data-post-id='${postId}']`);
+        if (!postCard) return;
 
-        // Populate title
-        const title = postCard.querySelector(".community-post-title")?.innerText || postCard.querySelector("h3")?.innerText || "";
+        const title = postCard.querySelector(".community-post-title")?.innerText
+                      || postCard.querySelector("h3")?.innerText || "";
+        const content = postCard.querySelector("p")?.innerText || "";
+        const existingImage = postCard.querySelector("img")?.src || "";
+
         document.getElementById("communityDetailsEditPostTitle").value = title;
-
-        // Populate content
-        const content = postCard.querySelector("p").innerText;
-        const editTextarea = document.getElementById("communityDetailsEditPostContent");
-        editTextarea.value = content;
-
-        // Populate hidden PostId input
+        document.getElementById("communityDetailsEditPostContent").value = content;
         document.getElementById("communityDetailsEditPostId").value = postId;
 
-        // Show existing image preview if any
-        const existingImage = postCard.querySelector("img")?.src;
-        const preview = document.getElementById("communityDetailsEditPostImagePreview");
-        if(existingImage){
-            preview.src = existingImage;
-            preview.style.display = "block";
+        const imagePreview = document.getElementById("communityDetailsEditPostImagePreview");
+        const imageContainer = document.getElementById("editPostImageContainer");
+        const removeBtn = document.getElementById("removeEditPostImageBtn");
+        const imageInput = document.getElementById("communityDetailsEditPostImage");
+
+        if (existingImage) {
+            imagePreview.src = existingImage;
+            imageContainer.style.display = "block";
+            imagePreview.style.display = "block";
         } else {
-            preview.style.display = "none";
+            imageContainer.style.display = "none";
+            imagePreview.src = "";
         }
 
-        // Show modal
+        if (imageInput) imageInput.value = "";
+
+        // Store the original snapshot
+        window._editOriginal = {
+            title: title.trim(),
+            content: content.trim(),
+            imageSrc: existingImage || "",
+            removeImage: false
+        };
+
+        // Disable save until changes occur
+        document.getElementById("communityDetailsEditSaveBtn").disabled = true;
         document.getElementById("communityDetailsEditPostModal").style.display = "flex";
+        updateEditSaveButtonState();
+
+        // Hook up remove image button
+        removeBtn.onclick = () => {
+            imagePreview.src = "";
+            imageContainer.style.display = "none";
+            window._editOriginal.removeImage = true; // mark as removed
+            updateEditSaveButtonState();
+        };
     }
 
     // Delete Post
@@ -1081,6 +1081,7 @@
             formData.append("PostId", selectedPostId);
             formData.append("Title", newTitle);
             formData.append("Content", newContent);
+            formData.append("RemoveImage", window._editOriginal.removeImage ? "true" : "false");
             if (newImage) formData.append("Image", newImage);
 
             const response = await fetch('/Community/EditPost', {
@@ -1095,7 +1096,7 @@
                 document.getElementById("communityDetailsEditPostModal").style.display = "none";
 
                 // Show success modal
-                showSuccessModal("Post updated successfully!");
+                window.location.reload();
             } else {
                 alert(result.message || "Failed to edit post");
             }
@@ -1122,9 +1123,17 @@
             });
 
             const result = await response.json();
-            if(result.success){
+            if (result.success) {
+                // 🗑️ Remove post card
                 const postCard = document.querySelector(`.community-details-post-card[data-post-id='${postId}']`);
-                postCard.remove();
+                if (postCard) postCard.remove();
+
+                // 🧹 Remove post comments from localStorage
+                let savedComments = JSON.parse(localStorage.getItem("postComments")) || {};
+                delete savedComments[postId];
+                localStorage.setItem("postComments", JSON.stringify(savedComments));
+
+                // ✅ Close modal and refresh UI
                 communityDetailsCloseDeletePostModal();
                 window.location.reload();
             } else alert(result.message || "Failed to delete post");
@@ -1236,6 +1245,14 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+        const titleEl = document.getElementById("communityDetailsEditPostTitle");
+        const contentEl = document.getElementById("communityDetailsEditPostContent");
+        const imageInputEl = document.getElementById("communityDetailsEditPostImage");
+
+        if (titleEl) titleEl.addEventListener('input', updateEditSaveButtonState);
+        if (contentEl) contentEl.addEventListener('input', updateEditSaveButtonState);
+        if (imageInputEl) imageInputEl.addEventListener('change', updateEditSaveButtonState);
+
         if (userDisabled) {
             document.querySelectorAll(".comment-btn").forEach(btn => {
                 btn.disabled = true;
@@ -1269,43 +1286,64 @@
         // Join & Policy Modal
         function initJoinPolicyModal() {
             const joinBtn = document.getElementById('communityDetailsJoinBtn');
-            const joinModal = document.getElementById('communityDetailsJoinModal');
-            const cancelBtn = document.getElementById('communityDetailsCancelBtn');
-            const confirmJoinBtn = document.getElementById('communityDetailsConfirmJoinBtn');
             const policyModal = document.getElementById('communityDetailsPolicyModal');
-            const finalJoinBtn = document.getElementById('communityDetailsFinalJoinBtn');
+            const acceptPolicyBtn = document.getElementById('communityDetailsAcceptPolicyBtn');
 
-            if(joinBtn) joinBtn.addEventListener('click', () => joinModal.style.display = 'flex');
-            cancelBtn?.addEventListener('click', () => joinModal.style.display = 'none');
-            joinModal?.addEventListener('click', e => { if(e.target === joinModal) joinModal.style.display = 'none'; });
-            confirmJoinBtn?.addEventListener('click', () => {
-                joinModal.style.display = 'none';
+            const joinModal = document.getElementById('communityDetailsJoinModal');
+            const confirmJoinBtn = document.getElementById('communityDetailsConfirmJoinBtn');
+            const cancelJoinBtn = document.getElementById('communityDetailsCancelBtn');
+            const joinMessage = document.getElementById('communityJoinMessage');
+
+            // Step 1: User clicks main join -> show policy modal
+            joinBtn?.addEventListener('click', () => {
                 policyModal.style.display = 'flex';
             });
 
-            function communityDetailsClosePolicyModal() { policyModal.style.display = 'none'; }
+            // Step 2: Accept policy -> show join message modal
+            acceptPolicyBtn?.addEventListener('click', () => {
+                policyModal.style.display = 'none';
+                joinModal.style.display = 'flex';
+            });
+
+            // Enable join button when user types a message
+            joinMessage.addEventListener('input', () => {
+                confirmJoinBtn.disabled = !joinMessage.value.trim();
+            });
+
+            // Cancel join modal
+            cancelJoinBtn?.addEventListener('click', () => joinModal.style.display = 'none');
+
+            // Close join modal by clicking outside
+            joinModal?.addEventListener('click', e => { if(e.target === joinModal) joinModal.style.display = 'none'; });
+
+            // Close policy modal function
+            window.communityDetailsClosePolicyModal = () => policyModal.style.display = 'none';
             policyModal?.addEventListener('click', e => { if(e.target === policyModal) communityDetailsClosePolicyModal(); });
 
-            finalJoinBtn?.addEventListener('click', async () => {
+            // Final join submit
+            confirmJoinBtn?.addEventListener('click', async () => {
                 const communityId = '@community.Id';
+                const message = joinMessage.value.trim();
+
                 try {
                     const formData = new FormData();
                     formData.append('communityId', communityId);
+                    formData.append('joinMessage', message);
 
                     const response = await fetch('/Community/Join', { method: 'POST', body: formData });
                     const data = await response.json();
 
                     if(response.ok && data.success){
-                        alert(data.message);
-                        policyModal.style.display = 'none';
-                        if(joinBtn) joinBtn.style.display = 'none';
+                        joinModal.style.display = 'none';
+                        joinBtn.style.display = 'none';
                         document.querySelector('.community-details-top button[disabled]')?.removeAttribute('disabled');
                         const membersInfo = document.querySelector('.community-details-info-card p strong');
                         if(membersInfo) membersInfo.parentNode.innerHTML = `<strong>Members:</strong> ${data.membersCount}`;
+                        window.location.reload();
                     } else {
                         alert(data.message || 'Failed to join community.');
                     }
-                } catch(err){
+                } catch(err) {
                     console.error(err);
                     alert('Error joining community');
                 }
@@ -1369,9 +1407,7 @@
                     if(result.success){
                         // Close the create post modal
                         communityDetailsCloseCreatePostModal();
-
-                        // Show success modal and refresh page
-                        showSuccessModal("Post created successfully!");
+                        window.location.reload();
                     } else {
                         alert(result.message || 'Failed to create post.');
                     }

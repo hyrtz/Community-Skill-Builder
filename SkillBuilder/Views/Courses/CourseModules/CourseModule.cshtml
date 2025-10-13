@@ -682,7 +682,7 @@
 
             <!-- Date Selection -->
             <label for="sessionDate" style="display:block; margin-bottom: 0.5rem; text-align:left;">Date</label>
-            <input type="date" id="sessionDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" style="width: 100%; padding: 0.5rem; margin-bottom: 1.2rem;" />
+            <input type="date" id="sessionDate" min="@DateTime.UtcNow.ToString("yyyy-MM-dd")" style="width: 100%; padding: 0.5rem; margin-bottom: 1.2rem;" />
 
             <!-- Time Input -->
             <label for="sessionTime" style="display:block; margin-bottom: 0.5rem; text-align:left;">Time</label>
@@ -1332,6 +1332,10 @@
 
                     // Add the "Give Feedback" button dynamically
                     addFeedbackButton();
+
+                    const finalProjectPoints = 100;
+                    showPointsPopup(finalProjectPoints);
+                    await saveUserPoints(finalProjectPoints);
                 } else {
                     alert(result.message || "Failed to submit project.");
                     submitBtn.disabled = false;
@@ -1381,7 +1385,27 @@
             syncProgressWithServer();
         }
 
-        function goToNextTab(currentIndex) {
+        async function saveUserPoints(points) {
+            try {
+                const response = await fetch('/Courses/SaveUserPoints', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ points })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log(`✅ Saved ${points} points. Total now: ${result.totalPoints}`);
+                } else {
+                    console.warn('⚠️ Failed to save points:', result.message);
+                }
+            } catch (error) {
+                console.error('❌ Error saving points:', error);
+            }
+        }
+
+        async function goToNextTab(currentIndex) {
             if (currentIndex >= regularTabs.length) return;
 
             const isFinalProject = currentIndex === regularTabs.length - 1;
@@ -1392,7 +1416,7 @@
 
                 const lessonType = moduleData[currentIndex]?.type || "Text";
 
-                // Points logic
+                // 🎯 Points logic
                 let points = {
                     "Text": 10,
                     "Image + Text": 15,
@@ -1405,7 +1429,11 @@
                     points = 100; // final project points
                 }
 
+                // Show popup on UI
                 showPointsPopup(points);
+
+                // 💾 Save points to backend
+                await saveUserPoints(points);
             }
 
             validateCompletedModules();

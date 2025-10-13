@@ -14,6 +14,7 @@
         public string CreatorId { get; set; }  // FK to User
         public User Creator { get; set; }
 
+        public List<CommunityJoinRequest> JoinRequests { get; set; } = new();
         public List<CommunityMembership> Memberships { get; set; } = new();
         public List<CommunityPost> Posts { get; set; } = new();
 

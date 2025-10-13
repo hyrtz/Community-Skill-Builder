@@ -22,7 +22,9 @@
         public List<Enrollment> Enrollments { get; set; }
         public List<CourseReview> Reviews { get; set; }
         public List<CourseProjectSubmission> ProjectSubmissions { get; set; }
+        public List<CommunityJoinRequest> CommunityJoinRequests { get; set; } = new List<CommunityJoinRequest>();
         public List<CommunityMembership> Memberships { get; set; }
+
 
         public bool IsArchived { get; set; } = false;
     }

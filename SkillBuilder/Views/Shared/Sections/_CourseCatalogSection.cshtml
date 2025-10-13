@@ -171,6 +171,10 @@
         </aside>
 
         <div class="course-main">
+            <div id="noCoursesMessage" style="display:none; text-align:center; padding:4rem; color:#555; font-size:1.2rem;">
+                No courses found.
+            </div>
+
             <div class="course-grid" id="courseCardsGrid">
                 @foreach (var course in Model)
                 {
@@ -206,6 +210,9 @@
         const selectedLevels = getCheckedValues("level-filter");
 
         const courseCards = document.querySelectorAll(".course-card");
+        const noCoursesMessage = document.getElementById("noCoursesMessage");
+
+        let visibleCount = 0;
 
         courseCards.forEach(card => {
             const courseCategory = card.getAttribute("data-classes")?.toLowerCase() || "";
@@ -218,11 +225,24 @@
 
             const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(courseLevel);
 
-            card.parentElement.style.display = (matchesClass && matchesLevel) ? "block" : "none";
+            const isVisible = matchesClass && matchesLevel;
+            card.closest(".course-card-link").style.display = isVisible ? "block" : "none";
+
+            if (isVisible) visibleCount++;
         });
+
+        // Show or hide the "no courses" message dynamically
+        if (noCoursesMessage) {
+            if (visibleCount === 0) {
+                noCoursesMessage.style.display = "block";
+                noCoursesMessage.textContent = "No courses found.";
+            } else {
+                noCoursesMessage.style.display = "none";
+            }
+        }
     }
 
-    // Auto-check box based on query string
+    // Auto-check box based on query string and bind filter logic
     window.addEventListener("DOMContentLoaded", () => {
         const filterFromQuery = "@filterQuery";
 
@@ -236,18 +256,19 @@
 
         // Run initial filtering
         filterCourses();
+
+        // Bind filter logic on checkbox changes
+        document.querySelectorAll('.course-checkbox-group input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', filterCourses);
+        });
     });
 
-    // Bind filter logic on checkbox changes
-    document.querySelectorAll('.course-checkbox-group input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', filterCourses);
-    });
-
+    // Clean up search query param from URL after load
     window.addEventListener('load', () => {
         const url = new URL(window.location.href);
         if (url.searchParams.has('search')) {
             url.searchParams.delete('search');
-            window.history.replaceState({}, document.title, url.pathname); // Removes ?search=...
+            window.history.replaceState({}, document.title, url.pathname);
         }
     });
 </script>

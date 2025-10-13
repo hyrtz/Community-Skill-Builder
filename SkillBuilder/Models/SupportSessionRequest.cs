@@ -16,7 +16,7 @@
         public TimeSpan SessionTime { get; set; }
 
         public string Status { get; set; } = "Pending";
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public string? MeetingLink { get; set; }
         public string? MeetingPlatform { get; set; }

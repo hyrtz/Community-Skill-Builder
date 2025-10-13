@@ -120,6 +120,37 @@ namespace SkillBuilder.Controllers
                 .Take(4)
                 .ToList();
 
+            var leaderboardUsers = _context.Users
+                .OrderByDescending(u => u.Points)
+                .Take(20)
+                .ToList();
+
+            var artisans = _context.Artisans
+                .Include(a => a.User)
+                .Where(a => !a.IsArchived && a.User != null)
+                .ToList();
+
+            var userCommunities = _context.Communities
+                .Where(c => c.CreatorId == user.Id && !c.IsArchived && c.IsPublished)
+                .Select(c => new CommunitiesViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description ?? "",
+                    AvatarUrl = c.AvatarUrl ?? "/assets/placeholder-avatar.png",
+                    CoverImageUrl = c.CoverImageUrl ?? "/assets/placeholder-community-cover.jpg",
+                    MembersCount = c.MembersCount,
+                    CreatorId = c.CreatorId
+                })
+                .ToList();
+
+            var communityIds = userCommunities.Select(c => c.Id).ToList();
+
+            var pendingJoinRequests = _context.CommunityJoinRequests
+                .Where(r => communityIds.Contains(r.CommunityId) && r.Status == "Pending")
+                .Include(r => r.User) // get requester info
+                .ToList();
+
             var viewModel = new UserProfileViewModel
             {
                 User = user,
@@ -130,7 +161,11 @@ namespace SkillBuilder.Controllers
                 CourseProgresses = inProgressCourses,
                 SupportRequests = supportRequests,
                 ArtisanSupportRequests = artisanSupportRequests,
-                RecommendedCourses = recommendedCourses
+                RecommendedCourses = recommendedCourses,
+                LeaderboardUsers = leaderboardUsers,
+                Artisans = artisans,
+                MyCommunities = userCommunities,
+                PendingJoinRequests = pendingJoinRequests
             };
 
             return View("~/Views/Profile/UserProfile.cshtml", viewModel);
@@ -594,10 +629,20 @@ namespace SkillBuilder.Controllers
             // Notify learner with reschedule action
             await AddNotificationAsync(
                 userId,
-                $"✅ You have successfully cancelled your session request for '{request.Course?.Title}'.",
+                $"You cancelled your session request for '{request.Course?.Title}'.",
                 "Reschedule Session",
                 $"/Support/RequestSession/{request.Course?.Id}"
             );
+
+            // ✅ Notify the artisan (course creator)
+            var artisanUserId = request.Course?.Artisan?.UserId;
+            if (!string.IsNullOrEmpty(artisanUserId))
+            {
+                await AddNotificationAsync(
+                    artisanUserId,
+                    $"⚠️ {request.User?.FirstName} {request.User?.LastName} has cancelled their support session for '{request.Course?.Title}'."
+                );
+            }
 
             return Ok(new { success = true, message = "Session cancelled successfully!" });
         }

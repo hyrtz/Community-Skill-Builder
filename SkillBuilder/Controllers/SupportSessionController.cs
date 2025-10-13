@@ -43,13 +43,43 @@ namespace SkillBuilder.Controllers
             _context.SupportSessionRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            // Include User and Course for JS rendering
+            // Include User and Course
             var newRequest = await _context.SupportSessionRequests
                 .Include(r => r.User)
                 .Include(r => r.Course)
                 .FirstOrDefaultAsync(r => r.Id == request.Id);
 
-            return Ok(newRequest);
+            if (newRequest == null || newRequest.Course == null || newRequest.User == null)
+                return BadRequest("Invalid request details.");
+
+            // ✅ Manually load the Artisan (since Course.CreatedBy maps to Artisan.UserId)
+            newRequest.Course.Artisan = await _context.Artisans
+                .FirstOrDefaultAsync(a => a.UserId == newRequest.Course.CreatedBy);
+
+            // ✅ Notify Learner
+            await AddNotificationAsync(
+                newRequest.UserId,
+                $"✅ Your support session request for '{newRequest.Course.Title}' has been successfully submitted."
+            );
+
+            // ✅ Notify Artisan (only if found)
+            if (newRequest.Course.Artisan != null)
+            {
+                await AddNotificationAsync(
+                    newRequest.Course.Artisan.UserId,
+                    $"📩 You’ve received a new support session request for '{newRequest.Course.Title}' from {newRequest.User.FirstName} {newRequest.User.LastName}."
+                );
+            }
+            else
+            {
+                Console.WriteLine($"⚠️ Artisan not found for Course ID: {newRequest.Course.Id}, CreatedBy: {newRequest.Course.CreatedBy}");
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = "Support session request submitted successfully."
+            });
         }
 
         // GET: Artisan’s view of pending support requests

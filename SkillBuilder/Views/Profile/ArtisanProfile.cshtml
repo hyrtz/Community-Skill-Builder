@@ -42,14 +42,12 @@
     .artisan-role {
         font-size: 0.95rem;
         color: #555;
-        margin-bottom: 1.5rem;
     }
 
     .artisan-tabs {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
-        margin-top: 2rem;
+        margin-top: 1rem;
     }
 
     .artisan-tab {
@@ -81,6 +79,7 @@
         padding: 2rem;
         border-radius: 12px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        overflow-y: auto;
     }
 
     .artisan-panel {
@@ -90,6 +89,19 @@
         .artisan-panel.active {
             display: block;
         }
+
+    .tab-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 0.6rem;
+        vertical-align: middle;
+        filter: grayscale(100%) brightness(0.5);
+        transition: filter 0.2s ease;
+    }
+
+    .artisan-tab.active .tab-icon {
+        filter: none;
+    }
 </style>
 
 <div class="artisan-dashboard-wrapper">
@@ -101,11 +113,24 @@
         <div class="artisan-role">Instructor</div>
 
         <div class="artisan-tabs">
-            <button class="artisan-tab active" data-tab="dashboard">Dashboard</button>
-            <button class="artisan-tab" data-tab="courses">Courses</button>
-            <button class="artisan-tab" data-tab="sessions">Support Sessions</button>
-            <button class="artisan-tab" data-tab="portfolio">Portfolio</button>
-            <button class="artisan-tab" data-tab="reviews">Project to Review</button>
+            <button class="artisan-tab active" data-tab="dashboard">
+                <img src="~/assets/Icons/ProfileDashboard.ico" class="tab-icon" /> Dashboard
+            </button>
+            <button class="artisan-tab" data-tab="courses">
+                <img src="~/assets/Icons/ProfileCourses.ico" class="tab-icon" /> My Courses
+            </button>
+            <button class="artisan-tab" data-tab="community">
+                <img src="~/assets/Icons/ProfileCommunity.ico" class="tab-icon" /> My Community
+            </button>
+            <button class="artisan-tab" data-tab="sessions">
+                <img src="~/assets/Icons/ProfileSessions.ico" class="tab-icon" /> Support Sessions
+            </button>
+            <button class="artisan-tab" data-tab="portfolio">
+                <img src="~/assets/Icons/ProfilePortfolio.ico" class="tab-icon" /> Portfolio
+            </button>
+            <button class="artisan-tab" data-tab="reviews">
+                <img src="~/assets/Icons/ProfileProjects.ico" class="tab-icon" /> Project to Review
+            </button>
         </div>
     </div>
 
@@ -116,6 +141,9 @@
         </div>
         <div class="artisan-panel" data-tab="courses">
             @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookCourses", Model)
+        </div>
+        <div class="artisan-panel" data-tab="community">
+            @Html.Partial("Sections/ArtisanNotebooks/_ArtisanNotebookCommunity", Model)
         </div>
         <div class="artisan-panel" data-tab="sessions">
             @await Html.PartialAsync("Sections/ArtisanNotebooks/_ArtisanNotebookSupportSessions", new List<SupportSessionRequest>())
@@ -144,4 +172,23 @@
             });
         });
     });
+
+    function matchArtisanMainToSidebar() {
+        const sidebar = document.querySelector('.artisan-sidebar');
+        const main = document.querySelector('.artisan-main');
+        if (sidebar && main) {
+            main.style.height = sidebar.offsetHeight + 'px';
+        }
+    }
+
+    // Run on load and resize
+    window.addEventListener('load', matchArtisanMainToSidebar);
+    window.addEventListener('resize', matchArtisanMainToSidebar);
+
+    // Auto-adjust when sidebar height changes (e.g. dynamic content)
+    const artisanSidebar = document.querySelector('.artisan-sidebar');
+    if (artisanSidebar) {
+        const observer = new ResizeObserver(matchArtisanMainToSidebar);
+        observer.observe(artisanSidebar);
+    }
 </script>

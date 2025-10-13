@@ -275,6 +275,7 @@ namespace SkillBuilder.Controllers
             public string Title { get; set; } = string.Empty;
             public string Content { get; set; } = string.Empty;
             public IFormFile? Image { get; set; }
+            public bool RemoveImage { get; set; }
         }
 
         [HttpPost("EditPost")]
@@ -301,13 +302,20 @@ namespace SkillBuilder.Controllers
             post.Title = model.Title;
             post.Content = model.Content;
 
-            if (model.Image != null)
+            // ✅ Handle image update/removal logic
+            if (model.RemoveImage)
+            {
+                post.ImageUrl = null; // remove image from DB
+            }
+            else if (model.Image != null)
+            {
                 post.ImageUrl = await SaveImage(model.Image, "community-posts");
+            }
 
             _context.CommunityPosts.Update(post);
             await _context.SaveChangesAsync();
 
-            // ✅ Notify only the user who edited
+            // ✅ Notify the user who edited
             await _notificationService.AddNotificationAsync(
                 userId,
                 $"✏️ Your post '{post.Title}' has been successfully updated."
@@ -490,53 +498,72 @@ namespace SkillBuilder.Controllers
                 $"✅ Your Community '{community.Name}' has been created successfully."
             );
 
+            // ✅ Notify all Admins
+            var adminIds = await _context.Users
+                .Where(u => u.Role == "Admin")
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            foreach (var adminId in adminIds)
+            {
+                await _notificationService.AddNotificationAsync(
+                    adminId,
+                    $"🌐 A new community '{community.Name}' was created by {user.FirstName} {user.LastName}."
+                );
+            }
+
             return RedirectToAction("CommunityHub", new { selectedCommunityId = community.Id });
         }
 
         [HttpPost("Join")]
-        public async Task<IActionResult> JoinCommunity(int communityId)
+        public async Task<IActionResult> JoinCommunity(int communityId, string joinMessage)
         {
-            var userId = User.FindFirst("UserId")?.Value; // ✅ fixed
+            var userId = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
+            // Check if the user is already a member
             var existingMembership = await _context.CommunityMemberships
                 .FirstOrDefaultAsync(m => m.CommunityId == communityId && m.UserId == userId);
-
             if (existingMembership != null)
                 return BadRequest(new { success = false, message = "You are already a member of this community." });
 
-            var membership = new CommunityMembership
+            // Check if there's already a pending join request
+            var existingRequest = await _context.CommunityJoinRequests
+                .FirstOrDefaultAsync(r => r.CommunityId == communityId && r.UserId == userId && r.Status == "Pending");
+            if (existingRequest != null)
+                return BadRequest(new { success = false, message = "You have already requested to join this community." });
+
+            // Create a new join request
+            var joinRequest = new CommunityJoinRequest
             {
                 CommunityId = communityId,
                 UserId = userId,
-                JoinedAt = DateTime.UtcNow,
-                Role = "Member"
+                ShortMessage = joinMessage?.Trim(),
+                RequestedAt = DateTime.UtcNow,
+                Status = "Pending"
             };
 
-            _context.CommunityMemberships.Add(membership);
-
-            var community = await _context.Communities.FindAsync(communityId);
-            if (community != null)
-                community.MembersCount += 1;
-
+            _context.CommunityJoinRequests.Add(joinRequest);
             await _context.SaveChangesAsync();
 
-            var ownerId = community.CreatorId;
-            if (!string.IsNullOrEmpty(ownerId) && ownerId != userId)
+            // Notify the community owner
+            var community = await _context.Communities.FindAsync(communityId);
+            if (community != null && !string.IsNullOrEmpty(community.CreatorId) && community.CreatorId != userId)
             {
                 await _notificationService.AddNotificationAsync(
-                    ownerId,
-                    $"👤 {User.Identity.Name} has joined your community '{community.Name}'."
+                    community.CreatorId,
+                    $"👤 {User.Identity.Name} has requested to join your community '{community.Name}'."
                 );
             }
 
+            // Notify the user
             await _notificationService.AddNotificationAsync(
                 userId,
-                $"✅ You have successfully joined the community '{community.Name}'."
+                $"✅ Your request to join '{community?.Name}' has been sent and is pending approval."
             );
 
-            return Ok(new { success = true, message = "Joined successfully!", membersCount = community.MembersCount });
+            return Ok(new { success = true, message = "Join request sent successfully!" });
         }
 
         private async Task<string> SaveImage(IFormFile file, string folderName)
@@ -554,6 +581,78 @@ namespace SkillBuilder.Controllers
             }
 
             return $"/uploads/{folderName}/{fileName}";
+        }
+
+        [HttpPost("HandleJoinRequest")]
+        public async Task<IActionResult> HandleJoinRequest([FromBody] JoinRequestActionModel model)
+        {
+            if (model == null)
+                return BadRequest(new { success = false, message = "Invalid request data." });
+
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var joinRequest = await _context.CommunityJoinRequests
+                .Include(r => r.User)
+                .Include(r => r.Community)
+                .FirstOrDefaultAsync(r => r.Id == model.RequestId);
+
+            if (joinRequest == null)
+                return NotFound(new { success = false, message = "Join request not found." });
+
+            // Only the community owner can approve/reject
+            if (joinRequest.Community.CreatorId != userId)
+                return Forbid();
+
+            if (model.Approve)
+            {
+                // ✅ Approve request
+                joinRequest.Status = "Approved";
+
+                // Add member to community
+                _context.CommunityMemberships.Add(new CommunityMembership
+                {
+                    CommunityId = joinRequest.CommunityId,
+                    UserId = joinRequest.UserId,
+                    JoinedAt = DateTime.UtcNow,
+                    Role = "Member"
+                });
+
+                // Update community member count
+                joinRequest.Community.MembersCount += 1;
+
+                await _notificationService.AddNotificationAsync(
+                    joinRequest.UserId,
+                    $"🎉 Your join request for '{joinRequest.Community.Name}' has been approved!"
+                );
+            }
+            else
+            {
+                // ❌ Reject request
+                joinRequest.Status = "Rejected";
+
+                await _notificationService.AddNotificationAsync(
+                    joinRequest.UserId,
+                    $"🚫 Your join request for '{joinRequest.Community.Name}' has been rejected."
+                );
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = model.Approve
+                    ? $"✅ {joinRequest.User.FirstName} {joinRequest.User.LastName} has been added to the community."
+                    : $"❌ {joinRequest.User.FirstName} {joinRequest.User.LastName}'s request has been rejected."
+            });
+        }
+
+        public class JoinRequestActionModel
+        {
+            public int RequestId { get; set; }
+            public bool Approve { get; set; }
         }
 
     }

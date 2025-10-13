@@ -30,12 +30,39 @@ namespace SkillBuilder.Data
         public DbSet<CommunityPost> CommunityPosts { get; set; }
         public DbSet<CommunityPostReport> CommunityPostReports { get; set; }
         public DbSet<Community> Communities { get; set; }
+        public DbSet<CommunityJoinRequest> CommunityJoinRequests { get; set; }
         public DbSet<CommunityMembership> CommunityMemberships { get; set; }
         public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // ✅ Force all DateTime fields to use UTC
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(DateTime))
+                    {
+                        property.SetValueConverter(
+                            new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+                                v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                                v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                            )
+                        );
+                    }
+                    else if (property.ClrType == typeof(DateTime?))
+                    {
+                        property.SetValueConverter(
+                            new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime?, DateTime?>(
+                                v => v == null ? null : (v.Value.Kind == DateTimeKind.Utc ? v : v.Value.ToUniversalTime()),
+                                v => v == null ? null : DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)
+                            )
+                        );
+                    }
+                }
+            }
 
             // User
             modelBuilder.Entity<User>().HasData(
@@ -565,6 +592,27 @@ namespace SkillBuilder.Data
                 .WithMany(c => c.Memberships)
                 .HasForeignKey(cm => cm.CommunityId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Community -> Creator (User) : restrict deletion
+            modelBuilder.Entity<Community>()
+                .HasOne(c => c.Creator)
+                .WithMany()
+                .HasForeignKey(c => c.CreatorId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade
+
+            // CommunityJoinRequest -> User : restrict deletion
+            modelBuilder.Entity<CommunityJoinRequest>()
+                .HasOne(cjr => cjr.User)
+                .WithMany(u => u.CommunityJoinRequests)
+                .HasForeignKey(cjr => cjr.UserId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade
+
+            // CommunityJoinRequest -> Community : optional cascade
+            modelBuilder.Entity<CommunityJoinRequest>()
+                .HasOne(cjr => cjr.Community)
+                .WithMany(c => c.JoinRequests)
+                .HasForeignKey(cjr => cjr.CommunityId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Seed CourseModules and ModuleContents for each Course
             modelBuilder.Entity<CourseModule>().HasData(

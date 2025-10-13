@@ -288,7 +288,6 @@
         border-radius: 8px;
         border: 1px solid #ddd;
         font-size: 0.95rem;
-        resize: vertical;
     }
 
     /* Success Modal */
@@ -394,7 +393,6 @@
             font-size: 0.9rem;
             width: 100%;
             box-sizing: border-box;
-            resize: vertical;
         }
 
     /* Character Count */
@@ -420,6 +418,21 @@
         font-size: 0.95rem;
         transition: background 0.2s ease;
     }
+
+        .community-details-posts-btn:disabled {
+            background: #ccc !important;
+            color: #777 !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            opacity: 0.7;
+            transition: none;
+        }
+
+            /* Optional - small hover override (prevent hover color change) */
+            .community-details-posts-btn:disabled:hover {
+                background: #ccc !important;
+                color: #777 !important;
+            }
 
         .community-details-posts-btn.primary {
             background: #344AEA;
@@ -508,7 +521,7 @@
                 <div class="comments-section" id="comments-section-@post.Id" style="display:none;">
                     <div class="comments-list" id="comments-list-@post.Id"></div>
                     <textarea id="comment-input-@post.Id" style="resize: none;" placeholder="Write a comment..." rows="2"></textarea>
-                    <button onclick="addComment(@post.Id)">Post</button>
+                    <button onclick="addComment(@post.Id)">Post Comment</button>
                 </div>
             </div>
         }
@@ -576,8 +589,21 @@
             <div class="community-details-posts-field">
                 <label for="communityDetailsEditPostImage">Update image (optional)</label>
                 <input type="file" name="Image" id="communityDetailsEditPostImage" accept="image/*" />
-                <div id="communityDetailsEditPostImagePreviewContainer" style="margin-top:0.5rem;">
-                    <img id="communityDetailsEditPostImagePreview" style="max-width:100%; border-radius:8px; display:none;" />
+
+                <div id="communityDetailsEditPostImagePreviewContainer"
+                     style="margin-top:0.5rem; position:relative; display:inline-block;">
+                    <img id="communityDetailsEditPostImagePreview"
+                         style="max-width:100%; border-radius:8px; display:none;" />
+
+                    <button type="button" id="communityDetailsEditRemoveImageBtn"
+                            style="display:none; position:absolute; top:6px; right:6px;
+                       background:rgba(0,0,0,0.6); color:#fff;
+                       border:none; border-radius:50%;
+                       width:28px; height:28px;
+                       font-weight:bold; cursor:pointer;
+                       line-height:1; font-size:16px;">
+                        ✕
+                    </button>
                 </div>
             </div>
 
@@ -612,17 +638,6 @@
         <div class="community-details-posts-actions">
             <button type="button" class="community-details-posts-btn secondary">Cancel</button>
             <button type="button" class="community-details-posts-btn primary">Delete</button>
-        </div>
-    </div>
-</div>
-
-<!-- SUCCESS MODAL -->
-<div id="successModal" class="community-details-posts-modal-overlay" style="display:none;">
-    <div class="community-details-posts-modal-content">
-        <h2 class="community-details-posts-title" id="successModalTitle">Success!</h2>
-        <p id="successModalMessage">Your action was successful.</p>
-        <div class="community-details-posts-actions">
-            <button type="button" class="community-details-posts-btn primary" id="successModalBtn">Great!</button>
         </div>
     </div>
 </div>
@@ -718,38 +733,99 @@
         }
     });
 
-    // ---------------- Edit Post ----------------
-    function openEditPostModal(postId){
-        selectedPostId = postId;
+    // ---------------- Image Preview for Edit Post ----------------
+    const editPostImageInput = document.getElementById('communityDetailsEditPostImage');
+    const editPostImagePreview = document.getElementById('communityDetailsEditPostImagePreview');
+    const removeImageBtn = document.getElementById('communityDetailsEditRemoveImageBtn');
+    let removeImageFlag = false;
 
+    // ---------------- Edit Post ----------------
+    const editTitleInput = document.getElementById('communityDetailsEditPostTitle');
+    const editContentInput = document.getElementById('communityDetailsEditPostContent');
+    const saveBtn = document.getElementById('communityDetailsEditSaveBtn');
+
+    let originalTitle = '';
+    let originalContent = '';
+    let originalImageUrl = '';
+
+    function openEditPostModal(postId) {
+        selectedPostId = postId;
         const postCard = document.querySelector(`.post-card[data-post-id='${postId}']`);
 
-        // Set hidden PostId
-        document.getElementById('communityDetailsEditPostId').value = postId;
-        // Set title
         const title = postCard.dataset.title || '';
-        document.getElementById('communityDetailsEditPostTitle').value = title;
-        document.getElementById('communityDetailsEditPostTitleCount').innerText = `${title.length}/100 maximum characters`;
+        const content = postCard.querySelector('.post-card-content p')?.innerText || '';
+        const imageUrl = postCard.dataset.image || '';
 
-        // Set content
-        const contentEl = postCard.querySelector('.post-card-content p');
-        const content = contentEl ? contentEl.innerText : '';
-        document.getElementById('communityDetailsEditPostContent').value = content;
-        document.getElementById('communityDetailsEditPostContentCount').innerText = `${content.length}/1000 maximum characters`;
+        originalTitle = title;
+        originalContent = content;
+        originalImageUrl = imageUrl;
+        removeImageFlag = false;
 
-        // Set image preview
-        const imageUrl = postCard.dataset.image;
-        const imagePreview = document.getElementById('communityDetailsEditPostImagePreview');
-        if(imageUrl){
-            imagePreview.src = imageUrl;
-            imagePreview.style.display = 'block';
+        editTitleInput.value = title;
+        editContentInput.value = content;
+
+        if (imageUrl) {
+            editPostImagePreview.src = imageUrl;
+            editPostImagePreview.style.display = 'block';
+            removeImageBtn.style.display = 'inline-block';
         } else {
-            imagePreview.src = '';
-            imagePreview.style.display = 'none';
+            editPostImagePreview.style.display = 'none';
+            removeImageBtn.style.display = 'none';
         }
 
-        // Show modal
+        saveBtn.disabled = true;
         document.getElementById('communityDetailsEditPostModal').style.display = 'flex';
+    }
+
+    // --- change detection ---
+    editPostImageInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                editPostImagePreview.src = e.target.result;
+                editPostImagePreview.style.display = 'block';
+                removeImageBtn.style.display = 'inline-block';
+                removeImageFlag = false;
+                toggleSaveButton(); // ✅ call here to enable Save
+            };
+            reader.readAsDataURL(file);
+        } else {
+            toggleSaveButton(); // handles case when user clears file input
+        }
+    });
+
+    removeImageBtn.addEventListener('click', () => {
+        editPostImagePreview.src = '';
+        editPostImagePreview.style.display = 'none';
+        editPostImageInput.value = '';
+        removeImageBtn.style.display = 'none';
+        removeImageFlag = true;
+        toggleSaveButton();
+    });
+
+    // Detect text changes
+    [editTitleInput, editContentInput].forEach(el => {
+        el.addEventListener('input', toggleSaveButton);
+    });
+
+    function toggleSaveButton() {
+        const hasChanges =
+            editTitleInput.value.trim() !== originalTitle ||
+            editContentInput.value.trim() !== originalContent ||
+            removeImageFlag ||
+            editPostImageInput.files.length > 0;
+
+        saveBtn.disabled = !hasChanges;
+    }
+
+    function toggleSaveButton() {
+        const hasChanges =
+            editTitleInput.value.trim() !== originalTitle ||
+            editContentInput.value.trim() !== originalContent ||
+            removeImageFlag ||
+            editPostImageInput.files.length > 0;
+        saveBtn.disabled = !hasChanges;
     }
 
     document.getElementById('communityDetailsEditCancelBtn').addEventListener('click', ()=>{
@@ -770,6 +846,7 @@
         formData.append('Title', title);
         formData.append('Content', content);
         if (imageFile) formData.append('Image', imageFile);
+        formData.append('RemoveImage', removeImageFlag);
 
         try {
             const res = await fetch('/Community/EditPost', { method: 'POST', body: formData });
@@ -777,7 +854,7 @@
 
             if (data.success) {
                 document.getElementById('communityDetailsEditPostModal').style.display = 'none';
-                showSuccessModal('Post updated successfully!');
+                window.location.reload();
 
             } else {
                 alert(data.message || 'Failed to update post');
@@ -806,10 +883,33 @@
             });
             const data = await res.json();
             if(data.success){
+
+                // 🧹 Delete from localStorage
+                let savedComments = JSON.parse(localStorage.getItem("postComments")) || {};
+                delete savedComments[selectedPostId];
+                localStorage.setItem("postComments", JSON.stringify(savedComments));
+
+                // 🗑️ Remove the post card from DOM
+                const postCard = document.querySelector(`.post-card[data-post-id='${selectedPostId}']`);
+                if (postCard) postCard.remove();
+
+                // 🧼 Also clear comments list in case it's visible
+                const commentsList = document.getElementById(`comments-list-${selectedPostId}`);
+                if (commentsList) commentsList.innerHTML = '';
+
+                const commentsSection = document.getElementById(`comments-section-${selectedPostId}`);
+                if (commentsSection) commentsSection.style.display = 'none';
+
                 communityDetailsCloseDeletePostModal();
-                showSuccessModal('Post deleted successfully!');
-            } else alert(data.message || 'Failed to delete post');
-        } catch(e){ console.error(e); alert('Error deleting post'); }
+                window.location.reload();
+
+            } else {
+                alert(data.message || 'Failed to delete post');
+            }
+        } catch(e){
+            console.error(e);
+            alert('Error deleting post');
+        }
     }
 
     // ---------------- Admin Delete Post ----------------
@@ -818,19 +918,37 @@
         document.getElementById('adminDeletePostModal').style.display='flex';
     }
 
-    async function confirmAdminDeletePost(){
-        try{
+    async function confirmAdminDeletePost() {
+        try {
             const res = await fetch('/Community/DeletePost', {
-                method:'POST',
-                body: new URLSearchParams({ PostId:selectedAdminPostId })
+                method: 'POST',
+                body: new URLSearchParams({ PostId: selectedAdminPostId })
             });
             const data = await res.json();
-            if(data.success){
-                document.querySelector(`.post-card[data-post-id='${selectedAdminPostId}']`).remove();
-                document.getElementById('adminDeletePostModal').style.display='none';
-                showSuccessModal('Post deleted successfully!');
-            } else alert(data.message || 'Failed');
-        } catch(e){ console.error(e); alert('Error deleting post'); }
+
+            if (data.success) {
+                let savedComments = JSON.parse(localStorage.getItem("postComments")) || {};
+                delete savedComments[selectedAdminPostId];
+                localStorage.setItem("postComments", JSON.stringify(savedComments));
+
+                const postCard = document.querySelector(`.post-card[data-post-id='${selectedAdminPostId}']`);
+                if (postCard) postCard.remove();
+
+                const commentsList = document.getElementById(`comments-list-${selectedAdminPostId}`);
+                if (commentsList) commentsList.innerHTML = '';
+
+                const commentsSection = document.getElementById(`comments-section-${selectedAdminPostId}`);
+                if (commentsSection) commentsSection.style.display = 'none';
+
+                document.getElementById('adminDeletePostModal').style.display = 'none';
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to delete post');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error deleting post');
+        }
     }
 
     // ---------------- Report Post ----------------
@@ -856,42 +974,19 @@
             const data = await res.json();
             if(data.success){
                 document.getElementById('communityDetailsReportModal').style.display='none';
-                showSuccessModal('Post reported successfully!');
+                window.location.reload();
             } else alert(data.message || 'Failed to report post');
         } catch(e){ console.error(e); alert('Error reporting post'); }
     });
 
-    // ---------------- Success Modal ----------------
-    function showSuccessModal(message){
-        const modal = document.getElementById('successModal');
-        document.getElementById('successModalTitle').innerText = 'Success!';
-        document.getElementById('successModalMessage').innerText = message;
-        modal.style.display='flex';
-    }
-
-    // Replace the previous click handler
-    document.getElementById('successModalBtn').addEventListener('click', ()=>{
-        document.getElementById('successModal').style.display='none';
-        // Reload after modal is closed
-        window.location.reload();
-    });
-
-        // ---------------- Image Preview for Edit Post ----------------
-    const editPostImageInput = document.getElementById('communityDetailsEditPostImage');
-    const editPostImagePreview = document.getElementById('communityDetailsEditPostImagePreview');
-
-    editPostImageInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                editPostImagePreview.src = e.target.result;
-                editPostImagePreview.style.display = 'block';
+    document.addEventListener("click", (event) => {
+        const allMenus = document.querySelectorAll("[id^='post-menu-']");
+        allMenus.forEach(menu => {
+            const postId = menu.id.replace("post-menu-", "");
+            const button = document.querySelector(`[onclick="togglePostMenu(${postId})"]`);
+            if (!menu.contains(event.target) && !button?.contains(event.target)) {
+                menu.style.display = "none";
             }
-            reader.readAsDataURL(file);
-        } else {
-            editPostImagePreview.src = '';
-            editPostImagePreview.style.display = 'none';
-        }
+        });
     });
 </script>

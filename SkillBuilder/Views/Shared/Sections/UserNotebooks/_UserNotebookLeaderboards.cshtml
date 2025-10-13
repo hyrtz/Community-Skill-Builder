@@ -1,0 +1,186 @@
+﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
+
+@{
+    var users = Model.LeaderboardUsers ?? new List<SkillBuilder.Models.User>();
+    var currentUserId = Model.User?.Id ?? "";
+}
+
+<style>
+    .leaderboard-wrapper {
+        padding: 1rem 2rem;
+    }
+
+    .leaderboard-header {
+        font-size: 1.8rem;
+        color: #344AEA;
+        margin-bottom: 1.5rem;
+    }
+
+    .leaderboard-subheader {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #344AEA;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 1rem;
+    }
+
+    .leaderboard-row {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease;
+    }
+
+        .leaderboard-row:hover {
+            transform: scale(1.02);
+        }
+
+    .leaderboard-cell {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .leaderboard-user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .leaderboard-user-info img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+    .leaderboard-user-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .leaderboard-user-name span {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .leaderboard-user-you {
+        font-size: 0.85rem;
+        color: #344AEA;
+        font-weight: 600;
+        margin-left: 0.3rem;
+    }
+
+    .leaderboard-points {
+        font-weight: bold;
+        color: #344AEA;
+    }
+
+    .rank-number {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #344AEA;
+        text-align: center;
+        width: 60px;
+    }
+
+    .medal {
+        font-size: 1.5rem;
+        margin-right: 0.3rem;
+    }
+
+</style>
+
+<h2 class="leaderboard-header">Leaderboards</h2>
+
+<div class="leaderboard-wrapper">
+
+    <div class="leaderboard-subheader">🏆 Top Learners</div>
+
+    <table class="leaderboard-table">
+        <tbody>
+            @if (users.Any())
+            {
+                var orderedUsers = users.OrderByDescending(u => u.Points).ToList();
+
+                for (int i = 0; i < orderedUsers.Count; i++)
+                {
+                    var user = orderedUsers[i];
+                    string medalIcon = "";
+                    string placementLabel;
+
+                    // 🥇🥈🥉 medals and short-form ranks for top 3
+                    if (i == 0)
+                    {
+                        medalIcon = "🥇";
+                        placementLabel = "1st";
+                    }
+                    else if (i == 1)
+                    {
+                        medalIcon = "🥈";
+                        placementLabel = "2nd";
+                    }
+                    else if (i == 2)
+                    {
+                        medalIcon = "🥉";
+                        placementLabel = "3rd";
+                    }
+                    else
+                    {
+                        placementLabel = $"{i + 1}th";
+                    }
+
+                    bool isCurrentUser = user.Id == currentUserId;
+
+                    <tr class="leaderboard-row">
+                        <td class="leaderboard-cell rank-number">
+                            @if (!string.IsNullOrEmpty(medalIcon))
+                            {
+                                <span class="medal">@medalIcon</span>
+                            }
+                            else
+                            {
+                                @($"{i + 1}")
+                            }
+                        </td>
+
+                        <td class="leaderboard-cell">
+                            <div class="leaderboard-user-info">
+                                <img src="@user.UserAvatar" alt="User Avatar" />
+                                <div class="leaderboard-user-details">
+                                    <div class="leaderboard-user-name">
+                                        <span>@user.FirstName @user.LastName</span>
+                                        @if (isCurrentUser)
+                                        {
+                                            <span class="leaderboard-user-you">(You)</span>
+                                        }
+                                    </div>
+                                    <div style="font-size:0.85rem; color:#777;">@placementLabel</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="leaderboard-cell">Enrolled Courses: @((user.Enrollments?.Count() ?? 0))</td>
+                        <td class="leaderboard-cell leaderboard-points">@user.Points pts</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" style="text-align:center; padding:2rem; color:#666;">
+                        No learners to display yet.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

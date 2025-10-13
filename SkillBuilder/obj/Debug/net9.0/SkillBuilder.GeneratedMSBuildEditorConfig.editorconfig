@@ -148,6 +148,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXEFydGlzYW5Ob3RlYm9va3NcU3VwcG9ydFNlc3Npb25zTm90ZWJvb2tzXF9TdXBwb3J0U2Vzc2lvbnNOb3RlYm9va1VwY29taW5nLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/ArtisanNotebooks/_ArtisanNotebookCommunity.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXEFydGlzYW5Ob3RlYm9va3NcX0FydGlzYW5Ob3RlYm9va0NvbW11bml0eS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/ArtisanNotebooks/_ArtisanNotebookCourses.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXEFydGlzYW5Ob3RlYm9va3NcX0FydGlzYW5Ob3RlYm9va0NvdXJzZXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -240,6 +244,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXFVzZXJOb3RlYm9va3NcQWNoaWV2ZW1lbnRzTm90ZWJvb2tzXF9BY2hpZXZlbWVudHNOb3RlYm9va1BlbmRpbmcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/UserNotebooks/MyCommunityNotebooks/_MyCommunityNotebookAllMembers.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXFVzZXJOb3RlYm9va3NcTXlDb21tdW5pdHlOb3RlYm9va3NcX015Q29tbXVuaXR5Tm90ZWJvb2tBbGxNZW1iZXJzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/UserNotebooks/MyCommunityNotebooks/_MyCommunityNotebookPending.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXFVzZXJOb3RlYm9va3NcTXlDb21tdW5pdHlOb3RlYm9va3NcX015Q29tbXVuaXR5Tm90ZWJvb2tQZW5kaW5nLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/UserNotebooks/MyCoursesNotebooks/_MyCoursesNotebookCompleted.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXFVzZXJOb3RlYm9va3NcTXlDb3Vyc2VzTm90ZWJvb2tzXF9NeUNvdXJzZXNOb3RlYm9va0NvbXBsZXRlZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -280,8 +292,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXFVzZXJOb3RlYm9va3NcX1VzZXJOb3RlYm9va0FjaGlldmVtZW50cy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/UserNotebooks/_UserNotebookArtisanList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXFVzZXJOb3RlYm9va3NcX1VzZXJOb3RlYm9va0FydGlzYW5MaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/UserNotebooks/_UserNotebookDashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXFVzZXJOb3RlYm9va3NcX1VzZXJOb3RlYm9va0Rhc2hib2FyZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/UserNotebooks/_UserNotebookLeaderboards.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXFVzZXJOb3RlYm9va3NcX1VzZXJOb3RlYm9va0xlYWRlcmJvYXJkcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/UserNotebooks/_UserNotebookMyCommunity.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFNlY3Rpb25zXFVzZXJOb3RlYm9va3NcX1VzZXJOb3RlYm9va015Q29tbXVuaXR5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/PREDATOR/Desktop/Tahi/Community-Skill-Builder/SkillBuilder/Views/Shared/Sections/UserNotebooks/_UserNotebookMyCourses.cshtml]
