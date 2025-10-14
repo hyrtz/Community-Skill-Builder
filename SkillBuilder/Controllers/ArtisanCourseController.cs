@@ -39,7 +39,7 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpPost("CreateCourse")]
-        [RequestSizeLimit(200 * 1024 * 1024)] // Allow up to 200 MB for this action
+        [RequestSizeLimit(10 * 1024 * 1024)] // 10 MB global cap by default
         public async Task<IActionResult> CreateCourse(CourseBuilderViewModel model)
         {
             if (!ModelState.IsValid)
@@ -221,7 +221,7 @@ namespace SkillBuilder.Controllers
             if (extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp")
             {
                 if (file.Length > 5 * 1024 * 1024)
-                    throw new InvalidOperationException("Image files must be under 5 MB.");
+                    throw new InvalidOperationException($"Image '{file.FileName}' exceeds 5 MB limit.");
             }
             else if (extension is ".pdf" or ".docx" or ".txt")
             {
