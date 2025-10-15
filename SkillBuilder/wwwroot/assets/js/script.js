@@ -53,21 +53,46 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Utility
     const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const isValidFirstName = (name) => /^[A-Za-z\s]{1,50}$/.test(name);
-    const isValidLastName = (name) => /^[A-Za-z\s]{1,50}$/.test(name);
+    const isValidFirstName = (name) => /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]{1,50}$/.test(name);
+    const isValidLastName = (name) => /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]{1,50}$/.test(name);
 
 
     // Reset signup view
+    //function resetSignupModalView() {
+    //    const signupForm = document.getElementById("signup-form");
+
+    //    signupForm.style.display = "none";
+    //    document.querySelector(".social-login").style.display = "flex";
+    //    document.querySelectorAll(".social-login button").forEach(btn => btn.style.display = "flex");
+    //    document.querySelectorAll(".separator").forEach(s => s.style.display = "flex");
+    //    document.querySelector(".signup-description").style.display = "block";
+    //    document.querySelector(".continue-email-btn").style.display = "block";
+    //    document.querySelector(".back-social-btn").style.display = "none";
+    //}
+
     function resetSignupModalView() {
         const signupForm = document.getElementById("signup-form");
+        if (signupForm) signupForm.style.display = "none";
 
-        signupForm.style.display = "none";
-        document.querySelector(".social-login").style.display = "flex";
-        document.querySelectorAll(".social-login button").forEach(btn => btn.style.display = "flex");
-        document.querySelectorAll(".separator").forEach(s => s.style.display = "flex");
-        document.querySelector(".signup-description").style.display = "block";
-        document.querySelector(".continue-email-btn").style.display = "block";
-        document.querySelector(".back-social-btn").style.display = "none";
+        const socialLogin = document.querySelector(".social-login");
+        if (socialLogin) socialLogin.style.display = "flex";
+
+        document.querySelectorAll(".social-login button").forEach(btn => {
+            if (btn) btn.style.display = "flex";
+        });
+
+        document.querySelectorAll(".separator").forEach(s => {
+            if (s) s.style.display = "flex";
+        });
+
+        const signupDescription = document.querySelector(".signup-description");
+        if (signupDescription) signupDescription.style.display = "block";
+
+        const continueEmailBtn = document.querySelector(".continue-email-btn");
+        if (continueEmailBtn) continueEmailBtn.style.display = "block";
+
+        const backSocialBtn = document.querySelector(".back-social-btn");
+        if (backSocialBtn) backSocialBtn.style.display = "none";
     }
 
     window.resetSignupModalView = resetSignupModalView;
@@ -132,13 +157,35 @@ document.addEventListener("DOMContentLoaded", function () {
         e.stopPropagation();
     });
 
+    //window.switchToSignup = () => {
+    //    closeModal("login-modal", false);
+    //    openModal("signup-modal");
+    //};
+
     window.switchToSignup = () => {
         closeModal("login-modal", false);
         openModal("signup-modal");
+
+        // Ensure the signup form is visible
+        const signupForm = document.getElementById('signup-form');
+        if (signupForm) signupForm.style.display = 'block';
     };
+
+    window.switchToTeach = () => {
+        closeModal("login-modal", false);
+        openModal("teach-modal");
+
+        // Ensure the teach form is visible
+        const teachForm = document.getElementById('teach-form');
+        if (teachForm) teachForm.style.display = 'block';
+    };
+
 
     window.switchToLogin = () => {
         closeModal("signup-modal", false);
+        closeModal("teach-modal", false); // don't rely on overlay logic
+        const overlay = document.getElementById("teach-modal-overlay");
+        if (overlay) overlay.style.display = "none"; // force hide overlay
         openModal("login-modal");
     };
 
@@ -153,14 +200,38 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("forgot-password-form").style.display = "block";
     };
 
+    //window.showSignupForm = function () {
+    //    signupForm.style.display = "block";
+    //    document.querySelector(".social-login").style.display = "none";
+    //    document.querySelectorAll(".social-login button").forEach(btn => btn.style.display = "none");
+    //    document.querySelectorAll(".auth-modal-right .separator").forEach(s => s.style.display = "none");
+    //    document.querySelector(".signup-description").style.display = "none";
+    //    document.querySelector(".continue-email-btn").style.display = "none";
+    //    document.querySelector(".back-social-btn").style.display = "inline-block";
+    //};
+
     window.showSignupForm = function () {
-        signupForm.style.display = "block";
-        document.querySelector(".social-login").style.display = "none";
-        document.querySelectorAll(".social-login button").forEach(btn => btn.style.display = "none");
-        document.querySelectorAll(".auth-modal-right .separator").forEach(s => s.style.display = "none");
-        document.querySelector(".signup-description").style.display = "none";
-        document.querySelector(".continue-email-btn").style.display = "none";
-        document.querySelector(".back-social-btn").style.display = "inline-block";
+        if (signupForm) signupForm.style.display = "block";
+
+        const socialLogin = document.querySelector(".social-login");
+        if (socialLogin) socialLogin.style.display = "none";
+
+        document.querySelectorAll(".social-login button").forEach(btn => {
+            if (btn) btn.style.display = "none";
+        });
+
+        document.querySelectorAll(".auth-modal-right .separator").forEach(s => {
+            if (s) s.style.display = "none";
+        });
+
+        const signupDescription = document.querySelector(".signup-description");
+        if (signupDescription) signupDescription.style.display = "none";
+
+        const continueEmailBtn = document.querySelector(".continue-email-btn");
+        if (continueEmailBtn) continueEmailBtn.style.display = "none";
+
+        const backSocialBtn = document.querySelector(".back-social-btn");
+        if (backSocialBtn) backSocialBtn.style.display = "inline-block";
     };
 
     window.togglePasswordVisibility = function (inputId, toggleIcon) {
@@ -648,10 +719,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    //if (signupTrigger) {
+    //    signupTrigger.addEventListener("click", e => {
+    //        e.preventDefault();
+    //        openModal("signup-modal");
+    //    });
+    //}
+
     if (signupTrigger) {
         signupTrigger.addEventListener("click", e => {
             e.preventDefault();
             openModal("signup-modal");
+
+            // Immediately show the email signup form
+            window.showSignupForm();
         });
     }
 

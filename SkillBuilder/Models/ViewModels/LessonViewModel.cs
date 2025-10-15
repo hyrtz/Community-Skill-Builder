@@ -10,6 +10,8 @@
         public string ContentText { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
         public string? VideoUrl { get; set; }
+        public string? ExistingImageUrl { get; set; } 
+        public string? ExistingVideoUrl { get; set; }
         public IFormFile? ImageFile { get; set; }
         public IFormFile? VideoFile { get; set; }
         public List<QuizQuestionViewModel> QuizQuestions { get; set; } = new();

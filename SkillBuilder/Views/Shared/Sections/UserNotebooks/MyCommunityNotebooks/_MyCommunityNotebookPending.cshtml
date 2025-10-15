@@ -1,23 +1,44 @@
 ﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
 
 <style>
-    /* ===== Card ===== */
+    .user-mycommunity-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Header row */
+    .user-mycommunity-header {
+        display: grid;
+        grid-template-columns: 2fr 1fr 3fr 2fr;
+        background: #f9fafb;
+        padding: 0.9rem 1.25rem;
+        font-weight: 600;
+        color: #374151;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Each request row */
     .user-mycommunity-pending-request-card {
         display: grid;
         grid-template-columns: 2fr 1fr 3fr 2fr;
         align-items: center;
-        padding: 0.8rem 1rem;
-        background-color: #fff;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        margin-bottom: 0.75rem;
-        gap: 0.5rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.15s ease;
     }
 
+        .user-mycommunity-pending-request-card:hover {
+            background: #f9fafb;
+        }
+
+    /* Avatar + Name */
     .user-mycommunity-requester-info {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.75rem;
     }
 
     .user-mycommunity-requester-avatar {
@@ -30,13 +51,17 @@
     .user-mycommunity-requester-name {
         font-weight: 600;
         color: #111827;
+        font-size: 0.95rem;
     }
 
+    /* Status */
     .user-mycommunity-request-status {
         font-weight: 500;
-        color: #6B7280;
+        color: #6b7280;
+        font-size: 0.9rem;
     }
 
+    /* Message */
     .user-mycommunity-request-message {
         font-size: 0.9rem;
         color: #374151;
@@ -45,154 +70,174 @@
         white-space: nowrap;
     }
 
-    .user-mycommunity-request-actions button {
-        padding: 0.4rem 0.8rem;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 500;
-        margin-right: 0.5rem;
-        transition: background 0.18s ease, transform 0.06s ease;
+    /* Action buttons */
+    .user-mycommunity-request-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
     }
 
+        .user-mycommunity-request-actions button {
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            transition: background 0.15s ease, color 0.15s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+
+    /* Approve Button */
     .user-mycommunity-approve-btn {
-        background-color: #34D399;
-        color: white;
+        background-color: #A5D6A7 !important;
+        border-color: #4CAF50 !important;
+        color: #256029 !important;
     }
 
         .user-mycommunity-approve-btn:hover {
-            background-color: #10B981;
-            transform: translateY(-1px);
+            background-color: #4CAF50 !important;
+            color: #fff !important;
         }
 
+    /* Reject Button */
     .user-mycommunity-reject-btn {
-        background-color: #F87171;
-        color: white;
+        background-color: #FEE4E2;
+        border-color: #DC2626;
+        color: #B91C1C;
     }
 
         .user-mycommunity-reject-btn:hover {
-            background-color: #EF4444;
-            transform: translateY(-1px);
+            background-color: #DC2626;
+            color: #fff;
         }
 
+    /* No Requests */
     .user-mycommunity-no-requests {
         text-align: center;
-        padding: 1rem;
-        color: #777;
-        font-weight: bold;
+        padding: 1.5rem;
+        color: #6b7280;
+        font-weight: 500;
     }
 
-    /* ===== Modal ===== */
+    /* ===== Modal Layout ===== */
     .user-mycommunity-modal-overlay {
         position: fixed;
         inset: 0;
+        background: rgba(15, 23, 42, 0.45);
         display: none;
         justify-content: center;
         align-items: center;
-        background: rgba(15, 23, 42, 0.5);
         z-index: 1200;
-        padding: 1.25rem;
-        backdrop-filter: blur(2px);
-        transition: opacity 180ms ease, visibility 180ms ease;
-        opacity: 0;
-        visibility: hidden;
+        padding: 1.5rem;
     }
 
-        .user-mycommunity-modal-overlay.show {
-            display: flex;
-            opacity: 1;
-            visibility: visible;
-        }
-
-    .user-mycommunity-modal {
-        background-color: #fff;
+    /* Modal box */
+    .user-mycommunity-modal-content {
+        background: #fff;
         border-radius: 12px;
+        padding: 1.75rem 1.5rem;
         width: 100%;
-        max-width: 520px;
-        box-shadow: 0 8px 30px rgba(2,6,23,0.15);
-        transform: translateY(-6px);
-        animation: user-mycommunity-popIn 200ms ease forwards;
+        max-width: 460px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
-    .user-mycommunity-modal-header {
-        padding: 1.25rem 1.25rem 0.5rem 1.25rem;
-        border-bottom: 1px solid #EEF2F7;
-    }
-
-        .user-mycommunity-modal-header h3 {
+        .user-mycommunity-modal-content h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #111827;
             margin: 0;
-            font-size: 1.15rem;
-            color: #0F172A;
-            font-weight: 600;
+            text-align: left;
         }
 
-    .user-mycommunity-modal-body {
-        padding: 0.75rem 1.25rem;
-        color: #334155;
-        font-size: 0.95rem;
+        .user-mycommunity-modal-content p {
+            font-size: 0.95rem;
+            color: #4b5563;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+    /* Textarea */
+    #rejectReason {
+        width: 100%;
+        min-height: 90px;
+        padding: 0.7rem 0.85rem;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        resize: vertical;
+        font-size: 0.9rem;
+        color: #111827;
+        outline: none;
     }
 
-        .user-mycommunity-modal-body textarea {
-            width: 100%;
-            min-height: 92px;
-            padding: 0.6rem 0.75rem;
-            border-radius: 8px;
-            border: 1px solid #D1D5DB;
-            font-size: 0.95rem;
-            resize: vertical;
+        #rejectReason:focus {
+            border-color: #3b82f6;
         }
 
-            .user-mycommunity-modal-body textarea:focus {
-                outline: none;
-                border-color: #60A5FA;
-                box-shadow: 0 0 0 3px rgba(96,165,250,0.12);
-            }
-
+    /* Modal footer */
     .user-mycommunity-modal-footer {
-        padding: 0.85rem 1.25rem 1.25rem 1.25rem;
         display: flex;
         justify-content: flex-end;
-        gap: 0.6rem;
-        border-top: 1px solid #F1F5F9;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
     }
 
     .user-mycommunity-cancel-btn {
-        background-color: #F3F4F6;
-        color: #0F172A;
-        font-weight: 600;
-        border: none;
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
         border-radius: 8px;
-        padding: 0.55rem 0.95rem;
+        padding: 0.6rem 1rem;
         cursor: pointer;
+        font-size: 0.9rem;
+        color: #374151;
+        font-weight: 500;
     }
+
+        .user-mycommunity-cancel-btn:hover {
+            background: #e5e7eb;
+        }
 
     .user-mycommunity-confirm-btn {
         border: none;
         border-radius: 8px;
-        padding: 0.55rem 0.95rem;
+        padding: 0.6rem 1.2rem;
         font-weight: 600;
         cursor: pointer;
-        color: white;
+        color: #fff;
+        min-width: 100px;
+        text-align: center;
     }
 
+    /* Approve Modal Button */
     .user-mycommunity-confirm-approve {
-        background-color: #10B981;
-        box-shadow: 0 2px 10px rgba(16,185,129,0.12);
+        background-color: #10b981;
     }
 
+        .user-mycommunity-confirm-approve:hover {
+            background-color: #059669;
+        }
+
+    /* Reject Modal Button */
     .user-mycommunity-confirm-reject {
-        background-color: #EF4444;
-        box-shadow: 0 2px 10px rgba(239,68,68,0.12);
+        background-color: #ef4444;
     }
 
-    .user-mycommunity-confirm-btn[disabled] {
-        background-color: #93C5FD;
-        cursor: not-allowed;
-    }
+        .user-mycommunity-confirm-reject:hover {
+            background-color: #dc2626;
+        }
 
-    body.user-mycommunity-modal-open {
-        overflow: hidden;
-    }
+        /* Disabled reject button styling */
+        .user-mycommunity-confirm-reject[disabled],
+        .user-mycommunity-confirm-reject.disabled {
+            background-color: #fca5a5 !important;
+            color: #fff !important;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
 </style>
 
 @if (Model.PendingJoinRequests == null || !Model.PendingJoinRequests.Any())
@@ -201,7 +246,14 @@
 }
 else
 {
-    <div>
+    <div class="user-mycommunity-container">
+        <div class="user-mycommunity-header">
+            <span>Name</span>
+            <span>Status</span>
+            <span>Short Message</span>
+            <span>Actions</span>
+        </div>
+
         @foreach (var request in Model.PendingJoinRequests)
         {
             <div class="user-mycommunity-pending-request-card" data-request-id="@request.Id">
@@ -212,11 +264,11 @@ else
                 <div class="user-mycommunity-request-status">@request.Status</div>
                 <div class="user-mycommunity-request-message">@request.ShortMessage</div>
                 <div class="user-mycommunity-request-actions">
-                    <button class="user-mycommunity-approve-btn" type="button"
+                    <button class="user-mycommunity-approve-btn"
                             onclick="openApproveModal(@request.Id, '@request.User.FirstName @request.User.LastName')">
                         Approve
                     </button>
-                    <button class="user-mycommunity-reject-btn" type="button"
+                    <button class="user-mycommunity-reject-btn"
                             onclick="openRejectModal(@request.Id, '@request.User.FirstName @request.User.LastName')">
                         Reject
                     </button>
@@ -226,35 +278,26 @@ else
     </div>
 }
 
-<!-- ===== Approve Modal ===== -->
+<!-- ===== Modals (unchanged logic) ===== -->
 <div class="user-mycommunity-modal-overlay" id="approveModal">
-    <div class="user-mycommunity-modal" role="dialog">
-        <div class="user-mycommunity-modal-header">
-            <h3>Approve Join Request</h3>
-        </div>
-        <div class="user-mycommunity-modal-body">
-            <p id="approveBody">Are you sure you want to approve this join request?</p>
-        </div>
+    <div class="user-mycommunity-modal-content">
+        <h3>Approve Join Request</h3>
+        <p id="approveBody">Are you sure?</p>
         <div class="user-mycommunity-modal-footer">
-            <button class="user-mycommunity-cancel-btn" onclick="closeModal('approveModal')">Cancel</button>
+            <button class="user-mycommunity-cancel-btn" onclick="closeApproveModal()">Cancel</button>
             <button id="confirmApproveBtn" class="user-mycommunity-confirm-btn user-mycommunity-confirm-approve">Approve</button>
         </div>
     </div>
 </div>
 
-<!-- ===== Reject Modal ===== -->
 <div class="user-mycommunity-modal-overlay" id="rejectModal">
-    <div class="user-mycommunity-modal" role="dialog">
-        <div class="user-mycommunity-modal-header">
-            <h3>Reject Join Request</h3>
-        </div>
-        <div class="user-mycommunity-modal-body">
-            <p id="rejectBody">Provide a reason for rejection:</p>
-            <textarea id="rejectReason" placeholder="Enter reason (required)"></textarea>
-        </div>
+    <div class="user-mycommunity-modal-content" role="dialog" aria-modal="true" aria-labelledby="rejectTitle">
+        <h3 id="rejectTitle">Reject Join Request</h3>
+        <p id="rejectBody">Please provide a reason:</p>
+        <textarea id="rejectReason" placeholder="Enter reason (required)"></textarea>
         <div class="user-mycommunity-modal-footer">
-            <button class="user-mycommunity-cancel-btn" onclick="closeModal('rejectModal')">Cancel</button>
-            <button id="confirmRejectBtn" class="user-mycommunity-confirm-btn user-mycommunity-confirm-reject" disabled>Reject</button>
+            <button class="user-mycommunity-cancel-btn" onclick="closeRejectModal()">Cancel</button>
+            <button id="confirmRejectBtn" class="user-mycommunity-confirm-btn user-mycommunity-confirm-reject" disabled aria-disabled="true">Reject</button>
         </div>
     </div>
 </div>
@@ -263,61 +306,44 @@ else
     let selectedRequestId = null;
     let selectedUserName = '';
 
-    function showOverlay(id) {
-        const overlay = document.getElementById(id);
-        if (!overlay) return;
-        overlay.classList.add('show');
-        document.body.classList.add('user-mycommunity-modal-open');
+    function openApproveModal(id, name) {
+        selectedRequestId = id;
+        selectedUserName = name;
+        document.getElementById('approveBody').textContent = `Approve ${name}'s join request?`;
+        document.getElementById('approveModal').style.display = 'flex';
     }
 
-    function hideOverlay(id) {
-        const overlay = document.getElementById(id);
-        if (!overlay) return;
-        overlay.classList.remove('show');
-        document.body.classList.remove('user-mycommunity-modal-open');
+    function closeApproveModal() {
+        document.getElementById('approveModal').style.display = 'none';
     }
 
-    function openApproveModal(requestId, userName) {
-        selectedRequestId = requestId;
-        selectedUserName = userName;
-        document.getElementById('approveBody').textContent =
-            `Are you sure you want to approve ${userName}'s join request?`;
-        showOverlay('approveModal');
+    function openRejectModal(id, name) {
+        selectedRequestId = id;
+        selectedUserName = name;
+
+        const reasonInput = document.getElementById('rejectReason');
+        const confirmBtn = document.getElementById('confirmRejectBtn');
+
+        // Reset textarea and disable button on open
+        reasonInput.value = '';
+        confirmBtn.disabled = true;
+        confirmBtn.classList.add('disabled');
+
+        document.getElementById('rejectBody').textContent = `Reject ${name}'s join request:`;
+        document.getElementById('rejectModal').style.display = 'flex';
+        reasonInput.focus();
     }
 
-    function openRejectModal(requestId, userName) {
-        selectedRequestId = requestId;
-        selectedUserName = userName;
-        document.getElementById('rejectBody').textContent =
-            `Please provide a reason for rejecting ${userName}'s request:`;
-        showOverlay('rejectModal');
+    function closeRejectModal() {
+        document.getElementById('rejectModal').style.display = 'none';
+        const reasonInput = document.getElementById('rejectReason');
+        const confirmBtn = document.getElementById('confirmRejectBtn');
+
+        // Reset on close
+        reasonInput.value = '';
+        confirmBtn.disabled = true;
+        confirmBtn.classList.add('disabled');
     }
-
-    function closeModal(id) {
-        hideOverlay(id);
-        if (id === 'rejectModal') resetRejectModal();
-    }
-
-    function resetRejectModal() {
-        const ta = document.getElementById('rejectReason');
-        ta.value = '';
-        document.getElementById('confirmRejectBtn').disabled = true;
-    }
-
-    document.getElementById('rejectReason').addEventListener('input', function () {
-        document.getElementById('confirmRejectBtn').disabled = this.value.trim() === '';
-    });
-
-    document.getElementById('confirmApproveBtn').addEventListener('click', async () => {
-        hideOverlay('approveModal');
-        await handleJoinRequest(selectedRequestId, true);
-    });
-
-    document.getElementById('confirmRejectBtn').addEventListener('click', async () => {
-        const reason = document.getElementById('rejectReason').value.trim();
-        hideOverlay('rejectModal');
-        await handleJoinRequest(selectedRequestId, false, reason);
-    });
 
     async function handleJoinRequest(requestId, approve, reason = "") {
         try {
@@ -327,14 +353,37 @@ else
                 body: JSON.stringify({ requestId, approve, reason })
             });
             const result = await response.json();
+
             if (result.success) {
                 const card = document.querySelector(`[data-request-id='${requestId}']`);
                 if (card) card.remove();
                 window.location.reload();
-            } else alert(result.message || 'Failed to process request.');
+            } else {
+                alert(result.message || 'Failed to process request.');
+            }
         } catch (err) {
             console.error(err);
             alert('Error processing request.');
         }
     }
+
+    document.getElementById('confirmApproveBtn').addEventListener('click', async () => {
+        closeApproveModal();
+        await handleJoinRequest(selectedRequestId, true);
+    });
+
+    document.getElementById('confirmRejectBtn').addEventListener('click', async () => {
+        const reason = document.getElementById('rejectReason').value.trim();
+        // Prevent reject if no input
+        if (!reason) return;
+        closeRejectModal();
+        await handleJoinRequest(selectedRequestId, false, reason);
+    });
+
+    document.getElementById('rejectReason').addEventListener('input', function () {
+        const confirmBtn = document.getElementById('confirmRejectBtn');
+        const hasText = this.value.trim() !== '';
+        confirmBtn.disabled = !hasText;
+        confirmBtn.classList.toggle('disabled', !hasText);
+    });
 </script>

@@ -132,6 +132,7 @@
     }
 </style>
 
+<!-- HTML container -->
 <div class="curriculum-edit-container">
     <h3>Curriculum</h3>
 
@@ -149,12 +150,10 @@
     <!-- Final Project -->
     <div class="curriculum-edit-final-project curriculum-edit-module" id="curriculum-edit-final-project-module">
         <div class="curriculum-edit-header"><strong>Final Project</strong></div>
-
         <div class="curriculum-edit-form-group">
             <label>Title *</label>
             <input type="text" class="curriculum-edit-form-control" name="FinalProject.Title" placeholder="Final project title" required />
         </div>
-
         <div class="curriculum-edit-form-group">
             <label>Details / Context *</label>
             <textarea class="curriculum-edit-form-control" name="FinalProject.Description" rows="4" placeholder="Describe the final project..." required></textarea>
@@ -216,13 +215,15 @@
             </div>
             <div class="curriculum-edit-form-group">
                 <label>Lesson Type *</label>
-                <select class="curriculum-edit-form-select" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].LessonType" onchange="curriculumEditHandleLessonTypeChange(this, ${moduleIndex}, ${lessonIndex})" required>
+                <select class="curriculum-edit-form-select" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].LessonType"
+                        onchange="curriculumEditHandleLessonTypeChange(this, ${moduleIndex}, ${lessonIndex})" required>
                     <option value="">-- Select Type --</option>
                     <option value="Text" ${lessonData?.LessonType==='Text'?'selected':''}>Text</option>
                     <option value="Image + Text" ${lessonData?.LessonType==='Image + Text'?'selected':''}>Image + Text</option>
                     <option value="Video" ${lessonData?.LessonType==='Video'?'selected':''}>Video</option>
                     <option value="Quiz" ${lessonData?.LessonType==='Quiz'?'selected':''}>Assessment</option>
-                    <option value="Session" ${lessonData?.LessonType==='Session'?'selected':''}>Session</option>
+                    <option value="Session" ${lessonData?.LessonType==='Session'?'selected':''}
+                        ${sessionAlreadyExists(moduleIndex, lessonIndex) ? 'disabled' : ''}>Session</option>
                 </select>
             </div>
             <div class="curriculum-edit-lesson-duration-row">
@@ -238,6 +239,19 @@
 
         if(lessonData) curriculumEditHandleLessonTypeChange(lessonDiv.querySelector("select"), moduleIndex, lessonIndex, lessonData);
         curriculumEditRenumberLessons(moduleIndex);
+    }
+
+    function sessionAlreadyExists(currentModuleIndex, currentLessonIndex){
+        const lessons = document.querySelectorAll(".curriculum-edit-module .curriculum-edit-lesson-block");
+        for(let lesson of lessons){
+            const select = lesson.querySelector("select[name$='.LessonType']");
+            const moduleIndex = parseInt(lesson.closest(".curriculum-edit-module").getAttribute("data-index"));
+            const lessonIndex = Array.from(lesson.parentNode.children).indexOf(lesson);
+            if(select.value === "Session" && !(moduleIndex===currentModuleIndex && lessonIndex===currentLessonIndex)){
+                return true;
+            }
+        }
+        return false;
     }
 
     function curriculumEditRemoveLesson(moduleIndex, btn) {
@@ -308,8 +322,12 @@
                         </div>
                         <div class="curriculum-edit-form-group">
                             <label>Current Image</label>
-                            ${lessonData?.ImageUrl ? `<img src="${lessonData.ImageUrl}" alt="Preview" style="max-width:200px; display:block; margin-bottom:0.5rem;" />` : `<p>No image uploaded</p>`}
+                            ${lessonData?.ImageUrl
+                                ? `<img src="${lessonData.ImageUrl}" alt="Preview" style="max-width:200px; display:block; margin-bottom:0.5rem;" />`
+                                : `<p>No image uploaded</p>`}
                             <input type="file" name="${nameBase}.ImageFile" accept="image/*" />
+                            <!-- ADD THIS HIDDEN FIELD -->
+                            <input type="hidden" name="${nameBase}.ExistingImageUrl" value="${lessonData?.ImageUrl || ''}" />
                         </div>`;
                 configContainer.innerHTML = html;
                 break;
@@ -317,11 +335,16 @@
             case 'Video':
                 html = `<div class="curriculum-edit-form-group">
                             <label>Current Video</label>
-                            ${lessonData?.VideoUrl ? `<video src="${lessonData.VideoUrl}" controls style="max-width:300px; display:block; margin-bottom:0.5rem;"></video>` : `<p>No video uploaded</p>`}
+                            ${lessonData?.VideoUrl
+                                ? `<video src="${lessonData.VideoUrl}" controls style="max-width:300px; display:block; margin-bottom:0.5rem;"></video>`
+                                : `<p>No video uploaded</p>`}
                             <input type="file" name="${nameBase}.VideoFile" accept="video/*" />
+                            <!-- ADD THIS HIDDEN FIELD -->
+                            <input type="hidden" name="${nameBase}.ExistingVideoUrl" value="${lessonData?.VideoUrl || ''}" />
                         </div>`;
                 configContainer.innerHTML = html;
                 break;
+
             case 'Quiz':
                 html = `<div class="curriculum-edit-quiz-builder" data-namebase="${nameBase}">
                             <div class="curriculum-edit-quiz-questions"></div>
@@ -445,17 +468,21 @@
 
         function validateCurriculumEditForm() {
             let allValid = true;
+
+            // Check all required fields
             const requiredFields = form.querySelectorAll("input[required], select[required], textarea[required]");
-            requiredFields.forEach(f=>{
-                if(f.offsetParent!==null && (!f.value||f.value.trim()==="")) allValid=false;
+            requiredFields.forEach(f => {
+                if (f.offsetParent !== null && (!f.value || f.value.trim() === "")) allValid = false;
             });
 
-            const modules = form.querySelectorAll(".curriculum-edit-module");
-            if(modules.length < 2) allValid=false;
+            // Only count modules excluding final project
+            const modulesEls = form.querySelectorAll(".curriculum-edit-module:not(#curriculum-edit-final-project-module)");
+            if (modulesEls.length < 2) allValid = false;
 
-            modules.forEach(mod=>{
+            // Validate lessons and quizzes
+            modulesEls.forEach(mod => {
                 const lessons = mod.querySelectorAll(".curriculum-edit-lesson-block");
-                lessons.forEach(lesson=>{
+                lessons.forEach(lesson => {
                     const lessonTitle = lesson.querySelector("input[name$='.Title']");
                     const lessonType = lesson.querySelector("select[name$='.LessonType']");
                     const lessonDuration = lesson.querySelector("input[name$='.DurationValue']");
@@ -466,19 +493,29 @@
                     if(!lessonUnit || !lessonUnit.value) allValid=false;
 
                     const quizQuestions = lesson.querySelectorAll(".curriculum-edit-quiz-question input[type='text']");
-                    quizQuestions.forEach(q=>{
-                        if(!q || !q.value.trim()) allValid=false;
+                    quizQuestions.forEach(q => {
+                        if(!q || !q.value.trim()) allValid = false;
                     });
                 });
             });
 
+            // Check session uniqueness
+            const sessionLessons = document.querySelectorAll(".curriculum-edit-module .curriculum-edit-lesson-block select");
+            let sessionCount = 0;
+            sessionLessons.forEach(s => {
+                if(s.value === "Session") sessionCount++;
+            });
+            if(sessionCount > 1) allValid = false;
+
+            // Final project fields
             if(!fpTitle || !fpTitle.value.trim()) allValid=false;
             if(!fpDesc || !fpDesc.value.trim()) allValid=false;
 
             submitBtn.disabled = !allValid;
 
+            // Show warning if less than 2 modules
             const warning = document.getElementById("curriculum-edit-module-warning");
-            if(warning) warning.style.display = modules.length<2?"block":"none";
+            if(warning) warning.style.display = modulesEls.length < 2 ? "block" : "none";
         }
 
         validateCurriculumEditForm();

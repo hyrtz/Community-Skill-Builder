@@ -132,31 +132,32 @@
         const fileSize = preloadData?.FileSize ?? 0;
 
         container.innerHTML = `
-            <div class="material-header">
-                <span class="material-title">Material ${index + 1}</span>
-                <span class="material-size">${fileSize > 0 ? (fileSize / 1024).toFixed(1) + " KB" : ""}</span>
-                <span class="material-delete" onclick="removeMaterial(${index})">🗑️</span>
-            </div>
+        <input type="hidden" name="Materials[${index}].Id" value="${preloadData?.Id ?? 0}" />
+        <div class="material-header">
+            <span class="material-title">Material ${index + 1}</span>
+            <span class="material-size">${fileSize > 0 ? (fileSize / 1024).toFixed(1) + " KB" : ""}</span>
+            <span class="material-delete" onclick="removeMaterial(${index})">🗑️</span>
+        </div>
 
-            <div class="material-fields">
-                <div class="material-form-group">
-                    <label>Material Title</label>
-                    <input type="text" name="Materials[${index}].Title" placeholder="Sample course material.pdf" value="${titleValue}" />
-                </div>
-                <div class="material-form-group">
-                    <label>Replace File</label>
-                    <div class="material-upload-wrapper">
-                        <input type="file" name="Materials[${index}].UploadFile" />
-                        <button type="button">Upload</button>
-                    </div>
+        <div class="material-fields">
+            <div class="material-form-group">
+                <label>Material Title</label>
+                <input type="text" name="Materials[${index}].Title" placeholder="Sample course material.pdf" value="${titleValue}" />
+            </div>
+            <div class="material-form-group">
+                <label>Replace File</label>
+                <div class="material-upload-wrapper">
+                    <input type="file" name="Materials[${index}].UploadFile" />
+                    <button type="button">Upload</button>
                 </div>
             </div>
+        </div>
 
-            <div class="material-form-group material-description">
-                <label>Description</label>
-                <input type="text" name="Materials[${index}].Description" placeholder="Add a description..." value="${descValue}" />
-            </div>
-        `;
+        <div class="material-form-group material-description">
+            <label>Description</label>
+            <input type="text" name="Materials[${index}].Description" placeholder="Add a description..." value="${descValue}" />
+        </div>
+    `;
 
         list.appendChild(container);
         renumberMaterials();
@@ -175,11 +176,13 @@
             const titleSpan = entry.querySelector(".material-title");
             if (titleSpan) titleSpan.textContent = `Material ${i + 1}`;
 
+            const idInput = entry.querySelector("input[name*='Id']");
             const titleInput = entry.querySelector("input[name*='Title']");
             const fileInput = entry.querySelector("input[type='file']");
             const descInput = entry.querySelector("input[name*='Description']");
             const deleteBtn = entry.querySelector(".material-delete");
 
+            if (idInput) idInput.name = `Materials[${i}].Id`;
             if (titleInput) titleInput.name = `Materials[${i}].Title`;
             if (fileInput) fileInput.name = `Materials[${i}].UploadFile`;
             if (descInput) descInput.name = `Materials[${i}].Description`;

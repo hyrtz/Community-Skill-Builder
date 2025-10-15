@@ -65,7 +65,7 @@ namespace SkillBuilder.Controllers
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            await _notificationService.AddNotificationAsync(newUser.Id, $"Welcome {newUser.FirstName}! Your account has been successfully created.");
+            await _notificationService.AddNotificationAsync(newUser.Id, $"🎉 Welcome {newUser.FirstName}! Your account has been successfully created.");
 
             var claims = new List<Claim>
             {

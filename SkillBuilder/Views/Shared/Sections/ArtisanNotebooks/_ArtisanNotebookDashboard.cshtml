@@ -127,6 +127,15 @@
             </a>    
         </div>
     }
+    else
+    {
+        <div class="artisan-dashboard-latest">
+            <div class="artisan-dashboard-latest-title">No Courses Yet</div>
+            <div class="artisan-dashboard-latest-overview">
+                You haven’t created any courses yet. Once you do, your latest course will appear here.
+            </div>
+        </div>
+    }
 
     @* Show messages if deactivated or not verified BELOW the dashboard *@
     @if (isDeactivated)

@@ -160,7 +160,84 @@
 </div>
 
 <script>
+
+    const lessonFileRules = {
+        image: {
+            maxSize: 5 * 1024 * 1024, // 5 MB
+            allowed: [".jpg", ".jpeg", ".png", ".gif", ".webp"]
+        },
+        video: {
+            maxSize: 200 * 1024 * 1024, // 200 MB
+            allowed: [".mp4", ".mov", ".avi"]
+        }
+    };
+
+    function validateLessonFile(input, type) {
+        const lessonFileRules = {
+            image: { maxSize: 5*1024*1024, allowed: [".jpg",".jpeg",".png",".gif",".webp"] },
+            video: { maxSize: 200*1024*1024, allowed: [".mp4",".mov",".avi"] }
+        };
+
+        const file = input.files[0];
+        if (!file) return true;
+
+        const errorEl = input.parentElement.parentElement.querySelector(".file-error");
+        if (!errorEl) return true;
+
+        errorEl.textContent = "";
+        errorEl.style.display = "none";
+
+        const { maxSize, allowed } = lessonFileRules[type];
+        const ext = file.name.toLowerCase().substring(file.name.lastIndexOf("."));
+
+        if (!allowed.includes(ext)) {
+            errorEl.textContent = `Invalid file type. Allowed: ${allowed.join(", ")}`;
+            errorEl.style.display = "block";
+            input.value = "";
+            return false;
+        }
+
+        if (file.size > maxSize) {
+            errorEl.textContent = `File too large. Max ${(maxSize/(1024*1024)).toFixed(0)} MB allowed.`;
+            errorEl.style.display = "block";
+            input.value = "";
+            return false;
+        }
+
+        return true;
+    }
+
+    function attachPreviewAndValidation(inputEl, type) {
+        if (!inputEl) return;
+
+        const previewEl = inputEl.parentElement.querySelector(".curriculum-upload-preview");
+        inputEl.addEventListener("change", function() {
+            if (!validateLessonFile(inputEl, type)) return;
+
+            const file = inputEl.files[0];
+            if (!file) return;
+
+            if (type === "image") {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewEl.innerHTML = "";
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.style.width = "100%";
+                    img.style.height = "100%";
+                    img.style.objectFit = "cover";
+                    previewEl.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            } else if (type === "video") {
+                previewEl.src = URL.createObjectURL(file);
+                previewEl.style.display = "block";
+            }
+        });
+    }
+
     let curriculumModuleIndex = 0;
+    let sessionLessonExists = false;
 
     // ------------------ MODULE / LESSON FUNCTIONS ------------------
     function addCurriculumModule() {
@@ -244,6 +321,12 @@
             <div class="lesson-config-container"></div>
         `;
 
+        const lessonTypeSelect = lessonDiv.querySelector(`select[name$='.LessonType']`);
+        if (sessionLessonExists) {
+            const sessionOption = Array.from(lessonTypeSelect.options).find(o => o.value === "Session");
+            if (sessionOption) sessionOption.disabled = true;
+        }
+
         lessonsContainer.appendChild(lessonDiv);
         renumberModules();
         checkRequiredFields();
@@ -258,7 +341,21 @@
 
     function removeCurriculumLesson(moduleIndex, btn) {
         const lessonDiv = btn.closest(".curriculum-lesson-block");
-        if (lessonDiv) lessonDiv.remove();
+        if (!lessonDiv) return;
+
+        const lessonTypeSelect = lessonDiv.querySelector("select[name$='.LessonType']");
+        if (lessonTypeSelect && lessonTypeSelect.value === "Session") {
+            sessionLessonExists = false;
+
+            // Re-enable Session option in all other lesson selects
+            const allLessonSelects = document.querySelectorAll(".curriculum-lesson-block select[name$='.LessonType']");
+            allLessonSelects.forEach(sel => {
+                const sessionOption = Array.from(sel.options).find(o => o.value === "Session");
+                if (sessionOption) sessionOption.disabled = false;
+            });
+        }
+
+        lessonDiv.remove();
         renumberModules();
         checkRequiredFields();
     }
@@ -316,23 +413,86 @@
         const lessonBlock = selectEl.closest(".curriculum-lesson-block");
         const configContainer = lessonBlock.querySelector(".lesson-config-container");
         configContainer.innerHTML = getLessonConfigBlock(moduleIndex, lessonIndex, selectEl.value);
+
+        // -------------------- FILE PREVIEW --------------------
+        if (selectEl.value === "Image + Text") {
+            const imgInput = configContainer.querySelector(`input[type='file'][name$='.ImageFile']`);
+            attachPreviewAndValidation(imgInput, "image");
+        } else if (selectEl.value === "Video") {
+            const videoInput = configContainer.querySelector(`input[type='file'][name$='.VideoFile']`);
+            attachPreviewAndValidation(videoInput, "video");
+        }
+
+        // -------------------- SESSION LESSON LOGIC --------------------
+        const allLessonSelects = document.querySelectorAll(".curriculum-lesson-block select[name$='.LessonType']");
+
+        if (selectEl.value === "Session") {
+            sessionLessonExists = true;
+        } else {
+            const prevValue = selectEl.getAttribute("data-prev") || "";
+            if (prevValue === "Session") {
+                sessionLessonExists = false;
+
+                // Re-enable Session in all other lesson selects
+                const allLessonSelects = document.querySelectorAll(".curriculum-lesson-block select[name$='.LessonType']");
+                allLessonSelects.forEach(sel => {
+                    const sessionOption = Array.from(sel.options).find(o => o.value === "Session");
+                    if (sessionOption) sessionOption.disabled = false;
+                });
+            }
+        }
+
+        // Update options visibility
+        allLessonSelects.forEach(sel => {
+            if (sel === selectEl) return; // skip current select
+
+            const sessionOption = Array.from(sel.options).find(o => o.value === "Session");
+            if (sessionOption) sessionOption.disabled = sessionLessonExists;
+        });
+
+        // Store current value for next change
+        selectEl.setAttribute("data-prev", selectEl.value);
     }
 
     function getLessonConfigBlock(moduleIndex, lessonIndex, type) {
         const nameBase = `Modules[${moduleIndex}].Lessons[${lessonIndex}]`;
         switch (type) {
             case "Text":
-                return `<div class="curriculum-form-group"><label>Lesson Content</label><textarea class="curriculum-form-control" name="${nameBase}.ContentText" rows="4" required></textarea></div>`;
+                return `<div class="curriculum-form-group">
+                            <label>Lesson Content</label>
+                            <textarea class="curriculum-form-control" name="${nameBase}.ContentText" rows="4" required></textarea>
+                        </div>`;
             case "Image + Text":
-                return `<div class="curriculum-form-group"><label>Lesson Content</label><textarea class="curriculum-form-control" name="${nameBase}.ContentText" rows="4" required></textarea></div>
-                        <div class="curriculum-form-group"><label>Upload Image</label><input type="file" name="${nameBase}.ImageFile" accept="image/*" class="curriculum-form-control" required /></div>`;
+                return `<div class="curriculum-form-group">
+                            <label>Lesson Content</label>
+                            <textarea class="curriculum-form-control" name="${nameBase}.ContentText" rows="4" required></textarea>
+                        </div>
+                        <div class="curriculum-form-group">
+                            <label>Upload Image</label>
+                            <div style="display:flex; gap:1rem; align-items:center;">
+                                <input type="file" name="${nameBase}.ImageFile" accept="image/*" class="curriculum-form-control" required />
+                                <div class="curriculum-upload-preview" style="width:80px; height:80px; background:#eee; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#aaa;">🖼️</div>
+                            </div>
+                            <span class="file-error" style="color:red; font-size:0.85rem; display:none;"></span>
+                        </div>`;
             case "Video":
-                return `<div class="curriculum-form-group"><label>Upload Video</label><input type="file" name="${nameBase}.VideoFile" accept="video/*" class="curriculum-form-control" required /></div>`;
+                return `<div class="curriculum-form-group">
+                            <label>Upload Video</label>
+                            <div style="display:flex; gap:1rem; align-items:center;">
+                                <input type="file" name="${nameBase}.VideoFile" accept="video/*" class="curriculum-form-control" required />
+                                <video class="curriculum-upload-preview" width="100" height="80" controls style="display:none;"></video>
+                            </div>
+                            <span class="file-error" style="color:red; font-size:0.85rem; display:none;"></span>
+                        </div>`;
             case "Quiz":
-                return `<div class="quiz-builder" data-namebase="${nameBase}"><div class="quiz-questions"></div>
-                        <button type="button" class="curriculum-add-btn" onclick="addQuizQuestion(this)">+ Add Question</button></div>`;
+                return `<div class="quiz-builder" data-namebase="${nameBase}">
+                            <div class="quiz-questions"></div>
+                            <button type="button" class="curriculum-add-btn" onclick="addQuizQuestion(this)">+ Add Question</button>
+                        </div>`;
             case "Session":
-                return `<div class="curriculum-form-group"><label>This will be a live session learners can request.</label></div>`;
+                return `<div class="curriculum-form-group">
+                            <label>This will be a live session learners can request.</label>
+                        </div>`;
             default:
                 return ``;
         }

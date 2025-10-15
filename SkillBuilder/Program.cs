@@ -9,6 +9,7 @@ using SkillBuilder.Data;
 using SkillBuilder.Models;
 using SkillBuilder.Services;
 using System.Security.Claims;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,19 +22,23 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
 });
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions =>
-        {
-            npgsqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 3,
-                maxRetryDelay: TimeSpan.FromSeconds(5),
-                errorCodesToAdd: null
-            );
-        }
-    )
-);
+// --- Connection string resolution (config first, then environment variable) ---
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("DB_CONNECTION");
+
+if (!string.IsNullOrWhiteSpace(connectionString))
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
+else
+{
+    // Optional logging if no DB found
+    builder.Logging.AddConsole();
+    Console.WriteLine("WARNING: No database connection string provided. App will start without a DB connection.");
+}
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IEmailService, SkillBuilder.Services.EmailService>();

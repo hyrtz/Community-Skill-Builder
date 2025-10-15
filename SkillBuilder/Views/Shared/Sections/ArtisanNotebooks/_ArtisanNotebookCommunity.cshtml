@@ -1,5 +1,344 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
+
 @{
+    var firstCommunityId = Model.MyCommunities.FirstOrDefault()?.Id ?? 0;
+    var members = firstCommunityId != 0 && Model.CommunityMembers.ContainsKey(firstCommunityId)
+        ? Model.CommunityMembers[firstCommunityId]
+        : new List<SkillBuilder.Models.ViewModels.CommunityMemberViewModel>();
 }
+
+<style>
+    .artisan-communities-section {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 0;
+    }
+
+    .artisan-communities-header {
+        font-size: 1.8rem;
+        color: #344AEA;
+        margin-bottom: 1rem;
+    }
+
+    .artisan-community-search-wrapper {
+        display: flex;
+        margin-bottom: 1.5rem;
+    }
+
+        .artisan-community-search-wrapper input {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 8px 0 0 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .artisan-community-search-wrapper button {
+            background-color: #344AEA;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+            .artisan-community-search-wrapper button:hover {
+                background-color: #2b36c5;
+            }
+
+            .artisan-community-search-wrapper button img {
+                width: 1rem;
+                height: 1rem;
+                filter: brightness(0) invert(1);
+            }
+
+    .artisan-community-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* ---------------- Community Card ---------------- */
+    .artisan-community-link {
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        width: 100%;
+    }
+
+    .artisan-community-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.9rem 1rem;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+    }
+
+        .artisan-community-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+    .artisan-community-info-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .artisan-community-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid #E5E7EB;
+        background-color: #f8f8ff;
+    }
+
+    .artisan-community-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .artisan-community-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .artisan-community-description {
+        font-size: 0.85rem;
+        color: #6B7280;
+        max-width: 280px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .artisan-community-members {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #374151;
+        flex-shrink: 0;
+    }
+
+    /* Empty state */
+    .artisan-community-empty {
+        text-align: center;
+        color: #777;
+        font-size: 1rem;
+        margin-top: 1rem;
+        display: none;
+    }
+
+        .artisan-community-empty.active {
+            display: block;
+        }
+
+    /* ---------------- Community Detail Section ---------------- */
+    .artisan-community-detail-container {
+        display: none;
+        flex-direction: column;
+    }
+
+    .artisan-community-back-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-weight: bold;
+        color: #344AEA;
+        margin-bottom: 1.5rem;
+        padding: 0.3rem 0.5rem;
+        border-radius: 8px;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+        .artisan-community-back-btn img {
+            width: 1.5rem;
+            height: 1.5rem;
+            background: #f7f7ff;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+        }
+
+        .artisan-community-back-btn:hover img {
+            background-color: #d0d4ff;
+        }
+
+    .artisan-community-tabs {
+        display: flex;
+        gap: 1rem;
+        border-bottom: 2px solid #E5E7EB;
+        margin-bottom: 1rem;
+    }
+
+    .artisan-community-tab {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6B7280;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+        .artisan-community-tab.active {
+            color: #344AEA;
+            border-bottom-color: #344AEA;
+        }
+
+    .artisan-community-tab-content {
+        display: none;
+    }
+
+        .artisan-community-tab-content.active {
+            display: block;
+        }
+</style>
+
+<div class="artisan-communities-section">
+    <h2 class="artisan-communities-header">My Communities</h2>
+
+    <!-- Search -->
+    <div class="artisan-community-search-wrapper">
+        <input type="text" id="artisanCommunitySearch" placeholder="Search communities..." />
+        <button type="button" id="artisanCommunitySearchBtn">
+            <img src="/assets/Icons/Search.ico" alt="Search" />
+        </button>
+    </div>
+
+    @if (!Model.MyCommunities.Any())
+    {
+        <div class="artisan-community-empty active">You haven't created any communities yet.</div>
+    }
+    else
+    {
+        <div class="artisan-community-grid">
+            @foreach (var community in Model.MyCommunities)
+            {
+                <div class="artisan-community-link">
+                    <div class="artisan-community-card">
+                        <div class="artisan-community-info-wrapper">
+                            <img class="artisan-community-avatar" src="@community.AvatarUrl" alt="Avatar" />
+                            <div class="artisan-community-info">
+                                <div class="artisan-community-title">@community.Name</div>
+                                <div class="artisan-community-description">@community.Description</div>
+                            </div>
+                        </div>
+                        <div class="artisan-community-members">@community.MembersCount members</div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="artisan-community-empty">No matching communities found.</div>
+    }
+</div>
+
+<!-- Artisan Community Detail Section -->
+<div class="artisan-community-detail-container" id="artisanCommunityDetailContainer">
+    <div class="artisan-community-back-btn" id="artisanCommunityBackBtn">
+        <img src="/assets/Icons/Back.ico" />
+        Back
+    </div>
+
+    <div style="font-size: 1.5rem; margin-bottom: 1rem;" class="artisan-community-title" id="artisanCommunityTitle">Community Name</div>
+
+    <div class="artisan-community-tabs">
+        <div class="artisan-community-tab active" data-tab="pending">Pending Member Requests</div>
+        <div class="artisan-community-tab" data-tab="all">All Members</div>
+    </div>
+
+    <div class="artisan-community-tab-content active" id="artisanCommunityTabPending">
+        @await Html.PartialAsync("Sections/ArtisanNotebooks/ArtisanCommunityNotebooks/_ArtisanCommunityNotebookPending", Model)
+    </div>
+
+    <div class="artisan-community-tab-content" id="artisanCommunityTabAll">
+        @await Html.PartialAsync("Sections/ArtisanNotebooks/ArtisanCommunityNotebooks/_ArtisanCommunityNotebookAllMembers", Model)
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // --- Search functionality ---
+        const searchInput = document.getElementById("artisanCommunitySearch");
+        const searchBtn = document.getElementById("artisanCommunitySearchBtn");
+        const rows = document.querySelectorAll(".artisan-community-card");
+        const emptyMsg = document.querySelector(".artisan-community-empty");
+
+        function filter() {
+            const query = searchInput.value.toLowerCase().trim();
+            let anyVisible = false;
+
+            rows.forEach(card => {
+                const title = card.querySelector(".artisan-community-title").innerText.toLowerCase();
+                const description = card.querySelector(".artisan-community-description").innerText.toLowerCase();
+                const isVisible = title.includes(query) || description.includes(query);
+
+                card.parentElement.style.display = isVisible ? "flex" : "none";
+                if (isVisible) anyVisible = true;
+            });
+
+            emptyMsg.classList.toggle("active", !anyVisible);
+        }
+
+        searchBtn.addEventListener("click", filter);
+        searchInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                filter();
+            }
+        });
+
+        // --- Community detail UI ---
+        const communityListContainer = document.querySelector(".artisan-communities-section");
+        const communityDetailContainer = document.getElementById("artisanCommunityDetailContainer");
+        const communityTitle = document.getElementById("artisanCommunityTitle");
+        const backBtn = document.getElementById("artisanCommunityBackBtn");
+
+        const tabs = document.querySelectorAll(".artisan-community-tab");
+        const tabContents = {
+            pending: document.getElementById("artisanCommunityTabPending"),
+            all: document.getElementById("artisanCommunityTabAll")
+        };
+
+        rows.forEach(card => {
+            card.addEventListener("click", () => {
+                const name = card.querySelector(".artisan-community-title").innerText;
+                communityTitle.innerText = name;
+
+                communityListContainer.style.display = "none";
+                communityDetailContainer.style.display = "flex";
+
+                // Optionally load partial views via AJAX here
+            });
+        });
+
+        backBtn.addEventListener("click", () => {
+            communityDetailContainer.style.display = "none";
+            communityListContainer.style.display = "flex";
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                tabs.forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                const tabName = tab.dataset.tab;
+                for (const key in tabContents) {
+                    tabContents[key].classList.toggle("active", key === tabName);
+                }
+            });
+        });
+    });
+</script>

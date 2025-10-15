@@ -157,7 +157,12 @@
                                 <img src="@user.UserAvatar" alt="User Avatar" />
                                 <div class="leaderboard-user-details">
                                     <div class="leaderboard-user-name">
-                                        <span>@user.FirstName @user.LastName</span>
+                                        <span>
+                                            <a href="@Url.Action("UserViewAsLearner", "Profile", new { userId = user.Id })"
+                                               style="text-decoration:none; color:inherit;">
+                                                @user.FirstName @user.LastName
+                                            </a>
+                                        </span>
                                         @if (isCurrentUser)
                                         {
                                             <span class="leaderboard-user-you">(You)</span>

@@ -271,9 +271,9 @@
 
         <!-- Right panel for form and buttons -->
         <div class="auth-modal-right">
-            <h2 class="signup-header">Sign up to <span style="color: #364BE9">Tahi</span></h2>
+            <h2 style="margin-bottom: 1rem;" class="signup-header">Sign up to <span style="color: #364BE9">Tahi</span></h2>
 
-            <!-- Social login buttons -->
+            @* <!-- Social login buttons -->
             <div class="social-login">
                 <button id="btn-google-signup"><img src="~/assets/Logos/Google.svg">Continue with Google</button>
                 <button id="btn-facebook-signup"><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
@@ -283,12 +283,12 @@
             <div class="separator"><span>or</span></div>
 
             <!-- Continue with Email Button -->
-            <button class="continue-email-btn" type="button" onclick="showSignupForm()">Continue with Email</button>
+            <button class="continue-email-btn" type="button" onclick="showSignupForm()">Continue with Email</button> *@
 
             <!-- Hidden form initially -->
             <form id="signup-form">
 
-                <button type="button" class="back-social-btn" onclick="resetSignupModalView()">←</button>
+                @* <button type="button" class="back-social-btn" onclick="resetSignupModalView()">←</button> *@
 
                 <div id="signup-inputs-wrapper">
                     <label for="signup-firstname">First Name</label>
@@ -307,7 +307,7 @@
                         <label for="signup-password">Password</label>
                         <div class="password-wrapper">
                             <input type="password" id="signup-password" name="Password" required />
-                            <span class="toggle-password" onclick="togglePasswordVisibility('signup-password', this)">👁️‍🗨️</span>
+                            <span style="margin-top: -1rem;" class="toggle-password" onclick="togglePasswordVisibility('signup-password', this)">👁️‍🗨️</span>
                         </div>
 
                         <div id="password-requirements" class="password-requirements">
@@ -320,7 +320,7 @@
                         <label for="signup-confirm">Confirm Password</label>
                         <div class="password-wrapper">
                             <input type="password" id="signup-confirm" name="ConfirmPassword" required />
-                            <span class="toggle-password" onclick="togglePasswordVisibility('signup-confirm', this)">👁️‍🗨️</span>
+                            <span style="margin-top: -1rem;" class="toggle-password" onclick="togglePasswordVisibility('signup-confirm', this)">👁️‍🗨️</span>
                         </div>
 
                         <p id="match-message" class="match-message">⚠️ Passwords do not match</p>
@@ -343,9 +343,9 @@
 
                     <p class="signup-error-message" style="color: red; margin-top: 10px; text-align: center;"></p>
 
-                    <p class="signup-description">
+                    @* <p class="signup-description">
                         By creating an account you agree with our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-                    </p>
+                    </p> *@
 
                 </div>
 
@@ -412,6 +412,17 @@
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         let currentSignupEmail = null;
+        const signupInputs = document.getElementById("signup-inputs-wrapper");
+        const backSocialBtn = document.querySelector(".back-social-btn");
+        const socialSection = document.querySelector(".social-login");
+        const separator = document.querySelector(".separator");
+        const continueEmailBtn = document.querySelector(".continue-email-btn");
+
+        if (signupInputs) signupInputs.style.display = "block"; // show signup form
+        // if (backSocialBtn) backSocialBtn.style.display = "none"; hide back button
+        // if (socialSection) socialSection.style.display = "none"; hide social buttons
+        // if (separator) separator.style.display = "none"; hide "or" separator
+        // if (continueEmailBtn) continueEmailBtn.style.display = "none"; hide continue email button
         /* ---------------------------
          * Initialize Appwrite
          * --------------------------- */

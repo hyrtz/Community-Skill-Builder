@@ -66,44 +66,6 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("CommunityId");
 
                     b.ToTable("CommunityPosts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AuthorId = "user-1",
-                            Category = "",
-                            CommunityId = 1,
-                            Content = "Just finished my first clay pot! Excited to share with everyone.",
-                            ImageUrl = "/assets/Community Pics/CompletePottery.png",
-                            IsPublished = true,
-                            SubmittedAt = new DateTime(2025, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "First Pottery Creation"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AuthorId = "user-3",
-                            Category = "",
-                            CommunityId = 3,
-                            Content = "Making progress on a wooden sculpture. Any tips for fine detailing?",
-                            ImageUrl = "/assets/Community Pics/CompleteWoodCarving.png",
-                            IsPublished = true,
-                            SubmittedAt = new DateTime(2025, 1, 6, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Carving Progress"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            AuthorId = "user-2",
-                            Category = "",
-                            CommunityId = 2,
-                            Content = "Starting weaving for the first time. Happy to join this community!",
-                            ImageUrl = "/assets/Community Pics/CompleteWeaving.png",
-                            IsPublished = true,
-                            SubmittedAt = new DateTime(2025, 1, 7, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "New to Weaving"
-                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.AboutFeature", b =>
@@ -237,50 +199,6 @@ namespace SkillBuilder.Migrations
                         .IsUnique();
 
                     b.ToTable("Artisans");
-
-                    b.HasData(
-                        new
-                        {
-                            ArtisanId = "A1111111",
-                            FirstName = "Alice",
-                            Hometown = "Vigan, Ilocos Sur",
-                            Introduction = "Alice is a skilled pottery artisan teaching hand-building techniques.",
-                            IsApproved = false,
-                            IsArchived = false,
-                            LastName = "Artisan",
-                            Profession = "Pottery Artisan",
-                            Role = "Artisan",
-                            UserAvatar = "/assets/Avatar/Sample3.ico",
-                            UserId = "user-1"
-                        },
-                        new
-                        {
-                            ArtisanId = "A1111112",
-                            FirstName = "Bob",
-                            Hometown = "Cebu City",
-                            Introduction = "Bob is an expert in woodcarving with 10 years of experience.",
-                            IsApproved = false,
-                            IsArchived = false,
-                            LastName = "Builder",
-                            Profession = "Woodcarving Artisan",
-                            Role = "Artisan",
-                            UserAvatar = "/assets/Avatar/Sample6.ico",
-                            UserId = "user-2"
-                        },
-                        new
-                        {
-                            ArtisanId = "A1111113",
-                            FirstName = "Charlie",
-                            Hometown = "Davao City",
-                            Introduction = "Charlie specializes in traditional and modern weaving techniques.",
-                            IsApproved = false,
-                            IsArchived = false,
-                            LastName = "Craftsman",
-                            Profession = "Weaving Artisan",
-                            Role = "Artisan",
-                            UserAvatar = "/assets/Avatar/Sample9.ico",
-                            UserId = "user-3"
-                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.ArtisanApplication", b =>
@@ -361,38 +279,6 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("ArtisanWorks");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ArtisanId = "A1111111",
-                            Caption = "Handcrafted pottery made using traditional Vigan techniques.",
-                            CourseId = 1,
-                            ImageUrl = "/assets/Works/JuanWorks1.png",
-                            PublishDate = new DateTime(2024, 12, 31, 16, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Classic Handcrafted Pottery"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ArtisanId = "A1111111",
-                            Caption = "A functional yet beautiful rustic clay pot for everyday use.",
-                            CourseId = 2,
-                            ImageUrl = "/assets/Works/JuanWorks2.png",
-                            PublishDate = new DateTime(2024, 12, 31, 16, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Rustic Clay Pot"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ArtisanId = "A1111111",
-                            Caption = "An elegant pot showcasing intricate carvings and smooth finishing.",
-                            CourseId = 3,
-                            ImageUrl = "/assets/Works/JuanWorks3.png",
-                            PublishDate = new DateTime(2024, 12, 31, 16, 0, 0, 0, DateTimeKind.Utc),
-                            Title = "Elegant Decorative Pot"
-                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.Community", b =>
@@ -437,47 +323,6 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("CreatorId");
 
                     b.ToTable("Communities");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AvatarUrl = "/assets/Community Pics/CompletePottery.png",
-                            CoverImageUrl = "/uploads/community-banner/PotteryBanner.png",
-                            CreatedAt = new DateTime(2024, 12, 31, 16, 0, 0, 0, DateTimeKind.Utc),
-                            CreatorId = "user-1",
-                            Description = "A community for learners and artisans passionate about pottery and ceramics.",
-                            IsArchived = false,
-                            IsPublished = true,
-                            MembersCount = 125,
-                            Name = "Pottery Enthusiasts"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AvatarUrl = "/assets/Community Pics/CompleteWeaving.png",
-                            CoverImageUrl = "/uploads/community-banner/WeavingBanner.png",
-                            CreatedAt = new DateTime(2024, 12, 31, 16, 0, 0, 0, DateTimeKind.Utc),
-                            CreatorId = "user-2",
-                            Description = "Connecting artisans and learners who love weaving traditional and modern textiles.",
-                            IsArchived = false,
-                            IsPublished = true,
-                            MembersCount = 98,
-                            Name = "Weaving Circle"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            AvatarUrl = "/assets/Community Pics/CompleteWoodcarving.png",
-                            CoverImageUrl = "/uploads/community-banner/WoodCarvingBanner.png",
-                            CreatedAt = new DateTime(2024, 12, 31, 16, 0, 0, 0, DateTimeKind.Utc),
-                            CreatorId = "user-3",
-                            Description = "A space for woodcarvers to share projects, tips, and showcase craftsmanship.",
-                            IsArchived = false,
-                            IsPublished = true,
-                            MembersCount = 150,
-                            Name = "Woodcarving Masters"
-                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CommunityHighlight", b =>
@@ -825,74 +670,6 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("CreatedBy");
 
                     b.ToTable("Courses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Category = "Pottery",
-                            CreatedAt = new DateTime(2024, 5, 31, 16, 0, 0, 0, DateTimeKind.Utc),
-                            CreatedBy = "A1111111",
-                            Difficulty = "Beginner",
-                            Duration = "15 hours",
-                            FinalProjectDescription = "Design, shape, and glaze a personalized vase as your final pottery project.",
-                            FinalProjectTitle = "Create Your Own Clay Vase",
-                            FullDescription = "This course provides a step-by-step guide to both traditional and modern methods of pottery...",
-                            ImageUrl = "/assets/Courses Pics/Pottery.png",
-                            IsArchived = false,
-                            IsPublished = true,
-                            Link = "pottery",
-                            Overview = "Pottery is the art and craft of shaping and firing clay...",
-                            Requirements = "Clay, a pottery wheel or hand-building tools, access to a kiln, apron, and sponges.",
-                            Thumbnail = "/assets/Courses Pics/Pottery.png",
-                            Title = "Pottery",
-                            Video = "/assets/Videos/Pottery.mp4",
-                            WhatToLearn = "You'll learn pottery basics, hand-building, wheel throwing, and glazing techniques."
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Category = "Wood Carving",
-                            CreatedAt = new DateTime(2024, 5, 31, 16, 0, 0, 0, DateTimeKind.Utc),
-                            CreatedBy = "A1111112",
-                            Difficulty = "Intermediate",
-                            Duration = "29 hours",
-                            FinalProjectDescription = "Apply your skills by carving a detailed animal figurine as your capstone project.",
-                            FinalProjectTitle = "Carve a Wooden Animal Figurine",
-                            FullDescription = "Explore the detailed world of woodcarving through this course...",
-                            ImageUrl = "/assets/Courses Pics/Woodcarving.png",
-                            IsArchived = false,
-                            IsPublished = true,
-                            Link = "woodcarving",
-                            Overview = "Woodcarving is the art of shaping and sculpting wood...",
-                            Requirements = "Carving knives, gouges, mallet, sandpaper, safety gloves, and carving wood (basswood recommended).",
-                            Thumbnail = "/assets/Courses Pics/Woodcarving.png",
-                            Title = "Woodcarving",
-                            Video = "/assets/Videos/Wood Carving.mp4",
-                            WhatToLearn = "You'll learn carving techniques like relief carving, whittling, chip carving, and finishing."
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Category = "Weaving",
-                            CreatedAt = new DateTime(2024, 5, 31, 16, 0, 0, 0, DateTimeKind.Utc),
-                            CreatedBy = "A1111113",
-                            Difficulty = "Professional",
-                            Duration = "18 hours",
-                            FinalProjectDescription = "Plan and weave a wall hanging using advanced techniques to showcase your weaving skills.",
-                            FinalProjectTitle = "Design a Handwoven Wall Hanging",
-                            FullDescription = "This advanced course in weaving introduces students to both traditional and experimental textile design...",
-                            ImageUrl = "/assets/Courses Pics/Weaving.png",
-                            IsArchived = false,
-                            IsPublished = true,
-                            Link = "weaving",
-                            Overview = "Weaving is the craft of interlacing threads or fibers...",
-                            Requirements = "Table or floor loom, warp and weft yarns, weaving comb, shuttles, and scissors.",
-                            Thumbnail = "/assets/Courses Pics/Weaving.png",
-                            Title = "Weaving",
-                            Video = "/assets/Videos/Weaving.mp4",
-                            WhatToLearn = "You’ll explore techniques in tapestry weaving, loom setup, fiber selection, and pattern creation."
-                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CourseMaterial", b =>
@@ -952,92 +729,6 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("CourseModules");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CourseId = 1,
-                            Order = 0,
-                            Title = "Introduction"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CourseId = 1,
-                            Order = 0,
-                            Title = "History"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CourseId = 1,
-                            Order = 0,
-                            Title = "Session"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CourseId = 1,
-                            Order = 0,
-                            Title = "Quiz"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CourseId = 2,
-                            Order = 0,
-                            Title = "Introduction"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CourseId = 2,
-                            Order = 0,
-                            Title = "History"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CourseId = 2,
-                            Order = 0,
-                            Title = "Session"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CourseId = 2,
-                            Order = 0,
-                            Title = "Quiz"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CourseId = 3,
-                            Order = 0,
-                            Title = "Introduction"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            CourseId = 3,
-                            Order = 0,
-                            Title = "History"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            CourseId = 3,
-                            Order = 0,
-                            Title = "Session"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            CourseId = 3,
-                            Order = 0,
-                            Title = "Quiz"
-                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CourseProjectSubmission", b =>
@@ -1086,6 +777,40 @@ namespace SkillBuilder.Migrations
                     b.ToTable("CourseProjectSubmissions");
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.CourseReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ReportedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReporterId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("ReporterId");
+
+                    b.ToTable("CourseReports");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.CourseReview", b =>
                 {
                     b.Property<int>("Id")
@@ -1118,35 +843,6 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("CourseReviews");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Comment = "An excellent course! The mentor was very knowledgeable.",
-                            CourseId = 1,
-                            CreatedAt = new DateTime(2024, 6, 4, 16, 0, 0, 0, DateTimeKind.Utc),
-                            Rating = 5,
-                            UserId = "A1111111"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Comment = "Really enjoyed learning pottery. A few lessons were a bit fast though.",
-                            CourseId = 1,
-                            CreatedAt = new DateTime(2024, 6, 9, 16, 0, 0, 0, DateTimeKind.Utc),
-                            Rating = 4,
-                            UserId = "A1111111"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Comment = "Very hands-on and engaging! Perfect for intermediate learners.",
-                            CourseId = 3,
-                            CreatedAt = new DateTime(2024, 6, 14, 16, 0, 0, 0, DateTimeKind.Utc),
-                            Rating = 5,
-                            UserId = "A1111111"
-                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.Enrollment", b =>
@@ -1223,176 +919,6 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("CourseModuleId");
 
                     b.ToTable("ModuleContents");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ContentText = "Pottery intro content something anything.",
-                            ContentType = "Video",
-                            CourseModuleId = 1,
-                            MediaUrl = "/assets/Videos/Pottery.mp4",
-                            Order = 0,
-                            Title = "Welcome to Pottery"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            ContentText = "Learn about clay, tools, and equipment.",
-                            ContentType = "Image + Text",
-                            CourseModuleId = 2,
-                            MediaUrl = "/assets/Courses Pics/Pottery.png",
-                            Order = 0,
-                            Title = "Pottery Materials"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            ContentText = "Step by step techniques for beginners.",
-                            ContentType = "Image + Text",
-                            CourseModuleId = 2,
-                            MediaUrl = "/assets/Courses Pics/Pottery1.png",
-                            Order = 0,
-                            Title = "Basic Pottery Techniques"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ContentText = "History content something anything.",
-                            ContentType = "Image + Text",
-                            CourseModuleId = 2,
-                            MediaUrl = "/assets/Courses Pics/Pottery2.png",
-                            Order = 0,
-                            Title = "History of Pottery"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ContentType = "Session",
-                            CourseModuleId = 3,
-                            Order = 0,
-                            Title = "Live Pottery Session"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            ContentText = "Woodcarving intro content something anything.",
-                            ContentType = "Video",
-                            CourseModuleId = 6,
-                            MediaUrl = "/assets/Videos/Wood Carving.mp4",
-                            Order = 0,
-                            Title = "Welcome to Woodcarving"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            ContentText = "Learn about wood types suitable for carving.",
-                            ContentType = "Image + Text",
-                            CourseModuleId = 7,
-                            MediaUrl = "/assets/Courses Pics/Woodcarving.png",
-                            Order = 0,
-                            Title = "Wood Types"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            ContentText = "Introduction to essential carving tools.",
-                            ContentType = "Image + Text",
-                            CourseModuleId = 7,
-                            MediaUrl = "/assets/Courses Pics/Woodcarving1.png",
-                            Order = 0,
-                            Title = "Basic Carving Tools"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            ContentText = "History content something anything.",
-                            ContentType = "Image + Text",
-                            CourseModuleId = 7,
-                            MediaUrl = "/assets/Courses Pics/Woodcarving2.png",
-                            Order = 0,
-                            Title = "History of Woodcarving"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            ContentType = "Session",
-                            CourseModuleId = 8,
-                            Order = 0,
-                            Title = "Live Woodcarving Session"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            ContentText = "Weaving intro content something anything.",
-                            ContentType = "Video",
-                            CourseModuleId = 11,
-                            MediaUrl = "/assets/Videos/Weaving.mp4",
-                            Order = 0,
-                            Title = "Welcome to Weaving"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            ContentText = "Learn about threads, yarns, and tools.",
-                            ContentType = "Image + Text",
-                            CourseModuleId = 12,
-                            MediaUrl = "/assets/Courses Pics/Weaving.png",
-                            Order = 0,
-                            Title = "Weaving Materials"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            ContentText = "Step by step weaving techniques.",
-                            ContentType = "Image + Text",
-                            CourseModuleId = 12,
-                            MediaUrl = "/assets/Courses Pics/Weaving1.png",
-                            Order = 0,
-                            Title = "Basic Weaving Techniques"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            ContentText = "History content something anything.",
-                            ContentType = "Image + Text",
-                            CourseModuleId = 12,
-                            MediaUrl = "/assets/Courses Pics/Weaving2.png",
-                            Order = 0,
-                            Title = "History of Weaving"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            ContentType = "Session",
-                            CourseModuleId = 13,
-                            Order = 0,
-                            Title = "Live Weaving Session"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            ContentType = "Quiz",
-                            CourseModuleId = 4,
-                            Order = 0,
-                            Title = "Pottery Quiz"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            ContentType = "Quiz",
-                            CourseModuleId = 9,
-                            Order = 0,
-                            Title = "Woodcarving Quiz"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            ContentType = "Quiz",
-                            CourseModuleId = 14,
-                            Order = 0,
-                            Title = "Weaving Quiz"
-                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.ModuleProgress", b =>
@@ -1503,173 +1029,6 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("ModuleContentId");
 
                     b.ToTable("QuizQuestions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CorrectAnswer = "Clay",
-                            ModuleContentId = 13,
-                            OptionA = "Wood",
-                            OptionB = "Metal",
-                            OptionC = "Clay",
-                            OptionD = "Plastic",
-                            Question = "What is the main material used in pottery?"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CorrectAnswer = "Wheel Throwing",
-                            ModuleContentId = 13,
-                            OptionA = "Sculpting",
-                            OptionB = "Weaving",
-                            OptionC = "Wheel Throwing",
-                            OptionD = "Casting",
-                            Question = "Which technique is used in pottery?"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CorrectAnswer = "1000°C",
-                            ModuleContentId = 13,
-                            OptionA = "100°C",
-                            OptionB = "400°C",
-                            OptionC = "1000°C",
-                            OptionD = "2000°C",
-                            Question = "What temperature does a kiln usually reach?"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CorrectAnswer = "Coating",
-                            ModuleContentId = 13,
-                            OptionA = "Painting",
-                            OptionB = "Coating",
-                            OptionC = "Mixing",
-                            OptionD = "Breaking",
-                            Question = "What is glazing in pottery?"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CorrectAnswer = "Remove air bubbles",
-                            ModuleContentId = 13,
-                            OptionA = "Decorate it",
-                            OptionB = "Remove air bubbles",
-                            OptionC = "Color it",
-                            OptionD = "Dry it faster",
-                            Question = "Why do we wedge clay?"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CorrectAnswer = "Chisel",
-                            ModuleContentId = 14,
-                            OptionA = "Pencil",
-                            OptionB = "Chisel",
-                            OptionC = "Brush",
-                            OptionD = "Hammer",
-                            Question = "What tool is essential in woodcarving?"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CorrectAnswer = "Basswood",
-                            ModuleContentId = 14,
-                            OptionA = "Oak",
-                            OptionB = "Basswood",
-                            OptionC = "Mahogany",
-                            OptionD = "Pine",
-                            Question = "Which wood is best for beginners?"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CorrectAnswer = "Cutting out small designs",
-                            ModuleContentId = 14,
-                            OptionA = "Removing chips",
-                            OptionB = "Cutting out small designs",
-                            OptionC = "Joining wood",
-                            OptionD = "Painting wood",
-                            Question = "What is chip carving?"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CorrectAnswer = "Both A and B",
-                            ModuleContentId = 14,
-                            OptionA = "Gloves",
-                            OptionB = "Mask",
-                            OptionC = "Both A and B",
-                            OptionD = "None",
-                            Question = "Safety gear includes?"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CorrectAnswer = "Sharp and clean",
-                            ModuleContentId = 14,
-                            OptionA = "Wet",
-                            OptionB = "Rusty",
-                            OptionC = "Sharp and clean",
-                            OptionD = "Scattered",
-                            Question = "How should tools be stored?"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CorrectAnswer = "Loom",
-                            ModuleContentId = 15,
-                            OptionA = "Hook",
-                            OptionB = "Loom",
-                            OptionC = "Needle",
-                            OptionD = "Stick",
-                            Question = "What tool is used to hold threads in weaving?"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            CorrectAnswer = "Horizontally",
-                            ModuleContentId = 15,
-                            OptionA = "Vertically",
-                            OptionB = "Diagonally",
-                            OptionC = "Horizontally",
-                            OptionD = "Randomly",
-                            Question = "Weft yarns go?"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            CorrectAnswer = "Twill",
-                            ModuleContentId = 15,
-                            OptionA = "Zigzag",
-                            OptionB = "Twill",
-                            OptionC = "Spin",
-                            OptionD = "Knot",
-                            Question = "Which is a basic weave pattern?"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            CorrectAnswer = "Design",
-                            ModuleContentId = 15,
-                            OptionA = "Sound",
-                            OptionB = "Texture",
-                            OptionC = "Design",
-                            OptionD = "Hardness",
-                            Question = "Color theory helps with?"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            CorrectAnswer = "Structure",
-                            ModuleContentId = 15,
-                            OptionA = "Decoration",
-                            OptionB = "Structure",
-                            OptionC = "Noise",
-                            OptionD = "Glazing",
-                            Question = "What is the purpose of warp threads?"
-                        });
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.SupportSessionRequest", b =>
@@ -1789,74 +1148,9 @@ namespace SkillBuilder.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "A1111111",
-                            CreatedAt = new DateTime(2024, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "juan@example.com",
-                            FirstName = "Juan",
-                            IsArchived = false,
-                            IsDeactivated = false,
-                            IsVerified = true,
-                            LastName = "Dela Cruz",
-                            PasswordHash = "hashedpw",
-                            Points = 0,
-                            Role = "Learner",
-                            UserAvatar = "/assets/Avatar/Sample10.svg"
-                        },
-                        new
-                        {
-                            Id = "user-1",
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "alice@test.com",
-                            FirstName = "Alice",
-                            IsArchived = false,
-                            IsDeactivated = false,
-                            IsVerified = true,
-                            LastName = "Artisan",
-                            PasswordHash = "dummyhash1",
-                            Points = 10,
-                            Role = "Learner",
-                            SelectedInterests = "Crafts, Sewing",
-                            UserAvatar = "/assets/Avatar/Sample3.ico"
-                        },
-                        new
-                        {
-                            Id = "user-2",
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "bob@test.com",
-                            FirstName = "Bob",
-                            IsArchived = false,
-                            IsDeactivated = false,
-                            IsVerified = false,
-                            LastName = "Builder",
-                            PasswordHash = "dummyhash2",
-                            Points = 5,
-                            Role = "Learner",
-                            SelectedInterests = "Woodwork, DIY",
-                            UserAvatar = "/assets/Avatar/Sample6.ico"
-                        },
-                        new
-                        {
-                            Id = "user-3",
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "charlie@test.com",
-                            FirstName = "Charlie",
-                            IsArchived = false,
-                            IsDeactivated = false,
-                            IsVerified = true,
-                            LastName = "Craftsman",
-                            PasswordHash = "dummyhash3",
-                            Points = 20,
-                            Role = "Learner",
-                            SelectedInterests = "Painting, Pottery",
-                            UserAvatar = "/assets/Avatar/Sample9.ico"
-                        });
                 });
 
-            modelBuilder.Entity("SkillBuilder.Models.UserInterest", b =>
+            modelBuilder.Entity("SkillBuilder.Models.UserReport", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1864,17 +1158,24 @@ namespace SkillBuilder.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Interest")
+                    b.Property<string>("ReportType")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
+                    b.Property<DateTime>("ReportedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReportedUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReporterId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserInterests");
+                    b.ToTable("UserReports");
                 });
 
             modelBuilder.Entity("CommunityPost", b =>
@@ -1937,8 +1238,7 @@ namespace SkillBuilder.Migrations
 
                     b.HasOne("SkillBuilder.Models.Course", "Course")
                         .WithMany("ArtisanWorks")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("CourseId");
 
                     b.Navigation("Artisan");
 
@@ -2055,6 +1355,25 @@ namespace SkillBuilder.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.CourseReport", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SkillBuilder.Models.User", "Reporter")
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Reporter");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.CourseReview", b =>

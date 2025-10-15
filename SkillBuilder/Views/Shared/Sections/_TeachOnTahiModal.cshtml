@@ -201,6 +201,39 @@
         border-radius: 6px;
         border: 1px solid #ccc;
     }
+
+    .teach-redirect {
+        text-align: center;
+        font-size: 0.8rem;
+        margin-top: 1rem;
+        color: #555;
+    }
+
+        .teach-redirect a {
+            color: #364BE9;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .teach-redirect a:hover {
+                text-decoration: underline;
+            }
+
+    #artisan-profession {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 0.85rem;
+        background-color: #fff;
+        cursor: pointer;
+    }
+
+        #artisan-profession:focus {
+            border-color: #364BE9;
+            outline: none;
+            box-shadow: 0 0 0 1px rgba(54,75,233,0.2); /* smaller shadow */
+        }
 </style>
 
 <div id="teach-modal-overlay" style="z-index: 1001;" class="modal-overlay"></div>
@@ -218,7 +251,7 @@
         <div class="auth-modal-right">
             <h2 class="teach-header">Teach on <span style="color: #364BE9">Tahi</span></h2>
 
-            <!-- Social login -->
+            @* <!-- Social login -->
             <div class="social-login">
                 <button id="btn-google-teach"><img src="~/assets/Logos/Google.svg">Continue with Google</button>
                 <button id="btn-facebook-teach"><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
@@ -226,7 +259,7 @@
 
             <div class="separator"><span>or</span></div>
 
-            <button class="teach-email-btn" onclick="showTeachForm()">Continue with Email</button>
+            <button class="teach-email-btn" onclick="showTeachForm()">Continue with Email</button> *@
 
             <form id="teach-form" class="teach-form-wrapper">
                 <button type="button" class="teach-back-btn" onclick="hideTeachForm()" style="margin-top: 0.5rem;">←</button>
@@ -246,7 +279,7 @@
                 <label for="teach-password">Password</label>
                 <div class="teach-password-wrapper">
                     <input type="password" id="teach-password" name="Password" required />
-                    <span class="toggle-password" onclick="togglePasswordVisibility('teach-password', this)">👁️‍🗨️</span>
+                    <span style="margin-top: -0.5rem;" class="toggle-password" onclick="togglePasswordVisibility('teach-password', this)">👁️‍🗨️</span>
                 </div>
 
                 <div id="teach-password-checklist" class="password-checklist" style="display: none;">
@@ -259,7 +292,7 @@
                 <label for="teach-confirm">Confirm Password</label>
                 <div class="teach-password-wrapper">
                     <input type="password" id="teach-confirm" name="ConfirmPassword" required />
-                    <span class="toggle-password" onclick="togglePasswordVisibility('teach-confirm', this)">👁️‍🗨️</span>
+                    <span style="margin-top: -0.5rem;" class="toggle-password" onclick="togglePasswordVisibility('teach-confirm', this)">👁️‍🗨️</span>
                 </div>
 
                 <p id="teach-confirm-warning" class="teach-error" style="display: none;">⚠️ Passwords do not match.</p>
@@ -333,6 +366,11 @@
             </div>
 
             <p class="teach-description">Share your cultural knowledge with the community by becoming a mentor on Tahi.</p>
+
+            <p class="teach-redirect">
+                Already have an account?
+                <a href="#" onclick="switchToLogin()">Log In</a>
+            </p>
         </div>
     </div>
 </div>
@@ -402,17 +440,33 @@
             document.querySelector(".separator").style.display = "flex";
         };
 
+        // document.querySelectorAll(".nav-teach-btn").forEach(btn => {
+        //     btn.addEventListener("click", e => {
+        //         e.preventDefault();
+        //         openModal("teach-modal");
+        //         Reset visibility
+        //         document.querySelector("#teach-form").style.display = "none";
+        //         document.querySelector(".teach-verification-message").style.display = "none";
+        //         document.querySelector("#artisan-application").style.display = "none";
+        //         document.querySelector(".social-login").style.display = "flex";
+        //         document.querySelector(".teach-email-btn").style.display = "flex";
+        //         document.querySelector(".separator").style.display = "flex";
+        //     });
+        // });
+
         document.querySelectorAll(".nav-teach-btn").forEach(btn => {
             btn.addEventListener("click", e => {
                 e.preventDefault();
                 openModal("teach-modal");
-                // Reset visibility
-                document.querySelector("#teach-form").style.display = "none";
-                document.querySelector(".teach-verification-message").style.display = "none";
-                document.querySelector("#artisan-application").style.display = "none";
-                document.querySelector(".social-login").style.display = "flex";
-                document.querySelector(".teach-email-btn").style.display = "flex";
-                document.querySelector(".separator").style.display = "flex";
+
+                // Hide all panels
+                document.querySelector("#teach-form").style.display = "flex"; // show signup form
+                document.querySelector(".teach-back-btn").style.display = "none";
+                document.querySelector(".auth-close-btn").style.display = "flex";
+
+                document.querySelector("#teach-verification").style.display = "none"; // hide verification panel
+                document.querySelector("#artisan-application").style.display = "none"; // hide application
+                document.querySelector("#artisan-success").style.display = "none"; // hide success
             });
         });
 
@@ -448,7 +502,7 @@
             const confirm = teachConfirm.value;
             const agree = document.getElementById("teach-agree").checked;
 
-            const namePattern = /^[A-Za-z\s]*$/;
+            const namePattern = /^[A-Za-zñÑ\s]*$/;
             const emailPattern = new RegExp("^[^\\s]+@@[^\\s]+\\.[^\\s]+$");
             const validEmail = emailPattern.test(email);
 
@@ -469,10 +523,11 @@
             const input = document.getElementById(inputId);
             const error = document.getElementById(errorId);
             input.addEventListener("input", () => {
-                const valid = /^[A-Za-z\s]*$/.test(input.value);
+                const valid = /^[A-Za-zñÑ\s]*$/.test(input.value);
                 error.style.display = input.value && !valid ? "block" : "none";
             });
         }
+
         validateTeachNameInput("teach-firstname", "teach-fn-error");
         validateTeachNameInput("teach-lastname", "teach-ln-error");
 
@@ -500,6 +555,15 @@
                 return;
             }
 
+            // Show artisan form immediately
+            teachSignupEmail = data.Email; // store email
+            document.getElementById("teach-form").style.display = "none";
+            document.getElementById("artisan-application").style.display = "flex";
+            document.querySelector(".teach-description").style.display = "none";
+            document.querySelector(".teach-redirect").style.display = "none";
+            document.querySelector(".auth-close-btn").style.display = "none";
+
+            // Send signup request asynchronously, without blocking UI
             try {
                 const response = await fetch("/signup-artisan", {
                     method: "POST",
@@ -508,23 +572,19 @@
                 });
                 const result = await response.json().catch(() => ({ message: "Unexpected response" }));
 
-                if (response.ok) {
-                    // Save email globally for later verification
-                    teachSignupEmail = data.Email;
-
-                    document.getElementById("teach-form").style.display = "none";
-                    document.getElementById("artisan-application").style.display = "flex";
-                } else {
-                    error.textContent = result.message || "Submission failed.";
+                if (!response.ok) {
+                    // show error inside artisan form
+                    artisanErrorMsg.textContent = result.message || "Signup failed.";
                 }
             } catch (err) {
                 console.error(err);
-                error.textContent = "An error occurred. Please try again.";
+                artisanErrorMsg.textContent = "An error occurred. Please try again.";
             }
 
             submitBtn.disabled = false;
             submitBtn.textContent = "Create Instructor Account";
         }
+
         document.getElementById("teach-form").addEventListener("submit", submitTeachForm);
 
         // ---------- Skip Verification ----------
@@ -554,6 +614,9 @@
         const artisanOtherWrapper = document.getElementById("artisan-other-profession-wrapper");
         const artisanOtherInput = document.getElementById("artisan-other-profession");
 
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+        const ALLOWED_FILE_TYPES = [".pdf", ".doc", ".docx"];
+
         artisanProfessionSelect.addEventListener("change", () => {
             if (artisanProfessionSelect.value === "Others") {
                 artisanOtherWrapper.style.display = "block";
@@ -563,40 +626,57 @@
             }
         });
 
-        // Include this in your validation function
-        function validateArtisanForm() {
-                let professionValue = artisanProfessionSelect.value === "Others" ? artisanOtherInput.value.trim() : artisanProfessionSelect.value;
-                    formData.append("profession", professionValue);
-            const valid = professionValid &&
-                          artisanHometown.value.trim() &&
-                          artisanIntroduction.value.trim() &&
-                          artisanFile.files.length > 0;
-            artisanSubmitBtn.disabled = !valid;
+        function validateArtisanFile() {
+            artisanErrorMsg.textContent = ""; // reset
+            const file = artisanFile.files[0];
+            if (!file) {
+                artisanErrorMsg.textContent = "⚠️ Please upload a file.";
+                artisanSubmitBtn.disabled = true;
+                return false;
+            }
 
-            if (!professionValid && artisanProfessionSelect.value === "Others") {
+            const ext = file.name.toLowerCase().substring(file.name.lastIndexOf("."));
+            if (!ALLOWED_FILE_TYPES.includes(ext)) {
+                artisanErrorMsg.textContent = `⚠️ Invalid file type. Only ${ALLOWED_FILE_TYPES.join(", ")} allowed.`;
+                artisanSubmitBtn.disabled = true;
+                return false;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                artisanErrorMsg.textContent = `⚠️ File too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)} MB.`;
+                artisanSubmitBtn.disabled = true;
+                return false;
+            }
+
+            artisanErrorMsg.textContent = "";
+            return true;
+        }
+
+        function validateArtisanForm() {
+            const professionValue = artisanProfession.value.trim() === "Others" ? artisanOtherInput.value.trim() : artisanProfession.value.trim();
+            const validProfession = professionValue.length > 0;
+            const validHometown = artisanHometown.value.trim().length > 0;
+            const validIntro = artisanIntroduction.value.trim().length > 0;
+            const validFile = validateArtisanFile();
+
+            const validForm = validProfession && validHometown && validIntro && validFile;
+            artisanSubmitBtn.disabled = !validForm;
+
+            if (!validProfession && artisanProfession.value === "Others") {
                 document.getElementById("artisan-other-profession-error").style.display = "block";
             } else {
                 document.getElementById("artisan-other-profession-error").style.display = "none";
             }
-
-            if (valid) artisanErrorMsg.textContent = "";
         }
 
-        [artisanProfessionSelect, artisanHometown, artisanIntroduction, artisanFile, artisanOtherInput].forEach(el => {
+        // Listen to file selection and other inputs
+        [artisanFile, artisanProfession, artisanHometown, artisanIntroduction, artisanOtherInput].forEach(el => {
             el.addEventListener("input", validateArtisanForm);
             el.addEventListener("change", validateArtisanForm);
         });
 
-
-        function validateArtisanForm() {
-            const valid = artisanProfession.value.trim() && artisanHometown.value.trim() && artisanIntroduction.value.trim() && artisanFile.files.length > 0;
-            artisanSubmitBtn.disabled = !valid;
-            if (valid) artisanErrorMsg.textContent = "";
-        }
-        [artisanProfession, artisanHometown, artisanIntroduction, artisanFile].forEach(el => {
-            el.addEventListener("input", validateArtisanForm);
-            el.addEventListener("change", validateArtisanForm);
-        });
+        // Initial disable
+        artisanSubmitBtn.disabled = true;
 
         artisanSubmitBtn.addEventListener("click", async () => {
             artisanSubmitBtn.disabled = true;

@@ -52,11 +52,25 @@
         font-weight: 500;
         color: #065f46; /* darker green for status */
     }
+
+    /* Empty message styling */
+    .user-courses-empty {
+        text-align: center;
+        font-size: 1rem;
+        color: #6b7280;
+        padding: 2rem;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background-color: #f9fafb;
+        margin-top: 2rem;
+    }
 </style>
 
 @if (Model == null || !Model.Any(e => e.IsCompleted))
 {
-    <p>No completed courses yet.</p>
+    <div class="user-courses-empty">
+        You currently have no completed courses.
+    </div>
 }
 else
 {

@@ -2,9 +2,28 @@
 @model ArtisanProfileViewModel
 
 @{
-    var professions = new List<string> { "Potter", "Weaver", "Shoemaker", "Paper Crafter", "Embroiderer", "WoodCarver", "Others" };
+    var professions = new List<string> { "Potter", "Weaver", "Shoemaker", "Paper Crafter", "Embroiderer", "WoodCarver" };
+    var artisanProfession = Model.Artisan?.Profession ?? "";
+    var professionList = new List<SelectListItem>();
 
+    // If artisanProfession is not empty and not in predefined list, treat it as a new option
+    bool isCustom = !string.IsNullOrEmpty(artisanProfession) && !professions.Contains(artisanProfession);
+
+    foreach (var p in professions)
+    {
+        professionList.Add(new SelectListItem { Text = p, Value = p, Selected = artisanProfession == p });
+    }
+
+    // Add custom profession if exists
+    if (isCustom)
+    {
+        professionList.Add(new SelectListItem { Text = artisanProfession, Value = artisanProfession, Selected = true });
+    }
+
+    // Always add "Others" option
+    professionList.Add(new SelectListItem { Text = "Others", Value = "Others", Selected = isCustom ? false : artisanProfession == "Others" });
 }
+
 <style>
 /* --- Container --- */
 .eap-container-wrapper {
@@ -225,14 +244,19 @@
             <!-- Profession -->
             <div class="eap-field">
                 <label for="Profession">Profession</label>
-                <select id="Profession" name="Profession" class="eap-input" required>
-                    <option value="">Select your profession</option>
-                    @foreach (var prof in professions)
-                    {
-                        <option value="@prof" selected="@(Model.Artisan.Profession == prof ? "selected" : null)">@prof</option>
-                    }
-                </select>
-                <p class="eap-warning" id="eap-profession-warning">⚠️ Please select your profession.</p>
+
+                @Html.DropDownListFor(
+                model => model.Artisan.Profession, // binds to Artisan.Profession
+                    professionList,
+                    "Select your profession",
+                    new { @class = "eap-input", id = "Profession", required = "required" }
+                    )
+
+                <input type="text" id="OtherProfession" name="ProfessionOther" class="eap-input"
+                       placeholder="Enter your profession"
+                       value="@(isCustom? artisanProfession : "")"
+                       style="display:@(artisanProfession == "Others" ? "block" : "none"); margin-top:0.5rem;" />
+                <p class="eap-warning" id="eap-profession-warning">⚠️ Please select or enter your profession.</p>
             </div>
 
             <!-- Hometown -->
@@ -331,6 +355,27 @@
     const checkUpper = document.getElementById('eap-check-uppercase');
     const checkNumber = document.getElementById('eap-check-number');
     const checkSymbol = document.getElementById('eap-check-symbol');
+    const professionSelect = document.getElementById('Profession');
+    const otherProfessionInput = document.getElementById('OtherProfession');
+
+    function markFormChanged() {
+        submitBtn.disabled = false;
+    }
+
+    professionSelect.addEventListener('change', () => {
+        if (professionSelect.value === "Others") {
+            otherProfessionInput.style.display = "block";
+            otherProfessionInput.setAttribute("required", "required");
+            otherProfessionInput.focus();
+        } else {
+            otherProfessionInput.style.display = "none";
+            otherProfessionInput.removeAttribute("required");
+            otherProfessionInput.value = "";
+        }
+        markFormChanged();
+    });
+
+    otherProfessionInput.addEventListener('input', markFormChanged);
 
     let formChanged = false;
     let oldPasswordTimeout;
@@ -450,9 +495,30 @@
     const mainModalConfirm = document.getElementById('eap-modal-confirm');
     mainModalConfirm.addEventListener('click', () => {
         modalOverlay.style.display = 'none';
-        submitBtn.disabled = true;         
+
+        // Check if "Others" was selected and input has value
+        if(professionSelect.value === "Others" && otherProfessionInput.value.trim() !== "") {
+            // Update the dropdown to show the entered value
+            let enteredProfession = otherProfessionInput.value.trim();
+
+            // Check if option already exists
+            let optionExists = Array.from(professionSelect.options).some(opt => opt.value === enteredProfession);
+            if(!optionExists) {
+                let newOption = new Option(enteredProfession, enteredProfession, true, true); // text, value, defaultSelected, selected
+                professionSelect.add(newOption, professionSelect.options.length - 1); // insert before "Others"
+            } else {
+                // If exists, just select it
+                professionSelect.value = enteredProfession;
+            }
+
+            // Hide input again
+            otherProfessionInput.style.display = "none";
+            otherProfessionInput.value = "";
+        }
+
+        submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
-        form.submit();                      
+        form.submit();
     });
 
     const emailExistWarning = document.getElementById('eap-email-exist-warning');

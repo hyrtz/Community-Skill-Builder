@@ -73,7 +73,8 @@ namespace SkillBuilder.Controllers
                                 AuthorName = p.Author.FirstName,
                                 AuthorAvatarUrl = p.Author.UserAvatar,
                                 CommunityName = p.Community.Name,
-                                CommentsCount = 0
+                                CommentsCount = 0,
+                                Category = p.Category
                             })
                             .ToListAsync();
                     }
@@ -101,7 +102,8 @@ namespace SkillBuilder.Controllers
                         AuthorName = p.Author.FirstName,
                         AuthorAvatarUrl = p.Author.UserAvatar,
                         CommunityName = "Public", 
-                        CommentsCount = 0
+                        CommentsCount = 0,
+                        Category = p.Category
                     })
                     .ToListAsync();
             }
@@ -583,6 +585,19 @@ namespace SkillBuilder.Controllers
             return $"/uploads/{folderName}/{fileName}";
         }
 
+        [HttpGet("HasJoinRequest")]
+        public async Task<IActionResult> HasJoinRequest(int communityId)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var exists = await _context.CommunityJoinRequests
+                .AnyAsync(r => r.CommunityId == communityId && r.UserId == userId && r.Status == "Pending");
+
+            return Ok(new { success = true, hasRequest = exists });
+        }
+
         [HttpPost("HandleJoinRequest")]
         public async Task<IActionResult> HandleJoinRequest([FromBody] JoinRequestActionModel model)
         {
@@ -607,10 +622,7 @@ namespace SkillBuilder.Controllers
 
             if (model.Approve)
             {
-                // ✅ Approve request
-                joinRequest.Status = "Approved";
-
-                // Add member to community
+                // ✅ Approve request: add member to community
                 _context.CommunityMemberships.Add(new CommunityMembership
                 {
                     CommunityId = joinRequest.CommunityId,
@@ -622,21 +634,39 @@ namespace SkillBuilder.Controllers
                 // Update community member count
                 joinRequest.Community.MembersCount += 1;
 
+                // Notify both user and owner
                 await _notificationService.AddNotificationAsync(
                     joinRequest.UserId,
                     $"🎉 Your join request for '{joinRequest.Community.Name}' has been approved!"
                 );
+
+                await _notificationService.AddNotificationAsync(
+                    joinRequest.Community.CreatorId,
+                    $"✅ You approved {joinRequest.User.FirstName} {joinRequest.User.LastName}'s join request for '{joinRequest.Community.Name}'."
+                );
             }
             else
             {
-                // ❌ Reject request
-                joinRequest.Status = "Rejected";
+                // ❌ Reject request: notify both user and owner
+                string reasonText = string.IsNullOrWhiteSpace(model.Reason)
+                    ? ""
+                    : $"\n\n📝 Reason: {model.Reason}";
 
+                // Notify rejected user
                 await _notificationService.AddNotificationAsync(
                     joinRequest.UserId,
-                    $"🚫 Your join request for '{joinRequest.Community.Name}' has been rejected."
+                    $"🚫 Your join request for '{joinRequest.Community.Name}' has been rejected.{reasonText}"
+                );
+
+                // Notify owner about their own action
+                await _notificationService.AddNotificationAsync(
+                    joinRequest.Community.CreatorId,
+                    $"🚫 You rejected {joinRequest.User.FirstName} {joinRequest.User.LastName}'s join request for '{joinRequest.Community.Name}'.{reasonText}"
                 );
             }
+
+            // 🔹 Delete the join request from database
+            _context.CommunityJoinRequests.Remove(joinRequest);
 
             await _context.SaveChangesAsync();
 
@@ -653,6 +683,7 @@ namespace SkillBuilder.Controllers
         {
             public int RequestId { get; set; }
             public bool Approve { get; set; }
+            public string? Reason { get; set; } // ✅ Added reason
         }
 
     }

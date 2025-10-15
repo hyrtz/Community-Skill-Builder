@@ -132,7 +132,10 @@
                         <div class="material-form-group">
                             <label>Replace File</label>
                             <div class="material-upload-wrapper">
-                                <input type="file" name="Materials[@i].UploadFile" />
+                                <input type="file"
+                                       name="Materials[${materialIndex}].UploadFile"
+                                       accept=".doc,.docx,.doc,.pdf"
+                                       onchange="validateMaterialFile(this)" />
                                 <button type="button">Upload</button>
                             </div>
                         </div>
@@ -155,6 +158,8 @@
 <script>
     let materialIndex = @Model?.Materials?.Count ?? 0;
 
+    const maxFileSize = 20 * 1024 * 1024; // 20 MB
+
     function addMaterial() {
         const list = document.getElementById("material-list");
 
@@ -175,11 +180,13 @@
                     <input type="text" name="Materials[${materialIndex}].Title" placeholder="Sample course material.pdf" />
                 </div>
                 <div class="material-form-group">
-                    <label>Replace File</label>
+                    <label>Upload File</label>
                     <div class="material-upload-wrapper">
-                        <input type="file" name="Materials[${materialIndex}].UploadFile" />
+                        <input type="file" name="Materials[${materialIndex}].UploadFile"
+                               accept=".doc,.docx,.doc,.pdf" onchange="validateMaterialFile(this)" />
                         <button type="button">Upload</button>
                     </div>
+                    <span class="file-error" style="color:red; font-size:0.85rem; display:none;"></span>
                 </div>
             </div>
 
@@ -192,6 +199,28 @@
         list.appendChild(container);
         materialIndex++;
         renumberMaterials();
+    }
+
+    function validateMaterialFile(input) {
+        const file = input.files[0];
+        const errorEl = input.parentElement.parentElement.querySelector(".file-error");
+
+        if (!file) {
+            errorEl.style.display = "none";
+            return true;
+        }
+
+        const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+
+        if (file.size > maxFileSize) {
+            errorEl.textContent = `File too large. Max ${(maxFileSize / (1024*1024)).toFixed(0)} MB allowed.`;
+            errorEl.style.display = "block";
+            input.value = "";
+            return false;
+        }
+
+        errorEl.style.display = "none";
+        return true;
     }
 
     function removeMaterial(index) {

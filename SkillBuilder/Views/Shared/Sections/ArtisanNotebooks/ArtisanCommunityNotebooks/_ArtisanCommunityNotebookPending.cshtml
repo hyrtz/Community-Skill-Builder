@@ -1,0 +1,370 @@
+﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
+
+<style>
+    .artisan-mycommunity-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .artisan-mycommunity-header {
+        display: grid;
+        grid-template-columns: 2fr 1fr 3fr 2fr;
+        background: #f9fafb;
+        padding: 0.9rem 1.25rem;
+        font-weight: 600;
+        color: #374151;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .artisan-mycommunity-pending-request-card {
+        display: grid;
+        grid-template-columns: 2fr 1fr 3fr 2fr;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.15s ease;
+    }
+
+        .artisan-mycommunity-pending-request-card:hover {
+            background: #f9fafb;
+        }
+
+    .artisan-mycommunity-requester-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .artisan-mycommunity-requester-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .artisan-mycommunity-requester-name {
+        font-weight: 600;
+        color: #111827;
+        font-size: 0.95rem;
+    }
+
+    .artisan-mycommunity-request-status {
+        font-weight: 500;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .artisan-mycommunity-request-message {
+        font-size: 0.9rem;
+        color: #374151;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .artisan-mycommunity-request-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+
+        .artisan-mycommunity-request-actions button {
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            transition: background 0.15s ease, color 0.15s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+
+    .artisan-mycommunity-approve-btn {
+        background-color: #A5D6A7 !important;
+        border-color: #4CAF50 !important;
+        color: #256029 !important;
+    }
+
+        .artisan-mycommunity-approve-btn:hover {
+            background-color: #4CAF50 !important;
+            color: #fff !important;
+        }
+
+    .artisan-mycommunity-reject-btn {
+        background-color: #FEE4E2;
+        border-color: #DC2626;
+        color: #B91C1C;
+    }
+
+        .artisan-mycommunity-reject-btn:hover {
+            background-color: #DC2626;
+            color: #fff;
+        }
+
+    .artisan-mycommunity-no-requests {
+        text-align: center;
+        padding: 1.5rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    /* ===== Modal Layout ===== */
+    .artisan-mycommunity-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1200;
+        padding: 1.5rem;
+    }
+
+    .artisan-mycommunity-modal-content {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.75rem 1.5rem;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+        .artisan-mycommunity-modal-content h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+            text-align: left;
+        }
+
+        .artisan-mycommunity-modal-content p {
+            font-size: 0.95rem;
+            color: #4b5563;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+    #artisanRejectReason {
+        width: 100%;
+        min-height: 90px;
+        padding: 0.7rem 0.85rem;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        resize: vertical;
+        font-size: 0.9rem;
+        color: #111827;
+        outline: none;
+    }
+
+        #artisanRejectReason:focus {
+            border-color: #3b82f6;
+        }
+
+    .artisan-mycommunity-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .artisan-mycommunity-cancel-btn {
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: #374151;
+        font-weight: 500;
+    }
+
+        .artisan-mycommunity-cancel-btn:hover {
+            background: #e5e7eb;
+        }
+
+    .artisan-mycommunity-confirm-btn {
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: #fff;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    .artisan-mycommunity-confirm-approve {
+        background-color: #10b981;
+    }
+
+        .artisan-mycommunity-confirm-approve:hover {
+            background-color: #059669;
+        }
+
+    .artisan-mycommunity-confirm-reject {
+        background-color: #ef4444;
+    }
+
+        .artisan-mycommunity-confirm-reject:hover {
+            background-color: #dc2626;
+        }
+
+        .artisan-mycommunity-confirm-reject[disabled],
+        .artisan-mycommunity-confirm-reject.disabled {
+            background-color: #fca5a5 !important;
+            color: #fff !important;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+</style>
+
+@if (Model.PendingJoinRequests == null || !Model.PendingJoinRequests.Any())
+{
+    <div class="artisan-mycommunity-no-requests">No pending join requests.</div>
+}
+else
+{
+    <div class="artisan-mycommunity-container">
+        <div class="artisan-mycommunity-header">
+            <span>Name</span>
+            <span>Status</span>
+            <span>Short Message</span>
+            <span>Actions</span>
+        </div>
+
+        @foreach (var request in Model.PendingJoinRequests)
+        {
+            <div class="artisan-mycommunity-pending-request-card" data-request-id="@request.Id">
+                <div class="artisan-mycommunity-requester-info">
+                    <img src="@request.User.UserAvatar" class="artisan-mycommunity-requester-avatar" />
+                    <span class="artisan-mycommunity-requester-name">@request.User.FirstName @request.User.LastName</span>
+                </div>
+                <div class="artisan-mycommunity-request-status">@request.Status</div>
+                <div class="artisan-mycommunity-request-message">@request.ShortMessage</div>
+                <div class="artisan-mycommunity-request-actions">
+                    <button class="artisan-mycommunity-approve-btn"
+                            onclick="openApproveModal(@request.Id, '@request.User.FirstName @request.User.LastName')">
+                        Approve
+                    </button>
+                    <button class="artisan-mycommunity-reject-btn"
+                            onclick="openRejectModal(@request.Id, '@request.User.FirstName @request.User.LastName')">
+                        Reject
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="artisan-mycommunity-modal-overlay" id="approveModal">
+    <div class="artisan-mycommunity-modal-content">
+        <h3>Approve Join Request</h3>
+        <p id="approveBody">Are you sure?</p>
+        <div class="artisan-mycommunity-modal-footer">
+            <button class="artisan-mycommunity-cancel-btn" onclick="closeApproveModal()">Cancel</button>
+            <button id="confirmApproveBtn" class="artisan-mycommunity-confirm-btn artisan-mycommunity-confirm-approve">Approve</button>
+        </div>
+    </div>
+</div>
+
+<div class="artisan-mycommunity-modal-overlay" id="rejectModal">
+    <div class="artisan-mycommunity-modal-content" role="dialog" aria-modal="true" aria-labelledby="rejectTitle">
+        <h3 id="rejectTitle">Reject Join Request</h3>
+        <p id="rejectBody">Please provide a reason:</p>
+        <textarea id="artisanRejectReason" placeholder="Enter reason (required)"></textarea>
+        <div class="artisan-mycommunity-modal-footer">
+            <button class="artisan-mycommunity-cancel-btn" onclick="closeRejectModal()">Cancel</button>
+            <button id="confirmRejectBtn" class="artisan-mycommunity-confirm-btn artisan-mycommunity-confirm-reject" disabled aria-disabled="true">Reject</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedRequestId = null;
+    let selectedUserName = '';
+
+    function openApproveModal(id, name) {
+        selectedRequestId = id;
+        selectedUserName = name;
+        document.getElementById('approveBody').textContent = `Approve ${name}'s join request?`;
+        document.getElementById('approveModal').style.display = 'flex';
+    }
+
+    function closeApproveModal() {
+        document.getElementById('approveModal').style.display = 'none';
+    }
+
+    function openRejectModal(id, name) {
+        selectedRequestId = id;
+        selectedUserName = name;
+
+        const reasonInput = document.getElementById('artisanRejectReason');
+        const confirmBtn = document.getElementById('confirmRejectBtn');
+
+        reasonInput.value = '';
+        confirmBtn.disabled = true;
+        confirmBtn.classList.add('disabled');
+
+        document.getElementById('rejectBody').textContent = `Reject ${name}'s join request:`;
+        document.getElementById('rejectModal').style.display = 'flex';
+        reasonInput.focus();
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').style.display = 'none';
+        const reasonInput = document.getElementById('artisanRejectReason');
+        const confirmBtn = document.getElementById('confirmRejectBtn');
+
+        reasonInput.value = '';
+        confirmBtn.disabled = true;
+        confirmBtn.classList.add('disabled');
+    }
+
+    async function handleJoinRequest(requestId, approve, reason = "") {
+        try {
+            const response = await fetch('/Community/HandleJoinRequest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId, approve, reason })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                const card = document.querySelector(`[data-request-id='${requestId}']`);
+                if (card) card.remove();
+                window.location.reload();
+            } else {
+                alert(result.message || 'Failed to process request.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error processing request.');
+        }
+    }
+
+    document.getElementById('confirmApproveBtn').addEventListener('click', async () => {
+        closeApproveModal();
+        await handleJoinRequest(selectedRequestId, true);
+    });
+
+    document.getElementById('confirmRejectBtn').addEventListener('click', async () => {
+        const reason = document.getElementById('artisanRejectReason').value.trim();
+        if (!reason) return;
+        closeRejectModal();
+        await handleJoinRequest(selectedRequestId, false, reason);
+    });
+
+    document.getElementById('artisanRejectReason').addEventListener('input', function () {
+        const confirmBtn = document.getElementById('confirmRejectBtn');
+        const hasText = this.value.trim() !== '';
+        confirmBtn.disabled = !hasText;
+        confirmBtn.classList.toggle('disabled', !hasText);
+    });
+</script>

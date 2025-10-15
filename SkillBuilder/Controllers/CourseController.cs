@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
@@ -31,6 +32,7 @@ namespace SkillBuilder.Controllers
                 .Include(c => c.Enrollments)
                 .Include(c => c.Reviews).ThenInclude(r => r.User)
                 .Include(c => c.CourseModules).ThenInclude(m => m.Contents)
+                .Include(c => c.Materials)
                 .AsQueryable();
 
             // Only show published courses for normal users
@@ -208,8 +210,8 @@ namespace SkillBuilder.Controllers
         [HttpGet("CourseModule/{id}")]
         public IActionResult CourseModule(int id)
         {
-            var userId = User.FindFirst("UserId")?.Value;
-            if (userId == null) return Unauthorized();
+            var userId = User.FindFirstValue("UserId");
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
             if (user == null) return Unauthorized();
@@ -220,17 +222,22 @@ namespace SkillBuilder.Controllers
                 return RedirectToAction("CourseCatalog");
             }
 
+            // Load course with all related data including materials
             var course = _context.Courses
-                .Include(c => c.Artisan)
-                .Include(c => c.Enrollments)
-                .Include(c => c.Reviews)
-                .Include(c => c.Materials)
+                .Where(c => c.Id == id)
+                .Include(c => c.Materials) // include course materials
                 .Include(c => c.CourseModules)
                     .ThenInclude(m => m.Contents)
                         .ThenInclude(content => content.QuizQuestions)
-                .FirstOrDefault(c => c.Id == id);
+                .Include(c => c.Artisan)
+                .Include(c => c.Enrollments)
+                .Include(c => c.Reviews)
+                .FirstOrDefault();
 
             if (course == null) return NotFound();
+
+            // Debugging: log materials count
+            Console.WriteLine($"[DEBUG] Course ID: {course.Id}, Materials count: {course.Materials?.Count ?? 0}");
 
             // 🔒 Prevent access to unpublished courses for normal users
             if (!course.IsPublished && course.Artisan.UserId != userId && !User.IsInRole("Admin"))
@@ -248,9 +255,7 @@ namespace SkillBuilder.Controllers
             }
 
             // Count all contents in this course
-            int totalContents = course.CourseModules
-                .SelectMany(m => m.Contents)
-                .Count();
+            int totalContents = course.CourseModules.SelectMany(m => m.Contents).Count();
 
             // Find completed modules for this user
             var completedModules = _context.ModuleProgress
@@ -258,24 +263,31 @@ namespace SkillBuilder.Controllers
                 .Select(mp => mp.CourseModuleId)
                 .ToHashSet();
 
-            var orderedModules = course.CourseModules
-                .OrderBy(cm => cm.Order)
-                .ToList();
+            var orderedModules = course.CourseModules.OrderBy(cm => cm.Order).ToList();
 
-            // Count completed contents = all contents belonging to completed modules
             int completedContents = course.CourseModules
                 .Where(m => completedModules.Contains(m.Id))
                 .SelectMany(m => m.Contents)
                 .Count();
 
-            // Calculate percentage
             double progress = totalContents == 0 ? 0 : (double)completedContents / totalContents * 100;
             ViewData["CourseProgress"] = Math.Round(progress, 0);
 
-            // (Optional) figure out which module to show first: the first uncompleted one
-            var nextModule = orderedModules.FirstOrDefault(m => !completedModules.Contains(m.Id))
-                             ?? orderedModules.Last();
+            var nextModule = orderedModules.FirstOrDefault(m => !completedModules.Contains(m.Id)) ?? orderedModules.Last();
             ViewData["NextModuleId"] = nextModule?.Id;
+
+            // Optional debug: list material titles in log
+            if (course.Materials != null && course.Materials.Any())
+            {
+                foreach (var mat in course.Materials)
+                {
+                    Console.WriteLine($"[DEBUG] Material: {mat.Title}, FilePath: {mat.FilePath}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("[DEBUG] No materials found for this course.");
+            }
 
             return View("CourseModules/CourseModule", course);
         }
@@ -569,5 +581,103 @@ namespace SkillBuilder.Controllers
         {
             public int Points { get; set; }
         }
+
+        [HttpDelete("Delete/{id}")]
+        [Authorize(Roles = "Artisan")]
+        public async Task<IActionResult> DeleteCourse(int id)
+        {
+            var userId = User.FindFirstValue("UserId");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var course = await _context.Courses
+                .Include(c => c.Artisan)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (course == null)
+                return Json(new { success = false, message = "Course not found." });
+
+            if (course.Artisan?.UserId != userId)
+                return Forbid();
+
+            // 🗂️ Soft delete (archive)
+            course.IsArchived = true;
+            await _context.SaveChangesAsync();
+
+            // ✅ Send notification to the artisan confirming success
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"Your course \"{course.Title}\" has been deleted successfully."
+            );
+
+            // ✅ Return redirect URL with artisan ID (use Artisan.Id or Artisan.ArtisanId depending on your model)
+            var artisanId = course.Artisan.ArtisanId;
+            return Json(new
+            {
+                success = true,
+                message = "Course archived successfully.",
+                redirectUrl = $"/ArtisanProfile/{artisanId}"
+            });
+        }
+
+        public class ReportCourseViewModel
+        {
+            public int CourseId { get; set; }
+            public string Reason { get; set; } = string.Empty;
+            public string? Details { get; set; }
+        }
+
+        [HttpPost("Report/{id}")]
+        public async Task<IActionResult> ReportCourse(int id, [FromBody] ReportCourseViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Invalid report data." });
+
+            var userId = User.FindFirstValue("UserId");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var course = await _context.Courses
+                .Include(c => c.Artisan)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (course == null)
+                return NotFound(new { success = false, message = "Course not found." });
+
+            // 📝 Save report
+            var report = new CourseReport
+            {
+                CourseId = course.Id,
+                ReporterId = userId,
+                Reason = model.Reason,
+                Details = model.Details,
+                ReportedAt = DateTime.UtcNow
+            };
+            _context.CourseReports.Add(report);
+            await _context.SaveChangesAsync();
+
+            // 🔔 Notify reporting user
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"⚠️ You successfully reported the course \"{course.Title}\". Reason: \"{model.Reason}\"."
+            );
+
+            // 🔔 Notify all admins
+            var adminIds = await _context.Users
+                .Where(u => u.Role == "Admin")
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            foreach (var adminId in adminIds)
+            {
+                await _notificationService.AddNotificationAsync(
+                    adminId,
+                    $"⚠️ Course \"{course.Title}\" (by {course.Artisan?.FirstName} {course.Artisan?.LastName}) has been reported. Reason: {model.Reason}"
+                );
+            }
+
+            return Ok(new { success = true, message = "Course reported successfully." });
+        }
+
     }
 }

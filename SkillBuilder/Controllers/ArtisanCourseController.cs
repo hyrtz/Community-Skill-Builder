@@ -171,15 +171,17 @@ namespace SkillBuilder.Controllers
             {
                 foreach (var mat in model.Materials)
                 {
-                    if (mat.UploadFile != null)
+                    if (mat.UploadFile != null && mat.UploadFile.Length > 0)
                     {
                         var filePath = await SaveFileAsync(mat.UploadFile, "course-materials");
+
                         var courseMaterial = new CourseMaterial
                         {
                             CourseId = course.Id,
                             Title = mat.Title,
                             Description = mat.Description,
                             FilePath = filePath,
+                            FileName = mat.UploadFile.FileName,
                             FileSize = mat.UploadFile.Length
                         };
                         _context.CourseMaterials.Add(courseMaterial);
@@ -264,7 +266,6 @@ namespace SkillBuilder.Controllers
                 .Include(c => c.CourseModules)
                 .ThenInclude(m => m.Contents)
                 .ThenInclude(mc => mc.QuizQuestions)
-                .Include(c => c.ArtisanWorks) // ✅ Include ArtisanWorks
                 .FirstOrDefaultAsync(c => c.Id == courseId && c.CreatedBy == artisan.ArtisanId);
 
             if (course == null) return NotFound();
@@ -339,7 +340,6 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpPost("EditCourse")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditCourse(int courseId, CourseBuilderViewModel model)
         {
             if (!ModelState.IsValid)
@@ -350,7 +350,6 @@ namespace SkillBuilder.Controllers
             if (artisan == null) return Unauthorized();
 
             var course = await _context.Courses
-                .Include(c => c.ArtisanWorks)
                 .Include(c => c.Materials)
                 .Include(c => c.CourseModules)
                 .ThenInclude(m => m.Contents)
@@ -449,22 +448,42 @@ namespace SkillBuilder.Controllers
                                 lesson.ContentText = lessonVm.ContentText;
 
                                 // --------- Media handling ---------
-                                if (lessonVm.ImageFile != null)
+                                if (lessonVm.LessonType == "Image + Text")
                                 {
-                                    lesson.MediaUrl = await SaveFileAsync(lessonVm.ImageFile, "lesson-media");
+                                    if (lessonVm.ImageFile != null)
+                                    {
+                                        lesson.MediaUrl = await SaveFileAsync(lessonVm.ImageFile, "lesson-media");
+                                    }
+                                    else if (!string.IsNullOrEmpty(lessonVm.ExistingImageUrl))
+                                    {
+                                        lesson.MediaUrl = lessonVm.ExistingImageUrl; // preserve old
+                                    }
                                 }
-                                else if (lessonVm.VideoFile != null)
+
+                                if (lessonVm.LessonType == "Video")
                                 {
-                                    lesson.MediaUrl = await SaveFileAsync(lessonVm.VideoFile, "lesson-media");
+                                    if (lessonVm.VideoFile != null)
+                                    {
+                                        lesson.MediaUrl = await SaveFileAsync(lessonVm.VideoFile, "lesson-media");
+                                    }
+                                    else if (!string.IsNullOrEmpty(lessonVm.ExistingVideoUrl))
+                                    {
+                                        lesson.MediaUrl = lessonVm.ExistingVideoUrl; // preserve old
+                                    }
                                 }
-                                // else keep existing MediaUrl
-                                // lesson.MediaUrl = lesson.MediaUrl;  <-- no need to assign, already preserved
+                                // Text/Quiz/Session: no MediaUrl needed
 
                                 _context.ModuleContents.Update(lesson);
                             }
                             else
                             {
                                 // New lesson
+                                string mediaUrl = null;
+                                if (lessonVm.LessonType == "Image + Text" && lessonVm.ImageFile != null)
+                                    mediaUrl = await SaveFileAsync(lessonVm.ImageFile, "lesson-media");
+                                else if (lessonVm.LessonType == "Video" && lessonVm.VideoFile != null)
+                                    mediaUrl = await SaveFileAsync(lessonVm.VideoFile, "lesson-media");
+
                                 lesson = new ModuleContent
                                 {
                                     CourseModuleId = courseModule.Id,
@@ -472,11 +491,7 @@ namespace SkillBuilder.Controllers
                                     ContentType = lessonVm.LessonType ?? "Text",
                                     Duration = $"{lessonVm.DurationValue} {lessonVm.DurationUnit}",
                                     ContentText = lessonVm.ContentText,
-                                    MediaUrl = lessonVm.ImageFile != null
-                                        ? await SaveFileAsync(lessonVm.ImageFile, "lesson-media")
-                                        : lessonVm.VideoFile != null
-                                            ? await SaveFileAsync(lessonVm.VideoFile, "lesson-media")
-                                            : null
+                                    MediaUrl = mediaUrl
                                 };
                                 _context.ModuleContents.Add(lesson);
                                 await _context.SaveChangesAsync();
@@ -527,44 +542,6 @@ namespace SkillBuilder.Controllers
                             }
                         }
                     }
-                }
-            }
-
-            // ------------------ Artisan Works ------------------
-            if (model.ArtisanWorks != null)
-            {
-                var formIds = model.ArtisanWorks.Where(w => w.Id > 0).Select(w => w.Id).ToList();
-                var toDelete = course.ArtisanWorks.Where(w => w.Id > 0 && !formIds.Contains(w.Id)).ToList();
-                if (toDelete.Any()) _context.ArtisanWorks.RemoveRange(toDelete);
-
-                foreach (var workVm in model.ArtisanWorks.Where(w => w.Id > 0))
-                {
-                    var existingWork = course.ArtisanWorks.FirstOrDefault(w => w.Id == workVm.Id);
-                    if (existingWork != null)
-                    {
-                        existingWork.Title = workVm.Title ?? "";
-                        existingWork.Caption = workVm.Caption ?? "";
-                        if (workVm.ImageFile != null)
-                            existingWork.ImageUrl = await SaveFileAsync(workVm.ImageFile, "artisan-works");
-                    }
-                }
-
-                foreach (var workVm in model.ArtisanWorks.Where(w => w.Id == 0))
-                {
-                    var imageUrl = workVm.ImageFile != null
-                        ? await SaveFileAsync(workVm.ImageFile, "artisan-works")
-                        : null;
-
-                    var newWork = new ArtisanWork
-                    {
-                        ArtisanId = artisan.ArtisanId,
-                        CourseId = course.Id,
-                        Title = workVm.Title ?? "",
-                        Caption = workVm.Caption ?? "",
-                        ImageUrl = imageUrl,
-                        PublishDate = DateTime.UtcNow
-                    };
-                    _context.ArtisanWorks.Add(newWork);
                 }
             }
 

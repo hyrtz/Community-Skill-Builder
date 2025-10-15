@@ -144,6 +144,28 @@ namespace SkillBuilder.Controllers
                 })
                 .ToList();
 
+            var communityMembers = new Dictionary<int, List<CommunityMemberViewModel>>();
+
+            foreach (var community in userCommunities)
+            {
+                var members = _context.CommunityMemberships
+                    .Include(m => m.User)
+                    .Where(m => m.CommunityId == community.Id && m.User != null && !m.User.IsArchived)
+                    .Select(m => new CommunityMemberViewModel
+                    {
+                        UserId = m.User.Id,
+                        FullName = m.User.FirstName + " " + m.User.LastName,
+                        Email = m.User.Email,
+                        AvatarUrl = string.IsNullOrEmpty(m.User.UserAvatar) ? "/assets/default-avatar.png" : m.User.UserAvatar,
+                        Role = string.IsNullOrEmpty(m.Role) ? "Member" : m.Role,
+                        JoinedAt = m.JoinedAt,
+                        CommunityId = m.CommunityId
+                    })
+                    .ToList();
+
+                communityMembers[community.Id] = members;
+            }
+
             var communityIds = userCommunities.Select(c => c.Id).ToList();
 
             var pendingJoinRequests = _context.CommunityJoinRequests
@@ -165,7 +187,8 @@ namespace SkillBuilder.Controllers
                 LeaderboardUsers = leaderboardUsers,
                 Artisans = artisans,
                 MyCommunities = userCommunities,
-                PendingJoinRequests = pendingJoinRequests
+                PendingJoinRequests = pendingJoinRequests,
+                CommunityMembers = communityMembers
             };
 
             return View("~/Views/Profile/UserProfile.cshtml", viewModel);
@@ -646,6 +669,5 @@ namespace SkillBuilder.Controllers
 
             return Ok(new { success = true, message = "Session cancelled successfully!" });
         }
-
     }
 }

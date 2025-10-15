@@ -43,33 +43,84 @@ namespace SkillBuilder.Controllers
             if (artisan == null)
                 return NotFound();
 
+            // Artisan's courses
             var courses = _context.Courses
                 .Where(c => c.CreatedBy == artisan.UserId)
                 .ToList();
 
+            // Artisan's works
             var works = _context.ArtisanWorks
                 .Where(w => w.ArtisanId == artisan.ArtisanId)
                 .ToList();
 
+            // Support session requests for artisan
             var artisanSupportRequests = _context.SupportSessionRequests
                 .Include(r => r.User)
                 .Include(r => r.Course)
                 .Where(r => r.Course != null && r.Course.CreatedBy == artisan.UserId)
+                .OrderByDescending(r => r.CreatedAt)
                 .ToList();
 
+            // Project submissions for artisan's courses
             var projectSubmissions = _context.CourseProjectSubmissions
                 .Include(p => p.User)
                 .Include(p => p.Course)
-                .Where(p => courses.Select(c => c.Id).Contains(p.CourseId)) // only from artisan's courses
+                .Where(p => courses.Select(c => c.Id).Contains(p.CourseId))
                 .ToList();
 
+            // --- Communities ---
+            var artisanCommunities = _context.Communities
+                .Where(c => c.CreatorId == artisan.UserId && !c.IsArchived && c.IsPublished)
+                .Select(c => new CommunitiesViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description ?? "",
+                    AvatarUrl = c.AvatarUrl ?? "/assets/placeholder-avatar.png",
+                    CoverImageUrl = c.CoverImageUrl ?? "/assets/placeholder-community-cover.jpg",
+                    MembersCount = c.MembersCount,
+                    CreatorId = c.CreatorId
+                })
+                .ToList();
+
+            var communityMembers = new Dictionary<int, List<CommunityMemberViewModel>>();
+            foreach (var community in artisanCommunities)
+            {
+                var members = _context.CommunityMemberships
+                    .Include(m => m.User)
+                    .Where(m => m.CommunityId == community.Id && m.User != null && !m.User.IsArchived)
+                    .Select(m => new CommunityMemberViewModel
+                    {
+                        UserId = m.User.Id,
+                        FullName = m.User.FirstName + " " + m.User.LastName,
+                        Email = m.User.Email,
+                        AvatarUrl = string.IsNullOrEmpty(m.User.UserAvatar) ? "/assets/default-avatar.png" : m.User.UserAvatar,
+                        Role = string.IsNullOrEmpty(m.Role) ? "Member" : m.Role,
+                        JoinedAt = m.JoinedAt,
+                        CommunityId = m.CommunityId
+                    })
+                    .ToList();
+
+                communityMembers[community.Id] = members;
+            }
+
+            var communityIds = artisanCommunities.Select(c => c.Id).ToList();
+            var pendingJoinRequests = _context.CommunityJoinRequests
+                .Where(r => communityIds.Contains(r.CommunityId) && r.Status == "Pending")
+                .Include(r => r.User)
+                .ToList();
+
+            // Build view model
             var viewModel = new ArtisanProfileViewModel
             {
                 Artisan = artisan,
                 Courses = courses,
                 ArtisanWorks = works,
                 ArtisanSupportRequests = artisanSupportRequests,
-                ProjectSubmissions = projectSubmissions
+                ProjectSubmissions = projectSubmissions,
+                MyCommunities = artisanCommunities,
+                PendingJoinRequests = pendingJoinRequests,
+                CommunityMembers = communityMembers
             };
 
             return View("~/Views/Profile/ArtisanProfile.cshtml", viewModel);
@@ -137,13 +188,15 @@ namespace SkillBuilder.Controllers
             string FirstName,
             string LastName,
             string Email,
-            string Profession,
             string Hometown,
             string Introduction,
             IFormFile UserAvatar,
             string CurrentPassword,
             string NewPassword,
-            string ConfirmPassword)
+            string ConfirmPassword,
+            [Bind(Prefix = "Artisan.Profession")] string Profession 
+        )
+
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
@@ -173,7 +226,30 @@ namespace SkillBuilder.Controllers
                 hasChanges = true;
             }
 
-            if (artisan.Profession != Profession) { artisan.Profession = Profession; hasChanges = true; }
+            // Handle "Others" profession input
+            var finalProfession = Profession?.Trim();
+
+            if (finalProfession == "Others")
+            {
+                var professionOther = Request.Form["ProfessionOther"].ToString()?.Trim();
+                if (!string.IsNullOrEmpty(professionOther))
+                {
+                    finalProfession = professionOther;
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Please enter your profession when 'Others' is selected.";
+                    return RedirectToAction("EditProfileArtisan");
+                }
+            }
+
+            if (artisan.Profession != finalProfession)
+            {
+                artisan.Profession = finalProfession;
+                hasChanges = true;
+            }
+
+            // Continue with Hometown, Introduction, Email, etc.
             if (artisan.Hometown != Hometown) { artisan.Hometown = Hometown; hasChanges = true; }
             if (artisan.Introduction != Introduction) { artisan.Introduction = Introduction; hasChanges = true; }
 

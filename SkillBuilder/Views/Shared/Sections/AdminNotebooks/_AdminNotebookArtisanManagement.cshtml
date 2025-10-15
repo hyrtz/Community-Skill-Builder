@@ -6,12 +6,13 @@
     if (ViewBag.ShowArchived != null)
         showArchived = (bool)ViewBag.ShowArchived;
 
-    // Only artisans
+    // Only users with Role = "Artisan"
     var existingArtisans = Model.AllUsers
-        .Where(u => !u.IsArchived && u.Artisan != null)
+        .Where(u => !u.IsArchived && u.Role == "Artisan")
         .ToList();
+
     var archivedArtisans = Model.AllUsers
-        .Where(u => u.IsArchived && u.Artisan != null)
+        .Where(u => u.IsArchived && u.Role == "Artisan")
         .ToList();
 }
 
@@ -167,7 +168,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0, 0, 0, 0.5);
         z-index: 1000;
     }
 
@@ -181,7 +182,7 @@
         background: #fff;
         padding: 1.5rem;
         border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         z-index: 1001;
         max-width: 400px;
         width: 90%;
@@ -315,6 +316,7 @@
             color: #344AEA;
         }
 </style>
+
 <div class="artisan-mgmt-user-section">
     <div class="artisan-mgmt-user-header">All Artisans</div>
 
@@ -371,23 +373,33 @@
                     <td class="artisan-mgmt-user-cell">
                         <div class="artisan-mgmt-action-buttons">
                             <!-- Delete button -->
-                            <form asp-action="DeleteUser" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
-                                  onsubmit="return adminOpenDeleteModal(this);">
+                            <form asp-action="DeleteUser"
+                                  asp-route-id="@user.Id"
+                                  asp-route-adminId="@Model.Admin.UserId"
+                                  method="post"
+                                  onsubmit="return artisanOpenDeleteModal(this);">
                                 <button type="submit" class="artisan-mgmt-admin-action-btn artisan-mgmt-delete-btn">
                                     Delete User
                                 </button>
                             </form>
 
-                            <!-- Toggle Deactivation button -->
-                            <form asp-action="ToggleUserStatus" asp-route-id="@user.Id" asp-route-adminId="@Model.Admin.UserId" method="post"
-                                  onsubmit="return adminOpenToggleModal(this, '@(user.IsDeactivated ? "Reactivate" : "Deactivate")');">
+                            <!-- Toggle Deactivation / Reactivation button -->
+                            <form asp-action="ToggleUserStatus"
+                                  asp-route-id="@user.Id"
+                                  asp-route-adminId="@Model.Admin.UserId"
+                                  method="post"
+                                  onsubmit="return artisanOpenToggleModal(this, '@(user.IsDeactivated ? "Reactivate" : "Deactivate")');">
                                 @if (user.IsDeactivated)
                                 {
-                                    <button type="submit" class="artisan-mgmt-admin-action-btn artisan-mgmt-reactivate-btn">Reactivate</button>
+                                    <button type="submit" class="artisan-mgmt-admin-action-btn artisan-mgmt-reactivate-btn">
+                                        Reactivate
+                                    </button>
                                 }
                                 else
                                 {
-                                    <button type="submit" class="artisan-mgmt-admin-action-btn artisan-mgmt-deactivate-btn">Deactivate</button>
+                                    <button type="submit" class="artisan-mgmt-admin-action-btn artisan-mgmt-deactivate-btn">
+                                        Deactivate
+                                    </button>
                                 }
                             </form>
                         </div>
@@ -453,8 +465,8 @@
     <h3>Delete Artisan</h3>
     <p>Are you sure you want to delete this artisan?</p>
     <div class="artisan-mgmt-admin-modal-buttons">
-        <button id="artisanConfirmDelete" class="artisan-mgmt-admin-modal-confirm">Delete</button>
         <button onclick="artisanCloseModal()" class="artisan-mgmt-admin-modal-cancel">Cancel</button>
+        <button id="artisanConfirmDelete" class="artisan-mgmt-admin-modal-confirm">Delete</button>
     </div>
 </div>
 
@@ -462,10 +474,12 @@
 <div id="artisanToggleModal" class="artisan-mgmt-admin-modal">
     <h3>Change Artisan Status</h3>
     <p id="artisanToggleMessage"></p>
-    <textarea id="artisanToggleReason" placeholder="Reason for deactivation..." style="display:none; width:90%; margin-bottom:1rem;"></textarea>
+    <textarea id="artisanToggleReason"
+              placeholder="Reason for deactivation..."
+              style="display:none; width:100%; min-height:80px; margin-bottom:1rem; padding:0.5rem; border-radius:6px; border:1px solid #ccc; resize:none;"></textarea>
     <div class="artisan-mgmt-admin-modal-buttons">
-        <button id="artisanConfirmToggle" class="artisan-mgmt-admin-modal-confirm">Confirm</button>
         <button onclick="artisanCloseModal()" class="artisan-mgmt-admin-modal-cancel">Cancel</button>
+        <button id="artisanConfirmToggle" class="artisan-mgmt-admin-modal-confirm">Confirm</button>
     </div>
 </div>
 
@@ -473,7 +487,10 @@
     const artisanSearchInput = document.getElementById("artisanSearchInput");
     const artisanSearchButton = document.getElementById("artisanSearchButton");
 
-    function filterArtisans() {
+    // ==========================
+    // Search / Filter
+    // ==========================
+    function artisanFilterList() {
         const filter = artisanSearchInput.value.toLowerCase().trim();
         const rows = document.querySelectorAll(".artisan-mgmt-user-row");
         const activeTab = document.querySelector(".artisan-mgmt-user-tab.active").dataset.tab;
@@ -483,14 +500,6 @@
         rows.forEach(row => {
             if (row.dataset.tab !== activeTab) {
                 row.style.display = "none";
-                return;
-            }
-
-            if (row.id === "noUsersMessage") return;
-
-            const isEmptyRow = row.querySelector(".artisan-mgmt-user-cell")?.innerText.includes("No");
-            if (isEmptyRow) {
-                row.style.display = !filter ? "table-row" : "none";
                 return;
             }
 
@@ -506,91 +515,92 @@
             }
         });
 
-        const noUsersMessage = document.getElementById("noUsersMessage");
-        if (noUsersMessage) {
-            noUsersMessage.style.display = filter && !anyVisible ? "table-row" : "none";
-        }
+        const noMsg = document.getElementById("artisan-mgmt-no-users-message");
+        noMsg.style.display = filter && !anyVisible ? "table-row" : "none";
     }
 
-    artisanSearchInput.addEventListener("keydown", (e) => {
+    artisanSearchInput.addEventListener("keydown", e => {
         if (e.key === "Enter") {
             e.preventDefault();
-            filterArtisans();
+            artisanFilterList();
         }
     });
-
-    artisanSearchButton.addEventListener("click", filterArtisans);
+    artisanSearchButton.addEventListener("click", artisanFilterList);
 
     // ==========================
-    // Delete Artisan Modal
+    // Delete Modal (Artisan Only)
     // ==========================
-    let artisanCurrentDeleteForm = null;
+    let artisanDeleteForm = null;
 
-    function adminOpenDeleteModal(form) {
-        artisanCurrentDeleteForm = form;
-        showModal("artisanDeleteModal");
+    function artisanOpenDeleteModal(form) {
+        artisanDeleteForm = form;
+        artisanShowModal("artisanDeleteModal");
         return false;
     }
 
-    function artisanConfirmDeleteAction() {
-        if (artisanCurrentDeleteForm) artisanCurrentDeleteForm.submit();
+    function artisanConfirmDelete() {
+        if (artisanDeleteForm) artisanDeleteForm.submit();
     }
 
     // ==========================
-    // Toggle Artisan Status Modal
+    // Toggle Status Modal (Artisan Only)
     // ==========================
-    let artisanCurrentToggleForm = null;
+    let artisanToggleForm = null;
 
-    function adminOpenToggleModal(form, action) {
-        artisanCurrentToggleForm = form;
+    function artisanOpenToggleModal(form, action) {
+        artisanToggleForm = form;
 
         const msg = `Are you sure you want to ${action.toLowerCase()} this artisan?`;
-        document.getElementById("artisanToggleMessage").innerText = msg;
-
+        const msgEl = document.getElementById("artisanToggleMessage");
         const confirmBtn = document.getElementById("artisanConfirmToggle");
-        const reasonTextarea = document.getElementById("artisanToggleReason");
+        const reasonField = document.getElementById("artisanToggleReason");
+
+        msgEl.innerText = msg;
 
         if (action === "Reactivate") {
             confirmBtn.style.backgroundColor = "#4CAF50";
             confirmBtn.innerText = "Reactivate";
-            reasonTextarea.style.display = "none";
-            reasonTextarea.value = "";
+            reasonField.style.display = "none";
+            reasonField.value = "";
             confirmBtn.disabled = false;
         } else {
-            reasonTextarea.style.display = "block";
-            reasonTextarea.value = "";
             confirmBtn.innerText = "Deactivate";
+            confirmBtn.style.backgroundColor = "#e74c3c";
+            reasonField.style.display = "block";
+            reasonField.value = "";
             confirmBtn.disabled = true;
 
-            reasonTextarea.addEventListener("input", () => {
-                confirmBtn.disabled = reasonTextarea.value.trim() === "";
+            reasonField.addEventListener("input", () => {
+                confirmBtn.disabled = reasonField.value.trim() === "";
             });
         }
 
-        showModal("artisanToggleModal");
+        artisanShowModal("artisanToggleModal");
         return false;
     }
 
-    function artisanConfirmToggleAction() {
-        if (!artisanCurrentToggleForm) return;
+    function artisanConfirmToggle() {
+        if (!artisanToggleForm) return;
 
-        const action = document.getElementById("artisanConfirmToggle").innerText;
-        let hiddenInput = artisanCurrentToggleForm.querySelector("input[name='reason']");
+        const confirmBtn = document.getElementById("artisanConfirmToggle");
+        const action = confirmBtn.innerText;
+        const reasonText = document.getElementById("artisanToggleReason").value;
+
+        let hiddenReason = artisanToggleForm.querySelector("input[name='reason']");
 
         if (action === "Reactivate") {
-            if (hiddenInput) hiddenInput.remove();
+            if (hiddenReason) hiddenReason.remove();
         } else {
-            const reason = document.getElementById("artisanToggleReason").value;
-            if (!hiddenInput) {
-                hiddenInput = document.createElement("input");
-                hiddenInput.type = "hidden";
-                hiddenInput.name = "reason";
-                artisanCurrentToggleForm.appendChild(hiddenInput);
+            if (!hiddenReason) {
+                hiddenReason = document.createElement("input");
+                hiddenReason.type = "hidden";
+                hiddenReason.name = "reason";
+                artisanToggleForm.appendChild(hiddenReason);
             }
-            hiddenInput.value = reason;
+            hiddenReason.value = reasonText;
         }
 
-        artisanCurrentToggleForm.submit();
+        artisanToggleForm.submit();
     }
 
     // ==========================
@@ -606,30 +616,32 @@
 
             const selectedTab = tab.dataset.tab;
             artisanRows.forEach(row => {
-                row.style.display = (row.dataset.tab === selectedTab) ? "table-row" : "none";
+                row.style.display = row.dataset.tab === selectedTab ? "table-row" : "none";
             });
 
-            filterArtisans();
+            artisanFilterList();
         });
     });
 
     // ==========================
-    // Modal Utility
+    // Modal Utility (Independent)
     // ==========================
-    function showModal(modalId) {
+    function artisanShowModal(id) {
         document.getElementById("artisanModalBackdrop").style.display = "block";
-        document.getElementById(modalId).style.display = "block";
+        document.getElementById(id).style.display = "block";
     }
 
     function artisanCloseModal() {
         document.getElementById("artisanModalBackdrop").style.display = "none";
         document.querySelectorAll(".artisan-mgmt-admin-modal").forEach(m => m.style.display = "none");
-        artisanCurrentDeleteForm = null;
-        artisanCurrentToggleForm = null;
+        artisanDeleteForm = null;
+        artisanToggleForm = null;
     }
 
     document.getElementById("artisanModalBackdrop").addEventListener("click", artisanCloseModal);
     document.addEventListener("keydown", e => { if (e.key === "Escape") artisanCloseModal(); });
-    document.getElementById("artisanConfirmDelete").addEventListener("click", artisanConfirmDeleteAction);
-    document.getElementById("artisanConfirmToggle").addEventListener("click", artisanConfirmToggleAction);
+
+    // Confirm buttons
+    document.getElementById("artisanConfirmDelete").addEventListener("click", artisanConfirmDelete);
+    document.getElementById("artisanConfirmToggle").addEventListener("click", artisanConfirmToggle);
 </script>

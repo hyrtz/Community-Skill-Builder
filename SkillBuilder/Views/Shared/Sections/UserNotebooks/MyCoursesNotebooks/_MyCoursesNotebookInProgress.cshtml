@@ -18,7 +18,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 1rem 1.5rem;
-        background-color: #fff; /* neutral background */
+        background-color: #fff;
         border-radius: 12px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -52,11 +52,24 @@
         font-weight: 500;
         color: #374151;
     }
+
+    /* Empty message styling */
+    .user-courses-empty {
+        text-align: center;
+        font-size: 1rem;
+        color: #6b7280;
+        padding: 2rem;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background-color: #f9fafb;
+    }
 </style>
 
 @if (Model == null || !Model.Any(e => !e.IsCompleted))
 {
-    <p>No courses in progress.</p>
+    <div class="user-courses-empty">
+        You currently have no courses in progress.
+    </div>
 }
 else
 {

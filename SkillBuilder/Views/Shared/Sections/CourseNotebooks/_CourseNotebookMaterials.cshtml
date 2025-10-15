@@ -1,52 +1,108 @@
 ﻿@model SkillBuilder.Models.Course
 
+@{
+    // Current logged-in user ID
+    var userId = User.FindFirst("UserId")?.Value;
+
+    // Check if current user is enrolled in this course or is the course owner
+    bool canDownload = false;
+    if (!string.IsNullOrEmpty(userId))
+    {
+        canDownload = Model.Artisan?.UserId == userId ||
+                      Model.Enrollments.Any(e => e.UserId == userId);
+    }
+}
+
 <style>
-    .course-material-view-header {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin-bottom: 1.5rem;
-        color: #222;
+    .course-material-item {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding-left: 10px;
     }
 
-    .course-material-view-lesson-item {
-        margin-left: 2rem;
-        padding: 1rem 0;
-        border-top: 1px solid #000;
-        border-bottom: 1px solid #000;
-        font-size: 1rem;
+    .course-material-title {
+        font-size: 1.1rem;
+        font-weight: bold;
         color: #333;
+        margin-bottom: 0.3rem;
     }
 
-        .course-material-view-lesson-item:not(:first-child) {
-            border-top: none;
+    .course-material-description {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+
+    .course-material-size {
+        font-size: 0.85rem;
+        color: #777;
+        margin-left: 0.3rem;
+    }
+
+    .download-icon {
+        width: 32px;
+        height: 32px;
+        border: 2px solid #007bff;
+        border-radius: 6px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .download-icon:hover {
+            background-color: #007bff;
         }
 
-    .course-material-view-download-link {
-        color: #344AEA;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
+        .download-icon img {
+            width: 18px;
+            height: 18px;
+            transition: all 0.2s;
+        }
+
+        .download-icon:hover img {
+            filter: brightness(0) invert(1); /* turns the icon white on hover */
+        }
 </style>
 
-<div class="course-material-view-tab-section">
-    @if (Model.Materials != null && Model.Materials.Any())
+@if (Model.Materials != null && Model.Materials.Count > 0)
+{
+    var materialIndex = 1;
+    foreach (var material in Model.Materials)
     {
-        foreach (var material in Model.Materials)
-        {
-            <div class="course-material-view-lesson-item">
-                <strong>@material.Title</strong> <br />
-                <span style="font-size: 0.9rem; color: #555;">@material.Description</span><br />
-                @if (!string.IsNullOrWhiteSpace(material.FilePath))
+        <div class="course-material-item">
+            <div>
+                <div class="course-material-title">
+                    Material @materialIndex: @material.Title
+                    @if (material.FileSize > 0)
+                    {
+                        <span class="course-material-size">(@(material.FileSize / 1024) KB)</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(material.Description))
                 {
-                    <a href="@material.FilePath" download class="course-material-view-download-link">
-                        📥 Download File (@(material.FileSize / 1024.0):F1 KB)
-                    </a>
+                    <div class="course-material-description">
+                        @material.Description
+                    </div>
                 }
             </div>
-        }
+
+            @if (!string.IsNullOrWhiteSpace(material.FilePath) && canDownload)
+            {
+                <a href="@material.FilePath" target="_blank" title="Download" class="download-icon">
+                    <img src="~/assets/Icons/DownloadMaterials.ico" alt="Download" />
+                </a>
+            }
+        </div>
+
+        materialIndex++;
     }
-    else
-    {
-        <p>No materials available for this course yet.</p>
-    }
-</div>
+}
+else
+{
+    <p>No materials added yet for this course.</p>
+}

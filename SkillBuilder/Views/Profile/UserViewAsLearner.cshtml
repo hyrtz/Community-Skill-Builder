@@ -1,0 +1,301 @@
+﻿@using SkillBuilder.Models.ViewModels
+@model UserProfileViewModel
+
+@{
+    ViewData["Title"] = "View User (Admin)";
+    ViewData["IsCatalogPage"] = false;
+
+    // Assuming you have current user's ID in claims
+    var currentUserId = User.FindFirst("Id")?.Value;
+    bool isOwnProfile = currentUserId == Model.User.Id;
+}
+
+<style>
+    .admin-user-profile-section {
+        padding: 6rem 6rem;
+        background-color: #f9f9f9;
+    }
+
+    .admin-user-header {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        color: #344AEA;
+    }
+
+    .admin-user-wrapper {
+        display: flex;
+        gap: 2.5rem;
+        align-items: stretch;
+        height: 75vh;
+    }
+
+    .admin-user-sidebar {
+        width: 50%;
+        background-color: #E0F2FF;
+        padding: 2rem 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .user-avatar {
+        width: 28rem;
+        height: 28rem;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+    }
+
+    .user-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .user-email {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 1rem;
+    }
+
+    .user-role {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #344AEA;
+        margin-bottom: 2rem;
+    }
+
+    .report-user-btn {
+        background-color: #FF4D4F;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        transition: background-color 0.2s ease;
+    }
+
+        .report-user-btn:hover {
+            background-color: #d9363e;
+        }
+
+    .admin-user-main {
+        width: 50%;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* dashboard stats cards */
+    .user-dash-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .user-dash-card {
+        width: 80%;
+        max-width: 600px;
+        min-height: 180px;
+        background-color: #E6EEFF;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+        text-align: center;
+    }
+
+        .user-dash-card:hover {
+            transform: translateY(-4px);
+        }
+
+    .user-dash-card-title {
+        font-size: 1.2rem;
+        color: #344AEA;
+        font-weight: 600;
+        margin-bottom: 2rem;
+    }
+
+    .user-dash-card-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #222;
+    }
+
+    /* === Report Avatar Modal === */
+    .report-avatar-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .report-avatar-modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        width: 400px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        position: relative;
+        animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .report-avatar-close {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #888;
+    }
+
+        .report-avatar-close:hover {
+            color: #333;
+        }
+
+    .report-avatar-modal-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    /* Buttons inside modal */
+    .confirm-report-avatar-btn {
+        background-color: #FF4D4F;
+        color: white;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .confirm-report-avatar-btn:hover {
+            background-color: #D9363E;
+        }
+
+    .cancel-report-avatar-btn {
+        background-color: #ccc;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .cancel-report-avatar-btn:hover {
+            background-color: #aaa;
+        }
+
+</style>
+
+<section class="admin-user-profile-section">
+    <div class="admin-user-header">User Profile View</div>
+
+    <div class="admin-user-wrapper">
+        <!-- Sidebar -->
+        <div class="admin-user-sidebar">
+            <img src="@Model.User.UserAvatar" class="user-avatar" />
+            <div class="user-name">@Model.User.FirstName @Model.User.LastName</div>
+            <div class="user-email">@Model.User.Email</div>
+            @* Report User button, only visible if not own profile *@
+            @if (!isOwnProfile)
+            {
+                <button type="button" class="report-user-btn" onclick="showReportAvatarModal('@Model.User.Id')">Report Avatar</button>
+            }
+        </div>
+
+        <!-- Main Panel -->
+        <div class="admin-user-main">
+            <div class="user-dash-stats">
+                <div class="user-dash-card">
+                    <div class="user-dash-card-title">Total Enrollments</div>
+                    <div class="user-dash-card-value">
+                        @((Model.EnrolledCourses != null) ? Model.EnrolledCourses.Count() : 0)
+                    </div>
+                </div>
+                <div class="user-dash-card">
+                    <div class="user-dash-card-title">Total Points</div>
+                    <div class="user-dash-card-value">@Model.User.Points</div>
+                </div>
+                <div class="user-dash-card">
+                    <div class="user-dash-card-title">Profile Status</div>
+                    <div class="user-dash-card-value">
+                        @(Model.User.IsVerified ? "Active" : "Inactive")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-avatar-modal" class="report-avatar-modal">
+        <div class="report-avatar-modal-content">
+            <span id="report-avatar-close" class="report-avatar-close">&times;</span>
+            <h3>Report User Avatar</h3>
+            <p>Are you sure you want to report this user's avatar?<br />You can't undo this action.</p>
+            <div class="report-avatar-modal-actions">
+                <button id="confirm-report-avatar-btn" class="confirm-report-avatar-btn">Yes, Report</button>
+                <button id="cancel-report-avatar-btn" class="cancel-report-avatar-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script>
+    function showReportAvatarModal(userId) {
+        const modal = document.getElementById("report-avatar-modal");
+        modal.style.display = "flex";
+
+        const confirmBtn = document.getElementById("confirm-report-avatar-btn");
+        const cancelBtn = document.getElementById("cancel-report-avatar-btn");
+        const closeBtn = document.getElementById("report-avatar-close");
+
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+        closeBtn.onclick = null;
+
+        // Confirm report
+        confirmBtn.addEventListener("click", () => {
+            fetch(`/Profile/ReportUser/${userId}`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    modal.style.display = "none";
+                    window.location.reload();
+                } else {
+                    alert("Failed to report user avatar.");
+                }
+            })
+            .catch(() => alert("Error submitting report."));
+        });
+
+        cancelBtn.addEventListener("click", () => modal.style.display = "none");
+        closeBtn.addEventListener("click", () => modal.style.display = "none");
+        modal.addEventListener("click", e => { if (e.target === modal) modal.style.display = "none"; });
+    }
+</script>

@@ -8,10 +8,11 @@
 
     // Only learners (not Artisan or Admin)
     var existingUsers = Model.AllUsers
-        .Where(u => !u.IsArchived && u.Role != "Admin" && u.Artisan == null)
-        .ToList();
+        .Where(u => !u.IsArchived && u.Role == "Learner")
+    .ToList();
+
     var archivedUsers = Model.AllUsers
-        .Where(u => u.IsArchived && u.Role != "Admin" && u.Artisan == null)
+        .Where(u => u.IsArchived && u.Role == "Learner")
         .ToList();
 }
 

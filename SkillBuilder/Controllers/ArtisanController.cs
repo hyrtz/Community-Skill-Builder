@@ -113,7 +113,7 @@ namespace SkillBuilder.Controllers
         public async Task<IActionResult> AddWork(string Title, string Caption, IFormFile ImageFile)
         {
             if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(Caption) || ImageFile == null)
-                return BadRequest("Invalid input");
+                return Json(new { success = false, message = "Invalid input" });
 
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var artisan = await _context.Artisans
@@ -122,17 +122,12 @@ namespace SkillBuilder.Controllers
                 .FirstOrDefaultAsync(a => a.UserId == userId);
 
             if (artisan == null)
-                return Unauthorized();
+                return Json(new { success = false, message = "Unauthorized" });
 
             // Save file
             var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "works");
             if (!Directory.Exists(uploadsDir))
                 Directory.CreateDirectory(uploadsDir);
-
-            var projectSubmissions = await _context.CourseProjectSubmissions
-                .Include(p => p.Course)
-                .Where(p => p.UserId == artisan.UserId)
-                .ToListAsync();
 
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
             var filePath = Path.Combine(uploadsDir, fileName);
@@ -154,20 +149,139 @@ namespace SkillBuilder.Controllers
             _context.ArtisanWorks.Add(newWork);
             await _context.SaveChangesAsync();
 
-            // ✅ Notification
+            // Notification
             await _notificationService.AddNotificationAsync(
                 artisan.UserId,
                 $"🎉 You successfully added a new work: '{newWork.Title}'."
             );
 
-            var viewModel = new ArtisanProfileViewModel
+            // Return JSON for AJAX
+            return Json(new
             {
-                Artisan = artisan,
-                ArtisanWorks = artisan.Works.OrderByDescending(w => w.PublishDate).ToList(),
-                ProjectSubmissions = projectSubmissions
-            };
+                success = true,
+                message = "Work added successfully",
+                work = new
+                {
+                    id = newWork.Id,
+                    title = newWork.Title,
+                    caption = newWork.Caption,
+                    imageUrl = newWork.ImageUrl,
+                    publishDate = newWork.PublishDate.ToString("yyyy-MM-dd HH:mm")
+                }
+            });
+        }
 
-            return View("~/Views/Profile/ArtisanProfile.cshtml", viewModel);
+        [HttpGet("GetWork/{workId}")]
+        public async Task<IActionResult> GetWork(int workId)
+        {
+            var work = await _context.ArtisanWorks
+                .Include(w => w.Artisan)
+                .FirstOrDefaultAsync(w => w.Id == workId);
+
+            if (work == null)
+                return NotFound();
+
+            return Json(new
+            {
+                work.Id,
+                work.Title,
+                work.Caption,
+                work.ImageUrl
+            });
+        }
+
+        // POST: /Artisan/EditWork/5
+        [HttpPost("EditWork/{workId}")]
+        public async Task<IActionResult> EditWork(int workId, string Title, string Caption, IFormFile? ImageFile)
+        {
+            var work = await _context.ArtisanWorks
+                .Include(w => w.Artisan)
+                .FirstOrDefaultAsync(w => w.Id == workId);
+
+            if (work == null)
+                return Json(new { success = false, message = "Work not found" });
+
+            bool hasChanges = false;
+
+            if (!string.IsNullOrWhiteSpace(Title) && Title != work.Title)
+            {
+                work.Title = Title;
+                hasChanges = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(Caption) && Caption != work.Caption)
+            {
+                work.Caption = Caption;
+                hasChanges = true;
+            }
+
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "works");
+                if (!Directory.Exists(uploadsDir))
+                    Directory.CreateDirectory(uploadsDir);
+
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
+                var filePath = Path.Combine(uploadsDir, fileName);
+
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await ImageFile.CopyToAsync(stream);
+
+                work.ImageUrl = "/uploads/works/" + fileName;
+                hasChanges = true;
+            }
+
+            if (hasChanges)
+            {
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return Json(new { success = false, message = "Work was modified/deleted by someone else." });
+                }
+
+                await _notificationService.AddNotificationAsync(
+                    work.Artisan.UserId,
+                    $"✏️ You successfully updated your work: '{work.Title}'."
+                );
+            }
+
+            return Json(new { success = true, message = "Work updated successfully" });
+        }
+
+        // POST: /Artisan/DeleteWork/5
+        [HttpPost("DeleteWork/{workId}")]
+        public async Task<IActionResult> DeleteWork(int workId)
+        {
+            var work = await _context.ArtisanWorks
+                .Include(w => w.Artisan) // Load the related Artisan
+                .FirstOrDefaultAsync(w => w.Id == workId);
+
+            if (work == null)
+                return Json(new { success = false, message = "Work not found" });
+
+            _context.ArtisanWorks.Remove(work);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Json(new { success = false, message = "Work was already deleted or modified." });
+            }
+
+            if (work.ArtisanId != null)
+            {
+                await _notificationService.AddNotificationAsync(
+                    work.Artisan.UserId,
+                    $"🗑️ You successfully deleted your work: '{work.Title}'."
+                );
+            }
+
+            return Json(new { success = true, message = "Work deleted successfully" });
         }
     }
 }

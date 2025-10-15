@@ -481,7 +481,14 @@
                     <div class="avatar" style="background-image:url('@post.AuthorAvatarUrl')"></div>
                     <div class="community-info">
                         <h5>@post.AuthorName</h5>
-                        <h6>@post.CommunityName • @post.SubmittedAt.ToString("MMM dd, yyyy")</h6>
+                        <h6>
+                            @post.CommunityName • @post.SubmittedAt.ToString("MMM dd, yyyy")
+                            @if (!string.IsNullOrEmpty(post.Category))
+                            {
+                                <br />
+                                <span class="post-category">Category: @post.Category</span>
+                            }
+                        </h6>
                     </div>
                     <div class="post-options">
                         <button class="post-options-btn" onclick="togglePostMenu(@post.Id)">⋮</button>

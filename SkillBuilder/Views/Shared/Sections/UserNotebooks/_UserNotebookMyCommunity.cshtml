@@ -1,11 +1,18 @@
 ﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
 
+@{
+    var firstCommunityId = Model.MyCommunities.FirstOrDefault()?.Id ?? 0;
+    var members = firstCommunityId != 0 && Model.CommunityMembers.ContainsKey(firstCommunityId)
+        ? Model.CommunityMembers[firstCommunityId]
+        : new List<SkillBuilder.Models.ViewModels.CommunityMemberViewModel>();
+}
+
 <style>
     /* ---------------- My Communities Section ---------------- */
     .user-communities-section {
         display: flex;
         flex-direction: column;
-        padding: 1rem 0;
+        gap: 1.5rem;
     }
 
     .user-communities-header {
@@ -239,6 +246,7 @@
 <div class="community-detail-container" id="communityDetailContainer">
     <div class="community-back-btn" id="communityBackBtn">
         <img src="/assets/Icons/Back.ico" />
+        Back
     </div>
 
     <div class="community-title" id="communityTitle">Community Name</div>

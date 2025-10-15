@@ -249,15 +249,15 @@
             <span id ="login-close-btn" class="auth-close-btn" onclick="closeModal('login-modal', true)">&times;</span>
 
             <div id="login-main-content">
-                <h2>Log in to <span style="color: #364BE9">Tahi</span></h2>
+                <h2 style="margin-bottom: 1rem;">Log in to <span style="color: #364BE9">Tahi</span></h2>
 
                 <!-- Social Logins -->
-                <div class="social-login">
+                @* <div class="social-login">
                     <button id="btn-google-login"><img src="~/assets/Logos/Google.svg">Continue with Google</button>
                     <button id="btn-facebook-login"><img src="~/assets/Logos/FacebookLogo.svg">Continue with Facebook</button>
                 </div>
 
-                <div class="separator"><span>or</span></div>
+                <div class="separator"><span>or</span></div> *@
 
                 <!-- Email/Password Login -->
                 <form id="login-form">
@@ -267,7 +267,7 @@
                     <label for="login-password">Password</label>
                     <div class="password-wrapper">
                         <input type="password" id="login-password" required />
-                        <span class="toggle-password" onclick="togglePasswordVisibility('login-password', this)">👁️‍🗨️</span>
+                        <span style="margin-top: -1rem;" class="toggle-password" onclick="togglePasswordVisibility('login-password', this)">👁️‍🗨️</span>
                     </div>
 
                     <div class="forgot-password">
@@ -277,7 +277,12 @@
                     <button type="submit" class="modal-btn login-btn" disabled>Log In</button>
                     <p class="login-error-message" style="color:red;font-size:0.8rem;margin-top:0.5rem;text-align:center;"></p>
 
-                    <p class="signup-redirect">Don't have an account yet? <a href="#" onclick="switchToSignup()">Sign up</a></p>
+                    <p class="signup-redirect">
+                        Don't have an account yet?
+                        <br>
+                        <a href="#" onclick="switchToSignup()">Sign up As Learner</a> or
+                        <a href="#" onclick="switchToTeach()">Sign up As Artisan</a>
+                    </p>
                 </form>
             </div>
 
