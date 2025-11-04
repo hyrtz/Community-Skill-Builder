@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Models;
+using SkillBuilder.Models.Entities;
 using System.Text.Json;
 
 namespace SkillBuilder.Data
@@ -31,6 +32,7 @@ namespace SkillBuilder.Data
         public DbSet<CommunityPost> CommunityPosts { get; set; }
         public DbSet<CommunityPostReport> CommunityPostReports { get; set; }
         public DbSet<Community> Communities { get; set; }
+        public DbSet<CommunityReport> CommunityReports { get; set; }
         public DbSet<CommunityJoinRequest> CommunityJoinRequests { get; set; }
         public DbSet<CommunityMembership> CommunityMemberships { get; set; }
         public DbSet<Notification> Notifications { get; set; }
@@ -196,7 +198,7 @@ namespace SkillBuilder.Data
             // USER ⇄ ARTISAN (1:1)
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Artisan)
-                .WithOne(a => a.User) 
+                .WithOne(a => a.User)
                 .HasForeignKey<Artisan>(a => a.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 

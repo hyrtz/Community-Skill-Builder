@@ -1,59 +1,119 @@
 ﻿@model List<SkillBuilder.Models.CourseProjectSubmission>
 
+@{
+    string TruncateText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return "";
+        return text.Length > 120 ? text.Substring(0, 120) + "..." : text;
+    }
+}
+
 <style>
-    /* === Accepted Projects Section === */
-    .user-accepted-projects-section {
+    /* === Approved Projects Section === */
+    .approved-projects-section {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
     }
 
-    .user-accepted-projects-grid {
+    .approved-projects-grid {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: 1.5rem;
     }
 
-    .user-accepted-projects-card {
-        width: 200px;
-        text-align: center;
-        cursor: pointer;
+    /* === Card Style === */
+    .approved-project-card {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        background: #fff;
+        padding: 1rem;
+        transition: transform 0.2s ease;
+        width: 100%;
     }
 
-        .user-accepted-projects-card img {
-            width: 100%;
-            height: 160px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            transition: transform 0.2s ease;
-            border: 3px solid #28A745; /* green border for accepted */
+        .approved-project-card:hover {
+            transform: translateY(-2px);
         }
 
-            .user-accepted-projects-card img:hover {
-                transform: scale(1.05);
-            }
-
-    .user-accepted-projects-course-name {
-        margin-top: 0.5rem;
-        font-weight: bold;
-        color: #28A745;
-        font-size: 0.95rem;
-    }
-
-    .user-accepted-projects-empty {
-        padding: 2rem;
-        text-align: center;
-        color: #777;
-        font-size: 1rem;
-        line-height: 1.6;
-        border: 1px dashed #ccc;
+    .approved-project-img {
+        width: 288px;
+        height: 288px;
+        object-fit: cover;
         border-radius: 10px;
-        background-color: #fafafa;
+        flex-shrink: 0;
+        border: 3px solid #28A745;
     }
 
-    /* Modal Styles */
-    .accepted-projects-modal {
+    .approved-project-content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        max-width: 76%;
+    }
+
+    .approved-section {
+        background-color: #f6fff8;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid #28A745;
+    }
+
+        .approved-section p {
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .approved-section strong {
+            color: #28A745;
+            flex-shrink: 0;
+        }
+
+    /* Truncate text to one line */
+    .truncate-text {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        max-width: 100%;
+        flex: 1;
+    }
+
+    .approved-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-top: auto;
+    }
+
+    .btn-view-approved-project {
+        background-color: #28A745;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .btn-view-approved-project:hover {
+            background-color: #1f8b39;
+        }
+
+    /* === Unique Modal Styles === */
+    .approved-project-modal {
         display: none;
         position: fixed;
         z-index: 9999;
@@ -66,17 +126,18 @@
         align-items: center;
     }
 
-    .accepted-projects-modal-content {
+    .approved-project-modal-content {
         background: #fff;
-        border-radius: 10px;
+        border-radius: 12px;
         max-width: 700px;
         width: 90%;
         padding: 1.5rem;
         position: relative;
         animation: fadeIn 0.3s ease-in-out;
+        text-align: center;
     }
 
-    .accepted-projects-close {
+    .approved-project-modal-close {
         position: absolute;
         top: 10px;
         right: 15px;
@@ -86,95 +147,136 @@
         cursor: pointer;
     }
 
-    .accepted-projects-modal-body {
-        text-align: center;
+    .approved-project-modal-details h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #28A745;
     }
 
-    .accepted-projects-image {
-        max-width: 100%;
-        max-height: 400px;
-        margin-bottom: 1rem;
-        border-radius: 10px;
+    .approved-project-modal-details p {
+        font-size: 1rem;
+        color: #444;
+        margin: 0.3rem 0;
     }
 
-    .accepted-projects-details {
-        text-align: left;
-    }
-
-        .accepted-projects-details h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #28A745;
-        }
-
-        .accepted-projects-details p {
-            margin: 0.2rem 0;
-            font-size: 1rem;
-            color: #444;
-        }
 </style>
 
-<section class="user-accepted-projects-section">
-
+<section class="approved-projects-section">
     @if (Model != null && Model.Any())
     {
-        <div class="user-accepted-projects-grid">
+        <h2 style="font-weight: 300; font-size: 1rem;">
+            Congratulations! Here's the list of project that has been approved. You can now access your certificate on the course page.
+        </h2>
+
+        <div class="approved-projects-grid">
             @foreach (var project in Model)
             {
-                <div class="user-accepted-projects-card"
-                     data-image="@project.MediaUrl"
-                     data-title="@project.Course?.Title"
-                     data-caption="@project.Description">
-                    <img src="@project.MediaUrl" alt="Accepted project from @project.Course?.Title" />
-                    <div class="user-accepted-projects-course-name">@project.Course?.Title</div>
+                <div class="approved-project-card">
+                    <img src="@project.MediaUrl" alt="@project.Course?.Title" class="approved-project-img" />
+
+                    <div class="approved-project-content">
+                        <!-- Course Info -->
+                        <div class="approved-section">
+                            <p><strong>Course:</strong> <span class="truncate-text">@project.Course?.Title</span></p>
+                            <p>
+                                <strong>Artisan:</strong> <span class="truncate-text">
+                                    @(project.Course?.Artisan != null
+                                                                ? project.Course.Artisan.FirstName + " " + project.Course.Artisan.LastName
+                                                                : "Unknown Artisan")
+                        </span>
+                    </p>
                 </div>
-            }
+
+                        <!-- Final Project Info -->
+                        <div class="approved-section">
+                            <p><strong>Final Project Title:</strong> <span class="truncate-text">@project.Course?.FinalProjectTitle</span></p>
+                            <p><strong>Final Project Description:</strong> <span class="truncate-text">@project.Course?.FinalProjectDescription</span></p>
+                        </div>
+
+                        <!-- User Submission -->
+                        <div class="approved-section">
+                            <p><strong>Your Submission:</strong></p>
+                            <p><strong>Title:</strong> <span class="truncate-text">@project.Title</span></p>
+                            <p><strong>Description:</strong> <span class="truncate-text">@project.Description</span></p>
+                            <p><strong>Submitted At:</strong> <span class="truncate-text">@project.SubmittedAt.ToString("MMMM dd, yyyy")</span></p>
+                            <p>
+                                <strong>Approved Date:</strong> <span class="truncate-text">
+                                    @project.ApprovedAt.ToString("MMMM dd, yyyy")
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="approved-footer">
+                            <button type="button"
+                                    class="btn-view-approved-project"
+                                    data-title="@project.Title"
+                                    data-description="@project.Description"
+                                    data-media="@project.MediaUrl"
+                                    data-finaltitle="@project.Course?.FinalProjectTitle"
+                                    data-finaldesc="@project.Course?.FinalProjectDescription">
+                                View Project
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                }
         </div>
     }
     else
     {
-        <div class="user-accepted-projects-empty">
+        <div class="user-projects-empty">
             You have no approved projects yet.<br />
-            Once your submission is approved, it will show up here.
+            Once a project is approved, it will show up here.
         </div>
     }
 </section>
 
-<!-- Modal -->
-<div id="acceptedProjectsModal" class="accepted-projects-modal">
-    <div class="accepted-projects-modal-content">
-        <span class="accepted-projects-close">&times;</span>
-        <div class="accepted-projects-modal-body">
-            <img id="acceptedProjectsImage" class="accepted-projects-image" src="" alt="Project Image" />
-            <div class="accepted-projects-details">
-                <h2 id="acceptedProjectsTitle"></h2>
-                <p id="acceptedProjectsCaption"></p>
-            </div>
+<!-- === Unique Modal === -->
+<div id="approvedProjectModal" class="approved-project-modal">
+    <div class="approved-project-modal-content">
+        <span class="approved-project-modal-close">&times;</span>
+        <div class="approved-project-modal-details">
+
+            <!-- 🟢 Final Project Info moved to the top -->
+            <h4 id="approvedProjectModalFinalTitle" style="color:#28A745; margin-top:0;"></h4>
+            <p id="approvedProjectModalFinalDesc" style="font-size:0.95rem; color:#555; margin-bottom:1rem;"></p>
+
+            <hr style="margin: 1rem 0;" />
+
+            <!-- 🖼️ Image and user submission details -->
+            <img id="approvedProjectModalImage" style="max-width: 100%; max-height: 600px; border-radius: 8px; margin-bottom: 1rem;" alt="Project Image" />
+            <h2 id="approvedProjectModalTitle"></h2>
+            <p id="approvedProjectModalDescription"></p>
+
         </div>
     </div>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const modal = document.getElementById("acceptedProjectsModal");
-        const modalImage = document.getElementById("acceptedProjectsImage");
-        const modalTitle = document.getElementById("acceptedProjectsTitle");
-        const modalCaption = document.getElementById("acceptedProjectsCaption");
-        const closeBtn = document.querySelector(".accepted-projects-close");
+        const approvedModal = document.getElementById("approvedProjectModal");
+        const approvedModalTitle = document.getElementById("approvedProjectModalTitle");
+        const approvedModalDescription = document.getElementById("approvedProjectModalDescription");
+        const approvedModalImage = document.getElementById("approvedProjectModalImage");
+        const approvedModalFinalTitle = document.getElementById("approvedProjectModalFinalTitle");
+        const approvedModalFinalDesc = document.getElementById("approvedProjectModalFinalDesc");
+        const approvedCloseBtn = document.querySelector(".approved-project-modal-close");
 
-        document.querySelectorAll(".user-accepted-projects-card").forEach(card => {
-            card.addEventListener("click", () => {
-                modalImage.src = card.dataset.image;
-                modalTitle.textContent = card.dataset.title;
-                modalCaption.textContent = card.dataset.caption;
-                modal.style.display = "flex";
+        document.querySelectorAll(".btn-view-approved-project").forEach(approvedBtn => {
+            approvedBtn.addEventListener("click", () => {
+                approvedModalTitle.textContent = "Project Title: " + approvedBtn.dataset.title || "Untitled Project";
+                approvedModalDescription.textContent = "Caption: " + approvedBtn.dataset.description || "No description provided.";
+                approvedModalImage.src = approvedBtn.dataset.media || "";
+                approvedModalFinalTitle.textContent = "Final Project Title: " + approvedBtn.dataset.finaltitle || "";
+                approvedModalFinalDesc.textContent = "Description: " + approvedBtn.dataset.finaldesc || "";
+                approvedModal.style.display = "flex";
             });
         });
 
-        closeBtn.addEventListener("click", () => modal.style.display = "none");
-        modal.addEventListener("click", (e) => {
-            if (e.target === modal) modal.style.display = "none";
+        approvedCloseBtn.addEventListener("click", () => approvedModal.style.display = "none");
+        approvedModal.addEventListener("click", e => {
+            if (e.target === approvedModal) approvedModal.style.display = "none";
         });
     });
 </script>

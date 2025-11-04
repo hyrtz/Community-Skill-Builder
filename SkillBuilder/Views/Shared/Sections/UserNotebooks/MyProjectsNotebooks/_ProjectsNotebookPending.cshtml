@@ -1,58 +1,136 @@
 ﻿@model List<SkillBuilder.Models.CourseProjectSubmission>
 
+@{
+    string TruncateDescription(string desc, int wordLimit = 10)
+    {
+        if (string.IsNullOrWhiteSpace(desc)) return "";
+        var words = desc.Split(' ');
+        if (words.Length <= wordLimit) return desc;
+        return string.Join(' ', words.Take(wordLimit)) + "...";
+    }
+}
+
 <style>
-    /* === Pending Projects Section === */
-    .user-pending-projects-section {
+    /* === Project Cards === */
+    .user-projects-section {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
     }
 
-    .user-pending-projects-grid {
+    .user-projects-grid {
         display: flex;
         flex-wrap: wrap;
         gap: 1.5rem;
     }
 
-    .user-pending-projects-card {
-        width: 200px;
-        text-align: center;
-        cursor: pointer;
+    /* Horizontal Card */
+    .user-project-card-horizontal {
+        display: flex;
+        flex-direction: row; /* Horizontal layout */
+        gap: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        background: #fff;
+        padding: 1rem;
+        transition: transform 0.2s ease;
+        width: 100%;
     }
 
-        .user-pending-projects-card img {
-            width: 100%;
-            height: 160px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            transition: transform 0.2s ease;
+        .user-project-card-horizontal:hover {
+            transform: translateY(-2px);
         }
 
-            .user-pending-projects-card img:hover {
-                transform: scale(1.05);
-            }
-
-    .user-pending-projects-course-name {
-        margin-top: 0.5rem;
-        font-weight: bold;
-        color: #333;
-        font-size: 0.95rem;
+    .user-project-card-img {
+        width: 267px;
+        height: 267px;
+        object-fit: cover;
+        border-radius: 10px;
+        flex-shrink: 0;
     }
 
-    .user-pending-projects-empty {
-        padding: 2rem;
-        text-align: center;
-        color: #777;
+    .user-project-card-content {
+        display: flex;
+        flex-direction: column; /* stack title+desc+footer */
+        flex-grow: 1;
+        max-width: 76%;
+    }
+
+    .user-project-card-title {
+        font-weight: bold;
         font-size: 1rem;
-        line-height: 1.6;
-        border: 1px dashed #ccc;
-        border-radius: 10px;
-        background-color: #fafafa;
+        color: #344AEA;
+        margin-bottom: 0.3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-project-card-description {
+        font-size: 0.9rem;
+        color: #555;
+        margin-bottom: 0.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Footer pushed to bottom */
+    .user-project-card-footer {
+        display: flex;
+        justify-content: flex-end; /* button to right */
+        align-items: center;
+        margin-top: auto; /* pushes footer to bottom */
+    }
+
+    .project-submitted-time {
+        font-size: 0.8rem;
+        color: #777;
+        margin-right: 0.5rem;
+    }
+
+    .btn-view-project {
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .btn-view-project:hover {
+            background-color: #2a36c6;
+        }
+
+    .btn-view-project {
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .btn-view-project:hover {
+            background-color: #2a36c6;
+        }
+
+    .project-submitted-time {
+        font-size: 0.8rem;
+        color: #777;
     }
 
     /* Modal Styles */
-    .pending-projects-modal {
+    .project-modal {
         display: none;
         position: fixed;
         z-index: 9999;
@@ -65,75 +143,168 @@
         align-items: center;
     }
 
-    .pending-projects-modal-content {
+    .project-modal-content {
         background: #fff;
-        border-radius: 10px;
+        border-radius: 12px;
         max-width: 700px;
         width: 90%;
-        padding: 1.5rem;
+        padding: 1.75rem 1.5rem 1.5rem; /* increased top padding */
         position: relative;
         animation: fadeIn 0.3s ease-in-out;
+        text-align: center;
     }
 
-    .pending-projects-close {
+    /* --- Nice, aligned close button --- */
+    .pending-project-modal-close {
         position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 1.5rem;
-        font-weight: bold;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: none;
+        font-size: 20px;
+        line-height: 1;
         color: #333;
         cursor: pointer;
     }
 
-    .pending-projects-modal-body {
-        text-align: center;
-    }
-
-    .pending-projects-image {
+    .project-modal-image {
         max-width: 100%;
-        max-height: 400px;
+        max-height: 600px;
         margin-bottom: 1rem;
         border-radius: 10px;
     }
 
-    .pending-projects-details {
-        text-align: left;
+    .project-modal-details h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #344AEA;
     }
 
-        .pending-projects-details h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #344AEA;
+    .project-modal-details p {
+        font-size: 1rem;
+        color: #444;
+        margin: 0.3rem 0;
+    }
+
+    .user-project-card-section {
+        background-color: #f8f9ff;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid #344AEA;
+    }
+
+        .user-project-card-section p {
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
 
-        .pending-projects-details p {
-            margin: 0.2rem 0;
-            font-size: 1rem;
-            color: #444;
+    /* Truncate long texts in one line */
+    .truncate-text {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        max-width: 100%;
+        flex: 1;
+    }
+
+    .user-project-card-section strong {
+        color: #344AEA;
+        flex-shrink: 0;
+    }
+
+    .btn-view-pending-project {
+        background-color: #007bff; /* Bright blue */
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .btn-view-pending-project:hover {
+            background-color: #0056b3; /* Darker blue on hover */
         }
+
 </style>
 
-<section class="user-pending-projects-section">
+<section class="user-projects-section">
 
     @if (Model != null && Model.Any())
     {
-        <div class="user-pending-projects-grid">
+        <div class="user-projects-grid">
+            <h2 style="font-weight: 300;  font-size: 1rem;">
+                Here is your submitted final projects waiting to be approved by the course owner.
+            </h2>
             @foreach (var project in Model)
             {
-                <div class="user-pending-projects-card"
-                     data-image="@project.MediaUrl"
-                     data-title="@project.Course?.Title"
-                     data-caption="@project.Description">
-                    <img src="@project.MediaUrl" alt="Pending project from @project.Course?.Title" />
-                    <div class="user-pending-projects-course-name">@project.Course?.Title</div>
+                <div class="user-project-card-horizontal">
+                    <img src="@project.MediaUrl" alt="@project.Course?.Title" class="user-project-card-img" />
+
+                    <div class="user-project-card-content">
+
+                        <!-- === Course Info === -->
+                        <div class="user-project-card-section">
+                            <p><strong>Course:</strong> <span class="truncate-text">@project.Course?.Title</span></p>
+                            <p>
+                                <strong>Created By:</strong>
+                                <span class="truncate-text">
+                                    @(project.Course?.Artisan != null
+                                                                ? project.Course.Artisan.FirstName + " " + project.Course.Artisan.LastName
+                                                                : "Unknown Artisan")
+                        </span>
+                    </p>
                 </div>
-            }
+
+                        <!-- === Final Project Info === -->
+                        <div class="user-project-card-section">
+                            <p><strong>Final Project Title:</strong> <span class="truncate-text">@project.Course?.FinalProjectTitle</span></p>
+                            <p><strong>Final Project Description:</strong> <span class="truncate-text">@project.Course?.FinalProjectDescription</span></p>
+                        </div>
+
+                        <!-- === User Submission Info === -->
+                        <div class="user-project-card-section">
+                            <p><strong>Your Submission:</strong></p>
+                            <p><strong>Title:</strong> <span class="truncate-text">@project.Title</span></p>
+                            <p><strong>Description:</strong> <span class="truncate-text">@project.Description</span></p>
+                            <p><strong>Submitted At:</strong> <span class="truncate-text">@project.SubmittedAt.ToString("MMMM dd, yyyy")</span></p>
+                        </div>
+
+                        <!-- Footer Button -->
+                        <div class="user-project-card-footer">
+                            <button class="btn-view-pending-project"
+                                    data-image="@project.MediaUrl"
+                                    data-title="@project.Title"
+                                    data-caption="@project.Description"
+                                    data-finaltitle="@project.Course?.FinalProjectTitle"
+                                    data-finaldesc="@project.Course?.FinalProjectDescription">
+                                View Project
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+                }
         </div>
     }
     else
     {
-        <div class="user-pending-projects-empty">
+        <div class="user-projects-empty">
             You have no pending projects at the moment.<br />
             Once you submit a project, it will show up here for review.
         </div>
@@ -141,39 +312,48 @@
 </section>
 
 <!-- Modal -->
-<div id="pendingProjectsModal" class="pending-projects-modal">
-    <div class="pending-projects-modal-content">
-        <span class="pending-projects-close">&times;</span>
-        <div class="pending-projects-modal-body">
-            <img id="pendingProjectsImage" class="pending-projects-image" src="" alt="Project Image" />
-            <div class="pending-projects-details">
-                <h2 id="pendingProjectsTitle"></h2>
-                <p id="pendingProjectsCaption"></p>
-            </div>
+<div id="pendingProjectModal" class="project-modal">
+    <div class="project-modal-content">
+        <button class="pending-project-modal-close" aria-label="Close modal" title="Close">&times;</button>
+
+        <div class="project-modal-details">
+            <!-- Final project info at the top -->
+            <h4 id="pendingProjectModalFinalTitle" style="color:#007bff; margin-top:0;"></h4>
+            <p id="pendingProjectModalFinalDesc" style="font-size:0.95rem; color:#555; margin-bottom:1rem;"></p>
+
+            <img id="pendingProjectModalImage" class="project-modal-image" src="" alt="Project Image" style="margin-bottom:1rem;" />
+
+            <!-- Pending user submission info at the bottom -->
+            <h2 id="pendingProjectModalTitle"></h2>
+            <p id="pendingProjectModalCaption"></p>
         </div>
     </div>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const modal = document.getElementById("pendingProjectsModal");
-        const modalImage = document.getElementById("pendingProjectsImage");
-        const modalTitle = document.getElementById("pendingProjectsTitle");
-        const modalCaption = document.getElementById("pendingProjectsCaption");
-        const closeBtn = document.querySelector(".pending-projects-close");
+        const pendingModal = document.getElementById("pendingProjectModal");
+        const pendingModalImage = document.getElementById("pendingProjectModalImage");
+        const pendingModalTitle = document.getElementById("pendingProjectModalTitle");
+        const pendingModalCaption = document.getElementById("pendingProjectModalCaption");
+        const pendingModalFinalTitle = document.getElementById("pendingProjectModalFinalTitle");
+        const pendingModalFinalDesc = document.getElementById("pendingProjectModalFinalDesc");
+        const pendingCloseBtn = document.querySelector(".pending-project-modal-close");
 
-        document.querySelectorAll(".user-pending-projects-card").forEach(card => {
-            card.addEventListener("click", () => {
-                modalImage.src = card.dataset.image;
-                modalTitle.textContent = card.dataset.title;
-                modalCaption.textContent = card.dataset.caption;
-                modal.style.display = "flex";
+        document.querySelectorAll(".btn-view-pending-project").forEach(pendingBtn => {
+            pendingBtn.addEventListener("click", () => {
+                pendingModalImage.src = pendingBtn.dataset.image || "";
+                pendingModalTitle.textContent = "Project Title: " + pendingBtn.dataset.title || "Untitled Project";
+                pendingModalCaption.textContent = "Caption: " + pendingBtn.dataset.caption || "No description provided.";
+                pendingModalFinalTitle.textContent = "Final Project Title: " + pendingBtn.dataset.finaltitle || "";
+                pendingModalFinalDesc.textContent = "Description: " + pendingBtn.dataset.finaldesc || "";
+                pendingModal.style.display = "flex";
             });
         });
 
-        closeBtn.addEventListener("click", () => modal.style.display = "none");
-        modal.addEventListener("click", (e) => {
-            if (e.target === modal) modal.style.display = "none";
+        pendingCloseBtn.addEventListener("click", () => pendingModal.style.display = "none");
+        pendingModal.addEventListener("click", e => {
+            if (e.target === pendingModal) pendingModal.style.display = "none";
         });
     });
 </script>

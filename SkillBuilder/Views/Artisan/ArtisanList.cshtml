@@ -56,7 +56,7 @@
     .artisan-details {
         display: flex;
         flex-direction: column;
-        justify-content: center; 
+        justify-content: center;
     }
 
     .artisan-name a {
@@ -149,7 +149,7 @@
                 <tr class="artisan-row">
                     <td class="artisan-cell">
                         <div class="artisan-info">
-                            <img src="@artisan.User.UserAvatar"/>
+                            <img src="@artisan.User.UserAvatar" />
                             <div class="artisan-details">
                                 <div class="artisan-name">
                                     <a href="/ArtisanViewAsMentor/@artisan.UserId">
@@ -163,6 +163,13 @@
                     <td class="artisan-cell">@artisan.Hometown</td>
                 </tr>
             }
+
+            <!-- No artisans found row -->
+            <tr id="noArtisansRow" style="display:none;">
+                <td colspan="3" style="text-align:center; color:#777; padding:1rem;">
+                    No artisans found.
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>
@@ -171,11 +178,14 @@
     window.addEventListener('DOMContentLoaded', () => {
         const searchInput = document.getElementById('artisanSearchInput');
         const professionFilter = document.getElementById('artisanProfessionFilter');
+        const searchBtn = document.querySelector('.artisan-search-bar-wrapper button');
         const artisanRows = document.querySelectorAll('.artisan-row');
+        const noRow = document.getElementById('noArtisansRow');
 
         function filterArtisans() {
             const nameQuery = searchInput.value.toLowerCase().trim();
             const professionQuery = professionFilter.value; // exact match or empty for all
+            let anyVisible = false;
 
             artisanRows.forEach(row => {
                 const name = row.querySelector('.artisan-name a').innerText.toLowerCase();
@@ -184,19 +194,34 @@
                 const matchesName = name.includes(nameQuery);
                 const matchesProfession = !professionQuery || profession === professionQuery;
 
-                row.style.display = (matchesName && matchesProfession) ? 'table-row' : 'none';
+                if (matchesName && matchesProfession) {
+                    row.style.display = 'table-row';
+                    anyVisible = true;
+                } else {
+                    row.style.display = 'none';
+                }
             });
+
+            // Show "No artisans found" row if nothing matches
+            noRow.style.display = anyVisible ? 'none' : 'table-row';
         }
 
-        // Trigger filter when typing or changing profession
-        searchInput.addEventListener('input', filterArtisans);
-        professionFilter.addEventListener('change', filterArtisans);
+        // Search input triggers only on button click or Enter
+        searchBtn.addEventListener('click', filterArtisans);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filterArtisans();
+            }
+        });
 
-        // Optional: Remove ?search= from URL on page load
-        const url = new URL(window.location.href);
-        if (url.searchParams.has('search')) {
-            url.searchParams.delete('search');
-            window.history.replaceState({}, document.title, url.pathname);
-        }
+        // Profession filter triggers filter automatically
+        professionFilter.addEventListener('change', () => {
+            // Only filter by profession; ignore text input if empty
+            const originalNameQuery = searchInput.value.toLowerCase().trim();
+            if (!originalNameQuery) {
+                filterArtisans();
+            }
+        });
     });
 </script>

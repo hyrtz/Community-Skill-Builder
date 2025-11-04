@@ -292,6 +292,9 @@ namespace SkillBuilder.Migrations
                     b.Property<string>("AvatarUrl")
                         .HasColumnType("text");
 
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
                     b.Property<string>("CoverImageUrl")
                         .HasColumnType("text");
 
@@ -739,6 +742,9 @@ namespace SkillBuilder.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("CourseId")
                         .HasColumnType("integer");
 
@@ -882,6 +888,40 @@ namespace SkillBuilder.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Enrollments");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.Entities.CommunityReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommunityId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ReportedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReporterId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommunityId");
+
+                    b.HasIndex("ReporterId");
+
+                    b.ToTable("CommunityReports");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.ModuleContent", b =>
@@ -1412,6 +1452,25 @@ namespace SkillBuilder.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.Entities.CommunityReport", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.Community", "Community")
+                        .WithMany()
+                        .HasForeignKey("CommunityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SkillBuilder.Models.User", "Reporter")
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Community");
+
+                    b.Navigation("Reporter");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.ModuleContent", b =>

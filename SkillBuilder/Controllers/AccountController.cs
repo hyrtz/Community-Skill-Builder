@@ -337,6 +337,47 @@ namespace SkillBuilder.Controllers
                 }
             }
 
+            string redirectUrl;
+
+            switch (user.Role)
+            {
+                case "Artisan":
+                    var artisan = await _context.Artisans.FirstOrDefaultAsync(a => a.UserId == user.Id);
+                    if (artisan != null)
+                    {
+                        claims.Add(new Claim("ArtisanId", artisan.ArtisanId));
+                        claims.Add(new Claim("IsApproved", artisan.IsApproved.ToString()));
+
+                        // ✅ Correct Artisan redirect
+                        redirectUrl = $"/ArtisanProfile/{artisan.ArtisanId}";
+                    }
+                    else
+                    {
+                        redirectUrl = "/ArtisanProfile"; // fallback
+                    }
+                    break;
+
+                case "Admin":
+                    var admin = await _context.Admins.FirstOrDefaultAsync(a => a.UserId == user.Id);
+                    if (admin != null)
+                    {
+                        claims.Add(new Claim("AdminId", admin.AdminId));
+
+                        // ✅ Correct Admin redirect
+                        redirectUrl = $"/AdminProfile/{user.Id}";
+                    }
+                    else
+                    {
+                        redirectUrl = "/AdminProfile"; // fallback
+                    }
+                    break;
+
+                default:
+                    // ✅ Learner redirect
+                    redirectUrl = $"/UserProfile/{user.Id}";
+                    break;
+            }
+
             var identity = new ClaimsIdentity(claims, "TahiAuth");
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync("TahiAuth", principal);
@@ -346,6 +387,7 @@ namespace SkillBuilder.Controllers
                 success = true,
                 message = "Login successful.",
                 role = user.Role,
+                redirectUrl,
                 userId = user.Id,
                 isVerified = user.IsVerified
             });

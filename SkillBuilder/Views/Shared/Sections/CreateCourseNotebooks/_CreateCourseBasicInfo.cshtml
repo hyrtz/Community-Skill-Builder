@@ -1,7 +1,11 @@
 ﻿@model SkillBuilder.Models.ViewModels.CourseBuilderViewModel
 
 @{
-    var learningObjectives = Model.LearningObjectives ?? new List<string> { "" };
+    var learningObjectives = Model.LearningObjectives;
+    if (learningObjectives == null || !learningObjectives.Any())
+    {
+        learningObjectives = new List<string> { "Learn something new" };
+    }
 }
 
 <style>
@@ -190,7 +194,7 @@
     }
 
     .duration-unit {
-        flex: 1; 
+        flex: 1;
     }
 
     .file-error {
@@ -331,11 +335,11 @@
         // -------------------- FILE VALIDATION SETTINGS --------------------
         const fileRules = {
             image: {
-                maxSize: 5 * 1024 * 1024, // 5 MB
+                maxSize: 700 * 1024, // 700 KB
                 allowed: [".jpg", ".jpeg", ".png", ".gif", ".webp"]
             },
             video: {
-                maxSize: 200 * 1024 * 1024, // 200 MB
+                maxSize: 50 * 1024 * 1024, // 50 MB
                 allowed: [".mp4", ".mov", ".avi"]
             }
         };
@@ -383,8 +387,13 @@
 
             // Validate file size
             if (file.size > maxSize) {
-                const sizeMB = (maxSize / (1024 * 1024)).toFixed(0);
-                errorEl.textContent = `File too large. Max ${sizeMB} MB allowed.`;
+                let sizeText;
+                if (type === "image") {
+                    sizeText = "700 KB";
+                } else if (type === "video") {
+                    sizeText = "50 MB";
+                }
+                errorEl.textContent = `File too large. Max ${sizeText} allowed.`;
                 errorEl.style.display = "block";
                 input.value = "";
                 return false;

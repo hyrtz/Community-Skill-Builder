@@ -8,7 +8,7 @@
     .artisan-projects-section {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 1rem;
     }
 
     .artisan-projects-header {
@@ -20,7 +20,7 @@
     /* Tabs */
     .artisan-projects-tabs {
         display: flex;
-        gap: 2rem;
+        gap: 1rem;
         margin-bottom: 1rem;
     }
 
@@ -32,6 +32,7 @@
         font-weight: bold;
         cursor: pointer;
         transition: all 0.2s ease;
+        font-size: 1rem;
     }
 
         .artisan-projects-tab.active {
@@ -61,13 +62,13 @@
 </style>
 
 <section class="artisan-projects-section">
-    <h2 class="artisan-projects-header">Projects to Review</h2>
+    <h2 class="artisan-projects-header">Projects to Review<br /><span style="font-size: 1rem; font-weight: 400; color: black;">This is your projects to review section where you can see the list of all projects that was submitted by learners to complete the course, here you can approve projects by uploading your digital signature.</span></h2>
 
     <!-- Tabs -->
     <div class="artisan-projects-tabs">
         <button class="artisan-projects-tab @(activeTab == "pending" ? "active" : "")" data-tab="pending">Pending</button>
-        <button class="artisan-projects-tab @(activeTab == "approved" ? "active" : "")" data-tab="approved">Accepted</button>
-        <button class="artisan-projects-tab @(activeTab == "rejected" ? "active" : "")" data-tab="rejected">Declined</button>
+        <button class="artisan-projects-tab @(activeTab == "approved" ? "active" : "")" data-tab="approved">Approved</button>
+        <button class="artisan-projects-tab @(activeTab == "rejected" ? "active" : "")" data-tab="rejected">Rejected</button>
     </div>
 
     <!-- Notebook -->

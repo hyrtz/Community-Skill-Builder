@@ -42,11 +42,6 @@
         font-size: 1.1rem;
     }
 
-    .material-size {
-        font-size: 0.9rem;
-        color: #666;
-    }
-
     .material-delete {
         background: none;
         border: none;
@@ -129,35 +124,44 @@
 
         const titleValue = preloadData?.Title ?? "";
         const descValue = preloadData?.Description ?? "";
-        const fileSize = preloadData?.FileSize ?? 0;
+        const idValue = preloadData?.Id ?? 0;
+        let fileName = preloadData?.FileName ?? "";
+
+        // Limit preloaded file name to 10 characters
+        if (fileName.length > 10) {
+            fileName = fileName.substring(0, 10) + "...";
+        }
+
+        const filePath = preloadData?.FilePath ?? "";
 
         container.innerHTML = `
-        <input type="hidden" name="Materials[${index}].Id" value="${preloadData?.Id ?? 0}" />
-        <div class="material-header">
-            <span class="material-title">Material ${index + 1}</span>
-            <span class="material-size">${fileSize > 0 ? (fileSize / 1024).toFixed(1) + " KB" : ""}</span>
-            <span class="material-delete" onclick="removeMaterial(${index})">🗑️</span>
-        </div>
+            <!-- Hidden inputs -->
+            <input type="hidden" name="Materials[${index}].Id" value="${idValue}" />
+            <input type="hidden" name="Materials[${index}].FileName" value="${fileName}" />
+            <input type="hidden" name="Materials[${index}].FilePath" value="${filePath}" />
 
-        <div class="material-fields">
-            <div class="material-form-group">
-                <label>Material Title</label>
-                <input type="text" name="Materials[${index}].Title" placeholder="Sample course material.pdf" value="${titleValue}" />
+            <div class="material-header">
+                <span class="material-title">Material ${index + 1}</span>
+                <button type="button" class="material-delete" onclick="removeMaterial(${index})">🗑️</button>
             </div>
-            <div class="material-form-group">
-                <label>Replace File</label>
-                <div class="material-upload-wrapper">
-                    <input type="file" name="Materials[${index}].UploadFile" />
-                    <button type="button">Upload</button>
+            <div class="material-fields">
+                <div class="material-form-group">
+                    <label>Material Title</label>
+                    <input type="text" name="Materials[${index}].Title" placeholder="Sample course material.pdf" value="${titleValue}" />
+                </div>
+                <div class="material-form-group">
+                    <label>Upload File</label>
+                    <div class="material-upload-wrapper">
+                        <input type="file" name="Materials[${index}].UploadFile" />
+                        <span class="existing-file-name">${fileName}</span>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="material-form-group material-description">
-            <label>Description</label>
-            <input type="text" name="Materials[${index}].Description" placeholder="Add a description..." value="${descValue}" />
-        </div>
-    `;
+            <div class="material-form-group material-description">
+                <label>Description</label>
+                <input type="text" name="Materials[${index}].Description" placeholder="Add a description..." value="${descValue}" />
+            </div>
+        `;
 
         list.appendChild(container);
         renumberMaterials();
@@ -165,7 +169,21 @@
 
     function removeMaterial(index) {
         const item = document.querySelector(`.material-entry[data-index='${index}']`);
-        if (item) item.remove();
+        if (!item) return;
+
+        const idInput = item.querySelector("input[name*='Id']");
+        if (idInput && idInput.value != "0") {
+            const form = document.getElementById("edit-course-form");
+            if (form) {
+                const deleteInput = document.createElement("input");
+                deleteInput.type = "hidden";
+                deleteInput.name = "MaterialsToDelete";
+                deleteInput.value = idInput.value;
+                form.appendChild(deleteInput);
+            }
+        }
+
+        item.remove();
         renumberMaterials();
     }
 
@@ -173,6 +191,7 @@
         const materials = document.querySelectorAll('.material-entry');
         materials.forEach((entry, i) => {
             entry.setAttribute("data-index", i);
+
             const titleSpan = entry.querySelector(".material-title");
             if (titleSpan) titleSpan.textContent = `Material ${i + 1}`;
 
@@ -180,21 +199,23 @@
             const titleInput = entry.querySelector("input[name*='Title']");
             const fileInput = entry.querySelector("input[type='file']");
             const descInput = entry.querySelector("input[name*='Description']");
+            const fileNameInput = entry.querySelector("input[name*='FileName']");
             const deleteBtn = entry.querySelector(".material-delete");
 
             if (idInput) idInput.name = `Materials[${i}].Id`;
             if (titleInput) titleInput.name = `Materials[${i}].Title`;
             if (fileInput) fileInput.name = `Materials[${i}].UploadFile`;
             if (descInput) descInput.name = `Materials[${i}].Description`;
+            if (fileNameInput) fileNameInput.name = `Materials[${i}].FileName`;
             if (deleteBtn) deleteBtn.setAttribute("onclick", `removeMaterial(${i})`);
         });
 
         materialIndex = materials.length;
     }
 
-    // ---------------- PRELOAD EXISTING MATERIALS ----------------
+    // Preload existing materials from model
     document.addEventListener("DOMContentLoaded", () => {
-        const preloadMaterials = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Materials ?? new List<SkillBuilder.Models.ViewModels.CourseMaterialViewModel>()));
+        const preloadMaterials = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Materials ?? []));
         preloadMaterials.forEach(mat => addMaterial(mat));
     });
 </script>

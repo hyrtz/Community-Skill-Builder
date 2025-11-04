@@ -17,6 +17,7 @@
         display: flex;
         gap: 2.5rem;
         align-items: flex-start;
+        height: 100vh;
     }
 
     .user-profile-sidebar {
@@ -26,6 +27,8 @@
         border-radius: 12px;
         text-align: center;
         box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        min-height: 690px;
+        max-height: 690px;
     }
 
     .user-avatar {
@@ -84,6 +87,8 @@
         border-radius: 12px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.06);
         overflow-y: auto;
+        min-height: 690px;
+        max-height: 690px;
     }
 
     .tab-panel {
@@ -103,9 +108,9 @@
         transition: filter 0.2s ease;
     }
 
-        .user-tab.active .tab-icon {
-            filter: none;
-        }
+    .user-tab.active .tab-icon {
+        filter: none;
+    }
 </style>
 
 <section class="user-profile-section">
@@ -133,12 +138,6 @@
                 <button class="user-tab" data-tab="requests">
                     <img src="~/assets/Icons/ProfileSessions.ico" class="tab-icon" /> Request Sessions
                 </button>
-                <button class="user-tab" data-tab="leaderboards">
-                    <img src="~/assets/Icons/ProfileLeaderboards.ico" class="tab-icon" /> Leaderboards
-                </button>
-                <button class="user-tab" data-tab="artisanlist">
-                    <img src="~/assets/Icons/ProfileArtisanList.ico" class="tab-icon" /> Artisan List
-                </button>
                 <button class="user-tab" data-tab="achievements">
                     <img src="~/assets/Icons/ProfileAchievements.ico" class="tab-icon" /> Achievements
                 </button>
@@ -161,12 +160,6 @@
             </div>
             <div class="tab-panel" data-tab="requests">
                 @Html.Partial("Sections/UserNotebooks/_UserNotebookRequestSessions", Model)
-            </div>
-            <div class="tab-panel" data-tab="leaderboards">
-                @Html.Partial("Sections/UserNotebooks/_UserNotebookLeaderboards", Model)
-            </div>
-            <div class="tab-panel" data-tab="artisanlist">
-                @Html.Partial("Sections/UserNotebooks/_UserNotebookArtisanList", Model)
             </div>
             <div class="tab-panel" data-tab="achievements">
                 @Html.Partial("Sections/UserNotebooks/_UserNotebookAchievements", Model)

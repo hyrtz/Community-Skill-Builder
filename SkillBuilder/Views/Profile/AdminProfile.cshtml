@@ -105,6 +105,7 @@
             <button class="admin-tab" data-tab="applications">Artisan Applications</button>
             <button class="admin-tab" data-tab="courses">Course Management</button>
             <button class="admin-tab" data-tab="community">Community Management</button>
+            <button class="admin-tab" data-tab="reports">Report Logs</button>
         </div>
     </div>
 
@@ -124,6 +125,9 @@
         </div>
         <div class="admin-panel" data-tab="community">
             @Html.Partial("Sections/AdminNotebooks/_AdminNotebookCommunityManagement", Model)
+        </div>
+        <div class="admin-panel" data-tab="reports">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookReportLogs", Model)
         </div>
     </div>
 </div>

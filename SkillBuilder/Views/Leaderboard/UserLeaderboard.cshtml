@@ -1,20 +1,27 @@
-﻿@model List<SkillBuilder.Models.User>
+﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
 
 @{
-    ViewData["Title"] = "User Leaderboard";
+    var users = Model.LeaderboardUsers ?? new List<SkillBuilder.Models.User>();
+    var currentUserId = Model.User?.Id ?? "";
+    ViewData["IsCatalogPage"] = true;
     ViewData["UseCourseNavbar"] = true;
 }
 
 <style>
-    .leaderboard-container {
+    .leaderboard-wrapper {
         padding: 4rem 20rem;
     }
 
     .leaderboard-header {
-        font-size: 2rem;
-        font-weight: bold;
+        font-size: 1.8rem;
         color: #344AEA;
-        margin-top: 4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .leaderboard-subheader {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #344AEA;
         margin-bottom: 2rem;
         text-align: center;
     }
@@ -25,13 +32,8 @@
         border-spacing: 0 1rem;
     }
 
-        .leaderboard-table td,
-        .leaderboard-table th {
-            vertical-align: middle;
-        }
-
     .leaderboard-row {
-        background-color: #f9f9f9;
+        background-color: #fff;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         transition: transform 0.2s ease;
@@ -72,104 +74,120 @@
         color: #333;
     }
 
+    .leaderboard-user-you {
+        font-size: 0.85rem;
+        color: #344AEA;
+        font-weight: 600;
+        margin-left: 0.3rem;
+    }
+
     .leaderboard-points {
         font-weight: bold;
         color: #344AEA;
     }
 
-    /* Top Learner Cards */
-    .top-1 {
-        background: linear-gradient(90deg, #FFD700, #FFC107); /* golden */
-        color: white;
-        transform: scale(1.15);
-        font-size: 1.1rem;
-        font-weight: bold;
+    .rank-number {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #344AEA;
+        text-align: center;
+        width: 60px;
     }
 
-        .top-1 .leaderboard-user-info img {
-            width: 70px;
-            height: 70px;
-        }
-
-        .top-1 .rank-icon {
-            font-size: 1.8rem;
-        }
-
-    .top-2 {
-        background: linear-gradient(90deg, #C0C0C0, #B0B0B0); /* silver */
-        color: white;
-        transform: scale(1.08);
-        font-weight: bold;
+    .medal {
+        font-size: 1.5rem;
+        margin-right: 0.3rem;
     }
 
-        .top-2 .leaderboard-user-info img {
-            width: 60px;
-            height: 60px;
-        }
-
-        .top-2 .rank-icon {
-            font-size: 1.5rem;
-        }
-
-    .top-3 {
-        background: linear-gradient(90deg, #CD7F32, #B87333); /* bronze */
-        color: white;
-        transform: scale(1.05);
-        font-weight: bold;
-    }
-
-        .top-3 .leaderboard-user-info img {
-            width: 55px;
-            height: 55px;
-        }
-
-        .top-3 .rank-icon {
-            font-size: 1.4rem;
-        }
 </style>
 
-<div class="leaderboard-container">
-    <div class="leaderboard-header">Top Learners Leaderboard</div>
+<h2 class="leaderboard-header">Leaderboards</h2>
+
+<div class="leaderboard-wrapper">
+
+    <div class="leaderboard-subheader">🏆 Top Learners</div>
 
     <table class="leaderboard-table">
         <tbody>
-            @for (int i = 0; i < Model.Count; i++)
+            @if (users.Any())
             {
-                var user = Model.OrderByDescending(u => u.Points).ToList()[i];
-                var rowClass = "";
-                var icon = "";
-                if (i == 0) { rowClass = "top-1"; icon = "👑"; }
-                else if (i == 1) { rowClass = "top-2"; icon = "🥈"; }
-                else if (i == 2) { rowClass = "top-3"; icon = "🥉"; }
-                <tr class="leaderboard-row @rowClass">
-                    <td class="leaderboard-cell">
-                        <div class="leaderboard-user-info">
-                            @if (!string.IsNullOrEmpty(icon))
+                var orderedUsers = users.OrderByDescending(u => u.Points).ToList();
+
+                for (int i = 0; i < orderedUsers.Count; i++)
+                {
+                    var user = orderedUsers[i];
+                    string medalIcon = "";
+                    string placementLabel;
+
+                    // 🥇🥈🥉 medals and short-form ranks for top 3
+                    if (i == 0)
+                    {
+                        medalIcon = "🥇";
+                        placementLabel = "1st";
+                    }
+                    else if (i == 1)
+                    {
+                        medalIcon = "🥈";
+                        placementLabel = "2nd";
+                    }
+                    else if (i == 2)
+                    {
+                        medalIcon = "🥉";
+                        placementLabel = "3rd";
+                    }
+                    else
+                    {
+                        placementLabel = $"{i + 1}th";
+                    }
+
+                    bool isCurrentUser = user.Id == currentUserId;
+
+                    <tr class="leaderboard-row">
+                        <td class="leaderboard-cell rank-number">
+                            @if (!string.IsNullOrEmpty(medalIcon))
                             {
-                                <span class="rank-icon">@icon</span>
+                                <span class="medal">@medalIcon</span>
                             }
-                            <img src="@user.UserAvatar" alt="User Avatar" />
-                            <div class="leaderboard-user-details">
-                                <div class="leaderboard-user-name">
-                                    <span>@user.FirstName @user.LastName</span>
+                            else
+                            {
+                                @($"{i + 1}")
+                            }
+                        </td>
+
+                        <td class="leaderboard-cell">
+                            <div class="leaderboard-user-info">
+                                <img src="@user.UserAvatar" alt="User Avatar" />
+                                <div class="leaderboard-user-details">
+                                    <div class="leaderboard-user-name">
+                                        <span>
+                                            <a href="@Url.Action("UserViewAsLearner", "Profile", new { userId = user.Id })"
+                                               style="text-decoration:none; color:inherit;">
+                                                @user.FirstName @user.LastName
+                                            </a>
+                                        </span>
+                                        @if (isCurrentUser)
+                                        {
+                                            <span class="leaderboard-user-you">(You)</span>
+                                        }
+                                    </div>
+                                    <div style="font-size:0.85rem; color:#777;">@placementLabel</div>
                                 </div>
                             </div>
-                        </div>
+                        </td>
+
+                        <td class="leaderboard-cell">Enrolled Courses: @((user.Enrollments?.Count() ?? 0))</td>
+                        <td class="leaderboard-cell leaderboard-points">@user.Points pts</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" style="text-align:center; padding:2rem; color:#666;">
+                        No learners to display yet.
                     </td>
-                    <td class="leaderboard-cell">Enrolled courses: @((user.Enrollments?.Count() ?? 0))</td>
-                    <td class="leaderboard-cell leaderboard-points">@user.Points pts</td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
-
-<script>
-    window.addEventListener('load', () => {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has('search')) {
-            url.searchParams.delete('search');
-            window.history.replaceState({}, document.title, url.pathname); // Removes ?search=...
-        }
-    });
-</script>

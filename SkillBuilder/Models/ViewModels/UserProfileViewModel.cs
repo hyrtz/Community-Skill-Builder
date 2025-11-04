@@ -7,6 +7,7 @@
         public string UserAvatar => User?.UserAvatar ?? "/images/default-avatar.png";
         public bool IsDeactivated => User?.IsDeactivated ?? false;
         public int Points => User?.Points ?? 0;
+        public int? SelectedCommunityId { get; set; }
         public User User { get; set; } = new();
         public List<Artisan> Artisans { get; set; } = new();
         public List<Enrollment> Enrollments { get; set; } = new();

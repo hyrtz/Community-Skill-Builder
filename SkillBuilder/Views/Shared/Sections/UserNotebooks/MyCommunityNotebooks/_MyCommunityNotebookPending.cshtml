@@ -1,5 +1,16 @@
 ﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
 
+
+@{
+    var selectedCommunityId = Model.SelectedCommunityId;
+
+    // Filter PendingJoinRequests by the selected community
+    var pendingRequests = Model.PendingJoinRequests?
+        .Where(r => r.CommunityId == selectedCommunityId)
+        .ToList()
+        ?? new List<SkillBuilder.Models.CommunityJoinRequest>(); // match the actual type
+}
+
 <style>
     .user-mycommunity-container {
         background: #fff;
@@ -116,9 +127,13 @@
     /* No Requests */
     .user-mycommunity-no-requests {
         text-align: center;
-        padding: 1.5rem;
+        font-size: 1rem;
         color: #6b7280;
-        font-weight: 500;
+        padding: 2rem;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background-color: #f9fafb;
+        margin-top: 2rem;
     }
 
     /* ===== Modal Layout ===== */
@@ -240,9 +255,9 @@
         }
 </style>
 
-@if (Model.PendingJoinRequests == null || !Model.PendingJoinRequests.Any())
+@if (!pendingRequests.Any())
 {
-    <div class="user-mycommunity-no-requests">No pending join requests.</div>
+    <div class="user-mycommunity-no-requests">No pending join requests for this community.</div>
 }
 else
 {
@@ -254,7 +269,7 @@ else
             <span>Actions</span>
         </div>
 
-        @foreach (var request in Model.PendingJoinRequests)
+        @foreach (var request in pendingRequests)
         {
             <div class="user-mycommunity-pending-request-card" data-request-id="@request.Id">
                 <div class="user-mycommunity-requester-info">
@@ -301,7 +316,6 @@ else
         </div>
     </div>
 </div>
-
 <script>
     let selectedRequestId = null;
     let selectedUserName = '';
@@ -367,23 +381,27 @@ else
         }
     }
 
-    document.getElementById('confirmApproveBtn').addEventListener('click', async () => {
-        closeApproveModal();
-        await handleJoinRequest(selectedRequestId, true);
+    // ----- Event delegation to handle dynamically loaded buttons -----
+    document.addEventListener('click', async function(e) {
+        if (e.target.id === 'confirmApproveBtn') {
+            closeApproveModal();
+            await handleJoinRequest(selectedRequestId, true);
+        }
+
+        if (e.target.id === 'confirmRejectBtn') {
+            const reason = document.getElementById('rejectReason').value.trim();
+            if (!reason) return;
+            closeRejectModal();
+            await handleJoinRequest(selectedRequestId, false, reason);
+        }
     });
 
-    document.getElementById('confirmRejectBtn').addEventListener('click', async () => {
-        const reason = document.getElementById('rejectReason').value.trim();
-        // Prevent reject if no input
-        if (!reason) return;
-        closeRejectModal();
-        await handleJoinRequest(selectedRequestId, false, reason);
-    });
-
-    document.getElementById('rejectReason').addEventListener('input', function () {
-        const confirmBtn = document.getElementById('confirmRejectBtn');
-        const hasText = this.value.trim() !== '';
-        confirmBtn.disabled = !hasText;
-        confirmBtn.classList.toggle('disabled', !hasText);
+    document.addEventListener('input', function(e) {
+        if (e.target.id === 'rejectReason') {
+            const confirmBtn = document.getElementById('confirmRejectBtn');
+            const hasText = e.target.value.trim() !== '';
+            confirmBtn.disabled = !hasText;
+            confirmBtn.classList.toggle('disabled', !hasText);
+        }
     });
 </script>

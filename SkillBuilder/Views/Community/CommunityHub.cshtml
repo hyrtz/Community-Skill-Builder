@@ -4,10 +4,11 @@
     ViewData["Title"] = "Community Hub";
     var isDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
     var isVerified = User.FindFirst("IsVerified")?.Value == "True";
+    var isAdmin = User.IsInRole("Admin");
 }
 
 <style>
-    /* Wrapper for the page */  
+    /* Wrapper for the page */
     .community-page-wrapper {
         margin: 5.5rem 10%;
         display: flex;
@@ -109,9 +110,9 @@
     }
 
         .community-tab.active {
-            border-bottom-color: #3182ce;
+            border-bottom-color: #344AEA;
             background-color: #e6f0ff;
-            color: #3182ce;
+            color: #344AEA;
         }
 
     /* Tab panels */
@@ -288,7 +289,7 @@
     }
 
     .next-btn {
-        background: #3182ce;
+        background: #344AEA;
         border: none;
         color: white;
         padding: 0.5rem 1.25rem;
@@ -315,7 +316,7 @@
     }
 
         .category-card.selected {
-            background-color: #3182ce;
+            background-color: #344AEA;
             color: white;
             transform: scale(1.05);
         }
@@ -485,6 +486,24 @@
         transition: all 0.2s ease;
     }
 
+    #Category {
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 0.9rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #communityPostsCategorySelect {
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 0.9rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
 </style>
 
 <div class="community-page-wrapper">
@@ -516,10 +535,14 @@
 
         <div class="community-top-row">
             <div class="community-search">
-                <input type="text" placeholder="Search Tahi" />
-                <button><img src="/assets/Icons/Search.ico" width="20" height="20" /></button>
+                <input type="text" id="searchPostsInput" placeholder="Search posts..." />
+                <button id="searchPostsBtn"><img src="/assets/Icons/Search.ico" width="20" height="20" /></button>
             </div>
-            @if (isDeactivated || !isVerified)
+            @if (isAdmin)
+            {
+                <!-- Admins cannot create posts -->
+            }
+            else if (isDeactivated || !isVerified)
             {
                 <button class="create-post-btn" disabled style="opacity:0.5; cursor:not-allowed;">
                     ＋ Create Post
@@ -535,69 +558,78 @@
             <div class="left-section">
                 <div class="community-tabs">
                     <button type="button" class="community-tab active" data-tab="posts">Posts</button>
-                    <button type="button" class="community-tab" data-tab="communities">Communities</button>
+
+                    @if (!isAdmin)
+                    {
+                        <button type="button" class="community-tab" data-tab="communities">Communities</button>
+                    }
                 </div>
 
                 <div class="community-tab-panel active" data-tab="posts">
                     <partial name="Sections/CommunityNotebooks/_CommunityNotebookPosts" model="Model.Posts" />
                 </div>
 
-                <div class="community-tab-panel" data-tab="communities">
-                    <partial name="Sections/CommunityNotebooks/_CommunityNotebookCommunities" model="Model" />
-                </div>
+                @if (!isAdmin)
+                {
+                    <div class="community-tab-panel" data-tab="communities">
+                        <partial name="Sections/CommunityNotebooks/_CommunityNotebookCommunities" model="Model" />
+                    </div>
+                }
             </div>
 
-            <div class="right-section">
-                
-                @if (isDeactivated || !isVerified)
-                {
-                    <div class="create-community-card" style="opacity:0.5; pointer-events:none; cursor:not-allowed;">
-                        <p style="color:#d00; font-size:0.85rem; margin-top:0.5rem;">
-                            Can't Create Community, your account is either not verified or deactivated.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <div class="create-community-card" id="openCreateCommunityModal">
-                        <span class="plus-icon">＋</span>
-                        Create a community
-                    </div>
-                }
+            @if (!isAdmin)
+            {
+                <div class="right-section">
+                    @if (isDeactivated || !isVerified)
+                    {
+                        <div class="create-community-card" style="opacity:0.5; pointer-events:none; cursor:not-allowed;">
+                            <p style="color:#d00; font-size:0.85rem; margin-top:0.5rem;">
+                                Can't Create Community, your account is either not verified or deactivated.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="create-community-card" id="openCreateCommunityModal">
+                            <span class="plus-icon">＋</span>
+                            Create a community
+                        </div>
+                    }
 
-                <div class="right-card">
-                    <h4>Your Communities</h4>
-                    <ul class="user-communities">
-                        @{
-                            var currentUserId = User.FindFirst("UserId")?.Value;
-                            var ownedCommunities = Model.Communities?
-                            .Where(c => c.CreatorId == currentUserId)
-                            .ToList() ?? new List<SkillBuilder.Models.ViewModels.CommunitiesViewModel>();
-                        }
+                    <div class="right-card">
+                        <h4>Your Communities</h4>
+                        <ul class="user-communities">
+                            @{
+                                var currentUserId = User.FindFirst("UserId")?.Value;
+                                var ownedCommunities = Model.Communities?
+                                .Where(c => c.CreatorId == currentUserId)
+                                .ToList() ?? new List<SkillBuilder.Models.ViewModels.CommunitiesViewModel>();
+                            }
 
-                        @if (ownedCommunities.Any())
-                        {
-                            foreach (var community in ownedCommunities)
+                            @if (ownedCommunities.Any())
                             {
-                                <li>
-                                    <div class="community-avatar">
-                                        <img src="@(!string.IsNullOrEmpty(community.AvatarUrl)
-                                            ? community.AvatarUrl
-                                            : "/uploads/community-profile/default-community.png")"
+                                foreach (var community in ownedCommunities)
+                                {
+                                    <li>
+                                        <div class="community-avatar">
+                                            <img src="@(!string.IsNullOrEmpty(community.AvatarUrl)
+                                                                                                                                      ? community.AvatarUrl
+                                                                                                                                      : "/uploads/community-profile/default-community.png")"
                                  alt="@community.Name"
                                  style="width:40px; height:40px; border-radius:50%;" />
                         </div>
                         <span>@community.Name</span>
                     </li>
                                         }
-                        }
-                        else
-                        {
-                            <li>No communities owned yet.</li>
-                        }
-                    </ul>
+                            }
+                            else
+                            {
+                                <li>No communities owned yet.</li>
+                            }
+                        </ul>
+                    </div>
                 </div>
-            </div>
+            }
 
             <!-- Create Post Modal -->
             <div id="communityPostsCreateModal" class="community-posts-modal-overlay" style="display:none;">
@@ -644,15 +676,23 @@
 
                         <!-- Category -->
                         <div class="community-posts-field">
-                            <label>Select a category.</label>
-                            <div class="community-posts-categories">
-                                <button type="button" class="community-posts-category" data-value="Pottery">Pottery</button>
-                                <button type="button" class="community-posts-category" data-value="Weaving">Weaving</button>
-                                <button type="button" class="community-posts-category" data-value="Wood Carving">Wood Carving</button>
-                                <button type="button" class="community-posts-category" data-value="Paper Crafts">Paper Crafts</button>
-                                <button type="button" class="community-posts-category" data-value="Shoemaking">Shoemaking</button>
-                                <button type="button" class="community-posts-category" data-value="Embroidery">Embroidery</button>
-                            </div>
+                            <label for="communityPostsCategorySelect">Select a category</label>
+                            <select id="communityPostsCategorySelect">
+                                <option value="">-- Choose a category --</option>
+                                <option value="Pottery">Pottery</option>
+                                <option value="Weaving">Weaving</option>
+                                <option value="Wood Carving">Wood Carving</option>
+                                <option value="Paper Crafts">Paper Crafts</option>
+                                <option value="Shoemaking">Shoemaking</option>
+                                <option value="Embroidery">Embroidery</option>
+                                <option value="Others">Others</option>
+                            </select>
+
+                            <input type="text" id="communityPostsOtherCategory" placeholder="Enter custom category"
+                                   style="display:none;" />
+
+                            <!-- This hidden input will hold the actual value for form submission -->
+                            <input type="hidden" id="communityPostsCategory" name="Category" />
                         </div>
 
                         <!-- Actions -->
@@ -730,18 +770,30 @@
                         <!-- Step 3: Choose Category -->
                         <div class="modal-step" id="step3" style="display:none;">
                             <h2>Choose your category</h2>
-                            <p class="modal-subtitle">please select a category for your community.</p>
+                            <p class="modal-subtitle">Please select a category for your community.</p>
 
-                            <div id="categoryCards" style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2rem;">
-                                <div class="category-card" data-category="Pottery">Pottery</div>
-                                <div class="category-card" data-category="Weaving">Weaving</div>
-                                <div class="category-card" data-category="Wood Carving">Wood Crafts</div>
-                                <div class="category-card" data-category="Paper Crafts">Paper Crafts</div>
-                                <div class="category-card" data-category="Shoemaking">Shoemaking</div>
-                                <div class="category-card" data-category="Embroidery">Embroidery</div>
+                            <div class="form-group" style="margin-bottom: 2rem;">
+                                <label for="Category" class="form-label" style="font-weight:600;">Community Category</label>
+                                <select id="Category" name="Category" class="form-select" onchange="handleCategoryChange(this)">
+                                    <option value="">-- Select Category --</option>
+                                    <option value="Pottery">Pottery</option>
+                                    <option value="Weaving">Weaving</option>
+                                    <option value="Wood Carving">Wood Crafts</option>
+                                    <option value="Paper Crafts">Paper Crafts</option>
+                                    <option value="Shoemaking">Shoemaking</option>
+                                    <option value="Embroidery">Embroidery</option>
+                                    <option value="Others">Others</option>
+                                </select>
                             </div>
 
-                            <input type="hidden" name="Category" id="selectedCategory" />
+                            <div id="OtherCategoryWrapper" style="display:none; margin-bottom: 2rem;">
+                                <label for="OtherCategory" class="form-label" style="font-weight:600;">Specify Category</label>
+                                <input type="text" id="OtherCategory" name="OtherCategory"
+                                       placeholder="Enter desired category"
+                                       style="width:100%; padding:0.75rem; border-radius:8px; border:1px solid #ccc;" />
+                            </div>
+
+                            <input type="hidden" name="CategoryFinal" id="selectedCategory" />
 
                             <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
                                 <button type="button" class="cancel-btn">Cancel</button>
@@ -756,7 +808,47 @@
 </div>
 
 <script>
+    function handleCategoryChange(select) {
+        const otherWrapper = document.getElementById("OtherCategoryWrapper");
+        const createBtn = document.getElementById("createCommunityBtn");
+        const selectedCategoryInput = document.getElementById("selectedCategory");
+
+        if (select.value === "Others") {
+            otherWrapper.style.display = "block";
+            createBtn.disabled = true; // wait for input
+            selectedCategoryInput.value = "";
+        } else if (select.value) {
+            otherWrapper.style.display = "none";
+            createBtn.disabled = false;
+            selectedCategoryInput.value = select.value;
+        } else {
+            otherWrapper.style.display = "none";
+            createBtn.disabled = true;
+            selectedCategoryInput.value = "";
+        }
+    }
+
+
     document.addEventListener("DOMContentLoaded", () => {
+
+        const otherCategoryInput = document.getElementById("OtherCategory");
+        const createBtn = document.getElementById("createCommunityBtn");
+        const selectedCategoryInput = document.getElementById("selectedCategory");
+
+        if (otherCategoryInput && createBtn && selectedCategoryInput) {
+            otherCategoryInput.addEventListener("input", function () {
+                const inputVal = this.value.trim();
+
+                if (inputVal.length > 0) {
+                    createBtn.disabled = false;
+                    selectedCategoryInput.value = inputVal;
+                } else {
+                    createBtn.disabled = true;
+                    selectedCategoryInput.value = "";
+                }
+            });
+        }
+
         // ================== CREATE COMMUNITY MODAL ==================
         const modal = document.getElementById("createCommunityModal");
         const openModalBtn = document.getElementById("openCreateCommunityModal");
@@ -841,16 +933,37 @@
                 });
             }
 
-            // ---- STEP 2: Handle image upload ----
-            const handleImageUpload = (input, previewImg, deleteBtn) => {
+            // ---- STEP 2: Handle image upload with validation (max 700 KB) ----
+            const handleImageUpload = (input, previewImg, deleteBtn, maxSizeKB = 700) => {
                 if (!input || !previewImg || !deleteBtn) return;
+
+                // Create error message element
+                let errorMsg = document.createElement("small");
+                errorMsg.style.color = "red";
+                errorMsg.style.display = "none";
+                errorMsg.style.marginTop = "0.25rem";
+                input.parentNode.appendChild(errorMsg);
 
                 input.addEventListener("change", e => {
                     const file = e.target.files[0];
+                    const maxSizeBytes = maxSizeKB * 1024;
+
+                    // Reset previous error
+                    errorMsg.style.display = "none";
+                    errorMsg.textContent = "";
+
                     if (!file) return;
 
                     if (!file.type.startsWith("image/")) {
-                        alert("Only image files are allowed!");
+                        errorMsg.textContent = "Only image files are allowed!";
+                        errorMsg.style.display = "block";
+                        input.value = "";
+                        return;
+                    }
+
+                    if (file.size > maxSizeBytes) {
+                        errorMsg.textContent = `File is too large. Maximum allowed size is ${maxSizeKB} KB.`;
+                        errorMsg.style.display = "block";
                         input.value = "";
                         return;
                     }
@@ -867,17 +980,19 @@
 
                 deleteBtn.addEventListener("click", e => {
                     e.preventDefault();
-                    e.stopPropagation(); // <- prevents any parent handlers
+                    e.stopPropagation();
                     input.value = "";
                     previewImg.src = "";
                     previewImg.style.display = "none";
                     deleteBtn.style.display = "none";
+                    errorMsg.style.display = "none"; // hide error on delete
                     checkStep2Ready();
                 });
             };
 
-            handleImageUpload(bannerInput, bannerPreview, document.getElementById("bannerDeleteBtn"));
-            handleImageUpload(profileInput, profilePreview, document.getElementById("profileDeleteBtn"));
+            // Apply to banner and profile inputs
+            handleImageUpload(bannerInput, bannerPreview, document.getElementById("bannerDeleteBtn"), 700);
+            handleImageUpload(profileInput, profilePreview, document.getElementById("profileDeleteBtn"), 700);
 
             // ---- STEP 2: Enable Finish only if both images selected ----
             const checkStep2Ready = () => {
@@ -925,7 +1040,13 @@
         const contentCountPost = document.getElementById("communityPostsContentCount");
         const imageInput = document.getElementById("communityPostsImage");
         const imagePreview = document.getElementById("communityPostsImagePreview");
-        const categoriesPost = document.querySelectorAll(".community-posts-category");
+
+        // New dropdown & others input
+        const categorySelect = document.getElementById("communityPostsCategorySelect");
+        const otherpostCategoryInput = document.getElementById("communityPostsOtherCategory");
+        const hiddenCategoryInput = document.getElementById("communityPostsCategory");
+
+        const MAX_IMAGE_KB = 700;
         let selectedCategoryPost = null;
 
         // Open modal
@@ -942,9 +1063,22 @@
             if (contentInputPost) contentInputPost.value = "";
             if (titleCountPost) titleCountPost.textContent = "0/100 maximum characters";
             if (contentCountPost) contentCountPost.textContent = "0/1000 maximum characters";
-            categoriesPost.forEach(c => c.classList.remove("active"));
+            if (categorySelect) categorySelect.value = "";
+            if (otherpostCategoryInput) {
+                otherpostCategoryInput.value = "";
+                otherpostCategoryInput.style.display = "none";
+            }
+            if (hiddenCategoryInput) hiddenCategoryInput.value = "";
             selectedCategoryPost = null;
-            if (submitPostBtn) submitPostBtn.disabled = true; // reset
+            if (submitPostBtn) submitPostBtn.disabled = true;
+            if (imageInput) {
+                imageInput.value = "";
+                imagePreview.src = "";
+                imagePreview.style.display = "none";
+                if (imageInput.nextElementSibling?.classList.contains("image-error")) {
+                    imageInput.nextElementSibling.remove();
+                }
+            }
         };
 
         // Close events
@@ -955,29 +1089,45 @@
         window.addEventListener("keydown", e => { if (e.key === "Escape") closePostModal(); });
 
         // Character counters
-        if (titleInputPost && titleCountPost) {
-            titleInputPost.addEventListener("input", () => {
-                titleCountPost.textContent = `${titleInputPost.value.length}/100 maximum characters`;
-                validatePostForm();
-            });
-        }
+        if (titleInputPost) titleInputPost.addEventListener("input", validatePostForm);
+        if (contentInputPost) contentInputPost.addEventListener("input", validatePostForm);
 
-        if (contentInputPost && contentCountPost) {
-            contentInputPost.addEventListener("input", () => {
-                contentCountPost.textContent = `${contentInputPost.value.length}/1000 maximum characters`;
-                validatePostForm();
-            });
-        }
-
-        // Image preview
+        // Image preview with validation
         if (imageInput && imagePreview) {
+            let errorMsg = document.createElement("small");
+            errorMsg.classList.add("image-error");
+            errorMsg.style.color = "red";
+            errorMsg.style.display = "none";
+            errorMsg.style.marginTop = "0.25rem";
+            imageInput.parentNode.appendChild(errorMsg);
+
             imageInput.addEventListener("change", e => {
                 const file = e.target.files[0];
-                if (!file) return;
+                errorMsg.style.display = "none";
+                errorMsg.textContent = "";
+
+                if (!file) {
+                    imagePreview.src = "";
+                    imagePreview.style.display = "none";
+                    validatePostForm();
+                    return;
+                }
 
                 if (!file.type.startsWith("image/")) {
-                    alert("Only image files are allowed!");
+                    errorMsg.textContent = "Only image files are allowed!";
+                    errorMsg.style.display = "block";
                     imageInput.value = "";
+                    imagePreview.src = "";
+                    imagePreview.style.display = "none";
+                    return;
+                }
+
+                if (file.size > MAX_IMAGE_KB * 1024) {
+                    errorMsg.textContent = `File is too large. Maximum allowed size is ${MAX_IMAGE_KB} KB.`;
+                    errorMsg.style.display = "block";
+                    imageInput.value = "";
+                    imagePreview.src = "";
+                    imagePreview.style.display = "none";
                     return;
                 }
 
@@ -987,30 +1137,54 @@
                     imagePreview.style.display = "block";
                 };
                 reader.readAsDataURL(file);
+
+                validatePostForm();
             });
         }
 
-        // Category selection
-        categoriesPost.forEach(cat => {
-            cat.addEventListener("click", () => {
-                categoriesPost.forEach(c => c.classList.remove("active"));
-                cat.classList.add("active");
-                selectedCategoryPost = cat.dataset.value; // use data-value
-                document.getElementById("communityPostsCategory").value = selectedCategoryPost;
-                validatePostForm(); // enable only if title/content are valid
+        // ----------------- CATEGORY DROPDOWN -----------------
+        if (categorySelect && otherpostCategoryInput && hiddenCategoryInput) {
+            categorySelect.addEventListener("change", () => {
+                const val = categorySelect.value;
+                if (val === "Others") {
+                    otherpostCategoryInput.style.display = "block";
+                    hiddenCategoryInput.value = "";
+                    selectedCategoryPost = null; // important
+                    submitPostBtn.disabled = true;
+                } else if (val) {
+                    otherpostCategoryInput.style.display = "none";
+                    otherpostCategoryInput.value = "";
+                    hiddenCategoryInput.value = val;
+                    selectedCategoryPost = val; // ✅ update here
+                    validatePostForm();
+                } else {
+                    otherpostCategoryInput.style.display = "none";
+                    hiddenCategoryInput.value = "";
+                    selectedCategoryPost = null;
+                    submitPostBtn.disabled = true;
+                }
             });
-        });
+
+            otherpostCategoryInput.addEventListener("input", () => {
+                const val = otherpostCategoryInput.value.trim();
+                hiddenCategoryInput.value = val;
+                selectedCategoryPost = val ? val : null;
+                validatePostForm();
+            });
+        }
 
         // Validation & enabling submit
-        const validatePostForm = () => {
-            const title = titleInputPost.value.trim();
-            const content = contentInputPost.value.trim();
+        function validatePostForm() {
+            const title = titleInputPost?.value.trim();
+            const content = contentInputPost?.value.trim();
             const category = selectedCategoryPost;
             submitPostBtn.disabled = !(title && content && category);
-        };
+            if (titleCountPost) titleCountPost.textContent = `${titleInputPost.value.length}/100 maximum characters`;
+            if (contentCountPost) contentCountPost.textContent = `${contentInputPost.value.length}/1000 maximum characters`;
+        }
 
+        // Form submission
         const communityPostsForm = document.getElementById("communityPostsForm");
-
         if (communityPostsForm) {
             communityPostsForm.addEventListener("submit", async (e) => {
                 e.preventDefault();
@@ -1028,7 +1202,7 @@
                     if (result.success) {
                         // ✅ Create new post element
                         const newPost = document.createElement("div");
-                        newPost.classList.add("post-card"); // match your Razor class
+                        newPost.classList.add("post-card");
                         newPost.innerHTML = `
                             <div class="post-card-header">
                                 <div class="avatar" style="background-image:url('${result.post.authorAvatarUrl}')"></div>
@@ -1046,19 +1220,15 @@
                             </div>
                         `;
 
-                        // ✅ Insert into the Razor-generated container
                         const postsContainer = document.querySelector('.community-posts-list');
                         if (postsContainer) {
                             const noPosts = postsContainer.querySelector('.no-posts');
                             if (noPosts) noPosts.remove();
-
                             postsContainer.prepend(newPost);
                         }
 
-                        // ✅ Reset form and close modal
                         form.reset();
-                        if (typeof closePostModal === "function") closePostModal();
-
+                        closePostModal();
                         window.location.reload();
                     } else {
                         alert(result.message || "Something went wrong while creating the post.");
@@ -1070,9 +1240,44 @@
             });
         }
 
-
         // Initial disable state
         if (submitPostBtn) submitPostBtn.disabled = true;
+    });
+
+    function performPostSearch() {
+        const query = document.getElementById('searchPostsInput').value.toLowerCase();
+        const posts = document.querySelectorAll('.posts-only-list .post-card');
+        let anyVisible = false;
+
+        posts.forEach(post => {
+            // Skip the "No posts found" card itself
+            if (post.id === "noPostsFound") return;
+
+            const title = post.dataset.title?.toLowerCase() || '';
+            const content = post.querySelector('.post-card-content p')?.innerText.toLowerCase() || '';
+
+            if (title.includes(query) || content.includes(query)) {
+                post.style.display = 'block';
+                anyVisible = true;
+            } else {
+                post.style.display = 'none';
+            }
+        });
+
+        // Show "No posts found" message if nothing matches
+        const noPostsEl = document.getElementById('noPostsFound');
+        noPostsEl.style.display = anyVisible ? 'none' : 'block';
+    }
+
+    // Trigger search when clicking the button
+    document.getElementById('searchPostsBtn').addEventListener('click', performPostSearch);
+
+    // Trigger search when pressing Enter inside input
+    document.getElementById('searchPostsInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performPostSearch();
+        }
     });
 
     // ================== TAB SWITCHING LOGIC ==================

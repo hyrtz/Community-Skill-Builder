@@ -1,0 +1,356 @@
+﻿@using System.Text.Json
+@model SkillBuilder.Models.ViewModels.CourseDetailsViewModel
+@{
+    ViewData["Title"] = "Course Module (View Mode)";
+    ViewData["UseCourseNavbar"] = true;
+
+    var moduleJson = JsonSerializer.Serialize(
+        (Model.Modules ?? Enumerable.Empty<SkillBuilder.Models.ViewModels.CourseModuleViewModel>())
+        .Select((m, moduleIndex) => new
+        {
+            title = m.Title ?? "",
+            lessons = (m.Lessons ?? Enumerable.Empty<SkillBuilder.Models.ViewModels.LessonViewModel>())
+                .Select((l, lessonIndex) => new
+                {
+                    title = l.Title ?? "",
+                    contentType = l.LessonType ?? "Text",
+                    contentText = l.ContentText ?? "",
+                    mediaUrl = l.LessonType == "Video" ? l.VideoUrl ?? "" :
+                               l.LessonType == "Image + Text" ? l.ImageUrl ?? "" : "",
+                    quizQuestions = (l.QuizQuestions ?? Enumerable.Empty<SkillBuilder.Models.ViewModels.QuizQuestionViewModel>())
+                        .Select((q, qIndex) => new
+                        {
+                            question = q.QuestionText ?? "",
+                            options = new string[] { q.OptionA ?? "", q.OptionB ?? "", q.OptionC ?? "", q.OptionD ?? "" },
+                            correct = q.CorrectAnswer ?? "",
+                            index = qIndex + 1
+                        }).ToList()
+                }).ToList(),
+            index = moduleIndex + 1
+        }).ToList(),
+        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+    );
+
+    var finalProjectJson = JsonSerializer.Serialize(new
+    {
+        title = Model.FinalProjectTitle ?? "",
+        description = Model.FinalProjectDescription ?? ""
+    }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+}
+
+<div class="artisanView-header">
+    <h1>Course Module (View Mode)</h1>
+</div>
+
+<div class="artisanView-courseWrapper">
+    <!-- Sidebar -->
+    <div class="artisanView-moduleSidebar">
+        @if (Model.Modules != null && Model.Modules.Any())
+        {
+            @for (int i = 0; i < Model.Modules.Count; i++)
+            {
+                <div class="artisanView-sidebarModule">
+                    <strong class="module-title">Module @(i + 1): @Model.Modules[i].Title</strong>
+                    @if (Model.Modules[i].Lessons != null)
+                    {
+                        @for (int j = 0; j < Model.Modules[i].Lessons.Count; j++)
+                        {
+                            <button class="artisanView-lessonBtn" data-module="@i" data-lesson="@j">
+                                @Model.Modules[i].Lessons[j].Title
+                            </button>
+                        }
+                    }
+                </div>
+            }
+
+            <!-- Final Project Section -->
+            <div class="artisanView-sidebarModule">
+                <strong class="module-title">Final Project</strong>
+                <button class="finalProjectBtn artisanView-lessonBtn">View Final Project</button>
+            </div>
+        }
+    </div>
+
+    <!-- Main Content -->
+    <div id="artisanView-moduleContent" class="artisanView-moduleContent"></div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const modules = @Html.Raw(moduleJson);
+        const finalProject = @Html.Raw(finalProjectJson);
+        const moduleContent = document.getElementById("artisanView-moduleContent");
+        const lessonBtns = Array.from(document.querySelectorAll(".artisanView-lessonBtn"));
+        const finalBtn = document.querySelector(".finalProjectBtn");
+
+        function setActiveButton(activeBtn) {
+            lessonBtns.forEach(btn => btn.classList.remove("active"));
+            if (finalBtn) finalBtn.classList.remove("active");
+            activeBtn.classList.add("active");
+        }
+
+        function showLesson(moduleIndex, lessonIndex) {
+            const module = modules[moduleIndex];
+            if (!module || !module.lessons || !module.lessons[lessonIndex]) {
+                moduleContent.innerHTML = `<p class="lesson-text">Lesson content not available.</p>`;
+                return;
+            }
+
+            const lesson = module.lessons[lessonIndex];
+            let html = `<h2 class="lesson-title">${lesson.title}</h2>`;
+
+            switch (lesson.contentType) {
+                case "Text":
+                    html += `<p class="lesson-text">${lesson.contentText}</p>`;
+                    break;
+                case "Image + Text":
+                    html += `<img src="${lesson.mediaUrl}" class="lesson-image"/>
+                             <p class="lesson-text">${lesson.contentText}</p>`;
+                    break;
+                case "Video":
+                    html += `<video controls class="lesson-image">
+                                <source src="${lesson.mediaUrl}" type="video/mp4">
+                             </video>`;
+                    break;
+                case "Quiz":
+                    html += `<div class="quiz-section">`;
+                    lesson.quizQuestions.forEach(q => {
+                        html += `
+                        <div class="quiz-question">
+                            <h4>Question ${q.index}</h4>
+                            <p class="quiz-text">${q.question}</p>
+                            <ul class="quiz-options">
+                                ${q.options.map(opt => `<li>${opt}</li>`).join("")}
+                            </ul>
+                            <p class="quiz-correct">Correct Answer: ${q.correct}</p>
+                        </div>`;
+                    });
+                    html += `</div>`;
+                    break;
+                case "Session":
+                    html += `<div class="session-section">
+                                <p>This part is where learners can schedule a Request Live Session.</p>
+                             </div>`;
+                    break;
+                default:
+                    html += `<p class="lesson-text">Unsupported content type</p>`;
+            }
+
+            moduleContent.innerHTML = html;
+        }
+
+        function showFinalProject() {
+            moduleContent.innerHTML = `
+                <div class="final-project-section">
+                    <h2 class="lesson-title">Final Project</h2>
+                    <h3 class="final-title">${finalProject.title}</h3>
+                    <p class="lesson-text">${finalProject.description}</p>
+                </div>`;
+        }
+
+        lessonBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                setActiveButton(btn);
+                showLesson(parseInt(btn.dataset.module), parseInt(btn.dataset.lesson));
+            });
+        });
+
+        if (finalBtn) {
+            finalBtn.addEventListener("click", () => {
+                setActiveButton(finalBtn);
+                showFinalProject();
+            });
+        }
+
+        if (lessonBtns.length > 0) {
+            lessonBtns[0].click();
+        } else if (finalBtn) {
+            finalBtn.click();
+        }
+    });
+</script>
+
+<style>
+    /* Header */
+    .artisanView-header {
+        position: sticky;
+        top: 0;
+        background: #f8f9fa;
+        padding: 3rem 2rem 1rem 2rem;
+        margin-top: 4rem;
+        z-index: 10;
+    }
+
+        .artisanView-header h1 {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 0;
+            color: #222;
+        }
+
+    /* Layout */
+    .artisanView-courseWrapper {
+        display: flex;
+        gap: 2rem;
+        height: 100vh;
+        padding: 1rem 2rem;
+        box-sizing: border-box;
+        background: #f8f9fa;
+    }
+
+    /* Sidebar */
+    .artisanView-moduleSidebar {
+        width: 22%;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        padding: 2rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .module-title {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #222;
+    }
+
+    .artisanView-lessonBtn,
+    .finalProjectBtn {
+        width: 100%;
+        text-align: left;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: 0.2s;
+        opacity: 0.9;
+    }
+
+    .artisanView-lessonBtn {
+        background-color: #d4edda;
+        color: #155724;
+        margin: 0.8rem 0;
+    }
+
+        .artisanView-lessonBtn:hover {
+            background-color: #c3e6cb;
+            opacity: 1;
+        }
+
+    .finalProjectBtn {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+
+        .finalProjectBtn:hover {
+            background-color: #b8daff;
+            opacity: 1;
+        }
+
+    .active {
+        box-shadow: inset 0 0 0 2px #344AEA;
+        opacity: 1;
+    }
+
+    /* Main content */
+    .artisanView-moduleContent {
+        width: 78%;
+        background: #fff;
+        border-radius: 12px;
+        padding: 3rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+    }
+
+    .lesson-title {
+        color: #344AEA;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .lesson-text {
+        text-align: center;
+        max-width: 700px;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .lesson-image {
+        max-width: 100%;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Quiz styling */
+    .quiz-section {
+        width: 100%;
+        max-width: 700px;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .quiz-question {
+        background: #f1f3ff;
+        border: 1px solid #cdd4ff;
+        border-radius: 10px;
+        padding: 1.2rem 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+        .quiz-question h4 {
+            margin-bottom: 0.5rem;
+            color: #344AEA;
+            font-size: 1.1rem;
+        }
+
+    .quiz-text {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .quiz-options {
+        list-style: disc;
+        padding-left: 1.5rem;
+        margin-bottom: 0.6rem;
+    }
+
+        .quiz-options li {
+            margin: 0.2rem 0;
+        }
+
+    .quiz-correct {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    /* Session styling */
+    .session-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    /* Final project */
+    .final-project-section {
+        text-align: center;
+    }
+
+    .final-title {
+        color: #222;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+</style>

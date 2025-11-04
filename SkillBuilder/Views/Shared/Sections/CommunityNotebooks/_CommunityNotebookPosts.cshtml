@@ -451,6 +451,137 @@
             .community-details-posts-btn.secondary:hover {
                 background: #ddd;
             }
+
+    .comment {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+        .comment .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+    .comment-body {
+        flex: 1;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between; /* ✅ pushes delete icon to rightmost */
+        align-items: center;
+    }
+
+    .comment-author {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.95rem;
+        color: #333;
+    }
+
+    .comment .timestamp {
+        font-size: 0.8rem;
+        color: #888;
+    }
+
+    .comment-text {
+        margin-top: 4px;
+        font-size: 0.95rem;
+        color: #444;
+    }
+
+    /* 🗑️ Delete button (rightmost, no background) */
+    .comment-delete-btn {
+        background: none !important;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: color 0.2s ease;
+        padding: 2px;
+    }
+
+        .comment-delete-btn:hover {
+            color: #e74c3c;
+        }
+
+    /* === Delete Confirmation Modal === */
+    .delete-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+        .delete-modal.show {
+            display: flex;
+        }
+
+    .delete-modal-content {
+        background: white;
+        padding: 20px 24px;
+        border-radius: 10px;
+        width: 320px;
+        max-width: 90%;
+        text-align: center;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+        .delete-modal-content h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: #222;
+        }
+
+        .delete-modal-content p {
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+    .delete-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-confirm {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+        .btn-confirm:hover {
+            background: #c0392b;
+        }
+
+    .btn-cancel {
+        background: #eee;
+        color: #333;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+        .btn-cancel:hover {
+            background: #ddd;
+        }
 </style>
 
 <div class="posts-only-list">
@@ -533,6 +664,11 @@
             </div>
         }
     }
+
+    <!-- No posts found message (hidden by default) -->
+    <div id="noPostsFound" class="post-card" style="display:none; text-align:center; color:#777;">
+        No posts found.
+    </div>
 </div>
 
 <!-- REPORT POST MODAL -->
@@ -649,6 +785,18 @@
     </div>
 </div>
 
+<!-- 🗑️ Delete Comment Confirmation Modal -->
+<div id="deleteCommentModal" class="delete-modal">
+    <div class="delete-modal-content">
+        <h3>Delete Comment</h3>
+        <p>Are you sure you want to delete this comment?</p>
+        <div class="delete-modal-actions">
+            <button id="confirmDeleteCommentBtn" class="btn-confirm">Delete</button>
+            <button id="cancelDeleteCommentBtn" class="btn-cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let selectedPostId = null;
     let selectedAdminPostId = null;
@@ -676,41 +824,95 @@
     function getPostComments(){ return JSON.parse(localStorage.getItem("postComments")) || {}; }
     function setPostComments(comments){ localStorage.setItem("postComments", JSON.stringify(comments)); }
 
-    function addComment(postId){
-        if(userDisabled) return;
+    function addComment(postId) {
+        if (userDisabled) return;
+
         const input = document.getElementById(`comment-input-${postId}`);
         const text = input.value.trim();
-        if(!text) return;
+        if (!text) return;
+
+        // 1️⃣ Create a consistent comment object with unique id
         const comment = {
+            id: `c_${Date.now()}_${Math.random().toString(36).slice(2)}`,
             userId: currentUserId,
             firstName: currentUserFirstName,
             lastName: currentUserLastName,
-            avatarUrl: currentUserAvatar,
+            avatarUrl: currentUserAvatar || "/images/default-avatar.png",
             text,
             createdAt: new Date().toISOString()
         };
+
+        // 2️⃣ Retrieve and update saved comments
         let saved = getPostComments();
-        if(!saved[postId]) saved[postId]=[];
+        if (!saved[postId]) saved[postId] = [];
         saved[postId].push(comment);
-        setPostComments(saved);
-        renderComment(document.getElementById(`comments-list-${postId}`), comment);
-        document.getElementById(`comment-count-${postId}`).innerText = saved[postId].length;
-        input.value='';
+
+        // 3️⃣ Persist to localStorage
+        localStorage.setItem("postComments", JSON.stringify(saved));
+
+        // 4️⃣ Render immediately (real-time)
+        renderComment(postId, comment);
+
+        // 5️⃣ Update count instantly
+        const countEl = document.getElementById(`comment-count-${postId}`);
+        if (countEl) countEl.innerText = saved[postId].length;
+
+        // 6️⃣ Clear input
+        input.value = '';
     }
 
-    function renderComment(list, comment){
-        const el = document.createElement('div');
-        el.classList.add('comment');
-        el.innerHTML = `
-            <div class="avatar" style="background-image:url('${comment.avatarUrl}')"></div>
-            <div class="comment-content">
+    function renderComment(postId, comment) {
+        const commentList = document.getElementById(`comments-list-${postId}`);
+        if (!commentList) return; // prevent null error
+
+        const commentId = comment.id || `c_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+        const commentItem = document.createElement("div");
+        commentItem.classList.add("comment");
+        commentItem.dataset.commentId = commentId;
+
+        // Only show delete if owner or admin
+        const isOwner = comment.userId === currentUserId;
+        const isAdmin = "@currentUserIsAdmin".toLowerCase() === "true";
+        const showDelete = isOwner || isAdmin;
+
+        commentItem.innerHTML = `
+            <div class="avatar" style="background-image:url('${comment.avatarUrl || "/images/default-avatar.png"}')"></div>
+            <div class="comment-body">
                 <div class="comment-header">
-                    ${comment.firstName} ${comment.lastName}
-                    <span class="timestamp">${timeAgo(comment.createdAt)}</span>
+                    <div class="comment-author">
+                        <strong>${comment.firstName || "Anonymous"} ${comment.lastName || ""}</strong>
+                        <span class="timestamp">${timeAgo(comment.createdAt)}</span>
+                    </div>
+                    ${showDelete
+                        ? `<button class="comment-delete-btn" onclick="confirmDelete(${postId}, '${commentId}')">🗑️</button>`
+                        : ""}
                 </div>
                 <div class="comment-text">${comment.text}</div>
-            </div>`;
-        list.appendChild(el);
+            </div>
+        `;
+
+        commentList.appendChild(commentItem);
+    }
+
+    function deleteComment(postId, commentId) {
+        const saved = getPostComments();
+        if (!saved[postId]) return;
+
+        // Remove from localStorage
+        saved[postId] = saved[postId].filter(c => c.id !== commentId);
+        localStorage.setItem("postComments", JSON.stringify(saved));
+
+        // Remove from DOM
+        const commentList = document.getElementById(`comments-list-${postId}`);
+        const commentItem = commentList.querySelector(`[data-comment-id='${commentId}']`);
+        if (commentItem) commentItem.remove();
+
+        // Update count
+        const countEl = document.getElementById(`comment-count-${postId}`);
+        if (countEl) countEl.innerText = saved[postId].length;
+
+        console.log(`✅ Comment ${commentId} deleted from post ${postId}`);
     }
 
     function timeAgo(timestamp){
@@ -723,21 +925,115 @@
     }
 
     // Restore comments on load
-    document.addEventListener('DOMContentLoaded', ()=>{
+    document.addEventListener('DOMContentLoaded', () => {
         const saved = getPostComments();
-        for(let pid in saved){
+        for (let pid in saved) {
             const list = document.getElementById(`comments-list-${pid}`);
-            if(!list) continue;
-            saved[pid].forEach(c => renderComment(list,c));
+            if (!list) continue;
+            saved[pid].forEach(c => renderComment(pid, c)); // ✅ correct
             const countEl = document.getElementById(`comment-count-${pid}`);
-            if(countEl) countEl.innerText = saved[pid].length;
+            if (countEl) countEl.innerText = saved[pid].length;
         }
 
-        if(userDisabled){
-            document.querySelectorAll(".comment-btn, .comments-section textarea, .comments-section button").forEach(el=>{
-                el.disabled=true; el.style.cursor='not-allowed';
-            });
+        if (userDisabled) {
+            document.querySelectorAll(".comment-btn, .comments-section textarea, .comments-section button")
+                .forEach(el => {
+                    el.disabled = true;
+                    el.style.cursor = 'not-allowed';
+                });
         }
+
+        // --- Delete Comment Confirmation Modal Logic ---
+        const deleteCommentModal = document.getElementById("deleteCommentModal");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteCommentBtn");
+        const cancelDeleteBtn = document.getElementById("cancelDeleteCommentBtn");
+
+        let pendingDelete = { postId: null, commentId: null };
+
+        if (deleteCommentModal) {
+            // Make global for inline onclick
+            window.confirmDelete = function(postId, commentId) {
+                pendingDelete = { postId, commentId };
+                deleteCommentModal.classList.add("show");
+            }
+
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener("click", () => {
+                    if (pendingDelete.postId && pendingDelete.commentId) {
+                        deleteComment(pendingDelete.postId, pendingDelete.commentId);
+                    }
+                    deleteCommentModal.classList.remove("show");
+                    pendingDelete = { postId: null, commentId: null };
+                });
+            }
+
+            if (cancelDeleteBtn) {
+                cancelDeleteBtn.addEventListener("click", () => {
+                    deleteCommentModal.classList.remove("show");
+                    pendingDelete = { postId: null, commentId: null };
+                });
+            }
+        }
+
+        const adminDeleteModal = document.getElementById("adminDeletePostModal");
+        if (!adminDeleteModal) return;
+
+        const cancelBtn = adminDeleteModal.querySelector(".community-details-posts-btn.secondary");
+        const deleteBtn = adminDeleteModal.querySelector(".community-details-posts-btn.primary");
+
+        // Open modal when admin clicks a delete button
+        document.querySelectorAll(".delete-post-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                selectedAdminPostId = btn.getAttribute("data-post-id");
+                adminDeleteModal.style.display = "flex";
+            });
+        });
+
+        // Cancel button closes modal
+        cancelBtn.addEventListener("click", () => {
+            adminDeleteModal.style.display = "none";
+            selectedAdminPostId = null;
+        });
+
+        // Confirm delete button sends request
+        deleteBtn.addEventListener("click", async () => {
+            if (!selectedAdminPostId) return;
+
+            try {
+                const res = await fetch("/Community/AdminDeletePost", {
+                    method: "POST",
+                    body: new URLSearchParams({ postId: selectedAdminPostId }),
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // ✅ Clear related comments in localStorage
+                    const savedComments = JSON.parse(localStorage.getItem("postComments")) || {};
+                    delete savedComments[selectedAdminPostId];
+                    localStorage.setItem("postComments", JSON.stringify(savedComments));
+
+                    // ✅ Smoothly remove post card
+                    const postCard = document.querySelector(`.post-card[data-post-id='${selectedAdminPostId}']`);
+                    if (postCard) {
+                        postCard.style.transition = "opacity 0.3s";
+                        postCard.style.opacity = "0";
+                        setTimeout(() => postCard.remove(), 300);
+                    }
+
+                    // Close modal
+                    adminDeleteModal.style.display = "none";
+                    selectedAdminPostId = null;
+                    window.location.reload();
+                } else {
+                    alert(data.message || "Failed to delete post.");
+                }
+            } catch (err) {
+                console.error("Admin delete post error:", err);
+                alert("An error occurred while deleting the post.");
+            }
+        });
     });
 
     // ---------------- Image Preview for Edit Post ----------------
@@ -784,21 +1080,47 @@
         document.getElementById('communityDetailsEditPostModal').style.display = 'flex';
     }
 
-    // --- change detection ---
+    // Create a validation message element under the file input
+    let fileValidationMessage = document.createElement('div');
+    fileValidationMessage.style.color = 'red';
+    fileValidationMessage.style.fontSize = '0.85rem';
+    fileValidationMessage.style.marginTop = '0.25rem';
+    editPostImageInput.parentNode.appendChild(fileValidationMessage);
+
     editPostImageInput.addEventListener('change', function () {
         const file = this.files[0];
+        const maxSizeKB = 700;
+
         if (file) {
+            if (file.size / 1024 > maxSizeKB) {
+                // Show red text instead of alert
+                fileValidationMessage.innerText = `File is too large. Maximum allowed size is 700 KB.`;
+                this.value = ''; // Clear the file input
+                editPostImagePreview.style.display = 'none';
+                removeImageBtn.style.display = 'none';
+                removeImageFlag = false;
+                toggleSaveButton();
+                return;
+            } else {
+                fileValidationMessage.innerText = ''; // Clear any previous error
+            }
+
+            // Show preview
             const reader = new FileReader();
             reader.onload = function (e) {
                 editPostImagePreview.src = e.target.result;
                 editPostImagePreview.style.display = 'block';
                 removeImageBtn.style.display = 'inline-block';
                 removeImageFlag = false;
-                toggleSaveButton(); // ✅ call here to enable Save
+                toggleSaveButton();
             };
             reader.readAsDataURL(file);
         } else {
-            toggleSaveButton(); // handles case when user clears file input
+            // No file selected
+            fileValidationMessage.innerText = '';
+            editPostImagePreview.style.display = 'none';
+            removeImageBtn.style.display = 'none';
+            toggleSaveButton();
         }
     });
 
@@ -823,15 +1145,6 @@
             removeImageFlag ||
             editPostImageInput.files.length > 0;
 
-        saveBtn.disabled = !hasChanges;
-    }
-
-    function toggleSaveButton() {
-        const hasChanges =
-            editTitleInput.value.trim() !== originalTitle ||
-            editContentInput.value.trim() !== originalContent ||
-            removeImageFlag ||
-            editPostImageInput.files.length > 0;
         saveBtn.disabled = !hasChanges;
     }
 
@@ -920,27 +1233,37 @@
     }
 
     // ---------------- Admin Delete Post ----------------
-    function openAdminDeleteModal(postId){
+    function openAdminDeleteModal(postId) {
         selectedAdminPostId = postId;
-        document.getElementById('adminDeletePostModal').style.display='flex';
+        document.getElementById('adminDeletePostModal').style.display = 'flex';
     }
 
     async function confirmAdminDeletePost() {
         try {
-            const res = await fetch('/Community/DeletePost', {
+            // ✅ Use correct admin endpoint
+            const res = await fetch('/Community/AdminDeletePost', {
                 method: 'POST',
-                body: new URLSearchParams({ PostId: selectedAdminPostId })
+                body: new URLSearchParams({ postId: selectedAdminPostId }), // lowercase key matches backend
+                headers: { "X-Requested-With": "XMLHttpRequest" }
             });
+
             const data = await res.json();
 
-            if (data.success) {
-                let savedComments = JSON.parse(localStorage.getItem("postComments")) || {};
+            if (res.ok && data.success) {
+                // ✅ Clear related comments in localStorage
+                const savedComments = JSON.parse(localStorage.getItem("postComments")) || {};
                 delete savedComments[selectedAdminPostId];
                 localStorage.setItem("postComments", JSON.stringify(savedComments));
 
+                // ✅ Remove post card from DOM
                 const postCard = document.querySelector(`.post-card[data-post-id='${selectedAdminPostId}']`);
-                if (postCard) postCard.remove();
+                if (postCard) {
+                    postCard.style.transition = "opacity 0.3s";
+                    postCard.style.opacity = "0";
+                    setTimeout(() => postCard.remove(), 300);
+                }
 
+                // ✅ Clean up UI
                 const commentsList = document.getElementById(`comments-list-${selectedAdminPostId}`);
                 if (commentsList) commentsList.innerHTML = '';
 
@@ -948,13 +1271,15 @@
                 if (commentsSection) commentsSection.style.display = 'none';
 
                 document.getElementById('adminDeletePostModal').style.display = 'none';
+
+                // Optional: reload if you want to refresh the list
                 window.location.reload();
             } else {
-                alert(data.message || 'Failed to delete post');
+                alert(data.message || 'Failed to delete post.');
             }
         } catch (e) {
-            console.error(e);
-            alert('Error deleting post');
+            console.error("Admin delete post error:", e);
+            alert('An error occurred while deleting the post.');
         }
     }
 
@@ -996,4 +1321,5 @@
             }
         });
     });
+
 </script>

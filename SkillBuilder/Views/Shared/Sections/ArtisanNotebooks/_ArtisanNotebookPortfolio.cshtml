@@ -9,9 +9,11 @@
     }
 
     .artisan-portfolio-heading {
-        font-size: 1.5rem;
         font-weight: bold;
         color: #222;
+        font-size: 1.8rem;
+        color: #344AEA;
+        margin-bottom: 1rem;
     }
 
     .artisan-portfolio-grid {
@@ -195,10 +197,10 @@
         background-color: #e74c3c;
     }
 
-        .artisan-portfolio-btn-delete:hover {
-            background-color: #c0392b;
-            color: white;
-        }
+    .artisan-portfolio-btn-delete:hover {
+        background-color: #c0392b;
+        color: white;
+    }
 
     /* Edit modal image preview */
     .artisan-portfolio-edit-preview {
@@ -223,7 +225,7 @@
 </style>
 
 <div class="artisan-portfolio-section">
-    <div class="artisan-portfolio-heading">My Works</div>
+    <div class="artisan-portfolio-heading">My Works<br /><span style="font-size: 1rem; font-weight: 400; color: black;">This is your portfolio section where you can see the list of all works you have created.</span></div>
 
     <div class="artisan-portfolio-grid">
         @if (Model.ArtisanWorks != null && Model.ArtisanWorks.Any())
@@ -233,8 +235,8 @@
                 <div class="artisan-portfolio-card" data-work-id="@work.Id">
                     <img src="@work.ImageUrl" alt="@work.Title" />
                     <div class="artisan-portfolio-card-body">
-                        <h3>@work.Title</h3>
-                        <p>@work.Caption</p>
+                        <h3>Work Title: @work.Title</h3>
+                        <p>Work Caption: @work.Caption</p>
                     </div>
                     <div class="artisan-portfolio-card-actions">
                         <button class="artisan-portfolio-btn-edit" data-work-id="@work.Id">Edit</button>

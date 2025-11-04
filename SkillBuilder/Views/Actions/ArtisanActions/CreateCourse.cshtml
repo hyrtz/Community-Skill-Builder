@@ -146,6 +146,8 @@
         const tabs = document.querySelectorAll(".create-course-tab");
         const panels = document.querySelectorAll(".create-course-tab-panel");
 
+        let isDirty = false; // Track if user has made changes
+
         function activateTab(tabName) {
             localStorage.setItem("createCourseSelectedTab", tabName);
             tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
@@ -161,19 +163,18 @@
 
         const form = document.getElementById("create-course-form");
         const submitBtn = document.getElementById("createBtn");
-        const requiredFields = form.querySelectorAll("input[required], textarea[required], select[required]");
 
-        form.addEventListener("input", checkRequiredFields);
-        form.addEventListener("change", checkRequiredFields);
+        // Mark page as dirty on user interaction
+        form.addEventListener("input", () => { isDirty = true; checkRequiredFields(); });
+        form.addEventListener("change", () => { isDirty = true; checkRequiredFields(); });
         checkRequiredFields();
 
-        // 👁️ Observe module container for DOM changes
         const moduleList = document.getElementById("curriculum-modules");
         if (moduleList) {
             const observer = new MutationObserver(() => {
+                isDirty = true; // Any DOM change in modules marks dirty
                 checkRequiredFields();
             });
-
             observer.observe(moduleList, { childList: true, subtree: true });
         }
 
@@ -182,7 +183,19 @@
             localStorage.removeItem("createCourseSelectedTab");
             submitBtn.disabled = true;
             submitBtn.innerText = "Submitting...";
+            window.removeEventListener("beforeunload", beforeUnloadHandler); // Remove handler on submit
         });
+
+        // --- Beforeunload warning ---
+        function beforeUnloadHandler(e) {
+            // Only warn if user has made changes
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = ""; // Standard required for most browsers
+            }
+        }
+
+        window.addEventListener("beforeunload", beforeUnloadHandler);
     });
 
     function checkRequiredFields() {
@@ -190,7 +203,6 @@
         const requiredInputs = form.querySelectorAll("[required]");
         let allValid = true;
 
-        // Validate required inputs (text, selects, etc.)
         requiredInputs.forEach(input => {
             const isVisible = input.offsetParent !== null;
             const type = input.getAttribute("type");
@@ -224,7 +236,6 @@
             }
         });
 
-        // Modules validation
         const modules = document.querySelectorAll(".curriculum-module:not(#final-project-module)");
         const moduleWarning = document.getElementById("module-warning");
 
@@ -235,7 +246,6 @@
             if (moduleWarning) moduleWarning.style.display = "none";
         }
 
-        // Check that each module has at least 1 lesson
         modules.forEach(module => {
             const lessons = module.querySelectorAll(".curriculum-lesson-block");
             if (lessons.length === 0) {

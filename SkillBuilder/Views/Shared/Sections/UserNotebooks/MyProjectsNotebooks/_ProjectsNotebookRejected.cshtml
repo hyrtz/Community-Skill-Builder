@@ -1,59 +1,119 @@
 ﻿@model List<SkillBuilder.Models.CourseProjectSubmission>
 
+@{
+    string TruncateText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return "";
+        return text.Length > 120 ? text.Substring(0, 120) + "..." : text;
+    }
+}
+
 <style>
     /* === Declined Projects Section === */
-    .user-declined-projects-section {
+    .declined-projects-section {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
     }
 
-    .user-declined-projects-grid {
+    .declined-projects-grid {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: 1.5rem;
     }
 
-    .user-declined-projects-card {
-        width: 200px;
-        text-align: center;
-        cursor: pointer;
+    /* === Card Style === */
+    .declined-project-card {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        background: #fff;
+        padding: 1rem;
+        transition: transform 0.2s ease;
+        width: 100%;
     }
 
-        .user-declined-projects-card img {
-            width: 100%;
-            height: 160px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            transition: transform 0.2s ease;
-            border: 3px solid #DC3545; /* red border for declined */
+        .declined-project-card:hover {
+            transform: translateY(-2px);
         }
 
-            .user-declined-projects-card img:hover {
-                transform: scale(1.05);
-            }
-
-    .user-declined-projects-course-name {
-        margin-top: 0.5rem;
-        font-weight: bold;
-        color: #DC3545;
-        font-size: 0.95rem;
-    }
-
-    .user-declined-projects-empty {
-        padding: 2rem;
-        text-align: center;
-        color: #777;
-        font-size: 1rem;
-        line-height: 1.6;
-        border: 1px dashed #ccc;
+    .declined-project-img {
+        width: 288px;
+        height: 288px;
+        object-fit: cover;
         border-radius: 10px;
-        background-color: #fafafa;
+        flex-shrink: 0;
+        border: 3px solid #DC3545;
     }
 
-    /* Modal Styles */
-    .declined-projects-modal {
+    .declined-project-content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        max-width: 76%;
+    }
+
+    .declined-section {
+        background-color: #fff7f7;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid #DC3545;
+    }
+
+        .declined-section p {
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .declined-section strong {
+            color: #DC3545;
+            flex-shrink: 0;
+        }
+
+    /* Truncate text to one line */
+    .truncate-text {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        max-width: 100%;
+        flex: 1;
+    }
+
+    .declined-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-top: auto;
+    }
+
+    .btn-view-declined-project {
+        background-color: #DC3545;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+        .btn-view-declined-project:hover {
+            background-color: #b02a37;
+        }
+
+    /* === Modal Styles === */
+    .declined-project-modal {
         display: none;
         position: fixed;
         z-index: 9999;
@@ -66,17 +126,18 @@
         align-items: center;
     }
 
-    .declined-projects-modal-content {
+    .declined-project-modal-content {
         background: #fff;
-        border-radius: 10px;
+        border-radius: 12px;
         max-width: 700px;
         width: 90%;
         padding: 1.5rem;
         position: relative;
         animation: fadeIn 0.3s ease-in-out;
+        text-align: center;
     }
 
-    .declined-projects-close {
+    .declined-project-modal-close {
         position: absolute;
         top: 10px;
         right: 15px;
@@ -86,95 +147,142 @@
         cursor: pointer;
     }
 
-    .declined-projects-modal-body {
+    .declined-project-modal-details h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #DC3545;
+    }
+
+    .declined-project-modal-details p {
+        font-size: 1rem;
+        color: #444;
+        margin: 0.3rem 0;
+    }
+
+    .user-declined-empty {
+        padding: 2rem;
         text-align: center;
-    }
-
-    .declined-projects-image {
-        max-width: 100%;
-        max-height: 400px;
-        margin-bottom: 1rem;
+        color: #777;
+        font-size: 1rem;
+        line-height: 1.6;
+        border: 1px dashed #ccc;
         border-radius: 10px;
+        background-color: #fafafa;
     }
-
-    .declined-projects-details {
-        text-align: left;
-    }
-
-        .declined-projects-details h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #DC3545;
-        }
-
-        .declined-projects-details p {
-            margin: 0.2rem 0;
-            font-size: 1rem;
-            color: #444;
-        }
 </style>
 
-<section class="user-declined-projects-section">
-
+<section class="declined-projects-section">
     @if (Model != null && Model.Any())
     {
-        <div class="user-declined-projects-grid">
+        <h2 style="font-weight: 300; font-size: 1rem;">
+            Here are your rejected final projects. Please check your notifications for feedback and resubmission details.
+        </h2>
+
+        <div class="declined-projects-grid">
             @foreach (var project in Model)
             {
-                <div class="user-declined-projects-card"
-                     data-image="@project.MediaUrl"
-                     data-title="@project.Course?.Title"
-                     data-caption="@project.Description">
-                    <img src="@project.MediaUrl" alt="Declined project from @project.Course?.Title" />
-                    <div class="user-declined-projects-course-name">@project.Course?.Title</div>
+                <div class="declined-project-card">
+                    <img src="@project.MediaUrl" alt="@project.Course?.Title" class="declined-project-img" />
+
+                    <div class="declined-project-content">
+                        <!-- Course Info -->
+                        <div class="declined-section">
+                            <p><strong>Course:</strong> <span class="truncate-text">@project.Course?.Title</span></p>
+                            <p>
+                                <strong>Artisan:</strong> <span class="truncate-text">
+                                    @(project.Course?.Artisan != null
+                                                                ? project.Course.Artisan.FirstName + " " + project.Course.Artisan.LastName
+                                                                : "Unknown Artisan")
+                        </span>
+                    </p>
                 </div>
-            }
+
+                        <!-- Final Project Info -->
+                        <div class="declined-section">
+                            <p><strong>Final Project Title:</strong> <span class="truncate-text">@project.Course?.FinalProjectTitle</span></p>
+                            <p><strong>Final Project Description:</strong> <span class="truncate-text">@project.Course?.FinalProjectDescription</span></p>
+                        </div>
+
+                        <!-- User Submission -->
+                        <div class="declined-section">
+                            <p><strong>Your Submission:</strong></p>
+                            <p><strong>Title:</strong> <span class="truncate-text">@project.Title</span></p>
+                            <p><strong>Description:</strong> <span class="truncate-text">@project.Description</span></p>
+                            <p><strong>Submitted At:</strong> <span class="truncate-text">@project.SubmittedAt.ToString("MMMM dd, yyyy")</span></p>
+                            <p><strong>Declined Date:</strong> <span class="truncate-text">@project.ApprovedAt.ToString("MMMM dd, yyyy")</span></p>
+                        </div>
+
+                        <div class="declined-footer">
+                            <button type="button"
+                                    class="btn-view-declined-project"
+                                    data-title="@project.Title"
+                                    data-description="@project.Description"
+                                    data-media="@project.MediaUrl"
+                                    data-finaltitle="@project.Course?.FinalProjectTitle"
+                                    data-finaldesc="@project.Course?.FinalProjectDescription">
+                                View Project
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                }
         </div>
     }
     else
     {
-        <div class="user-declined-projects-empty">
-            You have no rejected projects.<br />
+        <div class="user-declined-empty">
+            You have no declined projects yet.<br />
             If a project is rejected, it will show up here.
         </div>
     }
 </section>
 
-<!-- Modal -->
-<div id="declinedProjectsModal" class="declined-projects-modal">
-    <div class="declined-projects-modal-content">
-        <span class="declined-projects-close">&times;</span>
-        <div class="declined-projects-modal-body">
-            <img id="declinedProjectsImage" class="declined-projects-image" src="" alt="Project Image" />
-            <div class="declined-projects-details">
-                <h2 id="declinedProjectsTitle"></h2>
-                <p id="declinedProjectsCaption"></p>
-            </div>
+<!-- === Declined Modal === -->
+<div id="declinedProjectModal" class="declined-project-modal">
+    <div class="declined-project-modal-content">
+        <span class="declined-project-modal-close">&times;</span>
+        <div class="declined-project-modal-details">
+
+            <!-- 🔴 Final Project Info moved to the top -->
+            <h4 id="declinedProjectModalFinalTitle" style="color:#DC3545; margin-top:0;"></h4>
+            <p id="declinedProjectModalFinalDesc" style="font-size:0.95rem; color:#555; margin-bottom:1rem;"></p>
+
+            <hr style="margin: 1rem 0;" />
+
+            <!-- 🖼️ Image and user submission details -->
+            <img id="declinedProjectModalImage" style="max-width: 100%; max-height: 600px; border-radius: 8px; margin-bottom: 1rem;" alt="Project Image" />
+            <h2 id="declinedProjectModalTitle"></h2>
+            <p id="declinedProjectModalDescription"></p>
+
         </div>
     </div>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const modal = document.getElementById("declinedProjectsModal");
-        const modalImage = document.getElementById("declinedProjectsImage");
-        const modalTitle = document.getElementById("declinedProjectsTitle");
-        const modalCaption = document.getElementById("declinedProjectsCaption");
-        const closeBtn = document.querySelector(".declined-projects-close");
+        const declinedModal = document.getElementById("declinedProjectModal");
+        const declinedModalTitle = document.getElementById("declinedProjectModalTitle");
+        const declinedModalDescription = document.getElementById("declinedProjectModalDescription");
+        const declinedModalImage = document.getElementById("declinedProjectModalImage");
+        const declinedModalFinalTitle = document.getElementById("declinedProjectModalFinalTitle");
+        const declinedModalFinalDesc = document.getElementById("declinedProjectModalFinalDesc");
+        const declinedCloseBtn = document.querySelector(".declined-project-modal-close");
 
-        document.querySelectorAll(".user-declined-projects-card").forEach(card => {
-            card.addEventListener("click", () => {
-                modalImage.src = card.dataset.image;
-                modalTitle.textContent = card.dataset.title;
-                modalCaption.textContent = card.dataset.caption;
-                modal.style.display = "flex";
+        document.querySelectorAll(".btn-view-declined-project").forEach(declinedBtn => {
+            declinedBtn.addEventListener("click", () => {
+                declinedModalTitle.textContent = "Project Title: " + declinedBtn.dataset.title || "Untitled Project";
+                declinedModalDescription.textContent = "Caption: " + declinedBtn.dataset.description || "No description provided.";
+                declinedModalImage.src = declinedBtn.dataset.media || "";
+                declinedModalFinalTitle.textContent = "Final Project Title: " + declinedBtn.dataset.finaltitle || "";
+                declinedModalFinalDesc.textContent = "Description: " + declinedBtn.dataset.finaldesc || "";
+                declinedModal.style.display = "flex";
             });
         });
 
-        closeBtn.addEventListener("click", () => modal.style.display = "none");
-        modal.addEventListener("click", (e) => {
-            if (e.target === modal) modal.style.display = "none";
+        declinedCloseBtn.addEventListener("click", () => declinedModal.style.display = "none");
+        declinedModal.addEventListener("click", e => {
+            if (e.target === declinedModal) declinedModal.style.display = "none";
         });
     });
 </script>

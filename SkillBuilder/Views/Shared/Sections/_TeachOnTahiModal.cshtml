@@ -93,16 +93,16 @@
         color: #333;
     }
 
-    .teach-verification-message h3 {
-        margin-bottom: 0.5rem;
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
+        .teach-verification-message h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
 
-    .teach-verification-message p {
-        font-size: 0.85rem;
-        color: #555;
-    }
+        .teach-verification-message p {
+            font-size: 0.85rem;
+            color: #555;
+        }
 
     .teach-back-btn {
         position: absolute;
@@ -376,6 +376,15 @@
 </div>
 
 <script>
+    window.addEventListener("beforeunload", function (e) {
+        const modal = document.getElementById("teach-modal");
+        if (modal && modal.style.display === "block") {
+            // Standard message, most browsers ignore custom text
+            e.preventDefault();
+            e.returnValue = "";
+        }
+    });
+
     document.addEventListener("DOMContentLoaded", () => {
         // ---------- Global variable for email ----------
         let teachSignupEmail = "";
@@ -420,7 +429,7 @@
 
         const closeBtn = document.getElementById("teach-close-btn");
         closeBtn?.addEventListener("click", () => closeModal("teach-modal", true));
-        
+
         // ---------- Show/Hide Signup Form ----------
         window.showTeachForm = function() {
             document.querySelector("#teach-form").style.display = "flex";

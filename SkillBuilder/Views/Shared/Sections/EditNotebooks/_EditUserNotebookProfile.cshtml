@@ -2,180 +2,180 @@
 @model UserProfileViewModel
 
 <style>
-/* --- Container --- */
-.epf-container-wrapper {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-    position: relative;
-    min-height: 580px;
-}
+    /* --- Container --- */
+    .epf-container-wrapper {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+        position: relative;
+        min-height: 580px;
+    }
 
-.epf-left-panel {
-    flex: 1;
-    max-width: calc(100% - 200px);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
+    .epf-left-panel {
+        flex: 1;
+        max-width: calc(100% - 200px);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
 
-.epf-right-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: 180px;
-    position: absolute;
-    right: 0;
-    top: 0;
-}
+    .epf-right-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: 180px;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
 
-.epf-field {
-    display: flex;
-    flex-direction: column;
-}
+    .epf-field {
+        display: flex;
+        flex-direction: column;
+    }
 
-.epf-field label {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
+        .epf-field label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
 
-.epf-input {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #c0c0c0;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    width: 100%;
-    margin-bottom: 1rem;
-}
+    .epf-input {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #c0c0c0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
 
-.epf-submit-btn {
-    margin-top: 1rem;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.95rem;
-    font-weight: bold;
-    background-color: #344AEA;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
+    .epf-submit-btn {
+        margin-top: 1rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: bold;
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
 
-.epf-submit-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
+        .epf-submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
 
-.epf-avatar-preview {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #ddd;
-    background-color: #f0f0f8;
-}
+    .epf-avatar-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #ddd;
+        background-color: #f0f0f8;
+    }
 
-.epf-change-avatar-btn,
-.epf-toggle-password-btn {
-    background-color: #344AEA;
-    color: white;
-    border: none;
-    padding: 0.7rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    text-align: center;
-    transition: background 0.2s ease;
-}
+    .epf-change-avatar-btn,
+    .epf-toggle-password-btn {
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        padding: 0.7rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        transition: background 0.2s ease;
+    }
 
-.epf-change-avatar-btn:hover,
-.epf-toggle-password-btn:hover {
-    background-color: #2b36c5;
-}
+        .epf-change-avatar-btn:hover,
+        .epf-toggle-password-btn:hover {
+            background-color: #2b36c5;
+        }
 
-/* --- Password section --- */
-.epf-password-section {
-    display: none;
-    flex-direction: column;
-    gap: 1rem;
-}
+    /* --- Password section --- */
+    .epf-password-section {
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+    }
 
-.epf-password-field {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
+    .epf-password-field {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
 
-.epf-password-field input {
-    padding-right: 2.5rem;
-}
+        .epf-password-field input {
+            padding-right: 2.5rem;
+        }
 
-.epf-toggle-eye {
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1rem;
-    cursor: pointer;
-}
+    .epf-toggle-eye {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1rem;
+        cursor: pointer;
+    }
 
-/* --- Modal --- */
-.epf-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
+    /* --- Modal --- */
+    .epf-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
 
-.epf-modal {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 300px;
-    text-align: center;
-}
+    .epf-modal {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 300px;
+        text-align: center;
+    }
 
-.epf-modal button {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-}
+        .epf-modal button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
 
-.epf-modal-confirm {
-    background-color: #344AEA;
-    color: white;
-}
+    .epf-modal-confirm {
+        background-color: #344AEA;
+        color: white;
+    }
 
-.epf-modal-cancel {
-    background-color: #ccc;
-    color: #333;
-    margin-left: 1rem;
-}
+    .epf-modal-cancel {
+        background-color: #ccc;
+        color: #333;
+        margin-left: 1rem;
+    }
 
-.epf-warning {
-    color: red;
-    font-size: 0.8rem;
-    display: none;
-    margin-bottom: 1rem;
-    margin-top: -1rem;
-}
+    .epf-warning {
+        color: red;
+        font-size: 0.8rem;
+        display: none;
+        margin-bottom: 1rem;
+        margin-top: -1rem;
+    }
 
-.password-checklist {
-    font-size: 0.8rem;
-    margin-top: 0.5rem;
-    color: gray;
-}
+    .password-checklist {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        color: gray;
+    }
 </style>
 
 @if (TempData["ErrorMessage"] != null)
@@ -227,13 +227,13 @@
             <div class="epf-password-section" id="epf-password-section">
                 <div class="epf-password-field">
                     <label for="CurrentPassword">Old Password</label>
-                    <input type="password" id="CurrentPassword" name="CurrentPassword" class="epf-input" placeholder="Enter current password"   />
+                    <input type="password" id="CurrentPassword" name="CurrentPassword" class="epf-input" placeholder="Enter current password" />
                     <span class="epf-toggle-eye" onclick="togglePassword('CurrentPassword', this)">👁️‍🗨️</span>
                     <p class="epf-warning" id="epf-current-warning" style="display:none;">⚠️ Wrong password</p>
                 </div>
                 <div class="epf-password-field">
                     <label for="NewPassword">New Password</label>
-                    <input type="password" id="NewPassword" name="NewPassword" class="epf-input" placeholder="Enter new password"   />
+                    <input type="password" id="NewPassword" name="NewPassword" class="epf-input" placeholder="Enter new password" />
                     <span class="epf-toggle-eye" onclick="togglePassword('NewPassword', this)">👁️‍🗨️</span>
                     <!-- Password checklist -->
                     <div class="password-checklist" id="epf-password-checklist">
@@ -342,13 +342,40 @@
 
     // Avatar preview
     changeAvatarBtn.addEventListener('click', () => avatarInput.click());
+
+    // --- Avatar file validation ---
+    const avatarWarning = document.createElement('div');
+    avatarWarning.style.color = 'red';
+    avatarWarning.style.fontSize = '0.85rem';
+    avatarWarning.style.marginTop = '0.25rem';
+    avatarInput.parentNode.appendChild(avatarWarning);
+
     avatarInput.addEventListener('change', e => {
         const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => avatarPreview.src = ev.target.result;
-        reader.readAsDataURL(file);
-        markFormChanged();
+        const maxSizeKB = 700;
+
+        if (!file) {
+            avatarWarning.innerText = '';
+            submitBtn.disabled = !formChanged;
+            avatarPreview.src = "@Model.User.UserAvatar"; // reset to original avatar if needed
+            return;
+        }
+
+        if (file.size / 1024 > maxSizeKB) {
+            avatarWarning.innerText = `File size exceeds ${maxSizeKB} KB. Please select a smaller image.`;
+            avatarPreview.src = "@Model.User.UserAvatar"; // reset preview
+            e.target.value = ''; // clear file input
+            submitBtn.disabled = true;
+        } else {
+            avatarWarning.innerText = '';
+            const reader = new FileReader();
+            reader.onload = ev => avatarPreview.src = ev.target.result;
+            reader.readAsDataURL(file);
+
+            // Enable save button if the form has changes
+            submitBtn.disabled = false;
+            markFormChanged();
+        }
     });
 
     // Toggle password section
@@ -486,5 +513,18 @@
                 submitBtn.disabled = false; // enable Save Changes
             }
         });
+    });
+
+    // ------------------ BEFOREUNLOAD WARNING ------------------
+    window.addEventListener('beforeunload', function (e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = ""; // Standard for most browsers
+        }
+    });
+
+    // Disable beforeunload on successful form submission
+    form.addEventListener('submit', () => {
+        window.removeEventListener('beforeunload', () => {});
     });
 </script>

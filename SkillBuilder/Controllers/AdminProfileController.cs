@@ -6,6 +6,7 @@ using SkillBuilder.Models;
 using SkillBuilder.Models.ViewModels;
 using SkillBuilder.Services;
 using System.Linq;
+using System.Security.Claims;
 
 namespace SkillBuilder.Controllers
 {
@@ -24,12 +25,13 @@ namespace SkillBuilder.Controllers
         [HttpGet("{id}")]
         public IActionResult AdminProfile(string id)
         {
-            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var currentAdminId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (id != currentUserId)
+            if (string.IsNullOrEmpty(currentAdminId) || id != currentAdminId)
             {
                 return Forbid();
             }
+
 
             if (string.IsNullOrEmpty(id))
                 return NotFound();
@@ -489,6 +491,133 @@ namespace SkillBuilder.Controllers
             await AddNotificationAsync(adminId, adminMessage);
 
             return Json(new { success = true });
+        }
+
+        [HttpPost("DeleteReview/{id}")]
+        public async Task<IActionResult> DeleteReview(int id, string adminId, string? reason)
+        {
+            var review = await _context.CourseReviews
+                .Include(r => r.User)
+                .Include(r => r.Course)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (review == null)
+                return Json(new { success = false, message = "Review not found" });
+
+            // Soft delete (archive) or hard delete, depending on your design
+            _context.CourseReviews.Remove(review);
+            await _context.SaveChangesAsync();
+
+            // Notify reviewer
+            if (review.User != null)
+            {
+                string message = $"⚠️ Your review for the course '{review.Course?.Title}' has been deleted by an admin.";
+                if (!string.IsNullOrWhiteSpace(reason))
+                    message += $" Reason: {reason}";
+
+                await AddNotificationAsync(review.User.Id, message);
+            }
+
+            // Notify admin
+            if (!string.IsNullOrEmpty(adminId))
+            {
+                string adminMessage = $"You deleted a review for the course '{review.Course?.Title}' by {review.User?.FirstName} {review.User?.LastName}.";
+                if (!string.IsNullOrWhiteSpace(reason))
+                    adminMessage += $" Reason: {reason}";
+
+                await AddNotificationAsync(adminId, adminMessage);
+            }
+
+            return Json(new { success = true });
+        }
+
+        [HttpGet("GetReportLogs")]
+        public IActionResult GetReportLogs()
+        {
+            var reports = new List<ReportLogViewModel>();
+
+            // --- USER REPORTS ---
+            reports.AddRange(
+                _context.UserReports
+                    .Select(r => new ReportLogViewModel
+                    {
+                        Id = r.Id,
+                        ReportType = "User",
+                        TargetUserId = r.ReportedUserId,   // <-- add this
+                        TargetName = _context.Users
+                                       .Where(u => u.Id == r.ReportedUserId)
+                                       .Select(u => u.FirstName + " " + u.LastName)
+                                       .FirstOrDefault() ?? "Unknown User",
+                        ReportedBy = _context.Users
+                                       .Where(u => u.Id == r.ReporterId)
+                                       .Select(u => u.FirstName + " " + u.LastName)
+                                       .FirstOrDefault() ?? "Unknown Reporter",
+                        Reason = r.ReportType,
+                        DateReported = r.ReportedAt,
+                        Status = "Pending"
+                    })
+            );
+
+            // --- COURSE REPORTS ---
+            reports.AddRange(
+                _context.CourseReports
+                    .Include(r => r.Course)
+                    .Include(r => r.Reporter)
+                    .Select(r => new ReportLogViewModel
+                    {
+                        Id = r.Id,
+                        ReportType = "Course",
+                        TargetCourseLink = r.Course != null ? r.Course.Link : null,
+                        TargetName = r.Course != null ? r.Course.Title : "Unknown Course",
+                        ReportedBy = r.Reporter != null ? r.Reporter.FirstName + " " + r.Reporter.LastName : "Unknown Reporter",
+                        Reason = r.Reason,
+                        DateReported = r.ReportedAt,
+                        Status = "Pending"
+                    })
+            );
+
+            // --- COMMUNITY REPORTS ---
+            reports.AddRange(
+                _context.CommunityReports
+                    .Include(r => r.Community)
+                    .Include(r => r.Reporter)
+                    .Select(r => new ReportLogViewModel
+                    {
+                        Id = r.Id,
+                        ReportType = "Community",
+                        TargetCommunityId = r.CommunityId, // <-- add this
+                        TargetName = r.Community != null ? r.Community.Name : "Unknown Community",
+                        ReportedBy = r.Reporter != null ? r.Reporter.FirstName + " " + r.Reporter.LastName : "Unknown Reporter",
+                        Reason = r.Reason,
+                        DateReported = r.ReportedAt,
+                        Status = "Pending"
+                    })
+            );
+
+            // --- COMMUNITY POST REPORTS ---
+            reports.AddRange(
+                _context.CommunityPostReports
+                    .Include(r => r.Post)
+                    .Select(r => new ReportLogViewModel
+                    {
+                        Id = r.Id,
+                        ReportType = "Post",
+                        TargetPostId = r.PostId,  // post id
+                        TargetCommunityId = r.Post.CommunityId, // <-- add this
+                        TargetName = r.Post != null
+                            ? r.Post.Title ?? (r.Post.Content.Length > 40 ? r.Post.Content.Substring(0, 40) + "..." : r.Post.Content)
+                            : "Unknown Post",
+                        ReportedBy = _context.Users
+                                       .Where(u => u.Id == r.ReporterId)
+                                       .Select(u => u.FirstName + " " + u.LastName)
+                                       .FirstOrDefault() ?? "Unknown Reporter",
+                        Reason = r.Reason,
+                        DateReported = r.ReportedAt,
+                        Status = "Pending"
+                    })
+            );
+
+            return Json(reports.OrderByDescending(r => r.DateReported).ToList());
         }
     }
 }

@@ -406,30 +406,28 @@
     </div>
 
     <!-- Center: Nav links -->
-    @if (string.IsNullOrEmpty(userRole) || userRole != "Admin")
-    {
-        <div class="navbar-center">
-            @if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(userRole))
-            {
-                <a href="@homeLink" class="navbar-item @(currentController == "UserProfile" || currentController == "ArtisanProfile" || currentController == "AdminProfile" ? "active-nav" : "")">Home</a>
-            }
+    <div class="navbar-center">
+        @if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(userRole) && userRole != "Admin")
+        {
+            <a href="@homeLink" class="navbar-item @(currentController == "UserProfile" || currentController == "ArtisanProfile" || currentController == "AdminProfile" ? "active-nav" : "")">Home</a>
 
             <a asp-controller="Courses" asp-action="CourseCatalog" class="navbar-item @(currentController == "Courses" ? "active-nav" : "")">Courses</a>
 
             @* Show Leaderboards and Artisans only if NOT Artisan *@
             @if (userRole != "Artisan")
             {
-                @* <a asp-controller="Leaderboard" asp-action="UserLeaderboard" class="navbar-item @(currentController == "Leaderboard" ? "active-nav" : "")">
+                <a asp-controller="Leaderboard" asp-action="UserLeaderboard" class="navbar-item @(currentController == "Leaderboard" ? "active-nav" : "")">
                     Leaderboards
                 </a>
                 <a asp-controller="Artisan" asp-action="ArtisanList" class="navbar-item @(currentController == "Artisan" ? "active-nav" : "")">
                     Artisans
-                </a> *@
+                </a>
             }
+        }
 
-            <a asp-controller="Community" asp-action="CommunityHub" class="navbar-item @(currentController == "Community" ? "active-nav" : "")">Community</a>
-        </div>
-    }
+        @* Community is always visible *@
+        <a asp-controller="Community" asp-action="CommunityHub" class="navbar-item @(currentController == "Community" ? "active-nav" : "")">Community</a>
+    </div>
 
     <!-- Right: Login/Signup -->
     <div class="navbar-right">
@@ -437,8 +435,15 @@
         {
             var isApproved = User.FindFirst("IsApproved")?.Value == "True";
             var isVerified = User.FindFirst("IsVerified")?.Value == "True";
+            var isDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
 
-            if (isApproved && isVerified)
+            if (isDeactivated)
+            {
+                <a class="navbar-item create-course-btn disabled" style="pointer-events:none; opacity:0.5;">
+                    Account Deactivated - Cannot Create Course
+                </a>
+            }
+            else if (isApproved && isVerified)
             {
                 <a href="/ArtisanActions/CreateCourse" class="navbar-item create-course-btn">
                     Create Course
@@ -451,7 +456,7 @@
                 </a>
             }
         }
-        
+
         <div class="notification-wrapper">
             <a href="javascript:void(0);" class="navbar-item nav-notification-icon" onclick="toggleNotificationDropdown()" style="display: @(User.Identity.IsAuthenticated ? "inline-block" : "none"); position: relative;">
                 <img src="/assets/icons/Bell.ico" style="width: 2rem;" />
@@ -478,7 +483,7 @@
 
                     <a href="@profileUrl" class="profile-menu-item">Profile</a>
 
-                    <button onclick="toggleProfileNotifMenu()" class="profile-menu-item profile-menu-toggle">
+                    @* <button onclick="toggleProfileNotifMenu()" class="profile-menu-item profile-menu-toggle">
                         Notification
                         <span class="profile-menu-arrow">▸</span>
                     </button>
@@ -492,7 +497,7 @@
                             <input type="radio" name="notifSetting" onchange="setProfileNotif(false)" />
                             Off
                         </label>
-                    </div>
+                    </div> *@
 
                     @if (userRole == "Artisan")
                     {
@@ -676,35 +681,54 @@
         const resubmitFileInput = document.querySelector("#resubmitForm input[type='file']");
         const resubmitPreview = document.getElementById("resubmitPreview");
 
+        // Create red error container
+        let resubmitFileError = document.getElementById("resubmitFileError");
+        if (!resubmitFileError && resubmitFileInput) {
+            resubmitFileError = document.createElement("div");
+            resubmitFileError.id = "resubmitFileError";
+            resubmitFileError.style.color = "red";
+            resubmitFileError.style.marginTop = "0.5rem";
+            resubmitFileError.style.fontSize = "0.8rem";
+            resubmitFileInput.insertAdjacentElement("afterend", resubmitFileError);
+        }
+
         if (resubmitFileInput) {
             resubmitFileInput.addEventListener("change", () => {
                 const file = resubmitFileInput.files[0];
                 const submitBtn = document.querySelector("#resubmitForm .logout-modal-btn-confirm");
-                resubmitPreview.innerHTML = ""; // Clear previous preview
+                resubmitPreview.innerHTML = "";
+                resubmitFileError.innerText = "";
 
                 if (!file) {
                     submitBtn.disabled = true;
                     return;
                 }
 
-                // Allowed types
                 const allowedTypes = [
                     "application/pdf",
-                    "application/msword", // .doc
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     "image/jpeg",
                     "image/jpg",
                     "image/png"
                 ];
 
                 if (!allowedTypes.includes(file.type)) {
-                    alert("Invalid file type. Allowed types: PDF, DOC, DOCX, JPG, JPEG, PNG.");
-                    resubmitFileInput.value = ""; // Reset input
+                    resubmitFileError.innerText = "Invalid file type. Allowed: PDF, DOC, DOCX, JPG, JPEG, PNG.";
+                    resubmitFileInput.value = "";
                     submitBtn.disabled = true;
                     return;
                 }
 
-                // Preview only if image
+                // ✅ File size validation (5 MB max)
+                const maxSizeMB = 5;
+                if (file.size > maxSizeMB * 1024 * 1024) {
+                    resubmitFileError.innerText = `File too large. Maximum allowed size is ${maxSizeMB} MB.`;
+                    resubmitFileInput.value = "";
+                    submitBtn.disabled = true;
+                    return;
+                }
+
                 if (file.type.startsWith("image/")) {
                     const img = document.createElement("img");
                     img.src = URL.createObjectURL(file);
@@ -714,7 +738,6 @@
                     img.style.borderRadius = "6px";
                     resubmitPreview.appendChild(img);
                 } else {
-                    // For PDF/DOC/DOCX just show the filename
                     const fileName = document.createElement("p");
                     fileName.textContent = `Selected file: ${file.name}`;
                     resubmitPreview.appendChild(fileName);
@@ -724,31 +747,50 @@
             });
         }
 
-        // --- Resubmit Project preview ---
+        // --- ✅ Resubmit Project preview ---
         const resubmitProjectInput = document.querySelector("#resubmitProjectForm input[type='file']");
         const resubmitProjectPreview = document.getElementById("resubmitProjectPreview");
+
+        // Create red error container
+        let resubmitProjectError = document.getElementById("resubmitProjectError");
+        if (!resubmitProjectError && resubmitProjectInput) {
+            resubmitProjectError = document.createElement("div");
+            resubmitProjectError.id = "resubmitProjectError";
+            resubmitProjectError.style.color = "red";
+            resubmitProjectError.style.marginTop = "0.5rem";
+            resubmitProjectError.style.fontSize = "0.8rem";
+            resubmitProjectInput.insertAdjacentElement("afterend", resubmitProjectError);
+        }
 
         if (resubmitProjectInput) {
             resubmitProjectInput.addEventListener("change", () => {
                 const file = resubmitProjectInput.files[0];
                 const submitBtn = document.querySelector("#resubmitProjectForm .logout-modal-btn-confirm");
                 resubmitProjectPreview.innerHTML = "";
+                resubmitProjectError.innerText = "";
 
                 if (!file) {
                     submitBtn.disabled = true;
                     return;
                 }
 
-                // Accept only jpg, jpeg, png
                 const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
                 if (!allowedTypes.includes(file.type)) {
-                    alert("Only JPG, JPEG, and PNG files are allowed.");
-                    resubmitProjectInput.value = ""; // Reset file input
+                    resubmitProjectError.innerText = "Only JPG, JPEG, and PNG files are allowed.";
+                    resubmitProjectInput.value = "";
                     submitBtn.disabled = true;
                     return;
                 }
 
-                // Show preview
+                // ✅ File size validation (700 KB max)
+                const maxSizeKB = 700;
+                if (file.size > maxSizeKB * 1024) {
+                    resubmitProjectError.innerText = `File too large. Maximum allowed size is ${maxSizeKB} KB.`;
+                    resubmitProjectInput.value = "";
+                    submitBtn.disabled = true;
+                    return;
+                }
+
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(file);
                 img.style.maxWidth = "100%";
@@ -849,6 +891,7 @@
 
                     await loadNotifications();
                     await loadUnreadCount();
+                    window.location.reload();
                 } else {
                     alert(result.message);
                     submitBtn.disabled = false;
@@ -931,6 +974,7 @@
                     window.resubmittedApps.add(appId);
                     await loadNotifications();
                     await loadUnreadCount();
+                    window.location.reload();
                 } else {
                     alert(result.message);
                     submitBtn.disabled = false;
@@ -1033,6 +1077,7 @@
 
                     await loadNotifications();
                     await loadUnreadCount();
+                    window.location.reload();
                 } else {
                     alert(result.message || "Something went wrong");
                     btn.disabled = false;

@@ -2,7 +2,7 @@
 @using System.Text.Json
 
 <style>
-    /* === Updated classnames === */
+    /* === Mirror CSS from _CreateCourseCurriculum === */
     .curriculum-edit-container {
         margin-bottom: 2rem;
     }
@@ -23,6 +23,7 @@
 
     .curriculum-edit-form-group {
         margin-bottom: 1rem;
+        margin-top: 1rem;
     }
 
         .curriculum-edit-form-group label {
@@ -73,6 +74,7 @@
         border-radius: 6px;
         cursor: pointer;
         transition: 0.2s;
+        margin-bottom: 1rem;
     }
 
         .curriculum-edit-add-btn:hover {
@@ -87,7 +89,7 @@
     }
 
     .curriculum-edit-lesson-duration-value {
-        width: 150px;
+        width: 150px !important;
     }
 
     .curriculum-edit-lesson-duration-unit {
@@ -126,13 +128,22 @@
     .curriculum-edit-lesson-preview img,
     .curriculum-edit-lesson-preview video {
         max-width: 100%;
+        height: auto;
+        display: block;
         margin-bottom: 0.5rem;
         border: 1px solid #ccc;
         border-radius: 6px;
     }
+
+    .curriculum-edit-form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
 </style>
 
-<!-- HTML container -->
 <div class="curriculum-edit-container">
     <h3>Curriculum</h3>
 
@@ -194,50 +205,80 @@
     }
 
     function curriculumEditRemoveModule(index) {
+        // Get all modules excluding final project
+        const modules = document.querySelectorAll(".curriculum-edit-module:not(#curriculum-edit-final-project-module)");
+
+        if(modules.length <= 2){
+            alert("You must have at least 2 modules.");
+            return; // prevent deletion
+        }
+
         const module = document.querySelector(`.curriculum-edit-module[data-index='${index}']`);
         if(module) module.remove();
         curriculumEditRenumberModules();
     }
 
-    // ------------------ LESSON FUNCTIONS ------------------
+        // ------------------ LESSON FUNCTIONS ------------------
     function curriculumEditAddLesson(moduleIndex, lessonData = null) {
         const lessonsContainer = document.getElementById(`curriculum-edit-lessons-${moduleIndex}`);
+        if(!lessonsContainer) return; // guard against null
         const lessonIndex = lessonsContainer.children.length;
 
         const lessonDiv = document.createElement("div");
         lessonDiv.className = "curriculum-edit-lesson-block";
 
         lessonDiv.innerHTML = `
-            <button type="button" class="curriculum-edit-lesson-delete-btn" onclick="curriculumEditRemoveLesson(${moduleIndex}, this)">🗑️</button>
-            <div class="curriculum-edit-form-group">
-                <label>Lesson Title *</label>
-                <input type="text" class="curriculum-edit-form-control" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].Title" placeholder="Lesson title" value="${lessonData?.Title || ''}" required />
+            <div class="curriculum-edit-lesson-header">
+                <button type="button" class="curriculum-edit-lesson-delete-btn" onclick="curriculumEditRemoveLesson(${moduleIndex}, this)">🗑️</button>
             </div>
-            <div class="curriculum-edit-form-group">
-                <label>Lesson Type *</label>
-                <select class="curriculum-edit-form-select" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].LessonType"
-                        onchange="curriculumEditHandleLessonTypeChange(this, ${moduleIndex}, ${lessonIndex})" required>
-                    <option value="">-- Select Type --</option>
-                    <option value="Text" ${lessonData?.LessonType==='Text'?'selected':''}>Text</option>
-                    <option value="Image + Text" ${lessonData?.LessonType==='Image + Text'?'selected':''}>Image + Text</option>
-                    <option value="Video" ${lessonData?.LessonType==='Video'?'selected':''}>Video</option>
-                    <option value="Quiz" ${lessonData?.LessonType==='Quiz'?'selected':''}>Assessment</option>
-                    <option value="Session" ${lessonData?.LessonType==='Session'?'selected':''}
-                        ${sessionAlreadyExists(moduleIndex, lessonIndex) ? 'disabled' : ''}>Session</option>
-                </select>
+
+            <div class="curriculum-edit-form-row">
+                <div class="curriculum-edit-form-col curriculum-edit-form-group">
+                    <label>Lesson Title *</label>
+                    <input type="text" class="curriculum-edit-form-control"
+                           name="Modules[${moduleIndex}].Lessons[${lessonIndex}].Title"
+                           placeholder="Lesson title"
+                           value="${lessonData?.Title || ''}" required />
+                </div>
+                <div class="curriculum-edit-form-col curriculum-edit-form-group">
+                    <label>Lesson Type *</label>
+                    <select class="curriculum-edit-form-select"
+                            name="Modules[${moduleIndex}].Lessons[${lessonIndex}].LessonType"
+                            onchange="curriculumEditHandleLessonTypeChange(this, ${moduleIndex}, ${lessonIndex})"
+                            required>
+                        <option value="">-- Select Type --</option>
+                        <option value="Text" ${lessonData?.LessonType==='Text'?'selected':''}>Text</option>
+                        <option value="Image + Text" ${lessonData?.LessonType==='Image + Text'?'selected':''}>Image + Text</option>
+                        <option value="Video" ${lessonData?.LessonType==='Video'?'selected':''}>Video</option>
+                        <option value="Quiz" ${lessonData?.LessonType==='Quiz'?'selected':''}>Assessment</option>
+                        <option value="Session" ${lessonData?.LessonType==='Session'?'selected':''}
+                            ${sessionAlreadyExists(moduleIndex, lessonIndex) ? 'disabled' : ''}>Session</option>
+                    </select>
+                </div>
             </div>
+
             <div class="curriculum-edit-lesson-duration-row">
-                <input type="number" class="curriculum-edit-form-control curriculum-edit-lesson-duration-value" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].DurationValue" value="${lessonData?.DurationValue || ''}" required />
-                <select class="curriculum-edit-form-select curriculum-edit-lesson-duration-unit" name="Modules[${moduleIndex}].Lessons[${lessonIndex}].DurationUnit" required>
+                <input type="number" class="curriculum-edit-form-control curriculum-edit-lesson-duration-value"
+                       name="Modules[${moduleIndex}].Lessons[${lessonIndex}].DurationValue"
+                       value="${lessonData?.DurationValue || ''}" required />
+                <select class="curriculum-edit-form-select curriculum-edit-lesson-duration-unit"
+                        name="Modules[${moduleIndex}].Lessons[${lessonIndex}].DurationUnit" required>
                     <option value="minutes" ${lessonData?.DurationUnit==='minutes'?'selected':''}>Minutes</option>
                     <option value="hours" ${lessonData?.DurationUnit==='hours'?'selected':''}>Hours</option>
                 </select>
             </div>
+
             <div class="curriculum-edit-lesson-config-container"></div>
         `;
+
         lessonsContainer.appendChild(lessonDiv);
 
-        if(lessonData) curriculumEditHandleLessonTypeChange(lessonDiv.querySelector("select"), moduleIndex, lessonIndex, lessonData);
+        // If lessonData exists, initialize the lesson type content
+        if(lessonData){
+            curriculumEditHandleLessonTypeChange(lessonDiv.querySelector("select"), moduleIndex, lessonIndex, lessonData);
+        }
+
+        // Re-number lessons after adding
         curriculumEditRenumberLessons(moduleIndex);
     }
 
@@ -282,16 +323,22 @@
 
     function curriculumEditRenumberLessons(moduleIndex) {
         const lessonsContainer = document.getElementById(`curriculum-edit-lessons-${moduleIndex}`);
+        if (!lessonsContainer) return; // <-- guard against null
+
         const lessons = lessonsContainer.children;
         Array.from(lessons).forEach((lesson, i) => {
             const titleInput = lesson.querySelector("input[name$='.Title']");
             if(titleInput) titleInput.name = `Modules[${moduleIndex}].Lessons[${i}].Title`;
+
             const typeSelect = lesson.querySelector("select[name$='.LessonType']");
             if(typeSelect) typeSelect.name = `Modules[${moduleIndex}].Lessons[${i}].LessonType`;
+
             const durationVal = lesson.querySelector("input[name$='.DurationValue']");
             if(durationVal) durationVal.name = `Modules[${moduleIndex}].Lessons[${i}].DurationValue`;
+
             const durationUnit = lesson.querySelector("select[name$='.DurationUnit']");
             if(durationUnit) durationUnit.name = `Modules[${moduleIndex}].Lessons[${i}].DurationUnit`;
+
             const deleteBtn = lesson.querySelector(".curriculum-edit-lesson-delete-btn");
             if(deleteBtn) deleteBtn.setAttribute("onclick", `curriculumEditRemoveLesson(${moduleIndex}, this)`);
 
@@ -315,32 +362,37 @@
                         </div>`;
                 configContainer.innerHTML = html;
                 break;
+
             case 'Image + Text':
                 html = `<div class="curriculum-edit-form-group">
                             <label>Content</label>
                             <textarea class="curriculum-edit-form-control" name="${nameBase}.ContentText" rows="4" required>${lessonData?.ContentText || ''}</textarea>
                         </div>
                         <div class="curriculum-edit-form-group">
-                            <label>Current Image</label>
-                            ${lessonData?.ImageUrl
-                                ? `<img src="${lessonData.ImageUrl}" alt="Preview" style="max-width:200px; display:block; margin-bottom:0.5rem;" />`
-                                : `<p>No image uploaded</p>`}
-                            <input type="file" name="${nameBase}.ImageFile" accept="image/*" />
-                            <!-- ADD THIS HIDDEN FIELD -->
+                            <label>Upload Image</label>
+                            <div style="display:flex; gap:1rem; align-items:center;">
+                                <input type="file" name="${nameBase}.ImageFile" accept="image/*" class="curriculum-edit-form-control" onchange="previewUploadImage(this)" />
+                                <div class="curriculum-upload-preview" style="width:80px; height:80px; background:#eee; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#aaa;">
+                                    ${lessonData?.ImageUrl ? `<img src="${lessonData.ImageUrl}" style="max-width:100%; max-height:100%;" />` : '🖼️'}
+                                </div>
+                            </div>
                             <input type="hidden" name="${nameBase}.ExistingImageUrl" value="${lessonData?.ImageUrl || ''}" />
+                            <span class="file-error" style="color:red; font-size:0.85rem; display:none;">Invalid file</span>
                         </div>`;
                 configContainer.innerHTML = html;
                 break;
 
             case 'Video':
                 html = `<div class="curriculum-edit-form-group">
-                            <label>Current Video</label>
-                            ${lessonData?.VideoUrl
-                                ? `<video src="${lessonData.VideoUrl}" controls style="max-width:300px; display:block; margin-bottom:0.5rem;"></video>`
-                                : `<p>No video uploaded</p>`}
-                            <input type="file" name="${nameBase}.VideoFile" accept="video/*" />
-                            <!-- ADD THIS HIDDEN FIELD -->
+                            <label>Upload Video</label>
+                            <div style="display:flex; gap:1rem; align-items:center;">
+                                <input type="file" name="${nameBase}.VideoFile" accept="video/*" class="curriculum-edit-form-control" onchange="previewUploadVideo(this)" />
+                                <div class="curriculum-upload-preview" style="width:120px; height:80px; background:#eee; display:flex; align-items:center; justify-content:center; font-size:1rem; color:#aaa;">
+                                    ${lessonData?.VideoUrl ? `<video src="${lessonData.VideoUrl}" style="max-width:100%; max-height:100%;" controls></video>` : '🎬'}
+                                </div>
+                            </div>
                             <input type="hidden" name="${nameBase}.ExistingVideoUrl" value="${lessonData?.VideoUrl || ''}" />
+                            <span class="file-error" style="color:red; font-size:0.85rem; display:none;"></span>
                         </div>`;
                 configContainer.innerHTML = html;
                 break;
@@ -361,6 +413,7 @@
                     }, 0);
                 }
                 break;
+
             case 'Session':
                 html = `<div class="curriculum-edit-form-group">
                             <label>This will be a live session learners can request.</label>
@@ -368,6 +421,86 @@
                 configContainer.innerHTML = html;
                 break;
         }
+    }
+
+    // ------------------ PREVIEW & FILE VALIDATION HANDLERS ------------------
+    function previewUploadImage(input) {
+        const previewDiv = input.parentNode.querySelector(".curriculum-upload-preview");
+        const errorSpan = input.closest(".curriculum-edit-form-group").querySelector(".file-error");
+        const file = input.files[0];
+        const maxSizeKB = 700; // 700 KB
+        const allowedTypes = ['image/jpeg','image/png','image/gif','image/webp'];
+
+        if(!file) return;
+
+        if(!allowedTypes.includes(file.type)){
+            if(errorSpan) {
+                errorSpan.textContent = "Invalid file type. Allowed: JPEG, PNG, GIF, WebP.";
+                errorSpan.style.display='block';
+            }
+            input.value = '';
+            previewDiv.innerHTML = '🖼️';
+            return;
+        }
+
+        if(file.size > maxSizeKB * 1024){
+            if(errorSpan) {
+                errorSpan.textContent = `File too large. Max ${maxSizeKB} KB.`;
+                errorSpan.style.display='block';
+            }
+            input.value = '';
+            previewDiv.innerHTML = '🖼️';
+            return;
+        }
+
+        if(errorSpan) errorSpan.style.display='none';
+
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.style.maxWidth = "100%";
+        img.style.maxHeight = "100%";
+        previewDiv.innerHTML = '';
+        previewDiv.appendChild(img);
+    }
+
+    function previewUploadVideo(input) {
+        const previewDiv = input.parentNode.querySelector(".curriculum-upload-preview");
+        const errorSpan = input.closest(".curriculum-edit-form-group").querySelector(".file-error");
+        const file = input.files[0];
+        const maxSizeMB = 50;
+        const allowedTypes = ['video/mp4','video/webm','video/ogg'];
+
+        if(!file) return;
+
+        if(!allowedTypes.includes(file.type)){
+            if(errorSpan){
+                errorSpan.textContent = "Invalid file type. Allowed: MP4, WebM, OGG.";
+                errorSpan.style.display = 'block';
+            }
+            input.value = '';
+            previewDiv.innerHTML = '🎬';
+            return;
+        }
+
+        if(file.size > maxSizeMB * 1024 * 1024){
+            if(errorSpan){
+                errorSpan.textContent = `File too large. Max ${maxSizeMB}MB.`;
+                errorSpan.style.display = 'block';
+            }
+            input.value = '';
+            previewDiv.innerHTML = '🎬';
+            return;
+        }
+
+        if(errorSpan) errorSpan.style.display = 'none';
+
+        const video = document.createElement("video");
+        video.src = URL.createObjectURL(file);
+        video.style.maxWidth = "100%";
+        video.style.maxHeight = "100%";
+        video.controls = true;
+        previewDiv.innerHTML = '';
+        previewDiv.appendChild(video);
     }
 
     // ------------------ QUIZ FUNCTIONS ------------------

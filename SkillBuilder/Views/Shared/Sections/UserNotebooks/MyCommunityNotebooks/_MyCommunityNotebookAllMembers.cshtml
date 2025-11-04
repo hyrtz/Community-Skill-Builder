@@ -1,65 +1,43 @@
 ﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
 
-@foreach (var community in Model.MyCommunities)
-{
-    <h3 style="margin-bottom: 1rem;">@community.Name Members</h3>
-    <div id="communityMembersWrapper_@community.Id">
-        @{
-            var members = Model.CommunityMembers.ContainsKey(community.Id)
-            ? Model.CommunityMembers[community.Id].Where(m => m.Role != "Owner").ToList()
-            : new List<SkillBuilder.Models.ViewModels.CommunityMemberViewModel>();
-        }
+@{
+    var selectedCommunity = Model.MyCommunities
+        .FirstOrDefault(c => c.Id == Model.SelectedCommunityId)
+        ?? Model.MyCommunities.FirstOrDefault();
 
-        @if (!members.Any())
-        {
-            <div class="no-members">No members found in this community.</div>
-        }
-        else
-        {
-            <div class="community-members-container">
-                @foreach (var member in members)
-                {
-                    <div class="community-member-card">
-                        <div class="member-info">
-                            <img src="@member.AvatarUrl" alt="@member.FullName" class="member-avatar" />
-                            <div class="member-details">
-                                <span class="member-name">@member.FullName</span>
-                                <span class="member-role">@member.Role</span>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-    </div>
+    var members = new List<SkillBuilder.Models.ViewModels.CommunityMemberViewModel>();
+
+    if (selectedCommunity != null && Model.CommunityMembers.ContainsKey(selectedCommunity.Id))
+    {
+        members = Model.CommunityMembers[selectedCommunity.Id]
+            .Where(m => m.Role != "Owner")
+            .ToList();
+    }
 }
 
 <style>
     .community-members-container {
+        margin-top: 1rem;
         display: flex;
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 1rem;
-        padding: 1rem;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        font-family: 'Inter', sans-serif;
     }
 
     .community-member-card {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.9rem 1.2rem;
-        border-radius: 10px;
+        justify-content: space-between;
+        background: #fff;
         border: 1px solid #e5e7eb;
-        background: #f9fafb;
-        transition: 0.2s;
+        border-radius: 10px;
+        padding: 0.7rem 1rem;
+        width: 100%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.15s ease;
     }
 
         .community-member-card:hover {
-            background: #eef2ff;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
 
     .member-info {
@@ -72,24 +50,276 @@
         width: 45px;
         height: 45px;
         border-radius: 50%;
-        border: 2px solid #e5e7eb;
         object-fit: cover;
     }
 
-    .member-details .member-name {
-        font-weight: 600;
-        color: #111827;
+    .member-details {
+        display: flex;
+        flex-direction: column;
     }
 
-    .member-details .member-role {
+    .member-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1f2937;
+    }
+
+    .member-role {
         font-size: 0.85rem;
         color: #6b7280;
     }
 
-    .no-members {
+    .remove-btn {
+        background: #dc2626;
+        color: #fff;
+        border: none;
+        padding: 0.35rem 0.9rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .remove-btn:hover {
+            background: #b91c1c;
+        }
+
+    .community-no-members {
         text-align: center;
-        font-weight: 500;
+        font-size: 1rem;
         color: #6b7280;
         padding: 2rem;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background-color: #f9fafb;
+        margin-top: 2rem;
     }
+
+    /* Modal Styles */
+    .community-modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .community-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 1001;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+    }
+
+        .community-modal h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .community-modal textarea {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            resize: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+    .community-modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .community-modal-cancel {
+        background-color: #ccc;
+        color: #333;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .community-modal-confirm {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: not-allowed;
+        opacity: 0.6;
+        transition: all 0.25s ease;
+    }
+
+        .community-modal-confirm.enabled {
+            cursor: pointer;
+            opacity: 1;
+        }
+
+            .community-modal-confirm.enabled:hover {
+                background-color: #c0392b;
+                transform: scale(1.03);
+            }
 </style>
+
+<div id="allMembersPartialContainer" data-community-id="@selectedCommunity?.Id">
+    @if (selectedCommunity == null)
+    {
+        <div class="community-no-members">No community selected.</div>
+    }
+    else if (!members.Any())
+    {
+        <div class="community-no-members">No members found in this community.</div>
+    }
+    else
+    {
+        <div class="community-members-container">
+            @foreach (var member in members)
+            {
+                <div class="community-member-card" data-member-id="@member.UserId" data-member-name="@member.FullName">
+                    <div class="member-info">
+                        <img src="@member.AvatarUrl" alt="@member.FullName" class="member-avatar" />
+                        <div class="member-details">
+                            <span class="member-name">@member.FullName</span>
+                            <span class="member-role">@member.Role</span>
+                        </div>
+                    </div>
+
+                    <!-- Remove Member Button -->
+                    <form asp-action="RemoveMember"
+                          asp-controller="Community"
+                          method="post"
+                          onsubmit="return openRemoveModal(this, '@member.FullName');">
+                        <input type="hidden" name="communityId" value="@selectedCommunity.Id" />
+                        <input type="hidden" name="memberId" value="@member.UserId" />
+                        <button type="submit" class="remove-btn">Remove</button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal Backdrop -->
+<div class="community-modal-backdrop" id="communityModalBackdrop"></div>
+
+<!-- Remove Member Modal -->
+<div class="community-modal" id="communityRemoveModal">
+    <h3>Remove Member</h3>
+    <p id="removeMemberMessage"></p>
+    <textarea id="removeReason" placeholder="Enter reason for removal..."></textarea>
+    <div class="community-modal-buttons">
+        <button class="community-modal-cancel" onclick="closeRemoveModal()">Cancel</button>
+        <button class="community-modal-confirm" id="confirmRemoveBtn" disabled>Remove</button>
+    </div>
+</div>
+
+<script>
+    let currentRemoveForm = null;
+
+    function openRemoveModal(form, memberName) {
+        currentRemoveForm = form;
+        const modal = document.getElementById("communityRemoveModal");
+        const backdrop = document.getElementById("communityModalBackdrop");
+        const message = document.getElementById("removeMemberMessage");
+        const reasonInput = document.getElementById("removeReason");
+        const confirmBtn = document.getElementById("confirmRemoveBtn");
+
+        message.innerText = `Are you sure you want to remove ${memberName}?`;
+        reasonInput.value = "";
+        confirmBtn.disabled = true;
+        confirmBtn.classList.remove("enabled");
+
+        backdrop.style.display = "block";
+        modal.style.display = "block";
+
+        // Ensure focus and event rebinding works even in partial loads
+        reasonInput.focus();
+        reasonInput.removeEventListener("input", reasonInput._handler || (() => {}));
+        reasonInput._handler = function () {
+            const hasText = this.value.trim().length > 0;
+            confirmBtn.disabled = !hasText;
+            confirmBtn.classList.toggle("enabled", hasText);
+        };
+        reasonInput.addEventListener("input", reasonInput._handler);
+
+        return false; // prevent form submit
+    }
+
+    function closeRemoveModal() {
+        document.getElementById("communityModalBackdrop").style.display = "none";
+        document.getElementById("communityRemoveModal").style.display = "none";
+    }
+
+    // Confirm button click handler
+    document.addEventListener("click", async function (e) {
+        const confirmBtn = document.getElementById("confirmRemoveBtn");
+        if (!confirmBtn || e.target !== confirmBtn) return;
+
+        if (!currentRemoveForm) {
+            console.warn("No form reference found for removal action.");
+            return;
+        }
+
+        const reasonValue = document.getElementById("removeReason")?.value.trim();
+        if (!reasonValue) return;
+
+        const communityId = currentRemoveForm.querySelector("input[name='communityId']").value;
+        const memberId = currentRemoveForm.querySelector("input[name='memberId']").value;
+
+        // Capture member card before resetting
+        const memberCard = currentRemoveForm.closest(".community-member-card");
+
+        // Close modal first
+        closeRemoveModal();
+
+        try {
+            const response = await fetch("/Community/RemoveMember", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    communityId: parseInt(communityId),
+                    userId: memberId,
+                    reason: reasonValue
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                window.location.reload();
+            } else {
+                alert(result.message || "Failed to remove member.");
+            }
+        } catch (error) {
+            console.error("Error removing member:", error);
+            alert("An error occurred while removing the member.");
+        }
+
+        // Now clear after everything is done
+        currentRemoveForm = null;
+    });
+
+    // Modal close on backdrop or ESC
+    document.addEventListener("click", e => {
+        if (e.target.id === "communityModalBackdrop") closeRemoveModal();
+    });
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") closeRemoveModal();
+    });
+</script>

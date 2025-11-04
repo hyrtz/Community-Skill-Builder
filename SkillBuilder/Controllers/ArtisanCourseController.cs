@@ -324,8 +324,10 @@ namespace SkillBuilder.Controllers
                 Materials = course.Materials
                     .Select(mat => new CourseMaterialViewModel
                     {
+                        Id = mat.Id,
                         Title = mat.Title,
                         FileName = mat.FileName,
+                        FilePath = mat.FilePath,
                         FileSize = mat.FileSize,
                         Description = mat.Description
                     }).ToList(),
@@ -541,6 +543,75 @@ namespace SkillBuilder.Controllers
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+            if (model.MaterialsToDelete != null && model.MaterialsToDelete.Any())
+            {
+                var materialsToDelete = course.Materials
+                    .Where(m => model.MaterialsToDelete.Contains(m.Id) && m.Id > 0)
+                    .ToList();
+                if (materialsToDelete.Any())
+                {
+                    // Delete actual files
+                    foreach (var mat in materialsToDelete)
+                    {
+                        if (!string.IsNullOrEmpty(mat.FilePath))
+                        {
+                            var path = Path.Combine(_env.WebRootPath, mat.FilePath);
+                            if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+                        }
+                    }
+
+                    _context.CourseMaterials.RemoveRange(materialsToDelete);
+                }
+            }
+
+            if (model.Materials != null && model.Materials.Any())
+            {
+                foreach (var matVm in model.Materials)
+                {
+                    CourseMaterial material;
+
+                    if (matVm.Id > 0)
+                    {
+                        material = course.Materials.First(m => m.Id == matVm.Id);
+                        material.Title = matVm.Title;
+                        material.Description = matVm.Description;
+
+                        if (matVm.UploadFile != null)
+                        {
+                            // Delete old file if exists
+                            if (!string.IsNullOrEmpty(material.FilePath))
+                            {
+                                var oldPath = Path.Combine(_env.WebRootPath, material.FilePath);
+                                if (System.IO.File.Exists(oldPath))
+                                    System.IO.File.Delete(oldPath);
+                            }
+
+                            var filePath = await SaveFileAsync(matVm.UploadFile, "course-materials");
+                            material.FilePath = filePath;
+                            material.FileName = matVm.UploadFile.FileName;
+                            material.FileSize = matVm.UploadFile.Length;
+                        }
+
+                        _context.CourseMaterials.Update(material);
+                    }
+                    else if (matVm.UploadFile != null)
+                    {
+                        // New material
+                        var filePath = await SaveFileAsync(matVm.UploadFile, "course-materials");
+                        material = new CourseMaterial
+                        {
+                            CourseId = course.Id,
+                            Title = matVm.Title,
+                            Description = matVm.Description,
+                            FileName = matVm.UploadFile.FileName,
+                            FileSize = matVm.UploadFile.Length,
+                            FilePath = filePath
+                        };
+                        _context.CourseMaterials.Add(material);
                     }
                 }
             }

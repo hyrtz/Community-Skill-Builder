@@ -25,191 +25,191 @@
 }
 
 <style>
-/* --- Container --- */
-.eap-container-wrapper {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-    position: relative;
-    min-height: 580px;
-}
+    /* --- Container --- */
+    .eap-container-wrapper {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+        position: relative;
+        min-height: 580px;
+    }
 
-.eap-left-panel {
-    flex: 1;
-    max-width: calc(100% - 200px);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
+    .eap-left-panel {
+        flex: 1;
+        max-width: calc(100% - 200px);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
 
-.eap-right-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: 180px;
-    position: absolute;
-    right: 0;
-    top: 0;
-}
+    .eap-right-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: 180px;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
 
-/* --- Fields --- */
-.eap-field {
-    display: flex;
-    flex-direction: column;
-}
+    /* --- Fields --- */
+    .eap-field {
+        display: flex;
+        flex-direction: column;
+    }
 
-.eap-field label {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
+        .eap-field label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
 
-.eap-input {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #c0c0c0;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    width: 100%;
-    margin-bottom: 1rem;
-}
+    .eap-input {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #c0c0c0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
 
-/* --- Buttons --- */
-.eap-submit-btn {
-    margin-top: 1rem;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.95rem;
-    font-weight: bold;
-    background-color: #344AEA;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
+    /* --- Buttons --- */
+    .eap-submit-btn {
+        margin-top: 1rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: bold;
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
 
-.eap-submit-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
+        .eap-submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
 
-.eap-avatar-preview {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #ddd;
-    background-color: #f0f0f8;
-}
+    .eap-avatar-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #ddd;
+        background-color: #f0f0f8;
+    }
 
-.eap-change-avatar-btn,
-.eap-toggle-password-btn {
-    background-color: #344AEA;
-    color: white;
-    border: none;
-    padding: 0.7rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    text-align: center;
-    transition: background 0.2s ease;
-}
+    .eap-change-avatar-btn,
+    .eap-toggle-password-btn {
+        background-color: #344AEA;
+        color: white;
+        border: none;
+        padding: 0.7rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        transition: background 0.2s ease;
+    }
 
-.eap-change-avatar-btn:hover,
-.eap-toggle-password-btn:hover {
-    background-color: #2b36c5;
-}
+        .eap-change-avatar-btn:hover,
+        .eap-toggle-password-btn:hover {
+            background-color: #2b36c5;
+        }
 
-/* --- Password section --- */
-.eap-password-section {
-    display: none;
-    flex-direction: column;
-    gap: 1rem;
-}
+    /* --- Password section --- */
+    .eap-password-section {
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+    }
 
-.eap-password-field {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
+    .eap-password-field {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
 
-.eap-password-field input {
-    padding-right: 2.5rem;
-}
+        .eap-password-field input {
+            padding-right: 2.5rem;
+        }
 
-.eap-toggle-eye {
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1rem;
-    cursor: pointer;
-}
+    .eap-toggle-eye {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1rem;
+        cursor: pointer;
+    }
 
-/* --- Modal --- */
-.eap-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
+    /* --- Modal --- */
+    .eap-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
 
-.eap-modal {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 300px;
-    text-align: center;
-}
+    .eap-modal {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 300px;
+        text-align: center;
+    }
 
-.eap-modal button {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-}
+        .eap-modal button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
 
-.eap-modal-confirm {
-    background-color: #344AEA;
-    color: white;
-}
+    .eap-modal-confirm {
+        background-color: #344AEA;
+        color: white;
+    }
 
-.eap-modal-cancel {
-    background-color: #ccc;
-    color: #333;
-    margin-left: 1rem;
-}
+    .eap-modal-cancel {
+        background-color: #ccc;
+        color: #333;
+        margin-left: 1rem;
+    }
 
-/* --- Warnings --- */
-.eap-warning {
-    color: red;
-    font-size: 0.8rem;
-    display: none;
-    margin-bottom: 1rem;
-    margin-top: -1rem;
-}
+    /* --- Warnings --- */
+    .eap-warning {
+        color: red;
+        font-size: 0.8rem;
+        display: none;
+        margin-bottom: 1rem;
+        margin-top: -1rem;
+    }
 
-/* --- Password checklist --- */
-.eap-password-checklist {
-    font-size: 0.8rem;
-    margin-top: 0.5rem;
-    color: gray;
-}
+    /* --- Password checklist --- */
+    .eap-password-checklist {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        color: gray;
+    }
 </style>
 
 <div class="eap-container-wrapper">
     <!-- Left Panel -->
     <div class="eap-left-panel">
         <form class="eap-form" method="post" enctype="multipart/form-data" asp-controller="ArtisanProfile" asp-action="EditProfileArtisan">
-            
+
             <!-- Email -->
             <div class="eap-field" id="eap-email-section" style="display:none;">
                 <label for="Email">Email</label>
@@ -247,10 +247,10 @@
 
                 @Html.DropDownListFor(
                 model => model.Artisan.Profession, // binds to Artisan.Profession
-                    professionList,
-                    "Select your profession",
-                    new { @class = "eap-input", id = "Profession", required = "required" }
-                    )
+                                professionList,
+                                "Select your profession",
+                                new { @class = "eap-input", id = "Profession", required = "required" }
+                                )
 
                 <input type="text" id="OtherProfession" name="ProfessionOther" class="eap-input"
                        placeholder="Enter your profession"
@@ -387,13 +387,39 @@
 
     // --- Avatar ---
     changeAvatarBtn.addEventListener('click', () => avatarInput.click());
+
+    const avatarWarning = document.createElement('div');
+    avatarWarning.style.color = 'red';
+    avatarWarning.style.fontSize = '0.85rem';
+    avatarWarning.style.marginTop = '0.25rem';
+    avatarPreview.parentNode.insertBefore(avatarWarning, avatarPreview.nextSibling);
+
     avatarInput.addEventListener('change', e => {
         const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => avatarPreview.src = ev.target.result;
-        reader.readAsDataURL(file);
-        markFormChanged();
+        const maxSizeKB = 700;
+
+        if (!file) {
+            avatarWarning.innerText = '';
+            avatarPreview.src = "@Model.Artisan.UserAvatar"; // reset preview
+            submitBtn.disabled = !formChanged;
+            return;
+        }
+
+        if (file.size / 1024 > maxSizeKB) {
+            avatarWarning.innerText = `File size exceeds ${maxSizeKB} KB. Please select a smaller image.`;
+            avatarPreview.src = "@Model.Artisan.UserAvatar"; // reset preview
+            e.target.value = ''; // clear file input
+            submitBtn.disabled = true;
+        } else {
+            avatarWarning.innerText = '';
+            const reader = new FileReader();
+            reader.onload = ev => avatarPreview.src = ev.target.result;
+            reader.readAsDataURL(file);
+
+            // Enable save button if form has changes
+            submitBtn.disabled = false;
+            markFormChanged();
+        }
     });
 
     // --- Password section toggle ---
@@ -482,7 +508,7 @@
         emailModal.style.display = 'none';
         emailSection.style.display = 'block';
         emailInput.setAttribute('required', 'required');
-        emailInput.focus(); 
+        emailInput.focus();
     });
 
     // Cancel modal
@@ -546,5 +572,21 @@
             emailExistWarning.style.display = 'none';
             submitBtn.disabled = !!email; // disable if anything typed but invalid
         }
+    });
+
+    // ------------------ BEFOREUNLOAD WARNING ------------------
+    const beforeUnloadHandler = function (e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = ""; // Standard for most browsers
+        }
+    };
+
+    // Add beforeunload
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+
+    // Disable beforeunload on successful form submission
+    form.addEventListener('submit', () => {
+        window.removeEventListener('beforeunload', beforeUnloadHandler);
     });
 </script>

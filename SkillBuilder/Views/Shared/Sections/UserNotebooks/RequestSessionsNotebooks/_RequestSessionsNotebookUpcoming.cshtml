@@ -7,6 +7,92 @@
         .ToList();
 }
 
+<style>
+    /* Card container */
+    .user-upcoming-request-card {
+        background-color: #f4f4f4;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        position: relative;
+    }
+
+    /* Title & Message */
+    .user-upcoming-request-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .user-upcoming-request-message {
+        margin-bottom: 0.5rem;
+        color: #444;
+        font-size: 0.95rem;
+        line-height: 1.3;
+    }
+
+    /* Schedule */
+    .user-upcoming-request-schedule {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+        .user-upcoming-request-schedule i {
+            color: #888;
+        }
+
+    /* Status Badge */
+    .user-upcoming-request-badge {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    /* Join Button */
+    .user-upcoming-request-join {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        background-color: #344AEA;
+        color: white;
+        font-weight: 600;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: background 0.2s ease;
+    }
+
+        .user-upcoming-request-join:hover {
+            background-color: #1f2bb8;
+        }
+
+    /* Footer container for status and join button */
+    .user-upcoming-request-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+
+    .user-support-empty {
+        text-align: center;
+        font-size: 1rem;
+        color: #6b7280;
+        padding: 2rem;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background-color: #f9fafb;
+        margin: 2rem 0;
+    }
+</style>
+
 @if (!upcoming.Any())
 {
     <div class="user-support-empty">
@@ -16,26 +102,47 @@
 }
 else
 {
+    <h2 style="font-weight: 300; font-size: 1rem; margin-bottom: 1.5rem;">
+        Here is the list of all your upcoming live session with artisan.
+    </h2>
     foreach (var request in upcoming)
     {
-        <div class="user-support-card">
-            <div class="user-support-title">@request.Title</div>
-            <div class="user-support-message">@request.Message</div>
-            <div class="user-support-schedule">
-                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
+        <div class="user-upcoming-request-card">
+
+            <!-- Course & Artisan -->
+            <div class="user-upcoming-course">
+                <strong>Course Title: </strong>@request.Course?.Title
+            </div>
+            <div class="user-upcoming-artisan">
+                <strong>Sent To: </strong>@(
+                request.Course?.Artisan != null
+                ? request.Course.Artisan.FirstName + " " + request.Course.Artisan.LastName
+                : "Unknown Artisan"
+                ) (Artisan)
+    </div>
+    <br />
+
+            <!-- Title & Message -->
+            <div class="user-upcoming-request-title">@request.Title</div>
+            <div class="user-upcoming-request-message">Request Message: @request.Message</div>
+
+            <!-- Schedule -->
+            <div class="user-upcoming-request-schedule">
+                <div><i class="fas fa-calendar-alt"></i>Requested Date & Time: @request.SessionDate.ToString("M/d/yyyy")</div>
                 <div>
                     <i class="fas fa-clock"></i>
-                    @(request.SessionTime != null
-                                ? (DateTime.Today + request.SessionTime).ToString("h:mm tt")
-                                : "TBD")
-        </div>
-    </div>
-    <span class="support-status-badge status-confirmed">Confirmed</span>
-    <div class="user-support-confirm-details">
-        Platform: <strong>@request.MeetingPlatform ?? "TBD"</strong><br />
+                    @(request.SessionTime != null ? (DateTime.Today + request.SessionTime).ToString("h:mm tt") : "TBD")
+                </div>
+            </div>
+
+            <!-- Footer: Status left, Join right -->
+            <div class="user-upcoming-request-footer">
+                <span class="user-upcoming-request-badge">Confirmed</span>
         @if (!string.IsNullOrWhiteSpace(request.MeetingLink))
                 {
-                    <a href="@request.MeetingLink" target="_blank">Join Link</a>
+                    <a href="@request.MeetingLink" target="_blank" class="user-upcoming-request-join">
+                        <i class="fas fa-link"></i> Join Session
+                    </a>
                 }
             </div>
         </div>

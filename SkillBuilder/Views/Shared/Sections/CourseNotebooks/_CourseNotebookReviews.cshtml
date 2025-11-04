@@ -1,4 +1,8 @@
-﻿<style>
+﻿@{
+    bool isAdmin = User.IsInRole("Admin");
+}
+
+<style>
     .course-review-view-heading {
         font-size: 2rem;
         margin-bottom: 2rem;
@@ -224,6 +228,131 @@
             line-height: 1.5;
             margin-top: 0.5rem;
         }
+
+    .course-review-view-delete-btn {
+        background: none;
+        border: none;
+        color: #d33;
+        font-size: 1.2rem;
+        margin-left: auto;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .course-review-view-delete-btn:hover {
+            color: #b00;
+        }
+
+    /* Delete Confirmation Modal */
+    #deleteReviewModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1200;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+    }
+
+        /* Modal content box */
+        #deleteReviewModal .course-review-view-modal-content {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+            padding: 2rem;
+            text-align: center;
+            animation: fadeInScale 0.25s ease;
+        }
+
+        /* Title */
+        #deleteReviewModal h2 {
+            font-size: 1.5rem;
+            color: #d33;
+            margin-bottom: 1rem;
+        }
+
+        /* Message text */
+        #deleteReviewModal p {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Reason textarea */
+        #deleteReviewModal textarea {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: none;
+            transition: border 0.2s ease;
+        }
+
+            #deleteReviewModal textarea:focus {
+                border-color: #344AEA;
+                outline: none;
+            }
+
+        /* Buttons container */
+        #deleteReviewModal .delete-modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Delete button */
+        #deleteReviewModal .btn-delete {
+            background-color: #d33;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+            #deleteReviewModal .btn-delete:hover {
+                background-color: #b00;
+            }
+
+        /* Cancel button */
+        #deleteReviewModal .btn-cancel {
+            background-color: #ccc;
+            color: #222;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+            #deleteReviewModal .btn-cancel:hover {
+                background-color: #bbb;
+            }
+
+        /* Close (×) icon */
+        #deleteReviewModal .course-review-view-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.4rem;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+            #deleteReviewModal .course-review-view-modal-close:hover {
+                color: #555;
+            }
 </style>
 
 <h1 class="course-review-view-heading">Learner Reviews</h1>
@@ -231,30 +360,44 @@
 <div class="course-review-view-section">
     <div class="course-review-view-cards-wrapper">
         <div class="course-review-view-cards-scroll">
-            @foreach (var review in Model.Reviews)
+            @if (Model.Reviews != null && Model.Reviews.Count > 0)
             {
-                <div class="course-review-view-card">
-                    <div class="course-review-view-card-top">
-                        <div class="course-review-view-user">
-                            <img src="@review.User.UserAvatar" class="course-review-view-avatar" />
-                            <div>
-                                <h4 class="course-review-view-name">@review.User.FirstName @review.User.LastName</h4>
-                                <div class="course-review-view-stars">
-                                    @{
-                                        for (int star = 1; star <= 5; star++)
-                                        {
-                                            <span class="star @(star <= review.Rating ? "filled" : "")">&#9733;</span>
+                foreach (var review in Model.Reviews)
+                {
+                    <div class="course-review-view-card">
+                        <div class="course-review-view-card-top">
+                            <div class="course-review-view-user">
+                                <img src="@review.User.UserAvatar" class="course-review-view-avatar" />
+                                <div>
+                                    <h4 class="course-review-view-name">@review.User.FirstName @review.User.LastName</h4>
+                                    <div class="course-review-view-stars">
+                                        @{
+                                            for (int star = 1; star <= 5; star++)
+                                            {
+                                                <span class="star @(star <= review.Rating ? "filled" : "")">&#9733;</span>
+                                            }
                                         }
-                                    }
-                                </div>
-
-                                <div class="course-review-view-date">
-                                    <p>@review.CreatedAt.ToString("MMMM dd, yyyy")</p>
+                                    </div>
+                                    <div class="course-review-view-date">
+                                        <p>@review.CreatedAt.ToString("MMMM dd, yyyy")</p>
+                                    </div>
                                 </div>
                             </div>
+                            @if (isAdmin)
+                            {
+                                <button class="course-review-view-delete-btn" onclick="deleteReview(@review.Id)" title="Delete review">
+                                    🗑️
+                                </button>
+                            }
                         </div>
+                        <p class="course-review-view-text">@review.Comment</p>
                     </div>
-                    <p class="course-review-view-text">@review.Comment</p>
+                }
+            }
+            else
+            {
+                <div style="text-align:center; color:#777; width:100%; padding:2rem 0;">
+                    <p style="font-size:1rem;">No reviews yet. Be the first to leave a review after completing this course!</p>
                 </div>
             }
         </div>
@@ -324,28 +467,120 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteReviewModal" class="course-review-view-modal">
+    <div class="course-review-view-modal-content" style="max-width: 400px; position: relative;">
+        <span class="course-review-view-modal-close" onclick="closeDeleteModal()">&times;</span>
+        <h2 style="text-align:center; color:#d33; margin-bottom:1rem;">Delete Review</h2>
+        <p style="text-align:center; color:#555; font-size:0.95rem;">
+            Are you sure you want to delete this review?
+        </p>
+
+        <textarea id="deleteReason"
+                  placeholder="Enter a reason"
+                  style="width:100%; margin-top:1rem; padding:0.5rem; border:1px solid #ccc; border-radius:6px; resize:none;"
+                  rows="3"></textarea>
+
+        <div class="delete-modal-buttons" style="display:flex; justify-content:center; gap:1rem; margin-top:1.5rem;">
+            <button onclick="confirmDelete()" class="btn-delete">Delete</button>
+            <button onclick="closeDeleteModal()" class="btn-cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
+
 <script>
+    let selectedReviewId = null;
+
     function openReviewModal() {
-        const modal = document.getElementById('course-review-view-modal');
-        modal.style.display = 'flex';
+        document.getElementById('course-review-view-modal').style.display = 'flex';
     }
 
     function closeReviewModal() {
-        const modal = document.getElementById('course-review-view-modal');
-        modal.style.display = 'none';
+        document.getElementById('course-review-view-modal').style.display = 'none';
     }
 
-    // Close modal if clicking outside the content
-    document.getElementById('course-review-view-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeReviewModal();
+    // 🗑️ Open delete confirmation modal
+    function deleteReview(reviewId) {
+        selectedReviewId = reviewId;
+        const modal = document.getElementById('deleteReviewModal');
+        const reasonInput = document.getElementById('deleteReason');
+        const deleteBtn = modal.querySelector('.btn-delete');
+        if (!deleteBtn) {
+            console.error("Delete button not found in modal!");
+            return;
         }
+
+        reasonInput.value = "";
+        deleteBtn.disabled = true;
+        deleteBtn.style.opacity = "0.6";
+        deleteBtn.style.cursor = "not-allowed";
+
+        // Enable button only when input has text
+        reasonInput.addEventListener("input", () => {
+            if (reasonInput.value.trim().length > 0) {
+                deleteBtn.disabled = false;
+                deleteBtn.style.opacity = "1";
+                deleteBtn.style.cursor = "pointer";
+            } else {
+                deleteBtn.disabled = true;
+                deleteBtn.style.opacity = "0.6";
+                deleteBtn.style.cursor = "not-allowed";
+            }
+        });
+
+        modal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteReviewModal').style.display = 'none';
+        selectedReviewId = null;
+    }
+
+    // 🧾 Confirm delete and send request
+    async function confirmDelete() {
+        if (!selectedReviewId) return;
+
+        const reason = document.getElementById('deleteReason').value.trim();
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+        try {
+            const response = await fetch(`/AdminProfile/DeleteReview/${selectedReviewId}?adminId=@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value&reason=${encodeURIComponent(reason)}`, {
+                method: "POST",
+                headers: {
+                    "RequestVerificationToken": token
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // ✅ Simply refresh the page after successful deletion
+                window.location.reload();
+            } else {
+                alert(result.message || "Failed to delete review.");
+            }
+        } catch (err) {
+            console.error("Error deleting review:", err);
+            alert("Something went wrong while deleting the review.");
+        }
+    }
+
+    // Close modals if clicking outside
+    document.querySelectorAll('.course-review-view-modal').forEach(modal => {
+        modal.addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeReviewModal();
+                closeDeleteModal();
+            }
+        });
     });
 
-    // Close modal on ESC key
-    document.addEventListener('keydown', function(e) {
+    // Close on ESC
+    document.addEventListener('keydown', function (e) {
         if (e.key === "Escape") {
             closeReviewModal();
+            closeDeleteModal();
         }
     });
 </script>

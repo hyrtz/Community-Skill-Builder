@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     var userId = User.FindFirst("UserId")?.Value;
     var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
     string profileUrl = userRole switch
@@ -12,71 +11,53 @@
 }
 
 <style>
-    .search-bar-wrapper {
+    .navbar {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        overflow: hidden;
-        background: white;
-        width: 100%;
+        padding: 1rem 3rem;
+        background: #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
     }
 
-    .search-category-select {
-        padding: 0.5rem;
-        font-size: 0.95rem;
-        border: none;
-        background-color: #f0f0f0;
-        height: 100%;
-        outline: none;
-        border-right: 1px solid #ccc;
-        flex-shrink: 0;
-    }
-
-    .search-bar-input {
-        border: none;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.95rem;
-        width: 100%;
-        outline: none;
-    }
-
-    .search-bar-button {
-        background-color: #3b44f6;
-        border: none;
-        padding: 10px 1rem;
-        height: 100%;
-        cursor: pointer;
+    .nav-links {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        border-left: 1px solid #ccc;
+        gap: 2rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
     }
 
-        .search-bar-button:hover {
-            background-color: #2c5282;
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            transition: color 0.3s;
         }
 
-    .search-icon {
-        width: 18px;
-        height: 18px;
-    }
+            .nav-links a:hover {
+                color: #344AEA;
+            }
+
 
     .navbar-item {
         transition: color 0.3s ease;
     }
+
         .navbar-item:hover {
             color: #3b44f6;
-
         }
 
     .dropdown {
         transition: color 0.3s ease;
     }
 
-        .dropbtn:hover {
-            color: #3b44f6;
-        }
+    .dropbtn:hover {
+        color: #3b44f6;
+    }
 
     .logout-modal-overlay {
         display: none;
@@ -426,31 +407,39 @@
     <div class="navbar-left">
         <a asp-controller="Home" asp-action="Index" class="navbar-logo">tahi.</a>
 
-        <div class="navbar-item dropdown">
-            <button class="dropbtn" onclick="toggleDropdown()">Explore ▾</button>
-            <div id="exploreDropdown" class="dropdown-content">
-                <h5>Explore Courses</h5>
-                <a href="/Courses?filter=Weaving">Weaving</a>
-                <a href="/Courses?filter=Pottery">Pottery</a>
-                <a href="/Courses?filter=Paper Crafts">Paper Crafts</a>
-                <a href="/Courses?filter=Wood Carving">Wood Carving</a>
-                <a href="/Courses?filter=Shoemaking">Shoemaking</a>
-                <a href="/Courses?filter=Embroidery">Embroidery</a>
+        @if (userRole != "Admin")
+        {
+            <div class="navbar-item dropdown">
+                <button class="dropbtn" onclick="toggleDropdown()">Explore ▾</button>
+                <div id="exploreDropdown" class="dropdown-content">
+                    <h5>Explore Courses</h5>
+                    <a href="/Courses?filter=Weaving">Weaving</a>
+                    <a href="/Courses?filter=Pottery">Pottery</a>
+                    <a href="/Courses?filter=Paper Crafts">Paper Crafts</a>
+                    <a href="/Courses?filter=Wood Carving">Wood Carving</a>
+                    <a href="/Courses?filter=Shoemaking">Shoemaking</a>
+                    <a href="/Courses?filter=Embroidery">Embroidery</a>
+                </div>
             </div>
-        </div>
-
-        <a href="#community" class="navbar-item">Community</a>
+        }
     </div>
 
-    <!-- Center: Search -->
-    <div class="navbar-center">
-        <div class="search-bar-wrapper">
-            <input type="text" id="searchInput" class="search-bar-input" placeholder="Search courses..." />
-            <button class="search-bar-button" onclick="handleSearch()">
-                <img src="/assets/icons/Search.ico" class="search-icon" />
-            </button>
+    @if (userRole != "Admin")
+    {
+        <div class="navbar-center">
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                @if (userRole != "Artisan")
+                {
+                    <li><a href="#courses">Courses</a></li>
+                }
+                <li><a href="#mission">Mission</a></li>
+                <li><a href="#community">Community</a></li>
+                <li><a href="#join">Join</a></li>
+            </ul>
         </div>
-    </div>
+    }
 
     <!-- Right: Actions -->
     <div class="navbar-right">
@@ -458,8 +447,15 @@
         {
             var isApproved = User.FindFirst("IsApproved")?.Value == "True";
             var isVerified = User.FindFirst("IsVerified")?.Value == "True";
+            var isDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
 
-            if (isApproved && isVerified)
+            if (isDeactivated)
+            {
+                <a class="navbar-item create-course-btn disabled" style="pointer-events:none; opacity:0.5;">
+                    Account Deactivated - Cannot Create Course
+                </a>
+            }
+            else if (isApproved && isVerified)
             {
                 <a href="/ArtisanActions/CreateCourse" class="navbar-item create-course-btn">
                     Create Course
@@ -500,10 +496,10 @@
                 <div class="profile-menu-dropdown">
                     <a href="@profileUrl" class="profile-menu-item">Profile</a>
 
-                    <button onclick="toggleProfileNotifMenu()" class="profile-menu-item profile-menu-toggle">
+                    @* <button onclick="toggleProfileNotifMenu()" class="profile-menu-item profile-menu-toggle">
                         Notification
                         <span class="profile-menu-arrow">▸</span>
-                    </button>
+                    </button> *@
 
                     @* <div id="profileNotificationToggle" class="profile-menu-sub">
                         <label class="profile-menu-sub-option">
@@ -643,11 +639,23 @@
         const resubmitFileInput = document.querySelector("#resubmitForm input[type='file']");
         const resubmitPreview = document.getElementById("resubmitPreview");
 
+        // Add an error container for resubmit application
+        let resubmitFileError = document.getElementById("resubmitFileError");
+        if (!resubmitFileError && resubmitFileInput) {
+            resubmitFileError = document.createElement("div");
+            resubmitFileError.id = "resubmitFileError";
+            resubmitFileError.style.color = "red";
+            resubmitFileError.style.marginTop = "0.5rem";
+            resubmitFileError.style.fontSize = "0.8rem";
+            resubmitFileInput.insertAdjacentElement("afterend", resubmitFileError);
+        }
+
         if (resubmitFileInput) {
             resubmitFileInput.addEventListener("change", () => {
                 const file = resubmitFileInput.files[0];
                 const submitBtn = document.querySelector("#resubmitForm .logout-modal-btn-confirm");
-                resubmitPreview.innerHTML = ""; // Clear previous preview
+                resubmitPreview.innerHTML = "";
+                if (resubmitFileError) resubmitFileError.innerText = "";
 
                 if (!file) {
                     submitBtn.disabled = true;
@@ -665,13 +673,22 @@
                 ];
 
                 if (!allowedTypes.includes(file.type)) {
-                    alert("Invalid file type. Allowed types: PDF, DOC, DOCX, JPG, JPEG, PNG.");
-                    resubmitFileInput.value = ""; // Reset input
+                    resubmitFileError.innerText = "Invalid file type. Allowed: PDF, DOC, DOCX, JPG, JPEG, PNG.";
+                    resubmitFileInput.value = "";
                     submitBtn.disabled = true;
                     return;
                 }
 
-                // Preview only if image
+                // ✅ File size validation (5 MB max)
+                const maxSizeMB = 5;
+                if (file.size > maxSizeMB * 1024 * 1024) {
+                    resubmitFileError.innerText = `File too large. Maximum allowed size is ${maxSizeMB} MB.`;
+                    resubmitFileInput.value = "";
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                // Show preview (for images only)
                 if (file.type.startsWith("image/")) {
                     const img = document.createElement("img");
                     img.src = URL.createObjectURL(file);
@@ -681,7 +698,6 @@
                     img.style.borderRadius = "6px";
                     resubmitPreview.appendChild(img);
                 } else {
-                    // For PDF/DOC/DOCX just show the filename
                     const fileName = document.createElement("p");
                     fileName.textContent = `Selected file: ${file.name}`;
                     resubmitPreview.appendChild(fileName);
@@ -695,11 +711,23 @@
         const resubmitProjectInput = document.querySelector("#resubmitProjectForm input[type='file']");
         const resubmitProjectPreview = document.getElementById("resubmitProjectPreview");
 
+        // Add an error container for resubmit project
+        let resubmitProjectError = document.getElementById("resubmitProjectError");
+        if (!resubmitProjectError && resubmitProjectInput) {
+            resubmitProjectError = document.createElement("div");
+            resubmitProjectError.id = "resubmitProjectError";
+            resubmitProjectError.style.color = "red";
+            resubmitProjectError.style.marginTop = "0.5rem";
+            resubmitProjectError.style.fontSize = "0.8rem";
+            resubmitProjectInput.insertAdjacentElement("afterend", resubmitProjectError);
+        }
+
         if (resubmitProjectInput) {
             resubmitProjectInput.addEventListener("change", () => {
                 const file = resubmitProjectInput.files[0];
                 const submitBtn = document.querySelector("#resubmitProjectForm .logout-modal-btn-confirm");
                 resubmitProjectPreview.innerHTML = "";
+                if (resubmitProjectError) resubmitProjectError.innerText = "";
 
                 if (!file) {
                     submitBtn.disabled = true;
@@ -709,8 +737,17 @@
                 // Accept only jpg, jpeg, png
                 const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
                 if (!allowedTypes.includes(file.type)) {
-                    alert("Only JPG, JPEG, and PNG files are allowed.");
-                    resubmitProjectInput.value = ""; // Reset file input
+                    resubmitProjectError.innerText = "Only JPG, JPEG, and PNG files are allowed.";
+                    resubmitProjectInput.value = "";
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                // ✅ File size validation (700 KB max)
+                const maxSizeKB = 700;
+                if (file.size > maxSizeKB * 1024) {
+                    resubmitProjectError.innerText = `File too large. Maximum allowed size is ${maxSizeKB} KB.`;
+                    resubmitProjectInput.value = "";
                     submitBtn.disabled = true;
                     return;
                 }
@@ -860,21 +897,6 @@
             console.log("Notification setting changed to:", isOn ? "On" : "Off");
         }
         window.setProfileNotif = setProfileNotif;
-
-        // --- Search ---
-        const searchInput = document.getElementById("searchInput");
-        if (searchInput) {
-            searchInput.addEventListener("keypress", function (e) {
-                if (e.key === "Enter") { e.preventDefault(); handleSearch(); }
-            });
-        }
-        function handleSearch() {
-            if (!searchInput) return;
-            const query = searchInput.value.trim();
-            if (!query) { alert("Please enter a search term."); return; }
-            window.location.href = `/Courses?search=${encodeURIComponent(query)}`;
-        }
-        window.handleSearch = handleSearch;
 
         // --- Logout modal ---
         const logoutModalOverlay = document.getElementById("logout-modal-overlay");
@@ -1027,6 +1049,7 @@
 
                     await loadNotifications();
                     await loadUnreadCount();
+                    window.location.reload();
                 } else {
                     alert(result.message || "Something went wrong");
                     btn.disabled = false;
@@ -1085,6 +1108,7 @@
 
                     await loadNotifications();
                     await loadUnreadCount();
+                    window.location.reload();
                 } else {
                     alert(result.message);
                     submitBtn.disabled = false;
@@ -1136,6 +1160,7 @@
                     window.resubmittedApps.add(appId);
                     await loadNotifications();
                     await loadUnreadCount();
+                    window.location.reload();
                 } else {
                     alert(result.message);
                     submitBtn.disabled = false;

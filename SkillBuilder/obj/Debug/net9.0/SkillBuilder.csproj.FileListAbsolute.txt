@@ -661,7 +661,6 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\ne
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\runtimes\win-x86\native\libwinpthread-1.dll
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\runtimes\win-x86\native\qpdf.dll
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\runtimes\win-x86\native\zlib1.dll
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\kui8okoj2m-e4qxbfpsid.gz
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\cnogzgnhf8-nx6hsjjc8k.gz
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\zg7t2g6orv-0i2latg4q4.gz
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\nf6a4ewk3v-b3ccm45830.gz
@@ -674,5 +673,6 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\ne
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\etradetxy9-jnizu7l3uv.gz
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\Npgsql.dll
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\gwr47kqyb5-w71jp2k4b8.gz
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\83eyz4qszu-pc5nztxwcb.gz
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\gwr47kqyb5-w9wxucabto.gz
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\obj\Debug\net9.0\compressed\kui8okoj2m-le70tejuf7.gz

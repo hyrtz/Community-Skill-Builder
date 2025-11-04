@@ -1,6 +1,21 @@
 ﻿@using SkillBuilder.Models.ViewModels
 @model List<AchievementViewModel>
 
+<style>
+
+    .empty-message {
+        text-align: center;
+        font-size: 1rem;
+        color: #6b7280;
+        padding: 2rem;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background-color: #f9fafb;
+        margin-top: 2rem;
+    }
+
+</style>
+
 @if (Model != null && Model.Any(a => a.IsAchieved))
 {
     @foreach (var achievement in Model.Where(a => a.IsAchieved))

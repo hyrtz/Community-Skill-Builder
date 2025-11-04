@@ -8,18 +8,19 @@
     .artisan-support-section {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 1rem;
     }
 
     .artisan-support-heading {
         font-size: 1.8rem;
         font-weight: bold;
-        color: #333;
+        color: #344AEA;
+        margin-bottom: 1rem;
     }
 
     .artisan-session-tabs {
         display: flex;
-        gap: 2rem;
+        gap: 1rem;
         margin-bottom: 1.5rem;
     }
 
@@ -92,7 +93,7 @@
 </style>
 
 <div class="artisan-support-section">
-    <div class="artisan-support-heading">Support Sessions</div>
+    <div class="artisan-support-heading">Support Sessions<br /><span style="font-size: 1rem; font-weight: 400; color: black;">This is your support session section where you can see the list of all live session requested by learners where you can either confirm or decline request.</span></div>
 
     <div class="artisan-session-tabs">
         <button class="artisan-session-tab @(activeSessionTab == "pending" ? "active" : "")" data-tab="pending">Pending</button>

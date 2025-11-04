@@ -16,11 +16,13 @@
         font-size: 1.8rem;
         font-weight: bold;
         color: #333;
+        color: #344AEA;
+        margin-bottom: 1rem;
     }
 
     .artisan-dashboard-stats {
         display: flex;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .artisan-dashboard-card {
@@ -97,7 +99,7 @@
 
     @* Existing dashboard content remains untouched *@
     <div class="artisan-dashboard-heading">
-        Welcome back, @Model.Artisan.User?.FirstName!
+        Welcome back, @Model.Artisan.User?.FirstName!<br /><span style="font-size: 1rem; font-weight: 400; color: black;">This is your dashboard section where you can see your current total course, works, and latest created course.</span>
     </div>
 
     <div class="artisan-dashboard-stats">
@@ -124,7 +126,7 @@
             <a class="artisan-dashboard-latest-link"
                href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = latest.Link })">
                 View Course
-            </a>    
+            </a>
         </div>
     }
     else

@@ -667,7 +667,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.querySelector(".nav-profile-icon")?.style.setProperty("display", "inline-block", "important");
 
                 closeModal("login-modal");
-                window.location.reload();
+
+                const redirectUrl = data.redirectUrl;
+                window.location.href = redirectUrl;
+
             } else {
                 loginError.textContent = data.message || "Invalid login credentials.";
             }

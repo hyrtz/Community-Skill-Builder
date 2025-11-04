@@ -1,5 +1,89 @@
 ﻿@model List<SkillBuilder.Models.SupportSessionRequest>
 
+<style>
+    .support-card-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .join-session-btn {
+        padding: 0.4rem 0.8rem;
+        text-decoration: none;
+    }
+
+    .complete-session-btn {
+        border: solid 1px;
+        border-radius: 5px;
+        padding: 0.4rem 0.8rem;
+    }
+
+        .complete-session-btn:hover {
+            background-color: #218838;
+            color: #fff;
+        }
+
+    .artisan-complete-session-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .artisan-complete-session-modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .artisan-complete-session-modal-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .artisan-btn-confirm-complete {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+        .artisan-btn-confirm-complete:hover {
+            background-color: #218838;
+        }
+
+    .artisan-btn-close-complete {
+        background-color: #ccc;
+        color: #333;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+        .artisan-btn-close-complete:hover {
+            background-color: #bbb;
+        }
+
+</style>
+
 @if (!Model.Any())
 {
     <div class="artisan-support-empty">
@@ -9,42 +93,64 @@
 else
 {
     <div class="artisan-support-list">
+        <h2 style="font-weight: 300; font-size: 1rem;">
+            Here is the list of all your upcoming sessions with learners.
+        </h2>
         @foreach (var request in Model)
         {
             <div class="artisan-support-card" id="support-@request.Id">
                 <div class="artisan-support-user">
                     <img src="@request.User.UserAvatar" class="artisan-support-user-avatar" />
                     <div class="artisan-support-user-info">
-                        <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
-                        <div class="artisan-support-user-course">@request.Course.Title</div>
+                        <div class="artisan-support-user-name">Learner: @request.User.FirstName @request.User.LastName</div>
+                        <div class="artisan-support-user-course">Course: @request.Course.Title</div>
                     </div>
                 </div>
 
-                <div class="artisan-support-title">@request.Title</div>
-                <div class="artisan-support-message">@request.Message</div>
+                <div class="artisan-support-title">Request Title: @request.Title</div>
+                <div class="artisan-support-message">Request Message: @request.Message</div>
 
-                <div class="support-status-badge status-confirmed" style="margin-top:0.5rem;">
-                    Confirmed
+                <!-- Added Requested Date & Time -->
+                <div class="artisan-support-schedule">
+                    <span><i class="fas fa-calendar-alt"></i>Requested Date & Time: @request.SessionDate.ToString("MMMM d, yyyy")</span>
+                    <span><i class="fas fa-clock"></i>& @request.SessionTime.ToString(@"hh\:mm")</span>
+                </div>
+
+                <div>
+                    <span style="font-weight: 600;">Status: </span>
+                    <div class="support-status-badge artisan-status-confirmed" style="margin-top:0.5rem;">
+                        Confirmed
+                    </div>
                 </div>
 
                 @if (!string.IsNullOrWhiteSpace(request.MeetingLink))
                 {
-                    <div style="margin-top:0.5rem;">
-                        <a href="@request.MeetingLink" target="_blank" class="btn btn-primary btn-sm">
+                    <div class="support-card-actions">
+                        <a href="@request.MeetingLink" target="_blank" class="btn btn-primary btn-sm join-session-btn">
                             <i class="fas fa-link"></i> Join Session
                         </a>
+
+                        <button class="btn btn-success btn-sm complete-session-btn" data-id="@request.Id">
+                            <i class="fas fa-check"></i> Mark as Completed
+                        </button>
                     </div>
                 }
-
-                <div style="margin-top:1rem;">
-                    <button class="btn btn-success btn-sm complete-session-btn" data-id="@request.Id">
-                        <i class="fas fa-check"></i> Mark as Completed
-                    </button>
-                </div>
             </div>
         }
     </div>
 }
+
+<!-- Confirmation Modal -->
+<div id="artisanCompleteSessionModal" class="artisan-complete-session-modal" style="display:none;">
+    <div class="artisan-complete-session-modal-content">
+        <h3>Confirm Completion</h3>
+        <p id="artisanCompleteSessionModalText">Are you sure you want to mark this session as completed?</p>
+        <div class="artisan-complete-session-modal-actions">
+            <button id="artisanConfirmCompleteBtn" class="artisan-btn-confirm-complete">Yes, Complete</button>
+            <button id="artisanCloseCompleteModal" class="artisan-btn-close-complete">No, Keep</button>
+        </div>
+    </div>
+</div>
 
 <script>
     async function completeSession(id) {
@@ -52,7 +158,6 @@ else
             const card = document.getElementById('support-' + id);
             if (!card) return;
 
-            // Grab info BEFORE removing
             const userAvatar = card.querySelector('.artisan-support-user-avatar').src;
             const userName = card.querySelector('.artisan-support-user-name').textContent;
             const userCourse = card.querySelector('.artisan-support-user-course').textContent;
@@ -67,10 +172,8 @@ else
 
             if (!res.ok) throw new Error('Failed to complete session');
 
-            // Remove from upcoming
             card.remove();
 
-            // Add to completed
             const completedContainer = document.getElementById('completedSupportContainer');
             let completedList = completedContainer.querySelector('.artisan-support-list');
             if (!completedList) {
@@ -98,19 +201,54 @@ else
                 </div>
             `;
             completedList.prepend(completedCard);
-
+            window.location.reload();
         } catch (err) {
             console.error(err);
             alert('Something went wrong while completing the session.');
         }
     }
 
-    // Use event delegation for dynamically rendered buttons
+    let artisanCompleteSessionId = null;
+
+    // Open confirmation modal
     document.addEventListener('click', e => {
-        if (e.target.closest('.complete-session-btn')) {
-            const btn = e.target.closest('.complete-session-btn');
-            const id = btn.dataset.id;
-            completeSession(id);
+        const btn = e.target.closest('.complete-session-btn');
+        if (!btn) return;
+
+        artisanCompleteSessionId = btn.dataset.id;
+
+        const card = document.getElementById('support-' + artisanCompleteSessionId);
+        const learnerName = card.querySelector('.artisan-support-user-name').textContent;
+        const courseName = card.querySelector('.artisan-support-user-course').textContent;
+
+        document.getElementById('artisanCompleteSessionModalText').textContent =
+            `Are you sure you want to mark the session for ${learnerName} (${courseName}) as completed?`;
+
+        document.getElementById('artisanCompleteSessionModal').style.display = 'flex';
+    });
+
+    // Close modal without doing anything
+    document.addEventListener('click', function(e) {
+        // Close modal
+        if (e.target.closest('#artisanCloseCompleteModal')) {
+            artisanCompleteSessionId = null;
+            document.getElementById('artisanCompleteSessionModal').style.display = 'none';
+        }
+
+        // Confirm complete
+        if (e.target.closest('#artisanConfirmCompleteBtn')) {
+            if (!artisanCompleteSessionId) return;
+            document.getElementById('artisanCompleteSessionModal').style.display = 'none';
+            completeSession(artisanCompleteSessionId);
+            artisanCompleteSessionId = null;
+        }
+    });
+
+    // Close modal by clicking outside
+    document.getElementById('artisanCompleteSessionModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('artisanCompleteSessionModal')) {
+            artisanCompleteSessionId = null;
+            document.getElementById('artisanCompleteSessionModal').style.display = 'none';
         }
     });
 </script>

@@ -17,8 +17,8 @@
         overflow: hidden;
         cursor: pointer;
         padding: 1rem;
-        max-height: 280px;
-        min-height: 280px;
+        max-height: 310px;
+        min-height: 310px;
         max-width: 270px;
         min-width: 270px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -42,12 +42,23 @@
 
     .artisan-accepted-review-course {
         font-weight: bold;
+        color: #555;
         margin-bottom: 0.3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .artisan-accepted-review-desc {
         color: #555;
         font-size: 0.9rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .artisan-accepted-review-status {
@@ -71,6 +82,7 @@
 </style>
 
 <div class="artisan-accepted-review-grid">
+
     @if (Model != null && Model.Count > 0)
     {
         @foreach (var submission in Model)
@@ -86,8 +98,8 @@
                 <img src="@submission.MediaUrl" alt="Accepted project from @submission.Course?.Title" />
 
                 <div class="artisan-accepted-review-info">
-                    <div class="artisan-accepted-review-course">@submission.Course?.Title</div>
-                    <div class="artisan-accepted-review-desc">@submission.Description</div>
+                    <div class="artisan-accepted-review-course">Course Title: @submission.Course?.Title</div>
+                    <div class="artisan-accepted-review-desc"><span style="font-weight: 600;">Description: </span>@submission.Description</div>
                     <div class="artisan-accepted-review-status">@submission.Status</div>
                 </div>
             </div>

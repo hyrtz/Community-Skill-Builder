@@ -16,6 +16,7 @@
 
         public string Status { get; set; } = "Pending";
         public DateTime SubmittedAt { get; set; }
+        public DateTime ApprovedAt { get; set; }
         public string? SignatureUrl { get; set; }
     }
 }

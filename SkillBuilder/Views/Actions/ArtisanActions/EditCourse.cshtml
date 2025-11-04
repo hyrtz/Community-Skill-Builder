@@ -149,6 +149,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById("edit-course-form");
         const submitBtn = document.getElementById("editBtn");
+        let isDirty = false; // Track user changes
 
         // ----- Tabs -----
         const tabs = document.querySelectorAll(".edit-course-tab");
@@ -162,16 +163,18 @@
         activateTab(savedTab);
         tabs.forEach(tab => tab.addEventListener("click", () => activateTab(tab.dataset.tab)));
 
-        // ----- Enable Save Changes dynamically -----
-        function enableSaveChanges() { if(submitBtn) submitBtn.disabled = false; }
-        form.addEventListener("input", enableSaveChanges);
-        form.addEventListener("change", enableSaveChanges);
-        form.addEventListener("click", enableSaveChanges);
+        // ----- Mark page as dirty on changes -----
+        function markDirty() { isDirty = true; enableSave(); }
+        function enableSave() { if(submitBtn) submitBtn.disabled = false; }
+
+        form.addEventListener("input", markDirty);
+        form.addEventListener("change", markDirty);
+        form.addEventListener("click", markDirty);
 
         // ----- Observe curriculum for changes -----
         const moduleList = document.getElementById("curriculum-modules");
         if(moduleList){
-            const observer = new MutationObserver(enableSaveChanges);
+            const observer = new MutationObserver(markDirty);
             observer.observe(moduleList, { childList: true, subtree: true });
         }
 
@@ -193,7 +196,7 @@
                 const radios = form.querySelectorAll(`input[name="${name}"]`);
                 const isVisible = Array.from(radios).some(r => r.offsetParent !== null);
                 const isChecked = Array.from(radios).some(r => r.checked);
-                if(isVisible && !isChecked) { allValid = false; radios.forEach(r => r.classList.add("input-invalid")); }
+                if(isVisible && !isChecked){ allValid = false; radios.forEach(r => r.classList.add("input-invalid")); }
                 else radios.forEach(r => r.classList.remove("input-invalid"));
             });
 
@@ -213,15 +216,25 @@
         }
         checkRequiredFields();
         if(moduleList){
-            const observer = new MutationObserver(checkRequiredFields);
-            observer.observe(moduleList, { childList: true, subtree: true });
+            const observer2 = new MutationObserver(checkRequiredFields);
+            observer2.observe(moduleList, { childList: true, subtree: true });
         }
 
-        // ----- Remove saved tab on submit -----
+        // ----- Beforeunload warning -----
+        function beforeUnloadHandler(e){
+            if(isDirty){
+                e.preventDefault();
+                e.returnValue = ""; // Standard for most browsers
+            }
+        }
+        window.addEventListener("beforeunload", beforeUnloadHandler);
+
+        // ----- Remove saved tab and disable button on submit -----
         form.addEventListener("submit", () => {
             localStorage.removeItem("editCourseSelectedTab");
             submitBtn.disabled = true;
             submitBtn.innerText = "Submitting...";
+            window.removeEventListener("beforeunload", beforeUnloadHandler); // Remove handler on submit
         });
     });
 </script>

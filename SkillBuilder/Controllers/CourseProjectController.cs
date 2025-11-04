@@ -56,6 +56,7 @@ namespace SkillBuilder.Controllers
 
             // Update project status
             project.Status = "Approved";
+            project.ApprovedAt = DateTime.UtcNow;
 
             // ✅ Update enrollment with final project info
             var enrollment = await _context.Enrollments
@@ -90,6 +91,7 @@ namespace SkillBuilder.Controllers
                 project.Description,
                 courseTitle = project.Course?.Title,
                 project.MediaUrl,
+                project.ApprovedAt,
                 project.SignatureUrl
             });
         }

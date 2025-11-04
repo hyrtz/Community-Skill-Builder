@@ -11,22 +11,34 @@
     else
     {
         <div class="artisan-support-list">
+            <h2 style="font-weight: 300;  font-size: 1rem;">
+                Here is the list of all sessions you have completed with learners.
+            </h2>
             @foreach (var request in Model)
             {
                 <div class="artisan-support-card" id="session-@request.Id">
                     <div class="artisan-support-user">
                         <img src="@request.User.UserAvatar" class="artisan-support-user-avatar" />
                         <div class="artisan-support-user-info">
-                            <div class="artisan-support-user-name">@request.User.FirstName @request.User.LastName</div>
-                            <div class="artisan-support-user-course">@request.Course.Title</div>
+                            <div class="artisan-support-user-name">Learner: @request.User.FirstName @request.User.LastName</div>
+                            <div class="artisan-support-user-course">Course: @request.Course.Title</div>
                         </div>
                     </div>
 
-                    <div class="artisan-support-title">@request.Title</div>
-                    <div class="artisan-support-message">@request.Message</div>
+                    <div class="artisan-support-title">Request Title: @request.Title</div>
+                    <div class="artisan-support-message">Request Message: @request.Message</div>
 
-                    <div class="support-status-badge status-completed" style="margin-top:0.5rem;">
-                        Completed
+                    <!-- Added Requested Date & Time -->
+                    <div class="artisan-support-schedule">
+                        <span><i class="fas fa-calendar-alt"></i>Requested Date & Time: @request.SessionDate.ToString("MMMM d, yyyy")</span>
+                        <span><i class="fas fa-clock"></i>& @request.SessionTime.ToString(@"hh\:mm")</span>
+                    </div>
+
+                    <div>
+                        <span style="font-weight: 600;">Status: </span>
+                        <div class="support-status-badge artisan-status-completed" style="margin-top:0.5rem;">
+                            Completed
+                        </div>
                     </div>
                 </div>
             }

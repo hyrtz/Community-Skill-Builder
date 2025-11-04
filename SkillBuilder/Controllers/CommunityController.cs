@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillBuilder.Data;
 using SkillBuilder.Models;
+using SkillBuilder.Models.Entities;
 using SkillBuilder.Models.ViewModels;
 using SkillBuilder.Services;
 
@@ -31,59 +32,60 @@ namespace SkillBuilder.Controllers
             if (!string.IsNullOrEmpty(search))
                 communitiesQuery = communitiesQuery.Where(c => c.Name.ToLower().Contains(search.ToLower()));
 
-                var communities = await communitiesQuery
-                    .OrderByDescending(c => c.MembersCount)
-                    .Take(20)
-                    .Select(c => new CommunitiesViewModel
-                    {
-                        Id = c.Id,
-                        Name = c.Name,
-                        Description = c.Description,
-                        AvatarUrl = !string.IsNullOrEmpty(c.AvatarUrl) ? c.AvatarUrl : "/uploads/community-profile/default-community.png",
-                        CoverImageUrl = !string.IsNullOrEmpty(c.CoverImageUrl) ? c.CoverImageUrl : "/uploads/community-banner/default-banner.png",
-                        MembersCount = c.MembersCount,
-                        CreatorId = c.CreatorId
-                    })
-                    .ToListAsync();
-
-                Community selectedCommunity = null;
-                List<CommunityPostViewModel> posts = new List<CommunityPostViewModel>();
-
-                if (selectedCommunityId.HasValue)
+            var communities = await communitiesQuery
+                .OrderByDescending(c => c.MembersCount)
+                .Take(20)
+                .Select(c => new CommunitiesViewModel
                 {
-                    selectedCommunity = await _context.Communities
-                        .Include(c => c.Memberships)
-                        .FirstOrDefaultAsync(c => c.Id == selectedCommunityId.Value && c.IsPublished); // Only published
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    AvatarUrl = !string.IsNullOrEmpty(c.AvatarUrl) ? c.AvatarUrl : "/uploads/community-profile/default-community.png",
+                    CoverImageUrl = !string.IsNullOrEmpty(c.CoverImageUrl) ? c.CoverImageUrl : "/uploads/community-banner/default-banner.png",
+                    MembersCount = c.MembersCount,
+                    CreatorId = c.CreatorId,
+                    Category = c.Category
+                })
+                .ToListAsync();
 
-                    if (selectedCommunity != null)
-                    {
-                        posts = await _context.CommunityPosts
-                            .Include(p => p.Author)
-                            .Where(p => p.CommunityId == selectedCommunity.Id && p.IsPublished)
-                            .OrderByDescending(p => p.SubmittedAt)
-                            .Take(10)
-                            .Select(p => new CommunityPostViewModel
-                            {
-                                Id = p.Id,
-                                Title = p.Title,
-                                Content = p.Content,
-                                SubmittedAt = p.SubmittedAt,
-                                ImageUrl = p.ImageUrl,
-                                AuthorId = p.AuthorId,
-                                AuthorName = p.Author.FirstName,
-                                AuthorAvatarUrl = p.Author.UserAvatar,
-                                CommunityName = p.Community.Name,
-                                CommentsCount = 0,
-                                Category = p.Category
-                            })
-                            .ToListAsync();
-                    }
-                    else
-                    {
-                        // Redirect if the community is unpublished or doesn't exist
-                        return RedirectToAction("CommunityHub");
-                    }
+            Community selectedCommunity = null;
+            List<CommunityPostViewModel> posts = new List<CommunityPostViewModel>();
+
+            if (selectedCommunityId.HasValue)
+            {
+                selectedCommunity = await _context.Communities
+                    .Include(c => c.Memberships)
+                    .FirstOrDefaultAsync(c => c.Id == selectedCommunityId.Value && c.IsPublished); // Only published
+
+                if (selectedCommunity != null)
+                {
+                    posts = await _context.CommunityPosts
+                        .Include(p => p.Author)
+                        .Where(p => p.CommunityId == selectedCommunity.Id && p.IsPublished)
+                        .OrderByDescending(p => p.SubmittedAt)
+                        .Take(10)
+                        .Select(p => new CommunityPostViewModel
+                        {
+                            Id = p.Id,
+                            Title = p.Title,
+                            Content = p.Content,
+                            SubmittedAt = p.SubmittedAt,
+                            ImageUrl = p.ImageUrl,
+                            AuthorId = p.AuthorId,
+                            AuthorName = p.Author.FirstName,
+                            AuthorAvatarUrl = p.Author.UserAvatar,
+                            CommunityName = p.Community.Name,
+                            CommentsCount = 0,
+                            Category = p.Category
+                        })
+                        .ToListAsync();
                 }
+                else
+                {
+                    // Redirect if the community is unpublished or doesn't exist
+                    return RedirectToAction("CommunityHub");
+                }
+            }
             else
             {
                 posts = await _context.CommunityPosts
@@ -101,7 +103,7 @@ namespace SkillBuilder.Controllers
                         AuthorId = p.AuthorId,
                         AuthorName = p.Author.FirstName,
                         AuthorAvatarUrl = p.Author.UserAvatar,
-                        CommunityName = "Public", 
+                        CommunityName = "Public",
                         CommentsCount = 0,
                         Category = p.Category
                     })
@@ -140,6 +142,95 @@ namespace SkillBuilder.Controllers
             return PartialView("~/Views/Shared/Sections/_CommunityDetailsSection.cshtml", detailsVm);
         }
 
+        [HttpGet("GetPendingRequestsPartial")]
+        public async Task<IActionResult> GetPendingRequestsPartial(int communityId)
+        {
+            // Get current user
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            // Ensure the current user is part of this community
+            var isMember = await _context.CommunityMemberships
+                .AnyAsync(m => m.CommunityId == communityId && m.UserId == userId);
+
+            if (!isMember)
+                return Forbid();
+
+            // Get pending join requests for this community only
+            var pendingRequests = await _context.CommunityJoinRequests
+                .Where(r => r.CommunityId == communityId && r.Status == "Pending")
+                .Include(r => r.User)
+                .ToListAsync();
+
+            var model = new UserProfileViewModel
+            {
+                PendingJoinRequests = pendingRequests,
+                SelectedCommunityId = communityId
+            };
+
+            return PartialView("Sections/UserNotebooks/MyCommunityNotebooks/_MyCommunityNotebookPending", model);
+        }
+
+        [HttpGet("GetMembersPartial")]
+        public async Task<IActionResult> GetMembersPartial(int communityId)
+        {
+            // Get current user
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            // Get all communities of the current user
+            var userCommunities = await _context.Communities
+                .Where(c => c.Memberships.Any(m => m.UserId == userId))
+                .ToListAsync();
+
+            // Get members of those communities
+            var communityMembers = await _context.CommunityMemberships
+                .Where(m => userCommunities.Select(c => c.Id).Contains(m.CommunityId))
+                .Include(m => m.User)
+                .ToListAsync();
+
+            // Build dictionary: CommunityId => List of members
+            var communityMembersDict = userCommunities.ToDictionary(
+                c => c.Id,
+                c => communityMembers
+                        .Where(m => m.CommunityId == c.Id)
+                        .Select(m => new CommunityMemberViewModel
+                        {
+                            UserId = m.UserId,
+                            FullName = $"{m.User.FirstName} {m.User.LastName}", // combine names
+                            Email = m.User.Email,
+                            AvatarUrl = !string.IsNullOrEmpty(m.User.UserAvatar)
+                                        ? m.User.UserAvatar
+                                        : "/assets/Avatar/Sample10.svg",
+                            Role = m.Role,
+                            JoinedAt = m.JoinedAt,
+                            CommunityId = m.CommunityId
+                        })
+                        .ToList()
+            );
+
+            var model = new UserProfileViewModel
+            {
+                MyCommunities = userCommunities.Select(c => new CommunitiesViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    AvatarUrl = !string.IsNullOrEmpty(c.AvatarUrl) ? c.AvatarUrl : "/uploads/community-profile/default-community.png",
+                    CoverImageUrl = !string.IsNullOrEmpty(c.CoverImageUrl) ? c.CoverImageUrl : "/uploads/community-banner/default-banner.png",
+                    MembersCount = c.MembersCount,
+                    CreatorId = c.CreatorId,
+                    Category = c.Category
+                }).ToList(),
+                CommunityMembers = communityMembersDict,
+                SelectedCommunityId = communityId
+            };
+
+            return PartialView("Sections/UserNotebooks/MyCommunityNotebooks/_MyCommunityNotebookAllMembers", model);
+        }
+
         [HttpPost("CreatePost")]
         public async Task<IActionResult> CreatePost([FromForm] CreateCommunityPostViewModel model)
         {
@@ -164,7 +255,7 @@ namespace SkillBuilder.Controllers
                 Title = model.Title,
                 Content = model.Content,
                 AuthorId = userId,
-                Category = model.Category, 
+                Category = model.Category,
                 ImageUrl = imagePath,
                 SubmittedAt = DateTime.UtcNow,
                 IsPublished = true
@@ -475,6 +566,7 @@ namespace SkillBuilder.Controllers
             {
                 Name = model.Name,
                 Description = model.Description,
+                Category = model.CategoryFinal,
                 AvatarUrl = avatarPath ?? "/assets/Images/default-community.png",
                 CoverImageUrl = bannerPath ?? "/assets/Images/default-banner.png",
                 MembersCount = 1,
@@ -684,6 +776,293 @@ namespace SkillBuilder.Controllers
             public int RequestId { get; set; }
             public bool Approve { get; set; }
             public string? Reason { get; set; } // ✅ Added reason
+        }
+
+        // ✅ GET: Community/Edit/{id}
+        // Returns a single community’s info for editing
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> EditCommunity(int id)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var community = await _context.Communities.FirstOrDefaultAsync(c => c.Id == id);
+            if (community == null)
+                return NotFound(new { success = false, message = "Community not found." });
+
+            // Only creator can edit
+            if (community.CreatorId != userId)
+                return Forbid();
+
+            var vm = new CommunitiesViewModel
+            {
+                Id = community.Id,
+                Name = community.Name,
+                Description = community.Description,
+                AvatarUrl = community.AvatarUrl,
+                CoverImageUrl = community.CoverImageUrl,
+                CreatorId = community.CreatorId,
+                MembersCount = community.MembersCount,
+                Category = community.Category // ✅ preload category
+            };
+
+            return Ok(vm);
+        }
+
+        // ✅ POST: Community/Edit
+        [HttpPost("Edit")]
+        public async Task<IActionResult> EditCommunity([FromForm] EditCommunityViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Invalid form data." });
+
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var community = await _context.Communities.FirstOrDefaultAsync(c => c.Id == model.Id);
+            if (community == null)
+                return NotFound(new { success = false, message = "Community not found." });
+
+            if (community.CreatorId != userId)
+                return Forbid();
+
+            // ✅ Update basic info
+            community.Name = model.Name;
+            community.Description = model.Description;
+
+            // ✅ Handle image uploads if provided
+            if (model.Avatar != null)
+                community.AvatarUrl = await SaveImage(model.Avatar, "community-profile");
+
+            if (model.Banner != null)
+                community.CoverImageUrl = await SaveImage(model.Banner, "community-banner");
+
+            // ✅ Update category if included in model
+            if (!string.IsNullOrEmpty(model.Category))
+                community.Category = model.Category;
+
+            _context.Communities.Update(community);
+            await _context.SaveChangesAsync();
+
+            // 🔔 Notify the owner
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"✏️ Your community '{community.Name}' has been successfully updated."
+            );
+
+            return Ok(new
+            {
+                success = true,
+                message = "Community updated successfully!",
+                community = new
+                {
+                    id = community.Id,
+                    name = community.Name,
+                    description = community.Description,
+                    avatarUrl = community.AvatarUrl,
+                    bannerUrl = community.CoverImageUrl,
+                    category = community.Category
+                }
+            });
+        }
+
+        public class EditCommunityViewModel
+        {
+            public int Id { get; set; }
+            public string Name { get; set; } = string.Empty;
+            public string? Description { get; set; }
+            public IFormFile? Avatar { get; set; }
+            public IFormFile? Banner { get; set; }
+            public string? Category { get; set; }
+        }
+
+        [HttpPost("Delete")]
+        public async Task<IActionResult> DeleteCommunity(int communityId)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var community = await _context.Communities
+                .Include(c => c.Memberships)
+                .Include(c => c.Posts)
+                .Include(c => c.JoinRequests)
+                .FirstOrDefaultAsync(c => c.Id == communityId);
+
+            if (community == null)
+                return NotFound(new { success = false, message = "Community not found." });
+
+            // Only creator can delete
+            if (community.CreatorId != userId)
+                return Forbid();
+
+            // Notify members about deletion
+            var memberIds = community.Memberships
+                .Where(m => m.UserId != userId)
+                .Select(m => m.UserId)
+                .ToList();
+
+            foreach (var memberId in memberIds)
+            {
+                await _notificationService.AddNotificationAsync(
+                    memberId,
+                    $"🗑️ The community '{community.Name}' has been deleted by its owner."
+                );
+            }
+
+            // Notify owner
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"✅ You have successfully deleted the community '{community.Name}'."
+            );
+
+            // Remove related posts
+            if (community.Posts != null && community.Posts.Any())
+                _context.CommunityPosts.RemoveRange(community.Posts);
+
+            // Remove memberships
+            if (community.Memberships != null && community.Memberships.Any())
+                _context.CommunityMemberships.RemoveRange(community.Memberships);
+
+            // Remove join requests
+            if (community.JoinRequests != null && community.JoinRequests.Any())
+                _context.CommunityJoinRequests.RemoveRange(community.JoinRequests);
+
+            // Finally, remove the community
+            _context.Communities.Remove(community);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Community deleted successfully." });
+        }
+
+        [HttpPost("RemoveMember")]
+        public async Task<IActionResult> RemoveMember([FromBody] RemoveMemberModel model)
+        {
+            if (model == null || model.CommunityId <= 0 || string.IsNullOrWhiteSpace(model.UserId))
+                return BadRequest(new { success = false, message = "Invalid request data." });
+
+            var currentUserId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized();
+
+            // ✅ Fetch community and check ownership
+            var community = await _context.Communities
+                .Include(c => c.Memberships)
+                .FirstOrDefaultAsync(c => c.Id == model.CommunityId);
+
+            if (community == null)
+                return NotFound(new { success = false, message = "Community not found." });
+
+            if (community.CreatorId != currentUserId)
+                return Forbid();
+
+            // ✅ Find the membership to remove
+            var membership = await _context.CommunityMemberships
+                .Include(m => m.User)
+                .FirstOrDefaultAsync(m => m.CommunityId == model.CommunityId && m.UserId == model.UserId);
+
+            if (membership == null)
+                return NotFound(new { success = false, message = "Member not found in this community." });
+
+            // ✅ Prevent owner from removing themselves
+            if (membership.UserId == currentUserId)
+                return BadRequest(new { success = false, message = "You cannot remove yourself from your own community." });
+
+            // ✅ Remove membership and update count
+            _context.CommunityMemberships.Remove(membership);
+            community.MembersCount = Math.Max(0, community.MembersCount - 1);
+            await _context.SaveChangesAsync();
+
+            // ✅ Notify the removed member
+            await _notificationService.AddNotificationAsync(
+                membership.UserId,
+                $"🚫 You have been removed from the community '{community.Name}'.\n\n📝 Reason: {model.Reason}"
+            );
+
+            // ✅ Notify the owner (confirmation)
+            await _notificationService.AddNotificationAsync(
+                currentUserId,
+                $"🗑️ You removed {membership.User.FirstName} {membership.User.LastName} from '{community.Name}'.\n\n📝 Reason: {model.Reason}"
+            );
+
+            return Ok(new
+            {
+                success = true,
+                message = $"{membership.User.FirstName} {membership.User.LastName} has been removed from the community."
+            });
+        }
+
+        public class RemoveMemberModel
+        {
+            public int CommunityId { get; set; }
+            public string UserId { get; set; } = string.Empty;
+            public string Reason { get; set; } = string.Empty;
+        }
+
+        [HttpPost("ReportCommunity")]
+        public async Task<IActionResult> ReportCommunity([FromForm] ReportCommunityViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Invalid report data." });
+
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var community = await _context.Communities
+                .Include(c => c.Memberships)
+                .FirstOrDefaultAsync(c => c.Id == model.CommunityId);
+
+            if (community == null)
+                return NotFound(new { success = false, message = "Community not found." });
+
+            var report = new CommunityReport
+            {
+                CommunityId = community.Id,
+                ReporterId = userId,
+                Reason = model.Reason,
+                Details = model.Details,
+                ReportedAt = DateTime.UtcNow
+            };
+
+            _context.CommunityReports.Add(report);
+            await _context.SaveChangesAsync();
+
+            var reasonText = string.IsNullOrWhiteSpace(model.Details)
+                ? model.Reason
+                : $"{model.Reason}: {model.Details}";
+
+            // Notify reporter
+            await _notificationService.AddNotificationAsync(
+                userId,
+                $"⚠️ You reported the community '{community.Name}' for '{reasonText}'."
+            );
+
+            // Notify all admins
+            var adminIds = await _context.Users
+                .Where(u => u.Role == "Admin")
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            foreach (var adminId in adminIds)
+            {
+                await _notificationService.AddNotificationAsync(
+                    adminId,
+                    $"⚠️ Community '{community.Name}' was reported by a user. Reason: {reasonText}"
+                );
+            }
+
+            return Ok(new { success = true, message = "Community reported successfully." });
+        }
+
+        public class ReportCommunityViewModel
+        {
+            public int CommunityId { get; set; }
+            public string Reason { get; set; } = string.Empty;
+            public string? Details { get; set; }
         }
 
     }

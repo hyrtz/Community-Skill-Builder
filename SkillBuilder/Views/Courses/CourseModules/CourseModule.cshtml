@@ -672,7 +672,6 @@
 
         <!-- Right Content Area -->
         <div class="module-content" id="moduleContent">
-
         </div>
     </div>
 
@@ -754,7 +753,20 @@
     </div>
 
     <div id="tahi-course-completion-modal" class="tahi-cc-modal" style="display:none;">
-        <div class="tahi-cc-modal-content">
+        <div class="tahi-cc-modal-content" style="position: relative;">
+
+            <!-- Close button at top right -->
+            <button id="tahi-cc-universal-close-btn" style="
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        ">
+                &times;
+            </button>
 
             <!-- Rating Section -->
             <div id="tahi-cc-rating-section">
@@ -803,29 +815,29 @@
         const moduleData = [];
         @for (int i = 0; i < courseModules.Count; i++)
         {
-            var contents = courseModules[i].Contents.ToList();
-            for (int j = 0; j < contents.Count; j++)
-            {
-                var content = contents[j];
-                var quizList = (content.QuizQuestions ?? new List<SkillBuilder.Models.QuizQuestion>())
-                    .Select(q => new
-                    {
-                                question = q.Question,
-                                options = new[] { q.OptionA, q.OptionB, q.OptionC, q.OptionD },
-                                correctAnswer = q.CorrectAnswer
-                    });
+                var contents = courseModules[i].Contents.ToList();
+                for (int j = 0; j < contents.Count; j++)
+                {
+                        var content = contents[j];
+                        var quizList = (content.QuizQuestions ?? new List<SkillBuilder.Models.QuizQuestion>())
+                                .Select(q => new
+                                {
+                                                question = q.Question,
+                                                options = new[] { q.OptionA, q.OptionB, q.OptionC, q.OptionD },
+                                                correctAnswer = q.CorrectAnswer
+                                });
 
-                <text>
-                    moduleData.push({
-                        title: @Html.Raw(JsonSerializer.Serialize(content.Title)),
-                        type: @Html.Raw(JsonSerializer.Serialize(content.ContentType ?? "Text")),
-                        contentText: @Html.Raw(JsonSerializer.Serialize(content.ContentText ?? "")),
-                        mediaUrl: @Html.Raw(JsonSerializer.Serialize(content.MediaUrl ?? "")),
-                        quizQuestions: @Html.Raw(JsonSerializer.Serialize(quizList)),
-                        showDetails: @Html.Raw(JsonSerializer.Serialize(i == 0 && j == 0))
-                    });
-                </text>
-            }
+                        <text>
+                            moduleData.push({
+                                title: @Html.Raw(JsonSerializer.Serialize(content.Title)),
+                                type: @Html.Raw(JsonSerializer.Serialize(content.ContentType ?? "Text")),
+                                contentText: @Html.Raw(JsonSerializer.Serialize(content.ContentText ?? "")),
+                                mediaUrl: @Html.Raw(JsonSerializer.Serialize(content.MediaUrl ?? "")),
+                                quizQuestions: @Html.Raw(JsonSerializer.Serialize(quizList)),
+                                showDetails: @Html.Raw(JsonSerializer.Serialize(i == 0 && j == 0))
+                            });
+                        </text>
+                }
         }
 
         const regularTabs = Array.from(document.querySelectorAll(".module-tab"))
@@ -1223,6 +1235,7 @@
                         <label for="finalProjectImage" style="font-weight:600;">Upload Image *</label>
                         <input type="file" id="finalProjectImage" class="form-control" accept="image/*"
                                 style="display:block; margin-top:0.5rem;" />
+                        <div id="finalProjectError" style="color:red; margin-top:0.5rem;"></div>
                     </div>
 
                     <div id="finalProjectPreview" style="margin-top:1rem; text-align:center;"></div>
@@ -1261,37 +1274,58 @@
         // ✅ Handles preview before submitting
         function previewFinalProject(input) {
             const previewContainer = document.getElementById("finalProjectPreview");
+            const errorContainer = document.getElementById("finalProjectError");
+            if (errorContainer) errorContainer.innerText = ""; // reset error
             previewContainer.innerHTML = "";
 
             const file = input.files[0];
             if (!file) return;
 
+            // Validate type
             if (!file.type.startsWith("image")) {
-                alert("Only image files are allowed.");
+                if (errorContainer) errorContainer.innerText = "Only image files are allowed.";
                 input.value = "";
                 return;
             }
 
-            const img = document.createElement("img");
+            // Validate size (700 KB max)
+            const maxSizeKB = 700;
+            if (file.size / 1024 > maxSizeKB) {
+                if (errorContainer) errorContainer.innerText = `File is too large. Maximum allowed size is ${maxSizeKB} KB.`;
+                input.value = "";
+                return;
+            }
+
+            const img = new Image();
+            img.onload = function () {
+                previewContainer.appendChild(img);
+            };
             img.src = URL.createObjectURL(file);
             img.style.maxWidth = "100%";
             img.style.borderRadius = "8px";
-            previewContainer.appendChild(img);
         }
 
-        // ✅ make it globally available
         window.previewFinalProject = previewFinalProject;
 
-        // ✅ Final Project submission
         async function submitFinalProject() {
             const title = document.getElementById("finalProjectSubmissionTitle")?.value.trim();
             const caption = document.getElementById("finalProjectSubmissionCaption")?.value.trim();
-            const file = document.getElementById("finalProjectImage")?.files[0];
+            const fileInput = document.getElementById("finalProjectImage");
+            const file = fileInput?.files[0];
             const submitBtn = document.getElementById("submitFinalProjectBtn");
+            const errorContainer = document.getElementById("finalProjectError");
+            if (errorContainer) errorContainer.innerText = ""; // reset errors
 
-            if (!title) return alert("Please enter a project title.");
-            if (!caption) return alert("Please enter a project caption.");
-            if (!file) return alert("Please upload your project file.");
+            if (!title) { if(errorContainer) errorContainer.innerText = "Please enter a project title."; return; }
+            if (!caption) { if(errorContainer) errorContainer.innerText = "Please enter a project caption."; return; }
+            if (!file) { if(errorContainer) errorContainer.innerText = "Please upload your project file."; return; }
+
+            // Validate type
+            if (!file.type.startsWith("image")) { if(errorContainer) errorContainer.innerText = "Only image files are allowed."; return; }
+
+            // Validate size
+            const maxSizeKB = 700;
+            if (file.size / 1024 > maxSizeKB) { if(errorContainer) errorContainer.innerText = `File is too large. Max ${maxSizeKB} KB.`; return; }
 
             submitBtn.disabled = true;
             submitBtn.innerText = "Submitting...";
@@ -1307,11 +1341,9 @@
                     method: "POST",
                     body: formData
                 });
-
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    // Show modal instead of alert
                     const modal = document.getElementById("finalProjectSuccessModal");
                     const closeBtn = document.getElementById("closeFinalProjectModal");
 
@@ -1337,13 +1369,13 @@
                     showPointsPopup(finalProjectPoints);
                     await saveUserPoints(finalProjectPoints);
                 } else {
-                    alert(result.message || "Failed to submit project.");
+                    if(errorContainer) errorContainer.innerText = result.message || "Failed to submit project.";
                     submitBtn.disabled = false;
                     submitBtn.innerText = "Submit Final Project";
                 }
             } catch (err) {
                 console.error(err);
-                alert("An error occurred while submitting the project.");
+                if(errorContainer) errorContainer.innerText = "An error occurred while submitting the project.";
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Submit Final Project";
             }
@@ -1798,7 +1830,14 @@
 
         window.addEventListener('beforeunload', function(e) {
             const quizModal = document.getElementById("quizModal");
-            if (quizModal && quizModal.classList.contains("show")) {
+            const sessionModal = document.getElementById("sessionModal");
+            const finalProjectBtn = document.getElementById("submitFinalProjectBtn");
+            const feedbackModal = document.getElementById("tahi-course-completion-modal");
+
+            if ((quizModal && quizModal.classList.contains("show")) ||
+                (sessionModal && sessionModal.style.display === "flex") ||
+                (finalProjectBtn && !finalProjectBtn.disabled) ||
+                (feedbackModal && feedbackModal.style.display === "flex")) {
                 e.preventDefault();
                 e.returnValue = ''; // modern browsers require this
             }
@@ -1866,6 +1905,11 @@
             updateTahiCCStars(0);
             document.getElementById("tahi-cc-comment").value = "";
         }
+
+        document.getElementById("tahi-cc-universal-close-btn").addEventListener("click", () => {
+            const modal = document.getElementById("tahi-course-completion-modal");
+            modal.style.display = "none";
+        });
 
         // Update star visuals
         function updateTahiCCStars(rating) {

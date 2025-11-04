@@ -312,11 +312,13 @@ namespace SkillBuilder.Controllers
             var enrollment = await _context.Enrollments
                 .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
 
+            // Check if the user has submitted a final project
             var hasSubmittedFinalProject = await _context.CourseProjectSubmissions
                 .AnyAsync(s => s.UserId == userId && s.CourseId == courseId &&
                                (s.Status == "Pending" || s.Status == "Approved"));
 
-            if ((progress >= 100 || hasSubmittedFinalProject) && enrollment != null && !enrollment.IsCompleted)
+            // ✅ Only mark course completed if all modules are done AND final project submitted
+            if (progress >= 100 && hasSubmittedFinalProject && enrollment != null && !enrollment.IsCompleted)
             {
                 enrollment.IsCompleted = true;
                 enrollment.CompletedAt = DateTime.UtcNow;
@@ -653,6 +655,7 @@ namespace SkillBuilder.Controllers
                 Details = model.Details,
                 ReportedAt = DateTime.UtcNow
             };
+
             _context.CourseReports.Add(report);
             await _context.SaveChangesAsync();
 
@@ -679,5 +682,131 @@ namespace SkillBuilder.Controllers
             return Ok(new { success = true, message = "Course reported successfully." });
         }
 
+        [HttpGet("ViewCourseModule/{id}")]
+        public IActionResult ViewCourseModule(int id)
+        {
+            var course = _context.Courses
+                .Include(c => c.CourseModules)
+                    .ThenInclude(m => m.Contents)
+                        .ThenInclude(mc => mc.QuizQuestions)
+                .Include(c => c.Artisan)
+                .FirstOrDefault(c => c.Id == id);
+
+            if (course == null) return NotFound();
+
+            // Build module DTOs (preserve Order and Id for later mapping)
+            var modules = course.CourseModules
+                .OrderBy(m => m.Order)
+                .Select(m => new ModuleJson
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    Order = m.Order,
+                    Lessons = m.Contents
+                        .OrderBy(c => c.Order)
+                        .Select(l => new LessonJson
+                        {
+                            Id = l.Id,
+                            Title = l.Title ?? "",
+                            ContentType = l.ContentType ?? "Text",
+                            ContentText = l.ContentText ?? "",
+                            MediaUrl = l.MediaUrl ?? "",
+                            Order = l.Order,
+                            QuizQuestions = l.QuizQuestions
+                                .Select(q => new QuizQuestionJson
+                                {
+                                    Id = q.Id,
+                                    Question = q.Question ?? "",
+                                    Options = new string[]
+                                    {
+                                q.OptionA ?? "",
+                                q.OptionB ?? "",
+                                q.OptionC ?? "",
+                                q.OptionD ?? ""
+                                    },
+                                    CorrectAnswer = q.CorrectAnswer ?? ""   // <-- populate correct answer here
+                                }).ToList()
+                        }).ToList()
+                }).ToList();
+
+            var finalProject = new FinalProjectJson
+            {
+                Title = course.FinalProjectTitle ?? "",
+                Description = course.FinalProjectDescription ?? ""
+            };
+
+            // Map to view model. Use the DTO's Order/Id values (no need to reorder again).
+            var model = new CourseDetailsViewModel
+            {
+                Id = course.Id,
+                Title = course.Title ?? "",
+                FinalProjectTitle = finalProject?.Title ?? "",
+                FinalProjectDescription = finalProject?.Description ?? "",
+                Modules = modules
+                    .Select(m => new CourseModuleViewModel
+                    {
+                        Title = m.Title ?? "",
+                        Lessons = (m.Lessons ?? new List<LessonJson>())
+                            .Select(l => new LessonViewModel
+                            {
+                                Id = l.Id,
+                                Title = l.Title ?? "",
+                                LessonType = l.ContentType ?? "Text",
+                                ContentText = l.ContentText ?? "",
+                                VideoUrl = l.ContentType == "Video" ? l.MediaUrl : null,
+                                ImageUrl = l.ContentType == "Image + Text" ? l.MediaUrl : null,
+                                QuizQuestions = (l.QuizQuestions ?? new List<QuizQuestionJson>())
+                                    .Select(q => new QuizQuestionViewModel
+                                    {
+                                        QuestionText = q.Question ?? "",
+                                        OptionA = q.Options.Length > 0 ? q.Options[0] : "",
+                                        OptionB = q.Options.Length > 1 ? q.Options[1] : "",
+                                        OptionC = q.Options.Length > 2 ? q.Options[2] : "",
+                                        OptionD = q.Options.Length > 3 ? q.Options[3] : "",
+                                        CorrectAnswer = q.CorrectAnswer ?? ""   // <-- carry it through
+                                    })
+                                    .ToList()
+                            })
+                            .ToList()
+                    })
+                    .ToList()
+            };
+
+            return View("~/Views/Shared/Sections/_CourseModuleViewing.cshtml", model);
+        }
+
+        // DTOs / helper classes — ensure these are in the same controller file or a nested namespace/class
+        public class LessonJson
+        {
+            public int Id { get; set; }
+            public string Title { get; set; } = "";
+            public string ContentType { get; set; } = "Text";
+            public string ContentText { get; set; } = "";
+            public string MediaUrl { get; set; } = "";
+            public int Order { get; set; }
+            public List<QuizQuestionJson> QuizQuestions { get; set; } = new();
+        }
+
+        public class QuizQuestionJson
+        {
+            public int Id { get; set; }
+            public string Question { get; set; } = "";
+            public string[] Options { get; set; } = new string[4];
+            public string CorrectAnswer { get; set; } = "";    // <-- added
+        }
+
+        public class ModuleJson
+        {
+            public int Id { get; set; }
+            public string Title { get; set; } = "";
+            public int Order { get; set; }
+            public List<LessonJson> Lessons { get; set; } = new();
+        }
+
+        public class FinalProjectJson
+        {
+            public string Title { get; set; } = "";
+            public string Description { get; set; } = "";
+        }
     }
 }

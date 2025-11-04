@@ -8,70 +8,129 @@
 }
 
 <style>
-    .declined-card {
+    /* Card container */
+    .user-declined-request-card {
         background-color: #f4f4f4;
-        opacity: 0.7;
         border: 1px solid #ccc;
-        position: relative;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
-    .status-declined {
+    /* User info section */
+    .user-declined-request-user {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-declined-request-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        margin-right: 0.75rem;
+    }
+
+    .user-declined-request-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-declined-request-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .user-declined-request-course {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    /* Title & Message */
+    .user-declined-request-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .user-declined-request-message {
+        margin-bottom: 0.5rem;
+        color: #444;
+        font-size: 0.95rem;
+        line-height: 1.3;
+    }
+
+    /* Status Badge */
+    .user-declined-request-badge {
+        display: inline-block;
         background-color: #ccc;
         color: #333;
         font-weight: bold;
         padding: 0.25rem 0.5rem;
         border-radius: 4px;
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
     }
+
+    .user-declined-request-empty {
+        text-align: center;
+        font-size: 1rem;
+        color: #6b7280;
+        padding: 2rem;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background-color: #f9fafb;
+    }
+
 </style>
 
 @if (!declined.Any())
 {
-    <div class="user-support-empty">
+    <div class="user-declined-request-empty">
         No declined requests found.<br />
         If an artisan declines your request, it will appear in this section.
     </div>
 }
 else
 {
+    <h2 style="font-weight: 300; font-size: 1rem; margin-bottom: 1.5rem;">
+        Here is the list of all declined live sessions.
+    </h2>
     foreach (var request in declined)
     {
-        <div class="user-support-card declined-card">
-            <div class="user-support-title">@request.Title</div>
-            <div class="user-support-message">@request.Message</div>
-            <div class="user-support-schedule">
-                <div>
-                    <i class="fas fa-calendar-alt"></i>
-                    @{
-                        string dateText = "No date scheduled";
-                        if (request.SessionDate != null)
-                        {
-                            if (DateTime.TryParse(request.SessionDate.ToString(), out var parsedDate))
-                            {
-                                dateText = parsedDate.ToString("M/d/yyyy");
-                            }
-                        }
-                        @dateText
-                    }
-                </div>
-                <div>
-                    <i class="fas fa-clock"></i>
-                    @{
-                        string timeText = "No time scheduled";
-                        if (request.SessionTime != null)
-                        {
-                            if (DateTime.TryParse(request.SessionTime.ToString(), out var parsedTime))
-                            {
-                                timeText = parsedTime.ToString("h:mm tt");
-                            }
-                        }
-                        @timeText
-                    }
-                </div>
+        <div class="user-declined-request-card">
+
+            <!-- Course & Artisan -->
+            <div class="user-completed-course">
+                <strong>Course Title: </strong>@request.Course?.Title
             </div>
-            <span class="support-status-badge status-declined">Declined</span>
+            <div class="user-completed-artisan">
+                <strong>Sent To: </strong>@(
+                request.Course?.Artisan != null
+                ? request.Course.Artisan.FirstName + " " + request.Course.Artisan.LastName
+                : "Unknown Artisan"
+                ) (Artisan)
+    </div>
+    <br />
+
+            @*   <!-- User info -->
+            <div class="user-declined-request-user">
+                <img src="@request.User.UserAvatar" class="user-declined-request-avatar" />
+                <div class="user-declined-request-info">
+                    <div class="user-declined-request-name">Learner: @request.User.FirstName @request.User.LastName</div>
+                    <div class="user-declined-request-course">Course: @request.Course.Title</div>
+                </div>
+            </div> *@
+
+            <!-- Title & message -->
+            <div class="user-declined-request-title">Request Title: @request.Title</div>
+            <div class="user-declined-request-message">Request Message: @request.Message</div>
+
+            <!-- Status badge -->
+            <div>
+                <span class="user-declined-request-badge status-declined">Declined</span>
+            </div>
+
         </div>
     }
 }

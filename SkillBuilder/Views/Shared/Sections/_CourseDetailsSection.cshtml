@@ -435,6 +435,20 @@
         color: #666;
         cursor: not-allowed;
     }
+
+    .course-detail-right a.course-detail-enroll-btn {
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .course-detail-right button,
+    .course-detail-right a.course-detail-enroll-btn {
+        display: block; /* ensures buttons behave like block elements */
+        width: 100%; /* all buttons take full container width */
+        box-sizing: border-box; /* include padding in width */
+        text-align: center; /* center text for links */
+    }
+
 </style>
 
 <section class="course-detail-section">
@@ -467,12 +481,24 @@
                 </div>
             </div>
 
-            @if (userRole == "Artisan" && Model.Artisan?.UserId == userId)
+            @if ((userRole == "Admin" || userRole == "Artisan"))
             {
                 <div class="course-detail-right">
-                    <button class="course-detail-delete-btn" onclick="showDeleteModal(@Model.Id)">
-                        Delete Course
-                    </button>
+
+                    @* View Course Module button for all Artisans and Admins *@
+                    <a asp-controller="Courses" asp-action="ViewCourseModule" asp-route-id="@Model.Id"
+                       class="course-detail-enroll-btn"
+                       style="display:block; width:100%; text-align:center; text-decoration:none; margin-bottom:1rem;">
+                        View Course Module
+                    </a>
+
+                    @* Delete button only for Artisan owner *@
+                    @if (userRole == "Artisan" && Model.Artisan?.UserId == userId)
+                    {
+                        <button class="course-detail-delete-btn" onclick="showDeleteModal(@Model.Id)">
+                            Delete Course
+                        </button>
+                    }
                 </div>
             }
 

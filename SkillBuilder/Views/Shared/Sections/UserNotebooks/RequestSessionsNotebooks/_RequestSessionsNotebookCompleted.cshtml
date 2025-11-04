@@ -7,35 +7,185 @@
         .ToList();
 }
 
+<style>
+    /* Card container */
+    .user-completed-request-card {
+        background-color: #f4f4f4;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* User info section */
+    .user-completed-request-user {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-completed-request-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        margin-right: 0.75rem;
+    }
+
+    .user-completed-request-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-completed-request-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .user-completed-request-course {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    /* Title & Message */
+    .user-completed-request-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .user-completed-request-message {
+        margin-bottom: 0.5rem;
+        color: #444;
+        font-size: 0.95rem;
+        line-height: 1.3;
+    }
+
+    /* Schedule */
+    .user-completed-request-schedule {
+        display: flex;
+        font-size: 0.875rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+        .user-completed-request-schedule i {
+            color: #888;
+        }
+
+    /* Status Badge */
+    .user-completed-request-badge {
+        display: inline-block;
+        background-color: #4CAF50;
+        color: #fff;
+        font-weight: bold;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Empty state */
+    .user-completed-request-empty {
+        text-align: center;
+        font-size: 1rem;
+        color: #6b7280;
+        padding: 2rem;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background-color: #f9fafb;
+    }
+
+    /* Disabled join link */
+    .user-completed-request-link a {
+        pointer-events: none;
+        color: #aaa;
+        text-decoration: none;
+        cursor: default;
+        font-size: 0.85rem;
+    }
+</style>
+
 @if (!completed.Any())
 {
-    <div class="user-support-empty">
+    <div class="user-completed-request-empty">
         You haven’t completed any sessions yet.<br />
         Completed sessions will be listed here with a summary or feedback.
     </div>
 }
 else
 {
+    <h2 style="font-weight: 300; font-size: 1rem; margin-bottom: 1.5rem;">
+        Here is the list of all completed live sessions.
+    </h2>
     foreach (var request in completed)
     {
-    <div class="user-support-card">
-        <div class="user-support-title">@request.Title</div>
-        <div class="user-support-message">@request.Message</div>
-        <div class="user-support-schedule">
-        <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
-        <div>
-            <i class="fas fa-clock"></i>
-            @( (DateTime.Today + request.SessionTime).ToString("h:mm tt") )
-        </div>
-    </div>
-    <span class="support-status-badge status-confirmed">Completed</span>
-    <div class="user-support-confirm-details">
-        Platform: <strong>@(request.MeetingPlatform ?? "TBD")</strong><br />
-        @if (!string.IsNullOrWhiteSpace(request.MeetingLink))
-                {
-                    <a href="@request.MeetingLink" target="_blank">Join Link</a>
-                }
+        <div class="user-completed-request-card">
+
+            <!-- Course & Artisan -->
+            <div class="user-completed-course">
+                <strong>Course Title: </strong>@request.Course?.Title
             </div>
+            <div class="user-completed-artisan">
+                <strong>Sent To: </strong>@(
+                request.Course?.Artisan != null
+                ? request.Course.Artisan.FirstName + " " + request.Course.Artisan.LastName
+                : "Unknown Artisan"
+                ) (Artisan)
+    </div>
+    <br />
+
+            @* <!-- User info -->
+            <div class="user-completed-request-user">
+                <img src="@request.User.UserAvatar" class="user-completed-request-avatar" />
+                <div class="user-completed-request-info">
+                    <div class="user-completed-request-name">Learner: @request.User.FirstName @request.User.LastName</div>
+                    <div class="user-completed-request-course">Course: @request.Course.Title</div>
+                </div>
+            </div> *@
+
+            <!-- Title & message -->
+            <div class="user-completed-request-title">Request Title: @request.Title</div>
+            <div class="user-completed-request-message">Request Message: @request.Message</div>
+
+            <!-- Schedule -->
+            <div class="user-completed-request-schedule">
+                <div>
+                    <i class="fas fa-calendar-alt"></i>Requested Date & Time:
+            @if (request.SessionDate != null && DateTime.TryParse(request.SessionDate.ToString(), out var parsedDate))
+                    {
+                        @parsedDate.ToString("M/d/yyyy")
+                    }
+                    else
+                    {
+                        <text>No date scheduled</text>
+                    }
+                </div>
+                <div>
+                    <i class="fas fa-clock"></i> &
+                    @if (request.SessionTime != null && DateTime.TryParse(request.SessionTime.ToString(), out var parsedTime))
+                    {
+                        @parsedTime.ToString("h:mm tt")
+                    }
+                    else
+                    {
+                        <text>No time scheduled</text>
+                    }
+                </div>
+            </div>
+
+            <!-- Status badge -->
+            <div>
+                <span class="user-completed-request-badge">Completed</span>
+            </div>
+
+            <!-- Disabled join link -->
+            @if (!string.IsNullOrWhiteSpace(request.MeetingLink))
+            {
+                <div class="user-completed-request-link">
+                    <a href="@request.MeetingLink" target="_blank">Join Link (disabled)</a>
+                </div>
+            }
+
         </div>
     }
 }

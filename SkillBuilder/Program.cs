@@ -9,7 +9,6 @@ using SkillBuilder.Data;
 using SkillBuilder.Models;
 using SkillBuilder.Services;
 using System.Security.Claims;
-using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,13 +21,13 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
 });
 
+
 // Get connection string from appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
-
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IEmailService, SkillBuilder.Services.EmailService>();
@@ -80,11 +79,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();       
-app.UseStaticFiles();          
-app.UseRouting();             
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 
-app.UseAuthentication();         
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

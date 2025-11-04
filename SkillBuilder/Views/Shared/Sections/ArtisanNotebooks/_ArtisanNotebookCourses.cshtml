@@ -3,6 +3,7 @@
 @{
     var isApproved = User.FindFirst("IsApproved")?.Value == "True";
     var isVerified = User.FindFirst("IsVerified")?.Value == "True";
+    var isDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
 }
 
 <style>
@@ -15,7 +16,8 @@
     .artisan-courses-heading {
         font-size: 1.8rem;
         font-weight: bold;
-        color: #222;
+        color: #344AEA;
+        margin-bottom: 1rem;
     }
 
     .artisan-courses-grid {
@@ -145,7 +147,7 @@
 </style>
 
 <div class="artisan-courses-section">
-    <div class="artisan-courses-heading">Courses</div>
+    <div class="artisan-courses-heading">Courses<br /><span style="font-size: 1rem; font-weight: 400; color: black;">This is your courses section where you can see the list of all courses you have created, here you can view reviews or edit courses..</span></div>
 
     <div class="artisan-courses-grid">
         @if (Model.Courses.Any())
@@ -164,9 +166,19 @@
                         <a href="/Courses?selectedCourse=@course.Link&tab=reviews" class="btn-outline" style="text-decoration: none;">
                             View Reviews
                         </a>
-                        <a href="/ArtisanActions/EditCourse/@course.Id" class="btn-primary" style="text-decoration: none;">
-                            Edit
-                        </a>
+
+                        @if (isDeactivated)
+                        {
+                            <a class="btn-primary" style="text-decoration: none; background-color:#ccc; cursor:not-allowed; opacity:0.6; pointer-events:none;">
+                                Edit (Account Deactivated)
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/ArtisanActions/EditCourse/@course.Id" class="btn-primary" style="text-decoration: none;">
+                                Edit
+                            </a>
+                        }
                     </div>
                 </div>
             }
@@ -179,7 +191,13 @@
                     Share your knowledge and skills with students around the world.
                 </p>
 
-                @if (isApproved && isVerified)
+                @if (isDeactivated)
+                {
+                    <a class="btn-primary full-width" style="text-decoration: none; background-color:#ccc; cursor:not-allowed; opacity:0.6; pointer-events:none;">
+                        Account is currently deactivated. Cannot create course.
+                    </a>
+                }
+                else if (isApproved && isVerified)
                 {
                     <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">
                         + Create course
@@ -203,7 +221,13 @@
                     Start sharing your expertise with learners worldwide.
                 </p>
 
-                @if (isApproved && isVerified)
+                @if (isDeactivated)
+                {
+                    <a class="btn-primary full-width" style="text-decoration: none; background-color:#ccc; cursor:not-allowed; opacity:0.6; pointer-events:none;">
+                        Account is currently deactivated. Cannot create course.
+                    </a>
+                }
+                else if (isApproved && isVerified)
                 {
                     <a href="/ArtisanActions/CreateCourse" class="btn-primary full-width" style="text-decoration: none;">
                         + Create course

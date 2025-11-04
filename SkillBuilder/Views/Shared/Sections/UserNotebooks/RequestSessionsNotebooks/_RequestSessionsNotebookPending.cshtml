@@ -145,23 +145,48 @@
 }
 else
 {
-    foreach (var request in pendingRequests)
+    <h2 style="font-weight: 300; font-size: 1rem; margin-bottom: 1.5rem;">
+        Here is the list of all your pending live session with artisan.
+    </h2>
+    @foreach (var request in pendingRequests)
     {
         <div class="user-support-card" data-request-id="@request.Id">
-            <div class="user-support-title">@request.Title</div>
-            <div class="user-support-message">@request.Message</div>
-
-            <div class="user-support-schedule">
-                <div><i class="fas fa-calendar-alt"></i> @request.SessionDate.ToString("M/d/yyyy")</div>
-                <div>
-                    <i class="fas fa-clock"></i>
-                    @(request.SessionTime != null
-                        ? (DateTime.Today + (TimeSpan)request.SessionTime).ToString("h:mm tt")
-                        : "N/A")
+            <div class="user-support-header">
+                <div class="user-support-course">
+                    <strong>Course Title: </strong>@request.Course?.Title
                 </div>
-            </div>
+                <div class="user-support-artisan">
+                    <strong>Sent To: </strong>@(
+                    request.Course?.Artisan != null
+                    ? request.Course.Artisan.FirstName + " " + request.Course.Artisan.LastName
+                    : "Unknown Artisan"
+                        )
+            (Artisan)
+        </div>
+    </div>
+    <br />
 
-            <!-- Footer: Cancel button + Status badge inline -->
+    <div class="user-support-title">
+        @request.Title
+    </div>
+    <div class="user-support-message">
+        <strong>Request Message: </strong>@request.Message
+    </div>
+
+    <div class="user-support-schedule">
+        <div>
+            <i class="fas fa-calendar-alt"></i>
+            <strong>Requested Date & Time: </strong>@request.SessionDate.ToString("M/d/yyyy")
+        </div>
+        <div>
+            <i class="fas fa-clock"></i>
+            &
+            @(request.SessionTime != null
+                        ? (DateTime.Today + request.SessionTime).ToString("h:mm tt")
+                        : "N/A")
+        </div>
+    </div>
+
             <div class="support-card-footer">
                 <span class="support-status-badge status-pending">Pending</span>
                 <button class="btn-cancel" data-request-id="@request.Id">Cancel</button>

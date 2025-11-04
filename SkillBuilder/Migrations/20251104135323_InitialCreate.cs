@@ -187,6 +187,7 @@ namespace SkillBuilder.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
+                    Category = table.Column<string>(type: "text", nullable: true),
                     AvatarUrl = table.Column<string>(type: "text", nullable: true),
                     CoverImageUrl = table.Column<string>(type: "text", nullable: true),
                     MembersCount = table.Column<int>(type: "integer", nullable: false),
@@ -356,6 +357,35 @@ namespace SkillBuilder.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CommunityReports",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CommunityId = table.Column<int>(type: "integer", nullable: false),
+                    ReporterId = table.Column<string>(type: "text", nullable: false),
+                    Reason = table.Column<string>(type: "text", nullable: false),
+                    Details = table.Column<string>(type: "text", nullable: true),
+                    ReportedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommunityReports", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CommunityReports_Communities_CommunityId",
+                        column: x => x.CommunityId,
+                        principalTable: "Communities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CommunityReports_Users_ReporterId",
+                        column: x => x.ReporterId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ArtisanWorks",
                 columns: table => new
                 {
@@ -442,6 +472,7 @@ namespace SkillBuilder.Migrations
                     MediaUrl = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     SubmittedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ApprovedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     SignatureUrl = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -787,6 +818,16 @@ namespace SkillBuilder.Migrations
                 column: "CommunityId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CommunityReports_CommunityId",
+                table: "CommunityReports",
+                column: "CommunityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommunityReports_ReporterId",
+                table: "CommunityReports",
+                column: "ReporterId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CourseMaterials_CourseId",
                 table: "CourseMaterials",
                 column: "CourseId");
@@ -898,6 +939,9 @@ namespace SkillBuilder.Migrations
 
             migrationBuilder.DropTable(
                 name: "CommunityPostReports");
+
+            migrationBuilder.DropTable(
+                name: "CommunityReports");
 
             migrationBuilder.DropTable(
                 name: "CommunityTestimonials");

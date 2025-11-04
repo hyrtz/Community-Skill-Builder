@@ -5,6 +5,15 @@
     var members = firstCommunityId != 0 && Model.CommunityMembers.ContainsKey(firstCommunityId)
         ? Model.CommunityMembers[firstCommunityId]
         : new List<SkillBuilder.Models.ViewModels.CommunityMemberViewModel>();
+
+    var categories = new List<string> { "Pottery", "Weaving", "Wood Carving", "Paper Crafts", "Shoemaking", "Embroidery" };
+    var artisanCategory = Model.MyCommunities.FirstOrDefault()?.Category ?? ""; // <- FIXED
+    var categoryList = new List<SelectListItem>();
+
+    foreach (var c in categories)
+    {
+        categoryList.Add(new SelectListItem { Text = c, Value = c, Selected = artisanCategory == c });
+    }
 }
 
 <style>
@@ -164,9 +173,10 @@
             border-radius: 50%;
             transition: background 0.2s ease;
         }
-            .community-back-btn:hover img {
-                background-color: #d0d4ff;
-            }
+
+        .community-back-btn:hover img {
+            background-color: #d0d4ff;
+        }
 
     .community-title {
         font-size: 1.6rem;
@@ -202,10 +212,197 @@
         .community-tab-content.active {
             display: block;
         }
+
+    /* --- Community Actions (Edit/Delete) --- */
+    .user-community-actions-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .user-community-action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+        .user-community-action-buttons button {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+    /* Edit Button */
+    .user-community-edit-btn {
+        background-color: #E0E7FF;
+        color: #344AEA;
+        border: 1px solid #344AEA;
+    }
+
+        .user-community-edit-btn:hover {
+            background-color: #344AEA;
+            color: #fff;
+        }
+
+    /* Delete Button */
+    .user-community-delete-btn {
+        background-color: #FEE2E2;
+        color: #B91C1C;
+        border: 1px solid #DC2626;
+    }
+
+        .user-community-delete-btn:hover {
+            background-color: #DC2626;
+            color: #fff;
+        }
+
+    /* === Edit Community Modal Styles === */
+    .user-community-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+        animation: fadeIn 0.25s ease forwards;
+    }
+
+    .user-community-modal {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        width: 550px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        animation: slideUp 0.25s ease forwards;
+    }
+
+    .user-community-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+        .user-community-modal-header h2 {
+            font-size: 1.4rem;
+            color: #344AEA;
+            font-weight: 700;
+        }
+
+    .user-community-modal-close {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        line-height: 1;
+        color: #555;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .user-community-modal-close:hover {
+            color: #000;
+        }
+
+    .user-community-modal-body .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .user-community-modal-body label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-community-modal-body input[type="text"],
+    .user-community-modal-body textarea,
+    .user-community-modal-body select {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+    .banner-preview-wrapper, .avatar-preview-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .banner-preview {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .avatar-preview {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .user-community-modal-footer {
+        text-align: right;
+        margin-top: 1rem;
+    }
+
+    .cancel-btn {
+        background-color: #E5E7EB;
+        color: #374151;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+        margin-right: 0.5rem;
+    }
+
+        .cancel-btn:hover {
+            background-color: #D1D5DB;
+        }
+
+    .save-btn {
+        background-color: #344AEA;
+        color: #fff;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+        .save-btn:hover:not(:disabled) {
+            background-color: #2c3ed7;
+        }
+
+        .save-btn:disabled {
+            background-color: #9CA3AF;
+            color: #fff;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+            .save-btn:disabled:hover {
+                background-color: #9CA3AF;
+            }
 </style>
 
 <div class="user-communities-section">
-    <h2 class="user-communities-header">My Communities</h2>
+    <h2 class="user-communities-header">My Communities<br /><span style="font-size: 1rem; font-weight: 400; color: black;">This is your my communities section where you can see the list of all communities you have created.</span></h2>
 
     <!-- Search -->
     <div class="user-community-search-wrapper">
@@ -225,15 +422,24 @@
             @foreach (var community in Model.MyCommunities)
             {
                 <div class="user-community-link">
-                    <div class="user-community-card">
+                    <div class="user-community-card"
+                         data-community-id="@community.Id"
+                         data-banner="@community.CoverImageUrl"
+                         data-category="@community.Category">
                         <div class="user-community-info-wrapper">
                             <img class="user-community-avatar" src="@community.AvatarUrl" alt="Avatar" />
                             <div class="user-community-info">
-                                <div class="user-community-title">@community.Name</div>
-                                <div class="user-community-description">@community.Description</div>
+                                <div class="user-community-title">Community Name: @community.Name</div>
+                                <div class="user-community-description">Description: @community.Description</div>
                             </div>
                         </div>
-                        <div class="user-community-members">@community.MembersCount members</div>
+                        <div class="user-community-actions-wrapper">
+                            <div class="user-community-members">@community.MembersCount members</div>
+                            <div class="user-community-action-buttons">
+                                <button class="user-community-edit-btn">Edit</button>
+                                <button class="user-community-delete-btn">Delete</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             }
@@ -265,6 +471,93 @@
     </div>
 </div>
 
+<!-- ===================== Edit Community Modal ===================== -->
+<div id="editCommunityModal" class="user-community-modal-overlay" style="display:none;">
+    <div class="user-community-modal">
+        <div class="user-community-modal-header">
+            <h2>Edit Community</h2>
+            <button id="closeEditCommunityModal" class="user-community-modal-close">&times;</button>
+        </div>
+
+        <form id="editCommunityForm" enctype="multipart/form-data">
+            <input type="hidden" id="editCommunityId" name="CommunityId" />
+
+            <div class="user-community-modal-body">
+                <!-- Banner Image -->
+                <div class="form-group">
+                    <label>Banner Image</label>
+                    <div class="banner-preview-wrapper">
+                        <img id="editCommunityBannerPreview" src="" alt="Banner Preview" class="banner-preview" />
+                        <input type="file" id="editCommunityBanner" name="BannerFile" accept="image/*" />
+                    </div>
+                </div>
+
+                <!-- Profile Avatar -->
+                <div class="form-group">
+                    <label>Community Profile</label>
+                    <div class="avatar-preview-wrapper">
+                        <img id="editCommunityAvatarPreview" src="" alt="Avatar Preview" class="avatar-preview" />
+                        <input type="file" id="editCommunityAvatar" name="AvatarFile" accept="image/*" />
+                    </div>
+                </div>
+
+                <!-- Name -->
+                <div class="form-group">
+                    <label>Community Name</label>
+                    <input type="text" id="editCommunityName" name="Name" required />
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="editCommunityDescription" name="Description" rows="3" required></textarea>
+                </div>
+
+                <!-- Category -->
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="editCommunityCategory" name="Category" class="eap-input" required>
+                        <option value="">Select Category</option>
+                        @foreach (var c in categories)
+                        {
+                            <option value="@c">@c</option>
+                        }
+                        <option value="Others">Others</option>
+                    </select>
+
+                    <!-- Input for custom category, hidden by default -->
+                    <input type="text" id="editCommunityCustomCategory" name="CustomCategory"
+                           placeholder="Enter your category" style="margin-top:0.5rem; display:none;" />
+                </div>
+            </div>
+
+            <div class="user-community-modal-footer">
+                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="submit" class="save-btn" disabled>Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===================== Delete Community Modal ===================== -->
+<div id="deleteCommunityModal" class="user-community-modal-overlay" style="display:none;">
+    <div class="user-community-modal">
+        <div class="user-community-modal-header">
+            <h2>Delete Community</h2>
+            <button id="closeDeleteCommunityModal" class="user-community-modal-close">&times;</button>
+        </div>
+
+        <div class="user-community-modal-body">
+            <p>Are you sure you want to delete this community? This action cannot be undone.</p>
+        </div>
+
+        <div class="user-community-modal-footer">
+            <button type="button" class="cancel-btn" id="deleteCancelBtn">Cancel</button>
+            <button type="button" class="save-btn" id="deleteConfirmBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         // --- Search functionality ---
@@ -272,6 +565,7 @@
         const searchBtn = document.getElementById("userCommunitySearchBtn");
         const rows = document.querySelectorAll(".user-community-card");
         const emptyMsg = document.querySelector(".user-community-empty");
+        let modalOpen = false;
 
         function filter() {
             const query = searchInput.value.toLowerCase().trim();
@@ -310,14 +604,40 @@
         };
 
         rows.forEach(card => {
-            card.addEventListener("click", () => {
+            card.addEventListener("click", async () => {
+                const communityId = card.dataset.communityId;
                 const name = card.querySelector(".user-community-title").innerText;
                 communityTitle.innerText = name;
 
                 communityListContainer.style.display = "none";
                 communityDetailContainer.style.display = "flex";
 
-                // Optionally load partial views via AJAX here
+                // ---- DYNAMIC MEMBER LOADING ----
+                const allMembersContainer = document.getElementById("communityTabAll");
+                if (allMembersContainer) allMembersContainer.innerHTML = "<div class='no-members'>Loading members...</div>";
+
+                try {
+                    const response = await fetch(`/Community/GetMembersPartial?communityId=${communityId}`);
+                    if (!response.ok) throw new Error("Failed to load members");
+                    const html = await response.text();
+                    allMembersContainer.innerHTML = html;
+                } catch (err) {
+                    allMembersContainer.innerHTML = "<div class='no-members'>Failed to load members.</div>";
+                    console.error(err);
+                }
+
+                const pendingContainer = document.getElementById("communityTabPending");
+                if (pendingContainer) pendingContainer.innerHTML = "<div class='no-requests'>Loading pending requests...</div>";
+
+                try {
+                    const response = await fetch(`/Community/GetPendingRequestsPartial?communityId=${communityId}`);
+                    if (!response.ok) throw new Error("Failed to load pending requests");
+                    const html = await response.text();
+                    pendingContainer.innerHTML = html;
+                } catch (err) {
+                    pendingContainer.innerHTML = "<div class='no-requests'>Failed to load pending requests.</div>";
+                    console.error(err);
+                }
             });
         });
 
@@ -337,5 +657,323 @@
                 }
             });
         });
+
+        // --- Edit Community Modal Logic ---
+        const editModal = document.getElementById("editCommunityModal");
+        const closeEditModal = document.getElementById("closeEditCommunityModal");
+        const editForm = document.getElementById("editCommunityForm");
+        const saveBtn = editForm.querySelector(".save-btn");
+        const cancelBtn = editForm.querySelector(".cancel-btn");
+
+        const nameInput = document.getElementById("editCommunityName");
+        const descInput = document.getElementById("editCommunityDescription");
+        const bannerPreview = document.getElementById("editCommunityBannerPreview");
+        const avatarPreview = document.getElementById("editCommunityAvatarPreview");
+        const bannerInput = document.getElementById("editCommunityBanner");
+        const avatarInput = document.getElementById("editCommunityAvatar");
+        const categorySelect = document.getElementById("editCommunityCategory");
+        const idInput = document.getElementById("editCommunityId");
+
+        let originalData = {};
+        let formChanged = false;
+
+        // -------------------- FILE VALIDATION SETTINGS --------------------
+        const fileRules = {
+            image: {
+                maxSize: 700 * 1024, // 700 KB
+                allowed: [".jpg", ".jpeg", ".png", ".gif", ".webp"]
+            }
+        };
+
+        // Add error message spans below avatar/banner
+        [avatarInput, bannerInput].forEach(input => {
+            if (!input.parentElement.querySelector(".file-error")) {
+                const error = document.createElement("span");
+                error.className = "file-error";
+                error.style.color = "red";
+                error.style.fontSize = "0.85rem";
+                error.style.display = "none";
+                input.insertAdjacentElement("afterend", error);
+            }
+        });
+
+        function validateFile(input) {
+            const file = input.files[0];
+            const errorEl = input.parentElement.querySelector(".file-error");
+            if (!file || !errorEl) return true;
+
+            errorEl.textContent = "";
+            errorEl.style.display = "none";
+
+            const { maxSize, allowed } = fileRules.image;
+            const ext = file.name.toLowerCase().substring(file.name.lastIndexOf("."));
+
+            if (!allowed.includes(ext)) {
+                errorEl.textContent = `Invalid file type. Allowed: ${allowed.join(", ")}`;
+                errorEl.style.display = "block";
+                input.value = "";
+                return false;
+            }
+
+            if (file.size > maxSize) {
+                errorEl.textContent = `File too large. Max size is 700 KB.`;
+                errorEl.style.display = "block";
+                input.value = "";
+                return false;
+            }
+
+            return true;
+        }
+
+        // File preview and validation
+        [bannerInput, avatarInput].forEach(input => {
+            input.addEventListener("change", e => {
+                if (!validateFile(input)) return;
+                const file = e.target.files[0];
+                if (file) {
+                    const preview = e.target.id.includes("Banner") ? bannerPreview : avatarPreview;
+                    preview.src = URL.createObjectURL(file);
+                    checkFormChanges();
+                }
+            });
+        });
+
+        // --- Open modal on "Edit" click ---
+        document.querySelectorAll(".user-community-edit-btn").forEach(btn => {
+            btn.addEventListener("click", e => {
+                e.stopPropagation();
+
+                const card = btn.closest(".user-community-card");
+
+                const name = card.querySelector(".user-community-title").innerText.replace(/^Community Name:\s*/i, "");
+                const desc = card.querySelector(".user-community-description").innerText.replace(/^Description:\s*/i, "");
+                const avatar = card.querySelector(".user-community-avatar").src;
+                const banner = card.dataset.banner || "";
+                const category = card.dataset.category || ""; // <-- get current category
+
+                idInput.value = card.dataset.communityId;
+                nameInput.value = name;
+                descInput.value = desc;
+                avatarPreview.src = avatar || "";
+                bannerPreview.src = banner || "";
+
+                // <-- dynamically preload the category
+                const categoryValue = card.dataset.category || "";
+                for (let opt of categorySelect.options) {
+                    opt.selected = (opt.value === categoryValue);
+                }
+
+                originalData = { name, desc, avatar, banner, category };
+
+                saveBtn.disabled = true;
+                formChanged = false;
+
+                editModal.style.display = "flex";
+                editModal.querySelector(".user-community-modal").style.display = "block";
+                document.body.style.overflow = "hidden";
+                modalOpen = true;
+            });
+        });
+
+        // --- Close modal only with X or Cancel ---
+        closeEditModal.addEventListener("click", () => {
+            editForm.reset();
+            editModal.style.display = "none";
+            editModal.querySelector(".user-community-modal").style.display = "none";
+            document.body.style.overflow = "";
+            modalOpen = false;
+            formChanged = false; // ✅ reset unsaved flag
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            editForm.reset();
+            editModal.style.display = "none";
+            editModal.querySelector(".user-community-modal").style.display = "none";
+            document.body.style.overflow = "";
+            modalOpen = false;
+            formChanged = false; // ✅ reset unsaved flag
+        });
+
+        // Remove "click outside" close behavior (intentionally)
+
+        // --- Detect real changes ---
+        function checkFormChanges() {
+            const current = {
+                name: nameInput.value,
+                desc: descInput.value,
+                category: categorySelect.value,
+                avatar: avatarPreview.src,
+                banner: bannerPreview.src
+            };
+
+            const changed = Object.keys(current).some(k => current[k] !== originalData[k]);
+            saveBtn.disabled = !changed;
+            formChanged = changed;
+        }
+
+        // Watch inputs for changes
+        [nameInput, descInput, categorySelect].forEach(input => {
+            input.addEventListener("input", checkFormChanges);
+        });
+
+        // --- Warn before leaving if unsaved changes ---
+        window.addEventListener("beforeunload", e => {
+            if (modalOpen && formChanged) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        });
+
+        // --- Handle form submission ---
+        editForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            let categoryToSend = categorySelect.value;
+            if (categoryToSend === "Others") {
+                categoryToSend = customCategoryInput.value.trim();
+            }
+            formData.append("Id", idInput.value);
+            formData.append("Name", nameInput.value);
+            formData.append("Description", descInput.value);
+            formData.append("Category", categoryToSend);
+            if (bannerInput.files[0]) formData.append("Banner", bannerInput.files[0]);
+            if (avatarInput.files[0]) formData.append("Avatar", avatarInput.files[0]);
+
+            try {
+                const response = await fetch("/Community/Edit", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.success) {
+
+                    const card = document.querySelector(`[data-community-id='${idInput.value}']`);
+                    if (card) {
+                        card.querySelector(".user-community-title").innerText = nameInput.value;
+                        card.querySelector(".user-community-description").innerText = descInput.value;
+                        card.querySelector(".user-community-avatar").src = avatarPreview.src;
+                        card.dataset.banner = result.community.bannerUrl;
+                        card.dataset.category = result.community.category;
+                    }
+
+                    editModal.style.display = "none";
+                    document.body.style.overflow = "";
+                    formChanged = false;
+
+                    window.location.reload();
+                } else {
+                    alert(result.message || "Update failed.");
+                }
+            } catch (err) {
+                console.error("Edit error:", err);
+                alert("Something went wrong while saving.");
+            }
+        });
+
+        // --- Delete Community Modal Logic ---
+        const deleteModal = document.getElementById("deleteCommunityModal");
+        const closeDeleteModal = document.getElementById("closeDeleteCommunityModal");
+        const deleteCancelBtn = document.getElementById("deleteCancelBtn");
+        const deleteConfirmBtn = document.getElementById("deleteConfirmBtn");
+
+        let communityToDeleteId = null;
+
+        // Open modal on Delete button click
+        document.querySelectorAll(".user-community-delete-btn").forEach(btn => {
+            btn.addEventListener("click", e => {
+                e.stopPropagation();
+
+                const card = btn.closest(".user-community-card");
+                communityToDeleteId = card.dataset.communityId;
+
+                deleteModal.style.display = "flex";
+                const innerModal = deleteModal.querySelector(".user-community-modal");
+                if (innerModal) innerModal.style.display = "block";
+
+                document.body.style.overflow = "hidden";
+                modalOpen = true;
+            });
+        });
+
+        // Close modal handlers
+        [closeDeleteModal, deleteCancelBtn].forEach(el => {
+            el.addEventListener("click", () => {
+                deleteModal.style.display = "none";
+                const innerModal = deleteModal.querySelector(".user-community-modal");
+                if (innerModal) innerModal.style.display = "none";
+                document.body.style.overflow = "";
+                modalOpen = false;
+                communityToDeleteId = null;
+            });
+        });
+
+        // Confirm deletion
+        deleteConfirmBtn.addEventListener("click", async () => {
+            if (!communityToDeleteId) return;
+
+            try {
+                // Create FormData to send communityId
+                const formData = new FormData();
+                formData.append("communityId", communityToDeleteId);
+
+                const response = await fetch("/Community/Delete", {
+                    method: "POST",
+                    body: formData
+                });
+
+                let result;
+                try {
+                    result = await response.json();
+                } catch {
+                    const text = await response.text();
+                    console.error("Delete response is not JSON:", text);
+                    alert("Unexpected server response.");
+                    return;
+                }
+
+                if (result.success) {
+                    // Remove card from UI
+                    const card = document.querySelector(`[data-community-id='${communityToDeleteId}']`);
+                    if (card) card.parentElement.remove();
+
+                    deleteModal.style.display = "none";
+                    document.body.style.overflow = "";
+                    modalOpen = false;
+                    communityToDeleteId = null;
+
+                    window.location.reload();
+                } else {
+                    alert(result.message || "Failed to delete community.");
+                }
+            } catch (err) {
+                console.error("Delete error:", err);
+                alert("Something went wrong while deleting the community.");
+            }
+        });
+
+            const customCategoryInput = document.getElementById("editCommunityCustomCategory");
+
+        // Show input if "Others" is selected
+        categorySelect.addEventListener("change", () => {
+            if (categorySelect.value === "Others") {
+                customCategoryInput.style.display = "block";
+                customCategoryInput.required = true;
+            } else {
+                customCategoryInput.style.display = "none";
+                customCategoryInput.required = false;
+            }
+            checkFormChanges();
+        });
+
+        // Preload custom category if the current category is not in the list
+        const currentCategory = originalData.category;
+        if (currentCategory && !Array.from(categorySelect.options).some(opt => opt.value === currentCategory)) {
+            categorySelect.value = "Others";
+            customCategoryInput.value = currentCategory;
+            customCategoryInput.style.display = "block";
+            customCategoryInput.required = true;
+        }
     });
 </script>

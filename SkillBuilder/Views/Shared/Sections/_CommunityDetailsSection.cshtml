@@ -11,6 +11,7 @@
     var nameParts = fullName.Split(' ', 2);
     var currentUserFirstName = nameParts.Length > 0 ? nameParts[0] : "";
     var currentUserLastName = nameParts.Length > 1 ? nameParts[1] : "";
+    var currentUserIsAdmin = User.IsInRole("Admin");
 
     var currentUserAvatar = User.FindFirst("AvatarUrl")?.Value ?? "/assets/Avatar/Sample10.svg";
     var currentUserIsVerified = User.FindFirst("IsVerified")?.Value == "True";
@@ -25,26 +26,26 @@
     }
 
     .community-details-cover {
-        position: relative; 
+        position: relative;
         height: 200px;
         background: #f0f0f0;
         display: flex;
-        justify-content: flex-start; 
+        justify-content: flex-start;
         align-items: flex-end;
-        padding-left: 2rem; 
+        padding-left: 2rem;
     }
 
     .community-details-avatar {
         position: absolute;
         bottom: -60px;
-        left: 2rem; 
+        left: 2rem;
         width: 120px;
         height: 120px;
         border-radius: 50%;
         background-size: cover;
         background-position: center;
         border: 4px solid #fff;
-        box-shadow: 0 0 6px rgba(0,0,0,0.2); 
+        box-shadow: 0 0 6px rgba(0,0,0,0.2);
     }
 
     .community-details-title {
@@ -156,14 +157,14 @@
         gap: 8px;
     }
 
-        .community-details-modal-content h2 {
-            margin-bottom: 0.5rem;
-        }
+    .community-details-modal-content h2 {
+        margin-bottom: 0.5rem;
+    }
 
-        .community-details-modal-content p {
-            margin-bottom: 1.5rem;
-            color: #555;
-        }
+    .community-details-modal-content p {
+        margin-bottom: 1.5rem;
+        color: #555;
+    }
 
     .community-details-modal-actions {
         display: flex;
@@ -213,12 +214,14 @@
 
     .community-details-posts-modal-content {
         background: #fff;
-        padding: 2rem;
         border-radius: 12px;
-        width: 600px;
-        max-width: 95%;
-        max-height: 90vh;
-        overflow-y: auto;
+        padding: 2rem;
+        width: 400px;
+        max-width: 90%;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        position: relative;
+        text-align: left;
+        animation: fadeIn 0.2s ease-in-out;
     }
 
     .community-details-posts-title {
@@ -235,23 +238,35 @@
     }
 
     .community-details-posts-field {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
     }
 
         .community-details-posts-field label {
-            display: block;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
         }
 
         .community-details-posts-field input,
         .community-details-posts-field textarea {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
             border-radius: 8px;
-            font-size: 0.95rem;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+            width: 100%;
+            box-sizing: border-box;
         }
+
+    #communityDetailsReportReason {
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 0.9rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
     .community-details-posts-charcount {
         font-size: 0.8rem;
@@ -329,27 +344,37 @@
     .comment-content {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.35rem;
         flex: 1;
     }
 
+        /* Header: name + time + delete button */
         .comment-content .comment-header {
+            display: flex;
+            justify-content: space-between; /* pushes delete button to right */
+            align-items: center;
             font-weight: 600;
             font-size: 0.85rem;
+        }
+
+        /* Left group (name + timestamp) */
+        .comment-content .comment-info {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-            .comment-content .comment-header .timestamp {
+            .comment-content .comment-info .timestamp {
                 font-weight: 400;
                 font-size: 0.75rem;
-                color: #555;
+                color: #777;
             }
 
+        /* Comment text */
         .comment-content .comment-text {
             font-size: 0.85rem;
             color: #333;
+            line-height: 1.4;
         }
 
     .comments-section textarea {
@@ -600,6 +625,200 @@
             #communityDetailsAcceptPolicyBtn:not(:disabled):hover {
                 background-color: #1e33c9;
             }
+
+    .report-community-btn {
+        background-color: #ff4d4f;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .report-community-btn:hover {
+            background-color: #d9363e;
+        }
+
+    .report-community-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .report-community-modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 400px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        animation: fadeIn 0.25s ease-in-out;
+    }
+
+        .report-community-modal-content h3 {
+            color: #344AEA;
+            margin-bottom: 1rem;
+        }
+
+    .close-report-community {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #888;
+    }
+
+        .close-report-community:hover {
+            color: #333;
+        }
+
+    .report-community-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .confirm-report-community-btn {
+        background-color: #ff4d4f;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .cancel-report-community-btn {
+        background-color: #ccc;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .cancel-report-community-btn:hover {
+            background-color: #aaa;
+        }
+
+    /* 🗑️ Delete Button */
+    .comment-inside-delete-btn {
+        background: transparent !important;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: all 0.2s ease;
+        padding: 2px;
+        display: flex;
+        align-items: center;
+    }
+
+        .comment-inside-delete-btn:hover {
+            color: #e74c3c;
+        }
+
+    /* === Community Inside Delete Comment Modal === */
+    .community-inside-delete-modal {
+        display: none;
+        position: fixed;
+        inset: 0; /* shorthand for top, right, bottom, left = 0 */
+        background: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+    }
+
+        .community-inside-delete-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+    .community-inside-delete-modal-content {
+        background: #fff;
+        padding: 24px 28px;
+        border-radius: 12px;
+        text-align: center;
+        min-width: 320px;
+        max-width: 90%;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        transform: scale(0.95);
+        transition: transform 0.2s ease;
+    }
+
+    .community-inside-delete-modal.show .community-inside-delete-modal-content {
+        transform: scale(1);
+    }
+
+    .community-inside-delete-modal-content h3 {
+        font-size: 1.25rem;
+        margin-bottom: 12px;
+        color: #222;
+    }
+
+    .community-inside-delete-modal-content p {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    /* Modal Actions */
+    .community-inside-delete-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    /* Confirm Button */
+    .community-inside-btn-confirm {
+        background-color: #e74c3c;
+        color: #fff;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+        .community-inside-btn-confirm:hover {
+            background-color: #c0392b;
+            transform: translateY(-1px);
+        }
+
+        .community-inside-btn-confirm:active {
+            transform: translateY(1px);
+        }
+
+    /* Cancel Button */
+    .community-inside-btn-cancel {
+        background-color: #ecf0f1;
+        color: #333;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+        .community-inside-btn-cancel:hover {
+            background-color: #d0d3d4;
+            transform: translateY(-1px);
+        }
+
+        .community-inside-btn-cancel:active {
+            transform: translateY(1px);
+        }
 </style>
 
 <section class="community-details-section">
@@ -627,6 +846,14 @@
             {
                 <button class="community-details-btn" id="communityDetailsCreatePostBtn">Create Post</button>
             }
+
+            @* Show "Report Community" if user is not owner and not admin *@
+            @if (!isOwner && !Model.IsAdmin)
+            {
+                <button class="report-community-btn" onclick="openReportCommunityModal(@community.Id)">
+                    Report Community
+                </button>
+            }
         </div>
     </div>
 
@@ -634,7 +861,7 @@
     <div class="community-details-main">
         <!-- Left: Posts -->
         <div class="community-details-left community-details-posts">
-            
+
             <!-- Create Post Modal -->
             <div id="communityDetailsCreatePostModal" class="community-details-posts-modal-overlay" style="display:none;">
                 <div class="community-details-posts-modal-content">
@@ -668,8 +895,14 @@
                         <div class="community-details-posts-field">
                             <label for="communityDetailsPostImage">Attach an image (optional)</label>
                             <input type="file" name="Image" id="communityDetailsPostImage" accept="image/*" />
-                            <div id="communityDetailsPostImagePreviewContainer" style="margin-top:0.5rem;">
-                                <img id="communityDetailsPostImagePreview" style="max-width:100%; border-radius:8px; display:none;" />
+
+                            <!-- Error message for validation -->
+                            <div id="postImageErrorMsg" style="color: red; font-size: 0.875rem; margin-top: 0.25rem;"></div>
+
+                            <!-- Preview container -->
+                            <div id="communityDetailsPostImagePreviewContainer" style="margin-top: 0.5rem;">
+                                <img id="communityDetailsPostImagePreview"
+                                     style="max-width: 100%; border-radius: 8px; display: none;" />
                             </div>
                         </div>
 
@@ -752,9 +985,9 @@
         <!-- Right: Info Card -->
         <div class="community-details-right">
             <div class="community-details-info-card">
-                <h2 class="community-details-info-title">@community.Name</h2>
-                <p>@community.Description</p>
-                <p><strong>Members:</strong> @community.MembersCount</p>
+                <h2 class="community-details-info-title">Community Name: @community.Name</h2>
+                <p>Description: @community.Description</p>
+                <p><strong>Total Members: </strong> @community.MembersCount</p>
             </div>
         </div>
     </div>
@@ -906,6 +1139,7 @@
             <div class="community-details-posts-field">
                 <label for="communityDetailsEditPostImage">Update image (optional)</label>
                 <input type="file" name="Image" id="communityDetailsEditPostImage" accept="image/*" />
+
                 <div id="editPostImageContainer" style="position: relative; display: none;">
                     <img id="communityDetailsEditPostImagePreview"
                          src=""
@@ -917,6 +1151,9 @@
                         ✕
                     </button>
                 </div>
+
+                <!-- Error message for invalid files -->
+                <div id="editPostImageErrorMsg" style="color:red; font-size:0.85rem; margin-top:4px;"></div>
             </div>
 
             <!-- Actions -->
@@ -955,14 +1192,68 @@
     </div>
 </div>
 
+<!-- REPORT COMMUNITY MODAL -->
+<div id="reportCommunityModal" class="report-community-modal">
+    <div class="report-community-modal-content">
+        <span class="close-report-community" onclick="closeReportCommunityModal()">&times;</span>
+        <h3>Report Community</h3>
+        <p>Please select the reason for reporting this community:</p>
+
+        <form id="reportCommunityForm">
+            <input type="hidden" id="reportCommunityId" name="CommunityId" />
+
+            <div class="community-details-posts-field">
+                <label for="reportCommunityReason">Reason</label>
+                <select id="reportCommunityReason" name="Reason" required>
+                    <option value="">-- Select Reason --</option>
+                    <option value="Spam">Spam</option>
+                    <option value="Inappropriate Content">Inappropriate Content</option>
+                    <option value="Harassment">Harassment</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="community-details-posts-field">
+                <label for="reportCommunityDetails">Additional details (optional)</label>
+                <textarea id="reportCommunityDetails" name="Details" rows="4" placeholder="Provide more details..."></textarea>
+            </div>
+
+            <div class="report-community-actions">
+                <button type="button" class="cancel-report-community-btn" onclick="closeReportCommunityModal()">Cancel</button>
+                <button type="submit" class="confirm-report-community-btn">Submit Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Community Delete Comment Modal -->
+<div id="communityInsideDeleteCommentModal" class="community-inside-delete-modal">
+    <div class="community-inside-delete-modal-content">
+        <h3>Delete Comment</h3>
+        <p>Are you sure you want to delete this comment?</p>
+        <div class="community-inside-delete-modal-actions">
+            <button id="communityInsideConfirmDeleteCommentBtn" class="community-inside-btn-confirm">Delete</button>
+            <button id="communityInsideCancelDeleteCommentBtn" class="community-inside-btn-cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const agreeCheckbox = document.getElementById('communityPolicyAgree');
     const acceptBtn = document.getElementById('communityDetailsAcceptPolicyBtn');
+    const communityInsideDeleteCommentModal = document.getElementById("communityInsideDeleteCommentModal");
+    const communityInsideConfirmDeleteCommentBtn = document.getElementById("communityInsideConfirmDeleteCommentBtn");
+    const communityInsideCancelDeleteCommentBtn = document.getElementById("communityInsideCancelDeleteCommentBtn");
 
-    // Enable button only when checked
-    agreeCheckbox.addEventListener('change', () => {
-        acceptBtn.disabled = !agreeCheckbox.checked;
-    });
+    if (agreeCheckbox && acceptBtn) {
+        agreeCheckbox.addEventListener('change', () => {
+            acceptBtn.disabled = !agreeCheckbox.checked;
+        });
+
+        acceptBtn.addEventListener('click', () => {
+            communityDetailsClosePolicyModal();
+        });
+    }
 
     acceptBtn.addEventListener('click', () => {
         // Add your accept logic here
@@ -1078,31 +1369,34 @@
         if (!postCard) return;
 
         const title = postCard.querySelector(".community-post-title")?.innerText
-                      || postCard.querySelector("h3")?.innerText || "";
+                        || postCard.querySelector("h3")?.innerText || "";
         const content = postCard.querySelector("p")?.innerText || "";
         const existingImage = postCard.querySelector("img")?.src || "";
 
-        document.getElementById("communityDetailsEditPostTitle").value = title;
-        document.getElementById("communityDetailsEditPostContent").value = content;
-        document.getElementById("communityDetailsEditPostId").value = postId;
-
+        const titleInput = document.getElementById("communityDetailsEditPostTitle");
+        const contentInput = document.getElementById("communityDetailsEditPostContent");
+        const imageInput = document.getElementById("communityDetailsEditPostImage");
         const imagePreview = document.getElementById("communityDetailsEditPostImagePreview");
         const imageContainer = document.getElementById("editPostImageContainer");
         const removeBtn = document.getElementById("removeEditPostImageBtn");
-        const imageInput = document.getElementById("communityDetailsEditPostImage");
+        const editFileErrorMsg = document.getElementById("editPostImageErrorMsg");
 
+        titleInput.value = title;
+        contentInput.value = content;
+        document.getElementById("communityDetailsEditPostId").value = postId;
+
+        // Show existing image if present
         if (existingImage) {
             imagePreview.src = existingImage;
             imageContainer.style.display = "block";
-            imagePreview.style.display = "block";
         } else {
-            imageContainer.style.display = "none";
             imagePreview.src = "";
+            imageContainer.style.display = "none";
         }
 
-        if (imageInput) imageInput.value = "";
+        imageInput.value = ""; // clear input
 
-        // Store the original snapshot
+        // Store original snapshot
         window._editOriginal = {
             title: title.trim(),
             content: content.trim(),
@@ -1110,16 +1404,50 @@
             removeImage: false
         };
 
-        // Disable save until changes occur
         document.getElementById("communityDetailsEditSaveBtn").disabled = true;
         document.getElementById("communityDetailsEditPostModal").style.display = "flex";
         updateEditSaveButtonState();
 
-        // Hook up remove image button
+        // Remove image button
         removeBtn.onclick = () => {
             imagePreview.src = "";
             imageContainer.style.display = "none";
-            window._editOriginal.removeImage = true; // mark as removed
+            window._editOriginal.removeImage = true;
+            updateEditSaveButtonState();
+        };
+
+        // File input validation and preview
+        imageInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (editFileErrorMsg) editFileErrorMsg.innerText = '';
+
+            if (!file) {
+                imagePreview.style.display = 'none';
+                updateEditSaveButtonState();
+                return;
+            }
+
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                if (editFileErrorMsg) editFileErrorMsg.innerText = 'Invalid file type. Only JPG, PNG, GIF, WEBP allowed.';
+                e.target.value = '';
+                imagePreview.style.display = 'none';
+                updateEditSaveButtonState();
+                return;
+            }
+
+            const maxSizeKB = 700;
+            if (file.size > maxSizeKB * 1024) {
+                if (editFileErrorMsg) editFileErrorMsg.innerText = `File too large. Maximum ${maxSizeKB} KB allowed.`;
+                e.target.value = '';
+                imagePreview.style.display = 'none';
+                updateEditSaveButtonState();
+                return;
+            }
+
+            imagePreview.src = URL.createObjectURL(file);
+            imagePreview.style.display = "block";
+            imageContainer.style.display = "block";
             updateEditSaveButtonState();
         };
     }
@@ -1220,10 +1548,14 @@
         document.getElementById("communityDetailsReportModal").style.display = "none";
     });
 
-    document.getElementById("communityDetailsReportSubmitBtn").addEventListener("click", async () => {
+    document.getElementById("communityDetailsReportSubmitBtn").addEventListener("click", async (e) => {
+        e.preventDefault(); // stop default form submission
+
+        if (!selectedPostId) return; // no post selected
+
         const reason = document.getElementById("communityDetailsReportReason").value;
         const details = document.getElementById("communityDetailsReportDetails").value.trim();
-        if(!reason) return alert("Please select a reason");
+        if (!reason) return; // don't proceed if no reason
 
         try {
             const formData = new FormData();
@@ -1236,12 +1568,25 @@
                 body: formData
             });
 
+            if (!response.ok) throw new Error("Server error");
+
             const result = await response.json();
-            if(result.success){
-                alert("Post reported successfully");
+
+            if (result.success) {
+                // Close modal
                 document.getElementById("communityDetailsReportModal").style.display = "none";
-            } else alert(result.message || "Failed to report post");
-        } catch(err){ console.error(err); alert("Error reporting post"); }
+
+                // Refresh page
+                window.location.reload();
+            }
+
+            // if failed, still reload page (optional)
+            else window.location.reload();
+
+        } catch (err) {
+            console.error(err);
+            window.location.reload(); // refresh on error as well
+        }
     });
 
     // Close modals when clicking outside
@@ -1268,41 +1613,66 @@
     }
 
     // Add comment
-    function addComment(postId){
+    function addComment(postId) {
         const input = document.getElementById(`comment-input-${postId}`);
         const list = document.getElementById(`comments-list-${postId}`);
         const commentText = input.value.trim();
-        if(!commentText) return;
+        if (!commentText) return;
+
+        // ✅ Generate a unique ID for the comment
+        const commentId = `c_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
         const commentData = {
+            id: commentId, // assign ID for deletion
             userId: currentUserId,
-            firstName: currentUserFirstName,
-            lastName: currentUserLastName,
-            avatarUrl: currentUserAvatar,
+            firstName: currentUserFirstName || "Unknown",
+            lastName: currentUserLastName || "",
+            avatarUrl: currentUserAvatar || "/assets/Avatar/Sample10.svg",
             text: commentText,
             createdAt: new Date().toISOString()
         };
 
+        // ✅ Save comment to localStorage
         let savedComments = getPostComments();
-        if(!savedComments[postId]) savedComments[postId] = [];
+        if (!savedComments[postId]) savedComments[postId] = [];
         savedComments[postId].push(commentData);
         setPostComments(savedComments);
 
+        // ✅ Render the new comment
         renderComment(list, commentData);
 
+        // ✅ Update comment count in real time
         const countEl = document.getElementById(`comment-count-${postId}`);
-        countEl.innerText = savedComments[postId].length;
+        if (countEl) countEl.innerText = savedComments[postId].length;
 
+        // Clear input
         input.value = "";
     }
 
     function renderComment(list, commentData){
+        // ✅ Ensure commentData has an ID
+        if (!commentData.id) {
+            commentData.id = `c_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        }
+
         const commentEl = document.createElement("div");
         commentEl.classList.add("comment");
+        commentEl.dataset.commentId = commentData.id; // use the stored id
+
+        const isOwner = commentData.userId === currentUserId;
+        const isAdmin = "@currentUserIsAdmin".toLowerCase() === "true";
+        const showDelete = isOwner || isAdmin;
+
         commentEl.innerHTML = `
-            <div class="avatar" style="background-image:url('${commentData.avatarUrl}'); width:32px; height:32px;"></div>
+            <div class="avatar" style="background-image:url('${commentData.avatarUrl || "/assets/Avatar/Sample10.svg"}'); width:32px; height:32px;"></div>
             <div class="comment-content">
-                <div class="comment-header">${commentData.firstName} ${commentData.lastName} <span class="timestamp">${timeAgo(commentData.createdAt)}</span></div>
+                <div class="comment-header">
+                    <div class="comment-info">
+                        <span class="comment-author">${commentData.firstName || "Unknown"} ${commentData.lastName || ""}</span>
+                        <span class="timestamp">${timeAgo(commentData.createdAt)}</span>
+                    </div>
+                    ${showDelete ? `<button class="comment-inside-delete-btn" onclick="communityInsideOpenDeleteCommentModal('${commentData.id}')">🗑️</button>` : ""}
+                </div>
                 <div class="comment-text">${commentData.text}</div>
             </div>
         `;
@@ -1318,6 +1688,59 @@
         if(diff < 604800) return `${Math.floor(diff/86400)} days ago`;
         return `${Math.floor(diff/604800)} weeks ago`;
     }
+
+    function openReportCommunityModal(communityId) {
+        const modal = document.getElementById("reportCommunityModal");
+        const input = document.getElementById("reportCommunityId");
+        if (!modal || !input) return;
+        input.value = communityId;
+        modal.style.display = "flex";
+    }
+
+    let communityInsidePendingDeleteCommentId = null;
+
+    // Open modal for a specific comment
+    function communityInsideOpenDeleteCommentModal(commentId) {
+        communityInsidePendingDeleteCommentId = commentId;
+        communityInsideDeleteCommentModal.style.display = "flex";
+    }
+
+    // Confirm deletion
+    communityInsideConfirmDeleteCommentBtn.addEventListener("click", () => {
+        if (!communityInsidePendingDeleteCommentId) return;
+
+        // Remove comment from DOM
+        const commentEl = document.querySelector(`[data-comment-id="${communityInsidePendingDeleteCommentId}"]`);
+        if (commentEl) commentEl.remove();
+
+        // Remove from localStorage
+        let savedComments = getPostComments(); // use the same key as render
+        for (let postId in savedComments) {
+            savedComments[postId] = savedComments[postId].filter(c => c.id !== communityInsidePendingDeleteCommentId);
+
+            // Update comment count in real time
+            const countEl = document.getElementById(`comment-count-${postId}`);
+            if (countEl) countEl.innerText = savedComments[postId].length;
+        }
+        setPostComments(savedComments);
+
+        communityInsidePendingDeleteCommentId = null;
+        communityInsideDeleteCommentModal.style.display = "none";
+    });
+
+    // Cancel deletion
+    communityInsideCancelDeleteCommentBtn.addEventListener("click", () => {
+        communityInsidePendingDeleteCommentId = null;
+        communityInsideDeleteCommentModal.style.display = "none";
+    });
+
+    // Close modal when clicking outside content
+    communityInsideDeleteCommentModal.addEventListener("click", (e) => {
+        if (e.target === communityInsideDeleteCommentModal) {
+            communityInsidePendingDeleteCommentId = null;
+            communityInsideDeleteCommentModal.style.display = "none";
+        }
+    });
 
     document.addEventListener("DOMContentLoaded", () => {
         const titleEl = document.getElementById("communityDetailsEditPostTitle");
@@ -1400,6 +1823,37 @@
                 alert("Error removing join request");
             }
         }
+
+        const reportModal = document.getElementById("reportCommunityModal");
+        const closeReportModal = document.querySelector(".close-report-community");
+        const cancelReportBtn = document.querySelector(".cancel-report-community-btn");
+        const reportForm = document.getElementById("reportCommunityForm");
+
+        closeReportModal.addEventListener("click", () => reportModal.style.display = "none");
+        cancelReportBtn.addEventListener("click", () => reportModal.style.display = "none");
+        window.addEventListener("click", (e) => {
+            if (e.target === reportModal) reportModal.style.display = "none";
+        });
+
+        reportForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(reportForm);
+
+            fetch('/Community/ReportCommunity', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message || "Failed to submit report.");
+                }
+            })
+            .catch(() => alert("An error occurred while submitting the report."));
+        });
 
         // Join & Policy Modal
         function initJoinPolicyModal() {
@@ -1540,12 +1994,38 @@
 
             postImageInput?.addEventListener('change', e => {
                 const file = e.target.files[0];
-                if(file){
-                    postImagePreview.src = URL.createObjectURL(file);
-                    postImagePreview.style.display = 'block';
-                } else {
+                const postImagePreview = document.getElementById('communityDetailsPostImagePreview');
+                const fileErrorMsg = document.getElementById('postImageErrorMsg'); // create a <div> below input for errors
+
+                // Clear previous error
+                if (fileErrorMsg) fileErrorMsg.innerText = '';
+
+                if (!file) {
                     postImagePreview.style.display = 'none';
+                    return;
                 }
+
+                // ✅ File type validation
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    if (fileErrorMsg) fileErrorMsg.innerText = 'Invalid file type. Only JPG, PNG, GIF, and WEBP images are allowed.';
+                    e.target.value = ''; // Clear the input
+                    postImagePreview.style.display = 'none';
+                    return;
+                }
+
+                // ✅ File size validation (max 700 KB)
+                const maxSizeKB = 700;
+                if (file.size > maxSizeKB * 1024) {
+                    if (fileErrorMsg) fileErrorMsg.innerText = `File is too large. Maximum allowed size is ${maxSizeKB} KB.`;
+                    e.target.value = '';
+                    postImagePreview.style.display = 'none';
+                    return;
+                }
+
+                // Show preview
+                postImagePreview.src = URL.createObjectURL(file);
+                postImagePreview.style.display = 'block';
             });
 
             createPostForm?.addEventListener('submit', async (e) => {

@@ -163,21 +163,16 @@
 
     const lessonFileRules = {
         image: {
-            maxSize: 5 * 1024 * 1024, // 5 MB
+            maxSize: 700 * 1024, // 700 KB
             allowed: [".jpg", ".jpeg", ".png", ".gif", ".webp"]
         },
         video: {
-            maxSize: 200 * 1024 * 1024, // 200 MB
+            maxSize: 50 * 1024 * 1024, // 50 MB
             allowed: [".mp4", ".mov", ".avi"]
         }
     };
 
     function validateLessonFile(input, type) {
-        const lessonFileRules = {
-            image: { maxSize: 5*1024*1024, allowed: [".jpg",".jpeg",".png",".gif",".webp"] },
-            video: { maxSize: 200*1024*1024, allowed: [".mp4",".mov",".avi"] }
-        };
-
         const file = input.files[0];
         if (!file) return true;
 
@@ -190,6 +185,7 @@
         const { maxSize, allowed } = lessonFileRules[type];
         const ext = file.name.toLowerCase().substring(file.name.lastIndexOf("."));
 
+        // Validate extension
         if (!allowed.includes(ext)) {
             errorEl.textContent = `Invalid file type. Allowed: ${allowed.join(", ")}`;
             errorEl.style.display = "block";
@@ -197,8 +193,15 @@
             return false;
         }
 
+        // Validate file size with dynamic message
         if (file.size > maxSize) {
-            errorEl.textContent = `File too large. Max ${(maxSize/(1024*1024)).toFixed(0)} MB allowed.`;
+            let sizeText;
+            if (type === "image") {
+                sizeText = "700 KB";
+            } else if (type === "video") {
+                sizeText = "50 MB";
+            }
+            errorEl.textContent = `File too large. Max ${sizeText} allowed.`;
             errorEl.style.display = "block";
             input.value = "";
             return false;

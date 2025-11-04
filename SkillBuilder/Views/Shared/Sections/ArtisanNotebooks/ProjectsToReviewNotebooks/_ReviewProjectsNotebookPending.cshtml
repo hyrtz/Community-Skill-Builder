@@ -1,166 +1,191 @@
 ﻿@model List<SkillBuilder.Models.CourseProjectSubmission>
 
+@{
+    string TruncateDescription(string desc, int wordLimit = 10)
+    {
+        if (string.IsNullOrWhiteSpace(desc)) return "";
+        var words = desc.Split(' ');
+        if (words.Length <= wordLimit) return desc;
+        return string.Join(' ', words.Take(wordLimit)) + "...";
+    }
+}
+
 <style>
     /* ===== Grid Layout ===== */
-    .artisan-pending-review-grid {
+    .user-projects-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 1.5rem;
     }
 
-    /* ===== Card Styles ===== */
-    .artisan-pending-review-card {
+    /* ===== Horizontal Card Styles ===== */
+    .user-project-card-horizontal {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         background: #fff;
         border: 1px solid #ddd;
         border-radius: 12px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         overflow: hidden;
         cursor: pointer;
-        max-height: 330px;
-        min-height: 330px;
-        max-width: 270px;
-        min-width: 270px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        min-height: 220px;
+        height: auto;
+        max-height: none;
     }
 
-        .artisan-pending-review-card:hover {
+        .user-project-card-horizontal:hover {
             transform: translateY(-4px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
 
-        .artisan-pending-review-card img {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
+    .user-project-card-img {
+        width: 200px;
+        height: 100%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .user-project-card-content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        padding: 1rem;
+    }
+
+    .user-project-card-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .user-project-card-section {
+        background-color: #f8f9ff;
+        border-left: 4px solid #344AEA;
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.6rem;
+    }
+
+        .user-project-card-section p {
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+            color: #333;
         }
 
-    .artisan-pending-review-content {
-        padding: 1rem 1rem 0 1rem;
-        flex-grow: 1;
-    }
+        .user-project-card-section strong {
+            color: #344AEA;
+        }
 
-    .artisan-pending-review-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #333;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .artisan-pending-review-actions {
-        margin: 1rem;
+    /* Footer Buttons */
+    .user-project-card-footer {
         display: flex;
-        justify-content: space-between;
-        gap: 1rem;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: auto;
+        padding-top: 0.5rem;
+        border-top: 1px solid #ddd;
     }
 
+    .btn-view-project,
     .artisan-pending-review-btn {
-        flex: 1;
-        padding: 0.6rem 1.2rem;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
         font-weight: 600;
-        transition: transform 0.15s ease, opacity 0.15s ease;
+        cursor: pointer;
+        transition: all 0.2s ease;
         font-size: 0.9rem;
+        border: 1px solid #364BE9;
+        background: white;
+        color: #364BE9;
     }
 
+        .btn-view-project:hover,
         .artisan-pending-review-btn:hover {
             transform: translateY(-2px);
             opacity: 0.9;
         }
 
-    .artisan-pending-review-btn-approve {
-        background-color: white;
-        color: #364BE9;
-        border: solid #364BE9 1px;
+    .artisan-pending-review-btn-approve:hover {
+        background-color: #45a049;
+        color: white;
+        border-color: #45a049;
     }
 
-        .artisan-pending-review-btn-approve:hover {
-            background-color: #45a049;
-            color: white;
-            border-color: #45a049;
-        }
-
-    .artisan-pending-review-btn-decline {
-        background-color: white;
-        color: #364BE9;
-        border: solid #364BE9 1px;
+    .artisan-pending-review-btn-decline:hover {
+        background-color: #c0392b;
+        color: white;
+        border-color: #c0392b;
     }
-
-        .artisan-pending-review-btn-decline:hover {
-            background-color: #c0392b;
-            color: white;
-            border-color: #c0392b;
-        }
 
     /* ===== Empty State ===== */
-    .artisan-pending-review-empty {
+    .user-projects-empty {
         text-align: center;
         color: #777;
         font-style: italic;
         margin: 2rem 0;
     }
 
-    /* ===== Review Modal ===== */
-    .artisan-pending-review-modal {
+    /* ===== Project Modal ===== */
+    .artisan-project-modal {
         display: none;
         position: fixed;
         z-index: 9999;
-        inset: 0;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
         background-color: rgba(0,0,0,0.7);
         justify-content: center;
         align-items: center;
     }
 
-    .artisan-pending-review-modal-content {
+    .artisan-project-modal-content {
         background: #fff;
-        border-radius: 10px;
+        border-radius: 12px;
         max-width: 700px;
         width: 90%;
-        padding: 1.5rem;
+        padding: 1.75rem 1.5rem 1.5rem; /* increased top padding */
         position: relative;
         animation: fadeIn 0.3s ease-in-out;
-    }
-
-    .artisan-pending-review-close {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 1.5rem;
-        cursor: pointer;
-    }
-
-    .artisan-pending-review-modal-body {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        align-items: center;
         text-align: center;
     }
 
-    .artisan-pending-review-image {
+    .artisan-project-modal-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: none;
+        font-size: 20px;
+        line-height: 1;
+        color: #333;
+        cursor: pointer;
+    }
+
+    .artisan-project-modal-image {
         max-width: 100%;
-        max-height: 400px;
-        margin-top: 1rem;
+        max-height: 600px;
+        margin-bottom: 1rem;
         border-radius: 10px;
-        object-fit: cover;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    .artisan-pending-review-details {
-        width: 100%;
-        text-align: left;
+    .artisan-project-modal-details h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #344AEA;
     }
 
-        .artisan-pending-review-details h2 {
-            font-size: 1.5rem;
-            color: #344AEA;
-            margin: 0 0 .5rem 0;
-        }
+    .artisan-project-modal-details p {
+        font-size: 1rem;
+        color: #444;
+        margin: 0.3rem 0;
+    }
 
     /* ===== Confirmation Modal ===== */
     .artisan-pending-confirm-backdrop {
@@ -222,14 +247,6 @@
         color: #333;
     }
 
-    .artisan-pending-confirm-confirm:hover {
-        opacity: 0.9;
-    }
-
-    .artisan-pending-confirm-cancel:hover {
-        background-color: #b3b3b3;
-    }
-
     .artisan-pending-confirm-confirm:disabled {
         background-color: #ccc !important;
         color: #666 !important;
@@ -238,87 +255,95 @@
     }
 </style>
 
-@if (Model != null && Model.Count > 0)
-{
-    <div class="artisan-pending-review-grid">
-        @foreach (var submission in Model)
-        {
-            <div class="artisan-pending-review-card"
-                 data-id="@submission.Id"
-                 data-image="@submission.MediaUrl"
-                 data-title="@submission.Title"
-                 data-caption="@submission.Description"
-                 data-course="@submission.Course?.Title"
-                 data-submitted="@submission.SubmittedAt.ToString("MMMM dd, yyyy")">
+<section>
+    @if (Model != null && Model.Any())
+    {
+        <div class="user-projects-grid">
+            @foreach (var project in Model)
+            {
+                <div class="user-project-card-horizontal"
+                     data-id="@project.Id"
+                     data-image="@project.MediaUrl"
+                     data-finaltitle="@project.Course?.FinalProjectTitle"
+                     data-finaldesc="@project.Course?.FinalProjectDescription"
+                     data-title="@project.Title"
+                     data-caption="@project.Description"
+                     data-course="@project.Course?.Title"
+                     data-submitted="@project.SubmittedAt.ToString("MMMM dd, yyyy")">
 
-                <img src="@submission.MediaUrl" alt="Project from @submission.Course?.Title" />
+                    <img src="@project.MediaUrl" alt="@project.Course?.Title" class="user-project-card-img" />
 
-                <div class="artisan-pending-review-content">
-                    <h3 class="artisan-pending-review-title">@submission.Title</h3>
+                    <div class="user-project-card-content">
+                        <!-- Wrapper to stack sections and footer -->
+                        <div class="user-project-card-content-wrapper">
+                            <!-- Course Info Section -->
+                            <div class="user-project-card-section">
+                                <p><strong>Course Title:</strong> @project.Course?.Title</p>
+                                <p><strong>Final Project Title:</strong> @project.Course?.FinalProjectTitle</p>
+                                <p><strong>Final Project Description:</strong> @TruncateDescription(project.Course?.FinalProjectDescription, 12)</p>
+                            </div>
+
+                            <!-- Project Info Section -->
+                            <div class="user-project-card-section">
+                                <p><strong>Submitted By:</strong> @($"{project.User?.FirstName} {project.User?.LastName}")</p>
+                                <p><strong>Project Title:</strong> @project.Title</p>
+                                <p><strong>Project Caption:</strong> @TruncateDescription(project.Description, 12)</p>
+                                <p><strong>Submitted At:</strong> @project.SubmittedAt.ToString("MMMM dd, yyyy")</p>
+                            </div>
+
+                            <!-- Footer Buttons -->
+                            <div class="user-project-card-footer">
+                                <button class="btn-view-project">View</button>
+                                <button class="artisan-pending-review-btn artisan-pending-review-btn-approve" data-id="@project.Id">Approve</button>
+                                <button class="artisan-pending-review-btn artisan-pending-review-btn-decline" data-id="@project.Id">Reject</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="user-projects-empty">No pending projects at the moment.</div>
+    }
+</section>
 
-                <div class="artisan-pending-review-actions">
-                    <button class="artisan-pending-review-btn artisan-pending-review-btn-approve" data-id="@submission.Id">
-                        Approve
-                    </button>
-                    <button class="artisan-pending-review-btn artisan-pending-review-btn-decline" data-id="@submission.Id">
-                        Decline
-                    </button>
-                </div>
-            </div>
-        }
-    </div>
-}
-else
-{
-    <div class="artisan-pending-review-empty">
-        No pending projects at the moment.
-    </div>
-}
+<!-- Project View Modal -->
+<div id="projectModal" class="artisan-project-modal">
+    <div class="artisan-project-modal-content">
+        <button class="artisan-project-modal-close" aria-label="Close modal" title="Close">&times;</button>
 
-<!-- Review Modal -->
-<div id="artisanPendingReviewModal" class="artisan-pending-review-modal" aria-hidden="true">
-    <div class="artisan-pending-review-modal-content" role="dialog" aria-modal="true" aria-labelledby="artisanPendingReviewTitle">
-        <span class="artisan-pending-review-close" id="artisanPendingReviewClose" aria-label="Close">&times;</span>
+        <div class="artisan-project-modal-details">
+            <!-- Final project info at the top -->
+            <h4 id="projectModalFinalTitle" style="color:#007bff; margin-top:0;"></h4>
+            <p id="projectModalFinalDesc" style="font-size:0.95rem; color:#555; margin-bottom:1rem;"></p>
 
-        <div class="artisan-pending-review-modal-body">
-            <div class="artisan-pending-review-top">
-                <img id="artisanPendingReviewImage" class="artisan-pending-review-image" src="" alt="Project Image" />
-            </div>
+            <!-- Project image -->
+            <img id="projectModalImage" class="artisan-project-modal-image" src="" alt="Project Image" style="margin-bottom:1rem;" />
 
-            <div class="artisan-pending-review-details">
-                <h2 id="artisanPendingReviewTitle"></h2>
-                <p id="artisanPendingReviewCaption" style="margin-bottom: 1rem;"></p>
-                <p><strong>Course:</strong> <span id="artisanPendingReviewCourse"></span></p>
-                <p><strong>Submitted:</strong> <span id="artisanPendingReviewDate"></span></p>
-            </div>
+            <!-- Pending user submission info at the bottom -->
+            <h2 id="projectModalTitle"></h2>
+            <p id="projectModalCaption"></p>
+            <p><strong>Course:</strong> <span id="projectModalCourse"></span></p>
+            <p><strong>Submitted:</strong> <span id="projectModalDate"></span></p>
         </div>
     </div>
 </div>
 
-<!-- Updated Confirmation Modal -->
+<!-- Confirmation Modal -->
 <div id="artisanPendingConfirmBackdrop" class="artisan-pending-confirm-backdrop"></div>
 <div id="artisanPendingConfirmModal" class="artisan-pending-confirm-modal">
     <h3 id="artisanPendingConfirmMessage">Confirm action</h3>
-
-    <!-- Digital Signature Upload for Approve -->
     <div id="artisanPendingSignatureWrapper" style="display:none; margin-bottom:1rem;">
-        <label for="artisanPendingSignature" style="font-size:0.9rem; color:#555;">
-            Upload your digital signature (PNG, transparent background)
-        </label>
+        <label for="artisanPendingSignature" style="font-size:0.9rem; color:#555;">Upload your digital signature (PNG)</label>
         <input type="file" id="artisanPendingSignature" accept="image/png" style="width:100%; margin-top:0.5rem;">
-        <p id="artisanPendingSignatureWarning" style="color:#c0392b; font-size:0.8rem; display:none;">
-            Only PNG files with no background are allowed.
-        </p>
+        <p id="artisanPendingSignatureWarning" style="color:#c0392b; font-size:0.8rem; display:none;">Only PNG files allowed.</p>
     </div>
-
-    <!-- Reject Reason -->
     <div id="artisanPendingRejectReasonWrapper" style="display:none; margin-bottom:1rem;">
-        <textarea id="artisanPendingRejectReason"
-                  placeholder="Enter rejection reason..."
-                  style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #ccc; resize:none;"></textarea>
+        <div style="margin-bottom: 1rem;">Please enter a reason why you want to reject this project.</div>
+        <textarea id="artisanPendingRejectReason" placeholder="Enter rejection reason..." style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #ccc; resize:none;"></textarea>
     </div>
-
     <div class="artisan-pending-confirm-buttons">
         <button type="button" onclick="artisanPendingCloseModal()" class="artisan-pending-confirm-cancel">Cancel</button>
         <button id="artisanPendingConfirmAction" class="artisan-pending-confirm-confirm" disabled>Confirm</button>
@@ -327,6 +352,16 @@ else
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("projectModal");
+        const modalImage = document.getElementById("projectModalImage");
+        const modalTitle = document.getElementById("projectModalTitle");
+        const modalCaption = document.getElementById("projectModalCaption");
+        const modalCourse = document.getElementById("projectModalCourse");
+        const modalDate = document.getElementById("projectModalDate");
+        const modalFinalTitle = document.getElementById("projectModalFinalTitle");
+        const modalFinalDesc = document.getElementById("projectModalFinalDesc");
+        const modalClose = document.querySelector(".artisan-project-modal-close");
+
         let artisanPendingCurrentAction = null;
         const confirmBtn = document.getElementById("artisanPendingConfirmAction");
         const rejectWrapper = document.getElementById("artisanPendingRejectReasonWrapper");
@@ -336,11 +371,8 @@ else
         const signatureWarning = document.getElementById("artisanPendingSignatureWarning");
 
         if (rejectTextarea) {
-            rejectTextarea.addEventListener("input", () => {
-                confirmBtn.disabled = rejectTextarea.value.trim() === "";
-            });
+            rejectTextarea.addEventListener("input", () => confirmBtn.disabled = rejectTextarea.value.trim() === "");
         }
-
         if (signatureInput) {
             signatureInput.addEventListener("change", () => {
                 const file = signatureInput.files[0];
@@ -355,27 +387,60 @@ else
             });
         }
 
+        // Card click - open project view modal
+        document.querySelectorAll(".user-project-card-horizontal").forEach(card => {
+            const viewBtn = card.querySelector(".btn-view-project");
+
+            if (viewBtn) {
+                viewBtn.addEventListener("click", e => {
+                    e.stopPropagation(); // prevent card click
+                    modalImage.src = card.dataset.image;
+                    modalTitle.textContent = card.dataset.title;
+                    modalCaption.textContent = card.dataset.caption;
+                    modalFinalTitle.textContent = "Final Project Title: " + (card.dataset.finaltitle || "");
+                    modalFinalDesc.textContent = "Description: " + (card.dataset.finaldesc || "");
+                    modalCourse.textContent = card.dataset.course || "";
+                    modalDate.textContent = card.dataset.submitted || "";
+                    modal.style.display = "flex";
+                });
+            }
+
+            card.addEventListener("click", e => {
+                if (e.target.closest("button")) return; // ignore button clicks
+            });
+        });
+
+        modalClose.addEventListener("click", () => modal.style.display = "none");
+        modal.addEventListener("click", e => { if (e.target === modal) modal.style.display = "none"; });
+        document.addEventListener("keydown", e => { if (e.key === "Escape") modal.style.display = "none"; });
+
+        // Approve/Reject buttons
+        document.querySelectorAll(".artisan-pending-review-btn").forEach(btn => {
+            btn.addEventListener("click", e => {
+                e.stopPropagation();
+                const action = btn.classList.contains("artisan-pending-review-btn-approve") ? "Approve" : "Reject";
+                const submissionId = btn.dataset.id;
+                artisanPendingOpenModal(action, submissionId);
+            });
+        });
+
         window.artisanPendingOpenModal = function(action, submissionId) {
             artisanPendingCurrentAction = { action, submissionId };
-
-            const message = action === "Approve"
-                ? "Are you sure you want to approve this submission?"
-                : "Are you sure you want to reject this submission?";
-            document.getElementById("artisanPendingConfirmMessage").innerText = message;
+            document.getElementById("artisanPendingConfirmMessage").innerText = action === "Approve" ? "Approve this submission?" : "Reject this submission?";
 
             if (action === "Approve") {
-                confirmBtn.style.backgroundColor = "#4CAF50";
-                confirmBtn.innerText = "Approve";
                 signatureWrapper.style.display = "block";
                 rejectWrapper.style.display = "none";
                 signatureInput.value = "";
+                confirmBtn.innerText = "Approve";
+                confirmBtn.style.backgroundColor = "#4CAF50";
                 confirmBtn.disabled = true;
             } else {
-                confirmBtn.style.backgroundColor = "#e74c3c";
-                confirmBtn.innerText = "Reject";
                 signatureWrapper.style.display = "none";
                 rejectWrapper.style.display = "block";
                 rejectTextarea.value = "";
+                confirmBtn.innerText = "Reject";
+                confirmBtn.style.backgroundColor = "#e74c3c";
                 confirmBtn.disabled = true;
             }
 
@@ -391,45 +456,26 @@ else
 
         confirmBtn.addEventListener("click", () => {
             if (!artisanPendingCurrentAction) return;
-
             const submissionId = artisanPendingCurrentAction.submissionId;
 
             if (artisanPendingCurrentAction.action === "Approve") {
                 const formData = new FormData();
                 formData.append("id", submissionId);
-                if (signatureInput.files[0]) {
-                    formData.append("signature", signatureInput.files[0]);
-                }
+                if (signatureInput.files[0]) formData.append("signature", signatureInput.files[0]);
 
-                fetch(`/CourseProject/Approve`, {
-                    method: "POST",
-                    body: formData
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error("Server error");
-                    return res.json();
-                })
-                .then(() => location.reload())
-                .catch(err => {
-                    console.error("Error approving project:", err);
-                    alert("Something went wrong. Please try again.");
-                });
-            } else { // Reject
+                fetch(`/CourseProject/Approve`, { method: "POST", body: formData })
+                    .then(res => res.ok ? res.json() : Promise.reject("Error"))
+                    .then(() => location.reload())
+                    .catch(err => alert("Something went wrong."));
+            } else {
                 const payload = { id: submissionId, reason: rejectTextarea.value.trim() };
                 fetch(`/CourseProject/Reject`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error("Server error");
-                    return res.json();
-                })
-                .then(() => location.reload())
-                .catch(err => {
-                    console.error("Error rejecting project:", err);
-                    alert("Something went wrong. Please try again.");
-                });
+                }).then(res => res.ok ? res.json() : Promise.reject("Error"))
+                  .then(() => location.reload())
+                  .catch(err => alert("Something went wrong."));
             }
 
             artisanPendingCloseModal();
@@ -437,49 +483,5 @@ else
 
         document.getElementById("artisanPendingConfirmBackdrop").addEventListener("click", artisanPendingCloseModal);
         document.addEventListener("keydown", e => { if (e.key === "Escape") artisanPendingCloseModal(); });
-
-        const modal = document.getElementById("artisanPendingReviewModal");
-        const modalImage = document.getElementById("artisanPendingReviewImage");
-        const modalTitle = document.getElementById("artisanPendingReviewTitle");
-        const modalCaption = document.getElementById("artisanPendingReviewCaption");
-        const modalDate = document.getElementById("artisanPendingReviewDate");
-        const modalCourse = document.getElementById("artisanPendingReviewCourse");
-        const closeBtn = document.getElementById("artisanPendingReviewClose");
-
-        // Card click to show modal
-        document.querySelectorAll(".artisan-pending-review-card").forEach(card => {
-            card.addEventListener("click", e => {
-                if (e.target.closest("button")) return;
-                modalImage.src = card.dataset.image;
-                modalTitle.textContent = card.dataset.title;
-                modalCaption.textContent = card.dataset.caption;
-                modalCourse.textContent = card.dataset.course;
-                modalDate.textContent = card.dataset.submitted;
-                modal.style.display = "flex";
-                modal.setAttribute("aria-hidden", "false");
-            });
-        });
-
-        // Approve / Reject buttons
-        document.querySelectorAll(".artisan-pending-review-btn").forEach(btn => {
-            btn.addEventListener("click", e => {
-                e.stopPropagation();
-                const action = btn.classList.contains("artisan-pending-review-btn-approve") ? "Approve" : "Reject";
-                const submissionId = btn.dataset.id;
-
-                artisanPendingOpenModal(action, submissionId);
-            });
-        });
-
-        // Modal close logic
-        closeBtn.addEventListener("click", closeModal);
-        modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
-        document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
-
-        function closeModal() {
-            modal.style.display = "none";
-            modal.setAttribute("aria-hidden", "true");
-            modalImage.src = "";
-        }
     });
 </script>

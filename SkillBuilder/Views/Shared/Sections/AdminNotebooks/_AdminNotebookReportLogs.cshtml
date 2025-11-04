@@ -1,0 +1,397 @@
+﻿@model SkillBuilder.Models.ViewModels.AdminProfileViewModel
+
+<style>
+    /* Container */
+    .report-log-section {
+        padding: 1.5rem 2.5rem;
+        background-color: #ffffff;
+        border-radius: 16px;
+        width: 100%;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+    }
+
+        .report-log-section:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.05);
+        }
+
+    .report-log-header {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #344AEA;
+        margin-bottom: 1.25rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Controls */
+    .report-log-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .report-log-search {
+        flex: 1;
+        display: flex;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: border-color 0.25s ease;
+    }
+
+        .report-log-search:focus-within {
+            border-color: #344AEA;
+        }
+
+        .report-log-search input {
+            flex: 1;
+            padding: 0.6rem 1.25rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            color: #222;
+        }
+
+        .report-log-search button {
+            flex: 0 0 auto;
+            background-color: #344AEA;
+            border: none;
+            padding: 0.55rem 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.25s ease, transform 0.25s ease;
+        }
+
+            .report-log-search button:hover {
+                background-color: #1f2bb8;
+                transform: scale(1.05);
+            }
+
+            .report-log-search button img {
+                width: 1.1rem;
+                height: 1.1rem;
+            }
+
+    .report-log-filter select {
+        padding: 0.55rem 0.85rem;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        font-weight: 600;
+        background-color: #f1f1f1;
+        font-size: 0.95rem;
+        transition: border-color 0.25s ease, background 0.25s ease;
+    }
+
+        .report-log-filter select:hover {
+            border-color: #344AEA;
+            background-color: #e8eaff;
+        }
+
+    /* Horizontal Card Design */
+    .report-log-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .report-log-card {
+        display: flex;
+        flex-direction: column; /* Stack top info and button vertically */
+        padding: 1rem;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        gap: 1rem; /* space between top section and button */
+    }
+
+        .report-log-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12), 0 6px 12px rgba(0,0,0,0.06);
+        }
+
+    .report-log-top {
+        display: flex;
+        justify-content: space-between; /* Info and Extra side by side */
+        gap: 1rem;
+    }
+
+    .report-log-info {
+        flex: 1; /* take remaining space */
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        margin: 1rem;
+    }
+
+
+        .report-log-info h4 {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #111;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .report-log-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #555;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    .report-log-extra {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+        color: #333;
+        text-align: right;
+        white-space: nowrap;
+        margin: 1rem;
+    }
+
+        .report-log-extra p strong {
+            color: #344AEA;
+            font-weight: 600;
+        }
+
+    .report-log-view-btn {
+        display: block;
+        width: 100%; /* Full width */
+        text-align: center;
+        padding: 0.75rem 1rem;
+        background-color: #3450ea;
+        color: #fff;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+    }
+
+        .report-log-view-btn:hover {
+            background-color: #1f36b8;
+        }
+
+    .no-reports {
+        text-align: center;
+        font-style: italic;
+        color: #777;
+        margin-top: 2rem;
+        font-size: 1rem;
+    }
+</style>
+
+<div class="report-log-section">
+    <div class="report-log-header">Report Logs</div>
+
+    <div class="report-log-controls">
+        <div class="report-log-search">
+            <input type="text" id="reportSearchInput" placeholder="Search by name, reporter, reason..." />
+            <button type="button" id="reportSearchButton">
+                <img src="/assets/Icons/Search.ico" alt="Search" />
+            </button>
+        </div>
+        <div class="report-log-filter">
+            <select id="reportFilter">
+                <option value="All">All Reports</option>
+                <option value="User">User Reports</option>
+                <option value="Course">Course Reports</option>
+                <option value="Community">Community Reports</option>
+                <option value="Post">Community Post Reports</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="report-log-cards" id="reportLogItems">
+        @if (Model.ReportLogs != null && Model.ReportLogs.Any())
+        {
+            @foreach (var report in Model.ReportLogs)
+            {
+                <div class="report-log-card" data-type="@report.ReportType" data-targetid="@report.Id">
+                    <!-- Top row: Info + Extra side by side -->
+                    <div class="report-log-top">
+                        <div class="report-log-info">
+                            <h4>
+                                @switch (report.ReportType)
+                                {
+                                    case "User":
+                                        @:User Name: @report.TargetName
+                                        break;
+                                    case "Course":
+                                        @:Course Name: @report.TargetName
+                                        break;
+                                    case "Community":
+                                        @:Community Name: @report.TargetName
+                                        break;
+                                    case "Post":
+                                        @:Post Name: @report.TargetName
+                                        break;
+                                    default:
+                                        @report.TargetName
+                                        break;
+                                }
+                            </h4>
+                            <p><strong>Reported By:</strong> @report.ReportedBy</p>
+                            <p><strong>Reason:</strong> @report.Reason</p>
+                        </div>
+                        <div class="report-log-extra">
+                            <p><strong>Type:</strong> @report.ReportType</p>
+                            <p><strong>Date:</strong> @report.DateReported.ToString("MMM dd, yyyy")</p>
+                        </div>
+                    </div>
+                    <!-- Full-width button below -->
+                    <a class="report-log-view-btn" href="@GetReportUrl(report)">View</a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="no-reports">No reports available.</div>
+        }
+    </div>
+</div>
+
+@functions {
+    private string GetReportUrl(SkillBuilder.Models.ViewModels.ReportLogViewModel report)
+    {
+        return report.ReportType switch
+        {
+            "User" => Url.Action("User", "AdminProfile", new { id = report.TargetUserId }),
+            "Course" => Url.Action("CourseCatalog", "Courses", new { selectedCourse = report.TargetCourseLink }),
+            "Community" => Url.Action("Details", "Community", new { id = report.TargetCommunityId }),
+            "Post" => report.TargetCommunityId != null
+                        ? Url.Action("PostDetails", "CommunityNotebook", new { id = report.TargetPostId })
+                        : Url.Action("Hub", "Community"),
+            _ => "#"
+        };
+    }
+}
+
+<script>
+    let allReports = [];
+
+    async function loadReportLogs() {
+        const container = document.getElementById("reportLogItems");
+        if (!container) return;
+
+        try {
+            const res = await fetch('/AdminProfile/GetReportLogs');
+            if (!res.ok) throw new Error('Network response was not ok');
+
+            const reports = await res.json();
+            allReports = reports;
+            renderReports(reports);
+        } catch (err) {
+            console.error("Failed to load report logs", err);
+            container.innerHTML = '<div class="no-reports">Failed to load reports.</div>';
+        }
+    }
+
+    function renderReports(reports) {
+        const container = document.getElementById("reportLogItems");
+        container.innerHTML = "";
+
+        if (!reports || reports.length === 0) {
+            container.innerHTML = '<div class="no-reports">No reports available.</div>';
+            return;
+        }
+
+        reports.forEach(report => {
+            let targetId = null;
+            let targetCommunityId = null;
+
+            switch(report.reportType) {
+                case "User": targetId = report.targetUserId; break;
+                case "Course": targetId = report.targetCourseLink; break;
+                case "Community": targetId = report.targetCommunityId; break;
+                case "Post":
+                    targetCommunityId = report.targetCommunityId; // link to the community
+                    break;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'report-log-card';
+            card.setAttribute('data-type', report.reportType);
+            let nameLabel = '';
+            switch(report.reportType) {
+                case "User": nameLabel = 'User Name'; break;
+                case "Course": nameLabel = 'Course Name'; break;
+                case "Community": nameLabel = 'Community Name'; break;
+                case "Post": nameLabel = 'Post Name'; break;
+                default: nameLabel = ''; break;
+            }
+
+            card.innerHTML = `
+                <div class="report-log-top">
+                    <div class="report-log-info">
+                        <h4>${nameLabel}: ${report.targetName}</h4>
+                        <p><strong>Reported By:</strong> ${report.reportedBy}</p>
+                        <p><strong>Reason:</strong> ${report.reason}</p>
+                    </div>
+                    <div class="report-log-extra">
+                        <p><strong>Type:</strong> ${report.reportType}</p>
+                        <p><strong>Date:</strong> ${new Date(report.dateReported).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <a class="report-log-view-btn" href="${getReportUrl(report.reportType, targetId, targetCommunityId)}">View</a>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function getReportUrl(reportType, targetId, targetCommunityId) {
+        switch(reportType) {
+            case "User":
+                return `/AdminProfile/User/${targetId}`;
+            case "Course":
+                return `/Courses?selectedCourse=${targetId}`;
+            case "Community":
+                return `/AdminProfile/CommunityDetails/${targetId}`;
+            case "Post":
+                return targetCommunityId
+                    ? `/AdminProfile/CommunityDetails/${targetCommunityId}`
+                    : `/Community/Hub`; // fallback if no community
+            default:
+                return "#";
+        }
+    }
+
+    function filterReports() {
+        const searchInput = document.getElementById("reportSearchInput").value.toLowerCase().trim();
+        const selectedFilter = document.getElementById("reportFilter").value;
+
+        let filtered = allReports;
+
+        if (selectedFilter !== "All") {
+            filtered = filtered.filter(r => r.reportType === selectedFilter);
+        }
+
+        if (searchInput) {
+            filtered = filtered.filter(r =>
+                r.targetName.toLowerCase().includes(searchInput) ||
+                r.reportedBy.toLowerCase().includes(searchInput) ||
+                r.reason.toLowerCase().includes(searchInput)
+            );
+        }
+
+        renderReports(filtered);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadReportLogs();
+        setInterval(loadReportLogs, 60000);
+
+        document.getElementById("reportFilter").addEventListener("change", filterReports);
+        document.getElementById("reportSearchInput").addEventListener("keydown", e => { if (e.key === "Enter") filterReports(); });
+        document.getElementById("reportSearchButton").addEventListener("click", filterReports);
+    });
+</script>
