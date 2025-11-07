@@ -306,7 +306,7 @@ namespace SkillBuilder.Controllers
                                     ImageFile = null,
                                     VideoFile = null,
                                     ImageUrl = l.ContentType == "Image + Text" ? l.MediaUrl : null,
-                                    VideoUrl = l.ContentType == "Video" ? l.MediaUrl : null,
+                                    VideoUrl = l.ContentType == "Video + Text" ? l.MediaUrl : null,
                                     QuizQuestions = l.QuizQuestions
                                         .Select(q => new QuizQuestionViewModel
                                         {
@@ -462,7 +462,7 @@ namespace SkillBuilder.Controllers
                                     }
                                 }
 
-                                if (lessonVm.LessonType == "Video")
+                                if (lessonVm.LessonType == "Video + Text")
                                 {
                                     if (lessonVm.VideoFile != null)
                                     {
@@ -483,7 +483,7 @@ namespace SkillBuilder.Controllers
                                 string mediaUrl = null;
                                 if (lessonVm.LessonType == "Image + Text" && lessonVm.ImageFile != null)
                                     mediaUrl = await SaveFileAsync(lessonVm.ImageFile, "lesson-media");
-                                else if (lessonVm.LessonType == "Video" && lessonVm.VideoFile != null)
+                                else if (lessonVm.LessonType == "Video + Text" && lessonVm.VideoFile != null)
                                     mediaUrl = await SaveFileAsync(lessonVm.VideoFile, "lesson-media");
 
                                 lesson = new ModuleContent

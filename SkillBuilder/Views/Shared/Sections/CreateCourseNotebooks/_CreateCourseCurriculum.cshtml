@@ -297,7 +297,7 @@
                         <option value="">-- Select Type --</option>
                         <option value="Text">Text</option>
                         <option value="Image + Text">Image + Text</option>
-                        <option value="Video">Video</option>
+                        <option value="Video + Text">Video + Text</option>
                         <option value="Quiz">Assessment</option>
                         <option value="Session">Session</option>
                     </select>
@@ -421,7 +421,7 @@
         if (selectEl.value === "Image + Text") {
             const imgInput = configContainer.querySelector(`input[type='file'][name$='.ImageFile']`);
             attachPreviewAndValidation(imgInput, "image");
-        } else if (selectEl.value === "Video") {
+        } else if (selectEl.value === "Video + Text") {
             const videoInput = configContainer.querySelector(`input[type='file'][name$='.VideoFile']`);
             attachPreviewAndValidation(videoInput, "video");
         }
@@ -478,8 +478,12 @@
                             </div>
                             <span class="file-error" style="color:red; font-size:0.85rem; display:none;"></span>
                         </div>`;
-            case "Video":
+            case "Video + Text":
                 return `<div class="curriculum-form-group">
+                            <label>Lesson Content / Description</label>
+                            <textarea class="curriculum-form-control" name="${nameBase}.ContentText" rows="4" required></textarea>
+                        </div>
+                        <div class="curriculum-form-group">
                             <label>Upload Video</label>
                             <div style="display:flex; gap:1rem; align-items:center;">
                                 <input type="file" name="${nameBase}.VideoFile" accept="video/*" class="curriculum-form-control" required />

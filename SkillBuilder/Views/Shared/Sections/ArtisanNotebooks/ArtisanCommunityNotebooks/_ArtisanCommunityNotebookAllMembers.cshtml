@@ -1,59 +1,73 @@
 ﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
 
+@{
+    var selectedCommunity = Model.MyCommunities
+        .FirstOrDefault(c => c.Id == Model.SelectedCommunityId);
+
+    var members = new List<SkillBuilder.Models.ViewModels.CommunityMemberViewModel>();
+    if (selectedCommunity != null && Model.CommunityMembers.ContainsKey(selectedCommunity.Id))
+    {
+        members = Model.CommunityMembers[selectedCommunity.Id]
+            .Where(m => m.Role != "Owner")
+            .ToList();
+    }
+}
+
 <style>
-    .artisan-community-members-container {
+    .community-members-container {
+        margin-top: 1rem;
         display: flex;
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 1rem;
-        padding: 1rem;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        font-family: 'Inter', sans-serif;
     }
 
-    .artisan-community-member-card {
+    .community-member-card {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 0.75rem;
-        padding: 0.9rem 1.2rem;
-        border-radius: 10px;
+        background: #fff;
         border: 1px solid #e5e7eb;
-        background: #f9fafb;
-        transition: 0.2s;
+        border-radius: 10px;
+        padding: 0.7rem 1rem;
+        width: 100%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.15s ease;
     }
 
-        .artisan-community-member-card:hover {
-            background: #eef2ff;
-            transform: translateY(-1px);
+        .community-member-card:hover {
+            transform: translateY(-2px);
         }
 
-    .artisan-member-info {
+    .member-info {
         display: flex;
         align-items: center;
         gap: 0.75rem;
     }
 
-    .artisan-member-avatar {
+    .member-avatar {
         width: 45px;
         height: 45px;
         border-radius: 50%;
-        border: 2px solid #e5e7eb;
         object-fit: cover;
     }
 
-    .artisan-member-details .artisan-member-name {
-        font-weight: 600;
-        color: #111827;
+    .member-details {
+        display: flex;
+        flex-direction: column;
     }
 
-    .artisan-member-details .artisan-member-role {
+    .member-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1f2937;
+    }
+
+    .member-role {
         font-size: 0.85rem;
         color: #6b7280;
     }
 
-    .artisan-remove-btn {
+    .remove-btn {
         background: #dc2626;
         color: #fff;
         border: none;
@@ -64,24 +78,22 @@
         transition: background 0.2s;
     }
 
-        .artisan-remove-btn:hover {
+        .remove-btn:hover {
             background: #b91c1c;
         }
 
-    .artisan-community-no-members {
-        font-weight: 500;
-        margin-top: 1rem;
-        padding: 2rem;
-        background-color: #fdfdfd;
-        border: 1px dashed #ccc;
-        border-radius: 10px;
+    .community-no-members {
         text-align: center;
-        color: #777;
         font-size: 1rem;
-        line-height: 1.6;
+        color: #6b7280;
+        padding: 2rem;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background-color: #f9fafb;
+        margin-top: 2rem;
     }
 
-    /* Modal Styles (same as user-side) */
+    /* Modal Styles */
     .community-modal-backdrop {
         display: none;
         position: fixed;
@@ -161,49 +173,47 @@
             }
 </style>
 
-@foreach (var community in Model.MyCommunities)
-{
-    <h3 style="margin-bottom: 1rem;">@community.Name Members</h3>
-    <div id="artisanCommunityMembersWrapper_@community.Id" data-community-id="@community.Id">
-        @{
-            var members = Model.CommunityMembers.ContainsKey(community.Id)
-            ? Model.CommunityMembers[community.Id].Where(m => m.Role != "Owner").ToList()
-            : new List<SkillBuilder.Models.ViewModels.CommunityMemberViewModel>();
-        }
+<div id="allMembersPartialContainer" data-community-id="@selectedCommunity?.Id">
+    @if (selectedCommunity == null)
+    {
+        <div class="community-no-members">No community selected.</div>
+    }
+    else
+    {
+        <h3>@selectedCommunity.Name Members</h3>
 
         @if (!members.Any())
         {
-            <div class="artisan-community-no-members">No members found in this community.</div>
+            <div class="community-no-members">No members found in this community.</div>
         }
         else
         {
-            <div class="artisan-community-members-container">
+            <div class="community-members-container">
                 @foreach (var member in members)
                 {
-                    <div class="artisan-community-member-card" data-member-id="@member.UserId" data-member-name="@member.FullName">
-                        <div class="artisan-member-info">
-                            <img src="@member.AvatarUrl" alt="@member.FullName" class="artisan-member-avatar" />
-                            <div class="artisan-member-details">
-                                <span class="artisan-member-name">@member.FullName</span>
-                                <span class="artisan-member-role">@member.Role</span>
+                    <div class="community-member-card" data-member-id="@member.UserId" data-member-name="@member.FullName">
+                        <div class="member-info">
+                            <img src="@member.AvatarUrl" alt="@member.FullName" class="member-avatar" />
+                            <div class="member-details">
+                                <span class="member-name">@member.FullName</span>
+                                <span class="member-role">@member.Role</span>
                             </div>
                         </div>
 
-                        <!-- Remove Button -->
                         <form asp-action="RemoveMember"
                               asp-controller="Community"
                               method="post"
                               onsubmit="return openRemoveModal(this, '@member.FullName');">
-                            <input type="hidden" name="communityId" value="@community.Id" />
+                            <input type="hidden" name="communityId" value="@selectedCommunity.Id" />
                             <input type="hidden" name="memberId" value="@member.UserId" />
-                            <button type="submit" class="artisan-remove-btn">Remove</button>
+                            <button type="submit" class="remove-btn">Remove</button>
                         </form>
                     </div>
                 }
             </div>
         }
-    </div>
-}
+    }
+</div>
 
 <!-- Modal Backdrop -->
 <div class="community-modal-backdrop" id="communityModalBackdrop"></div>
@@ -247,7 +257,7 @@
         };
         reasonInput.addEventListener("input", reasonInput._handler);
 
-        return false; // prevent submit
+        return false;
     }
 
     function closeRemoveModal() {
@@ -259,10 +269,7 @@
         const confirmBtn = document.getElementById("confirmRemoveBtn");
         if (!confirmBtn || e.target !== confirmBtn) return;
 
-        if (!currentRemoveForm) {
-            console.warn("No form reference found for removal action.");
-            return;
-        }
+        if (!currentRemoveForm) return;
 
         const reasonValue = document.getElementById("removeReason")?.value.trim();
         if (!reasonValue) return;

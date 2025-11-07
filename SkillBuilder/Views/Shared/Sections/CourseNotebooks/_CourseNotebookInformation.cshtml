@@ -57,13 +57,13 @@
 
     <!-- Full Description -->
     <div class="course-info-view-description">
-        <h1>Course Description</h1>
-        <p>@Model.FullDescription</p>
+        <h1 style="margin-bottom: 0.5rem; padding:0;">Course Description</h1>
+        <div style="white-space: pre-wrap;">@(Model.FullDescription?.Trim() ?? "")</div>
     </div>
 
     <!-- Requirements -->
     <div class="course-info-view-requirements">
-        <h1>Requirements and Materials</h1>
-        <p>@Model.Requirements</p>
+        <h1 style="margin-bottom: 0.5rem; padding:0;">Requirements and Materials</h1>
+        <div style="white-space: pre-wrap;">@(Model.Requirements?.Trim() ?? "")</div>
     </div>
 </div>

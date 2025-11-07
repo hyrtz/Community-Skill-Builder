@@ -391,157 +391,196 @@
         margin-top: 1rem;
     }
 
+    .artisan-community-tabs-top {
+        display: flex;
+        gap: 1.2rem;
+        margin-bottom: 1.8rem;
+        border-bottom: 2px solid #E5E7EB;
+    }
+
+    .artisan-community-tab-top {
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6B7280;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+        .artisan-community-tab-top.active {
+            color: #344AEA;
+            border-bottom-color: #344AEA;
+        }
+
+    .artisan-community-tab-top-content {
+        display: none;
+    }
+
+        .artisan-community-tab-top-content.active {
+            display: block;
+        }
 </style>
 
-<div class="artisan-communities-section">
-    <h2 class="artisan-communities-header">My Communities<br /><span style="font-size: 1rem; font-weight: 400; color: black;">This is your my communities section where you can see the list of all communities you have created.</span></h2>
+<h2 class="artisan-communities-header">My Communities<br /><span style="font-size: 1rem; font-weight: 400; color: black;">This is your my communities section where you can see the list of all communities you have created.</span></h2>
 
-    <!-- Search -->
-    <div class="artisan-community-search-wrapper">
-        <input type="text" id="artisanCommunitySearch" placeholder="Search communities..." />
-        <button type="button" id="artisanCommunitySearchBtn">
-            <img src="/assets/Icons/Search.ico" alt="Search" />
-        </button>
-    </div>
+<!-- Search -->
+<div class="artisan-community-search-wrapper">
+    <input type="text" id="artisanCommunitySearch" placeholder="Search communities..." />
+    <button type="button" id="artisanCommunitySearchBtn">
+        <img src="/assets/Icons/Search.ico" alt="Search" />
+    </button>
+</div>
 
-    @if (!Model.MyCommunities.Any())
-    {
-        <div class="artisan-community-empty active">You haven't created any communities yet.</div>
-    }
-    else
-    {
-        <div class="artisan-community-grid">
-            @foreach (var community in Model.MyCommunities)
-            {
-                <div class="artisan-community-link">
-                    <div class="artisan-community-card"
-                         data-community-id="@community.Id"
-                         data-banner="@community.BannerUrl"
-                         data-category="@community.Category">
-                        <div class="artisan-community-info-wrapper">
-                            <img class="artisan-community-avatar" src="@community.AvatarUrl" alt="Avatar" />
-                            <div class="artisan-community-info">
-                                <div class="artisan-community-title">Community Name: @community.Name</div>
-                                <div class="artisan-community-description">Description: @community.Description</div>
+<div class="artisan-community-tabs-top">
+    <div class="artisan-community-tab-top active" data-tab="artisan-my-communities">My Communities</div>
+    <div class="artisan-community-tab-top" data-tab="artisan-joined-communities">My Joined Communities</div>
+</div>
+
+<div id="myArtisanCommunitiesTab" class="artisan-community-tab-top-content active">
+    <div class="artisan-communities-section">
+        @if (!Model.MyCommunities.Any())
+        {
+            <div class="artisan-community-empty active">You haven't created any communities yet.</div>
+        }
+        else
+        {
+            <div class="artisan-community-grid">
+                @foreach (var community in Model.MyCommunities)
+                {
+                    <div class="artisan-community-link">
+                        <div class="artisan-community-card"
+                             data-community-id="@community.Id"
+                             data-banner="@community.BannerUrl"
+                             data-category="@community.Category">
+                            <div class="artisan-community-info-wrapper">
+                                <img class="artisan-community-avatar" src="@community.AvatarUrl" alt="Avatar" />
+                                <div class="artisan-community-info">
+                                    <div class="artisan-community-title">Community Name: @community.Name</div>
+                                    <div class="artisan-community-description">Description: @community.Description</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="artisan-community-actions-wrapper">
-                            <div class="artisan-community-members">@community.MembersCount members</div>
-                            <div class="artisan-community-action-buttons">
-                                <button class="artisan-community-edit-btn">Edit</button>
-                                <button class="artisan-community-delete-btn">Delete</button>
+                            <div class="artisan-community-actions-wrapper">
+                                <div class="artisan-community-members">@community.MembersCount members</div>
+                                <div class="artisan-community-action-buttons">
+                                    <button class="artisan-community-edit-btn">Edit</button>
+                                    <button class="artisan-community-delete-btn">Delete</button>
+                                </div>
                             </div>
                         </div>
                     </div>
+                }
+            </div>
+            <div class="artisan-community-empty">No matching communities found.</div>
+        }
+    </div>
+
+    <!-- Artisan Community Detail Section -->
+    <div class="artisan-community-detail-container" id="artisanCommunityDetailContainer">
+        <div class="artisan-community-back-btn" id="artisanCommunityBackBtn">
+            <img src="/assets/Icons/Back.ico" />
+            Back
+        </div>
+
+        <div style="font-size: 1.5rem; margin-bottom: 1rem;" class="artisan-community-title" id="artisanCommunityTitle">Community Name</div>
+
+        <div class="artisan-community-tabs">
+            <div class="artisan-community-tab active" data-tab="pending">Pending Member Requests</div>
+            <div class="artisan-community-tab" data-tab="all">All Members</div>
+        </div>
+
+        <div class="artisan-community-tab-content active" id="artisanCommunityTabPending">
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/ArtisanCommunityNotebooks/_ArtisanCommunityNotebookPending", Model)
+        </div>
+
+        <div class="artisan-community-tab-content" id="artisanCommunityTabAll">
+            @await Html.PartialAsync("Sections/ArtisanNotebooks/ArtisanCommunityNotebooks/_ArtisanCommunityNotebookAllMembers", Model)
+        </div>
+    </div>
+
+    <!-- ===================== Edit Artisan Community Modal ===================== -->
+    <div id="artisan-community-edit-modal" class="artisan-community-modal-overlay" style="display:none;">
+        <div class="artisan-community-modal">
+            <div class="artisan-community-modal-header">
+                <h2>Edit Community</h2>
+                <button id="artisan-community-close-edit-modal" class="artisan-community-modal-close">&times;</button>
+            </div>
+
+            <form id="artisan-community-edit-form" enctype="multipart/form-data">
+                <input type="hidden" id="artisan-community-edit-id" name="CommunityId" />
+
+                <div class="artisan-community-modal-body">
+                    <div class="form-group">
+                        <label>Banner Image</label>
+                        <div class="artisan-community-banner-preview-wrapper">
+                            <img id="artisan-community-edit-banner-preview" src="" alt="Banner Preview" class="artisan-community-banner-preview" />
+                            <input type="file" id="artisan-community-edit-banner" name="BannerFile" accept="image/*" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Community Profile</label>
+                        <div class="artisan-community-avatar-preview-wrapper">
+                            <img id="artisan-community-edit-avatar-preview" src="" alt="Avatar Preview" class="artisan-community-avatar-preview" />
+                            <input type="file" id="artisan-community-edit-avatar" name="AvatarFile" accept="image/*" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Community Name</label>
+                        <input type="text" id="artisan-community-edit-name" name="Name" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="artisan-community-edit-description" name="Description" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="artisan-community-edit-category" name="Category" class="eap-input" required>
+                            <option value="">Select Category</option>
+                            @foreach (var c in new List<string> { "Pottery", "Weaving", "Wood Carving", "Paper Crafts", "Shoemaking", "Embroidery" })
+                            {
+                                <option value="@c">@c</option>
+                            }
+                            <option value="Other">Other</option>
+                        </select>
+
+                        <!-- Hidden input for custom category -->
+                        <input type="text" id="artisan-community-edit-category-other" name="CustomCategory" placeholder="Enter category" style="display:none; margin-top:0.5rem;" />
+                    </div>
                 </div>
-            }
+
+                <div class="artisan-community-modal-footer">
+                    <button type="button" class="artisan-community-cancel-btn">Cancel</button>
+                    <button type="submit" class="artisan-community-save-btn" disabled>Save Changes</button>
+                </div>
+            </form>
         </div>
-        <div class="artisan-community-empty">No matching communities found.</div>
-    }
-</div>
-
-<!-- Artisan Community Detail Section -->
-<div class="artisan-community-detail-container" id="artisanCommunityDetailContainer">
-    <div class="artisan-community-back-btn" id="artisanCommunityBackBtn">
-        <img src="/assets/Icons/Back.ico" />
-        Back
     </div>
 
-    <div style="font-size: 1.5rem; margin-bottom: 1rem;" class="artisan-community-title" id="artisanCommunityTitle">Community Name</div>
-
-    <div class="artisan-community-tabs">
-        <div class="artisan-community-tab active" data-tab="pending">Pending Member Requests</div>
-        <div class="artisan-community-tab" data-tab="all">All Members</div>
-    </div>
-
-    <div class="artisan-community-tab-content active" id="artisanCommunityTabPending">
-        @await Html.PartialAsync("Sections/ArtisanNotebooks/ArtisanCommunityNotebooks/_ArtisanCommunityNotebookPending", Model)
-    </div>
-
-    <div class="artisan-community-tab-content" id="artisanCommunityTabAll">
-        @await Html.PartialAsync("Sections/ArtisanNotebooks/ArtisanCommunityNotebooks/_ArtisanCommunityNotebookAllMembers", Model)
-    </div>
-</div>
-
-<!-- ===================== Edit Artisan Community Modal ===================== -->
-<div id="artisan-community-edit-modal" class="artisan-community-modal-overlay" style="display:none;">
-    <div class="artisan-community-modal">
-        <div class="artisan-community-modal-header">
-            <h2>Edit Community</h2>
-            <button id="artisan-community-close-edit-modal" class="artisan-community-modal-close">&times;</button>
-        </div>
-
-        <form id="artisan-community-edit-form" enctype="multipart/form-data">
-            <input type="hidden" id="artisan-community-edit-id" name="CommunityId" />
+    <!-- ===================== Delete Artisan Community Modal ===================== -->
+    <div id="artisan-community-delete-modal" class="artisan-community-modal-overlay" style="display:none;">
+        <div class="artisan-community-modal">
+            <div class="artisan-community-modal-header">
+                <h2>Delete Community</h2>
+                <button id="artisan-community-close-delete-modal" class="artisan-community-modal-close">&times;</button>
+            </div>
 
             <div class="artisan-community-modal-body">
-                <div class="form-group">
-                    <label>Banner Image</label>
-                    <div class="artisan-community-banner-preview-wrapper">
-                        <img id="artisan-community-edit-banner-preview" src="" alt="Banner Preview" class="artisan-community-banner-preview" />
-                        <input type="file" id="artisan-community-edit-banner" name="BannerFile" accept="image/*" />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Community Profile</label>
-                    <div class="artisan-community-avatar-preview-wrapper">
-                        <img id="artisan-community-edit-avatar-preview" src="" alt="Avatar Preview" class="artisan-community-avatar-preview" />
-                        <input type="file" id="artisan-community-edit-avatar" name="AvatarFile" accept="image/*" />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Community Name</label>
-                    <input type="text" id="artisan-community-edit-name" name="Name" required />
-                </div>
-
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="artisan-community-edit-description" name="Description" rows="3" required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="artisan-community-edit-category" name="Category" class="eap-input" required>
-                        <option value="">Select Category</option>
-                        @foreach (var c in new List<string> { "Pottery", "Weaving", "Wood Carving", "Paper Crafts", "Shoemaking", "Embroidery" })
-                        {
-                            <option value="@c">@c</option>
-                        }
-                        <option value="Other">Other</option>
-                    </select>
-
-                    <!-- Hidden input for custom category -->
-                    <input type="text" id="artisan-community-edit-category-other" name="CustomCategory" placeholder="Enter category" style="display:none; margin-top:0.5rem;" />
-                </div>
+                <p>Are you sure you want to delete this community? This action cannot be undone.</p>
             </div>
 
             <div class="artisan-community-modal-footer">
-                <button type="button" class="artisan-community-cancel-btn">Cancel</button>
-                <button type="submit" class="artisan-community-save-btn" disabled>Save Changes</button>
+                <button type="button" class="artisan-community-cancel-btn" id="artisan-community-delete-cancel-btn">Cancel</button>
+                <button type="button" class="artisan-community-save-btn" id="artisan-community-delete-confirm-btn">Delete</button>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<!-- ===================== Delete Artisan Community Modal ===================== -->
-<div id="artisan-community-delete-modal" class="artisan-community-modal-overlay" style="display:none;">
-    <div class="artisan-community-modal">
-        <div class="artisan-community-modal-header">
-            <h2>Delete Community</h2>
-            <button id="artisan-community-close-delete-modal" class="artisan-community-modal-close">&times;</button>
-        </div>
-
-        <div class="artisan-community-modal-body">
-            <p>Are you sure you want to delete this community? This action cannot be undone.</p>
-        </div>
-
-        <div class="artisan-community-modal-footer">
-            <button type="button" class="artisan-community-cancel-btn" id="artisan-community-delete-cancel-btn">Cancel</button>
-            <button type="button" class="artisan-community-save-btn" id="artisan-community-delete-confirm-btn">Delete</button>
-        </div>
-    </div>
+<div id="artisanJoinedCommunitiesTab" class="artisan-community-tab-top-content">
+    @await Html.PartialAsync("Sections/ArtisanNotebooks/ArtisanCommunityNotebooks/_ArtisanJoinedCommunities", Model)
 </div>
 
 <script>
@@ -589,12 +628,27 @@
         };
 
         rows.forEach(card => {
-            card.addEventListener("click", () => {
+            card.addEventListener("click", async () => {
+                const communityId = card.dataset.communityId;
                 const name = card.querySelector(".artisan-community-title").innerText;
                 communityTitle.innerText = name;
 
                 communityListContainer.style.display = "none";
                 communityDetailContainer.style.display = "flex";
+
+                // ---- DYNAMIC MEMBER LOADING ----
+                const membersContainer = document.getElementById("allMembersPartialContainer");
+                if (membersContainer) membersContainer.innerHTML = "<div>Loading members...</div>";
+
+                try {
+                    const response = await fetch(`/Community/GetMembersPartial?communityId=${communityId}`);
+                    if (!response.ok) throw new Error("Failed to load members");
+                    const html = await response.text();
+                    membersContainer.innerHTML = html;
+                } catch (err) {
+                    membersContainer.innerHTML = "<div>Failed to load members.</div>";
+                    console.error(err);
+                }
             });
         });
 
@@ -861,6 +915,21 @@
                 console.error("Delete error:", err);
                 alert("Something went wrong while deleting.");
             }
+        });
+    });
+
+    const artisantopTabs = document.querySelectorAll(".artisan-community-tab-top");
+    const artisanmyTab = document.getElementById("myArtisanCommunitiesTab");
+    const artisanjoinedTab = document.getElementById("artisanJoinedCommunitiesTab");
+
+    artisantopTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            artisantopTabs.forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            const type = tab.dataset.tab;
+            artisanmyTab.classList.toggle("active", type === "artisan-my-communities");
+            artisanjoinedTab.classList.toggle("active", type === "artisan-joined-communities");
         });
     });
 </script>

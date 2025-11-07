@@ -93,7 +93,7 @@ public class CertificateService
                             {
                                 var signatureBytes = File.ReadAllBytes(signaturePath);
                                 col.Item()
-                                   .PaddingTop(12)       // spacing from learner info
+                                   .PaddingTop(-120)       // spacing from learner info
                                    .Height(60)           // reasonable height for signature
                                    .AlignLeft()          // align to left
                                    .Image(signatureBytes, ImageScaling.FitArea);

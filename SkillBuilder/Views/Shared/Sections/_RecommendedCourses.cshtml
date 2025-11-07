@@ -1,4 +1,33 @@
 ﻿@model List<SkillBuilder.Models.Course>
+@using SkillBuilder.Models.ViewModels
+
+@{
+    // Access user's course progress (if available)
+    var userCourseProgress = ViewData["UserCourseProgress"] as List<CourseProgressViewModel>;
+
+    // Start with all courses
+    var recommendedCourses = Model;
+
+    if (recommendedCourses != null)
+    {
+        // Filter out unpublished courses
+        recommendedCourses = recommendedCourses.Where(c => c.IsPublished).ToList();
+
+        if (userCourseProgress != null)
+        {
+            // Get IDs of completed courses
+            var completedCourseIds = userCourseProgress
+                                        .Where(c => c.ProgressPercentage >= 100)
+                                        .Select(c => c.CourseId)
+                                        .ToList();
+
+            // Exclude completed courses
+            recommendedCourses = recommendedCourses
+                                    .Where(c => !completedCourseIds.Contains(c.Id))
+                                    .ToList();
+        }
+    }
+}
 
 <style>
     /* Recommended Courses Section */
@@ -108,17 +137,16 @@
         font-size: 1rem;
         color: #555;
         margin: 2rem 0;
-    }   
-
+    }
 </style>
 
 <section class="recommended-courses-section profile-layout" id="recommended-courses">
     <h2 class="recommended-header">Recommended just for you</h2>
 
-    @if (Model != null && Model.Any())
+    @if (recommendedCourses != null && recommendedCourses.Any())
     {
         <div class="recommended-courses-container profile-layout">
-            @foreach (var course in Model)
+            @foreach (var course in recommendedCourses.Take(3))
             {
                 <a href="@Url.Action("CourseCatalog", "Courses", new { selectedCourse = course.Link })" class="recommended-card-link">
                     <div class="recommended-card">

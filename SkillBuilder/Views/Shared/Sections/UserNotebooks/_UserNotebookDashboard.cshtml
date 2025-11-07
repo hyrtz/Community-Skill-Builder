@@ -4,6 +4,8 @@
 @{
     ViewData["IsCatalogPage"] = false;
     ViewData["IsUserProfile"] = true;
+
+    var ongoingCourses = Model.CourseProgresses?.Where(c => c.ProgressPercentage < 100).ToList();
 }
 
 <style>
@@ -75,12 +77,14 @@
 
     @if (!Model.User.IsDeactivated && Model.User.IsVerified)
     {
-        if (Model.CourseProgresses != null && Model.CourseProgresses.Any())
+        if (ongoingCourses != null && ongoingCourses.Any())
         {
+            // Render ongoing courses partial
             @await Html.PartialAsync("Sections/UserNotebooks/_UserNotebookProgress", Model.CourseProgresses)
         }
         else
         {
+            // No ongoing courses → show recommended courses
             @await Html.PartialAsync("Sections/_RecommendedCourses", Model.RecommendedCourses)
         }
     }

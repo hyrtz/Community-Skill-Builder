@@ -753,7 +753,7 @@ namespace SkillBuilder.Controllers
                                 Title = l.Title ?? "",
                                 LessonType = l.ContentType ?? "Text",
                                 ContentText = l.ContentText ?? "",
-                                VideoUrl = l.ContentType == "Video" ? l.MediaUrl : null,
+                                VideoUrl = l.ContentType == "Video + Text" ? l.MediaUrl : null,
                                 ImageUrl = l.ContentType == "Image + Text" ? l.MediaUrl : null,
                                 QuizQuestions = (l.QuizQuestions ?? new List<QuizQuestionJson>())
                                     .Select(q => new QuizQuestionViewModel

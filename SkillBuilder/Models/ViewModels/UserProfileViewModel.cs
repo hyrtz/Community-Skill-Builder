@@ -16,6 +16,7 @@
         public List<Course> AllCourses { get; set; } = new();
         public List<Course> RecommendedCourses { get; set; } = new();
         public List<CommunitiesViewModel> MyCommunities { get; set; } = new();
+        public List<CommunitiesViewModel> JoinedCommunities { get; set; } = new();
         public List<CommunityJoinRequest> PendingJoinRequests { get; set; } = new();
         public Dictionary<int, List<CommunityMemberViewModel>> CommunityMembers { get; set; } = new();
         public List<CourseProjectSubmission> SubmittedProjects { get; set; } = new();

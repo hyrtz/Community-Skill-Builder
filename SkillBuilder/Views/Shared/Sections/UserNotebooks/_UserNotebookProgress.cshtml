@@ -1,5 +1,11 @@
 ﻿@model List<SkillBuilder.Models.ViewModels.CourseProgressViewModel>
 
+
+@{
+    // Filter only ongoing courses
+    var ongoingCourses = Model?.Where(c => c.ProgressPercentage < 100).ToList();
+}
+
 <style>
     .user-progress-section {
         margin-bottom: 4rem;
@@ -108,43 +114,38 @@
     }
 </style>
 
-<section class="user-progress-section">
-    <div class="user-progress-header">
-        <h2>Keep Learning</h2>
-        @* <a asp-controller="UserProfile" asp-action="Courses" asp-route-id="@Model.FirstOrDefault()?.UserId">
-            View all courses in progress &rarr;
-        </a> *@
-    </div>
-
-    @foreach (var course in Model)
-    {
-        var progress = Math.Round(course.ProgressPercentage, 0);
-        <div class="user-progress-card">
-            <!-- Progress Bar -->
-            @* <div class="user-progress-bar-container">
-                <div class="user-progress-bar-fill" style="width:@progress%">@($"{progress}%")</div>
-            </div> *@
-
-            <!-- Course Info -->
-            <div class="user-progress-card-content">
-                <small>Course</small>
-                <h4>@course.CourseTitle</h4>
-                <p>@course.CourseDescription</p>
-            </div>
-
-            <!-- Resume / Unpublished Button -->
-            @if (course.IsPublished)
-            {
-                <form asp-controller="Courses" asp-action="CourseModule" asp-route-id="@course.CourseId" method="get">
-                    <button type="submit" class="user-progress-resume-button">Resume</button>
-                </form>
-            }
-            else
-            {
-                <button type="button" class="user-progress-unpublished-button" disabled>
-                    This course is currently unpublished
-                </button>
-            }
+@if (ongoingCourses != null && ongoingCourses.Any())
+{
+    <section class="user-progress-section">
+        <div class="user-progress-header">
+            <h2>Keep Learning</h2>
         </div>
-    }
-</section>
+
+        @foreach (var course in ongoingCourses)
+        {
+            var progress = Math.Round(course.ProgressPercentage, 0);
+            <div class="user-progress-card">
+                <!-- Course Info -->
+                <div class="user-progress-card-content">
+                    <small>Course</small>
+                    <h4>@course.CourseTitle</h4>
+                    <p>@course.CourseDescription</p>
+                </div>
+
+                <!-- Resume / Unpublished Button -->
+                @if (course.IsPublished)
+                {
+                    <form asp-controller="Courses" asp-action="CourseModule" asp-route-id="@course.CourseId" method="get">
+                        <button type="submit" class="user-progress-resume-button">Resume</button>
+                    </form>
+                }
+                else
+                {
+                    <button type="button" class="user-progress-unpublished-button" disabled>
+                        This course is currently unpublished
+                    </button>
+                }
+            </div>
+        }
+    </section>
+}

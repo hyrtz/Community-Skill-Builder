@@ -25,7 +25,7 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult UserProfile(string id)
+        public IActionResult UserProfile(string id, int? communityId)
         {
             var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (id != currentUserId)
@@ -144,6 +144,21 @@ namespace SkillBuilder.Controllers
                 })
                 .ToList();
 
+            var joinedCommunities = _context.CommunityMemberships
+                .Include(m => m.Community)
+                .Where(m => m.UserId == user.Id && !m.Community.IsArchived && m.Community.IsPublished)
+                .Select(m => new CommunitiesViewModel
+                {
+                    Id = m.Community.Id,
+                    Name = m.Community.Name,
+                    Description = m.Community.Description ?? "",
+                    AvatarUrl = m.Community.AvatarUrl ?? "/assets/placeholder-avatar.png",
+                    CoverImageUrl = m.Community.CoverImageUrl ?? "/assets/placeholder-community-cover.jpg",
+                    MembersCount = m.Community.MembersCount,
+                    CreatorId = m.Community.CreatorId
+                })
+                .ToList();
+
             var communityMembers = new Dictionary<int, List<CommunityMemberViewModel>>();
 
             foreach (var community in userCommunities)
@@ -187,8 +202,10 @@ namespace SkillBuilder.Controllers
                 LeaderboardUsers = leaderboardUsers,
                 Artisans = artisans,
                 MyCommunities = userCommunities,
+                JoinedCommunities = joinedCommunities,
                 PendingJoinRequests = pendingJoinRequests,
-                CommunityMembers = communityMembers
+                CommunityMembers = communityMembers,
+                SelectedCommunityId = communityId ?? userCommunities.FirstOrDefault()?.Id
             };
 
             return View("~/Views/Profile/UserProfile.cshtml", viewModel);

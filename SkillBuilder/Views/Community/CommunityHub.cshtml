@@ -1244,15 +1244,25 @@
         if (submitPostBtn) submitPostBtn.disabled = true;
     });
 
-    function performPostSearch() {
+        function performSearch() {
         const query = document.getElementById('searchPostsInput').value.toLowerCase();
+
+        // Determine active tab
+        const activeTab = document.querySelector('.community-tab.active')?.dataset?.tab;
+
+        if (activeTab === "posts") {
+            filterPosts(query);
+        }
+        else if (activeTab === "communities") {
+            filterCommunities(query);
+        }
+    }
+
+    function filterPosts(query) {
         const posts = document.querySelectorAll('.posts-only-list .post-card');
         let anyVisible = false;
 
         posts.forEach(post => {
-            // Skip the "No posts found" card itself
-            if (post.id === "noPostsFound") return;
-
             const title = post.dataset.title?.toLowerCase() || '';
             const content = post.querySelector('.post-card-content p')?.innerText.toLowerCase() || '';
 
@@ -1264,21 +1274,44 @@
             }
         });
 
-        // Show "No posts found" message if nothing matches
-        const noPostsEl = document.getElementById('noPostsFound');
-        noPostsEl.style.display = anyVisible ? 'none' : 'block';
+        document.getElementById('noPostsFound').style.display = anyVisible ? 'none' : 'block';
     }
 
-    // Trigger search when clicking the button
-    document.getElementById('searchPostsBtn').addEventListener('click', performPostSearch);
+    function filterCommunities(query) {
+        const list = document.querySelectorAll('.community-list-item'); // <— You confirm this class!
+        let anyVisible = false;
 
-    // Trigger search when pressing Enter inside input
-    document.getElementById('searchPostsInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            performPostSearch();
+        list.forEach(item => {
+            const name = item.dataset.name?.toLowerCase() || '';
+            const description = item.dataset.description?.toLowerCase() || '';
+
+            if (name.includes(query) || description.includes(query)) {
+                item.style.display = 'flex';
+                anyVisible = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        const noCommunities = document.getElementById('noCommunitiesFound');
+        if (noCommunities) {
+            noCommunities.style.display = anyVisible ? 'none' : 'block';
         }
-    });
+    }
+
+    const searchBtn = document.getElementById('searchPostsBtn');
+    const searchInput = document.getElementById('searchPostsInput');
+
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener('click', performSearch);
+
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performSearch();
+            }
+        });
+    }
 
     // ================== TAB SWITCHING LOGIC ==================
     const tabs = document.querySelectorAll(".community-tab");

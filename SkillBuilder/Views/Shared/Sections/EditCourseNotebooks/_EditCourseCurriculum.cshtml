@@ -249,7 +249,7 @@
                         <option value="">-- Select Type --</option>
                         <option value="Text" ${lessonData?.LessonType==='Text'?'selected':''}>Text</option>
                         <option value="Image + Text" ${lessonData?.LessonType==='Image + Text'?'selected':''}>Image + Text</option>
-                        <option value="Video" ${lessonData?.LessonType==='Video'?'selected':''}>Video</option>
+                        <option value="Video + Text" ${lessonData?.LessonType==='Video + Text'?'selected':''}>Video + Text</option>
                         <option value="Quiz" ${lessonData?.LessonType==='Quiz'?'selected':''}>Assessment</option>
                         <option value="Session" ${lessonData?.LessonType==='Session'?'selected':''}
                             ${sessionAlreadyExists(moduleIndex, lessonIndex) ? 'disabled' : ''}>Session</option>
@@ -382,8 +382,12 @@
                 configContainer.innerHTML = html;
                 break;
 
-            case 'Video':
+            case 'Video + Text':
                 html = `<div class="curriculum-edit-form-group">
+                            <label>Content</label>
+                            <textarea class="curriculum-edit-form-control" name="${nameBase}.ContentText" rows="4" required>${lessonData?.ContentText || ''}</textarea>
+                        </div>
+                        <div class="curriculum-edit-form-group">
                             <label>Upload Video</label>
                             <div style="display:flex; gap:1rem; align-items:center;">
                                 <input type="file" name="${nameBase}.VideoFile" accept="video/*" class="curriculum-edit-form-control" onchange="previewUploadVideo(this)" />

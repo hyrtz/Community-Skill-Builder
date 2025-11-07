@@ -1,0 +1,26 @@
+﻿@model SkillBuilder.Models.ViewModels.ArtisanProfileViewModel
+
+@if (Model.JoinedCommunities == null || !Model.JoinedCommunities.Any())
+{
+    <div class="artisan-community-empty active">You haven't joined any communities yet.</div>
+}
+else
+{
+    <div class="artisan-community-grid">
+        @foreach (var community in Model.JoinedCommunities)
+        {
+            <a href="/Community/Hub?selectedCommunityId=@community.Id" class="artisan-community-link">
+                <div class="artisan-community-card">
+                    <div class="artisan-community-info-wrapper">
+                        <img class="artisan-community-avatar" src="@community.AvatarUrl" alt="Community Avatar" />
+                        <div class="artisan-community-info">
+                            <div class="artisan-community-title">@community.Name</div>
+                            <div class="artisan-community-description">@community.Description</div>
+                        </div>
+                    </div>
+                    <div class="artisan-community-members">@community.MembersCount members</div>
+                </div>
+            </a>
+        }
+    </div>
+}

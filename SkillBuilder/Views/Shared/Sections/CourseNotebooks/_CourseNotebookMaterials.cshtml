@@ -1,15 +1,20 @@
 ﻿@model SkillBuilder.Models.Course
 
+
 @{
     // Current logged-in user ID
     var userId = User.FindFirst("UserId")?.Value;
 
-    // Check if current user is enrolled in this course or is the course owner
+    // Get user role
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+    // Check if current user is enrolled in this course or is the course owner or is admin
     bool canDownload = false;
     if (!string.IsNullOrEmpty(userId))
     {
         canDownload = Model.Artisan?.UserId == userId ||
-                      Model.Enrollments.Any(e => e.UserId == userId);
+                      Model.Enrollments.Any(e => e.UserId == userId) ||
+                      userRole == "Admin";
     }
 }
 

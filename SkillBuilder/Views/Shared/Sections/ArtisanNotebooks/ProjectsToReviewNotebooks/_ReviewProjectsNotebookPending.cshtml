@@ -339,6 +339,12 @@
         <label for="artisanPendingSignature" style="font-size:0.9rem; color:#555;">Upload your digital signature (PNG)</label>
         <input type="file" id="artisanPendingSignature" accept="image/png" style="width:100%; margin-top:0.5rem;">
         <p id="artisanPendingSignatureWarning" style="color:#c0392b; font-size:0.8rem; display:none;">Only PNG files allowed.</p>
+
+        <!-- ✅ Preview Container -->
+        <div id="artisanPendingSignaturePreviewWrapper" style="display:none; margin-top:0.75rem; text-align:center;">
+            <p style="margin-bottom:0.4rem; font-size:0.85rem; color:#555;">Signature Preview:</p>
+            <img id="artisanPendingSignaturePreview" src="" style="max-width:180px; max-height:80px; object-fit:contain; border:1px solid #ddd; border-radius:6px; padding:4px;">
+        </div>
     </div>
     <div id="artisanPendingRejectReasonWrapper" style="display:none; margin-bottom:1rem;">
         <div style="margin-bottom: 1rem;">Please enter a reason why you want to reject this project.</div>
@@ -375,16 +381,31 @@
         }
         if (signatureInput) {
             signatureInput.addEventListener("change", () => {
-                const file = signatureInput.files[0];
-                if (file && file.type === "image/png") {
-                    signatureWarning.style.display = "none";
-                    confirmBtn.disabled = false;
-                } else {
-                    signatureWarning.style.display = "block";
-                    confirmBtn.disabled = true;
-                    signatureInput.value = "";
-                }
-            });
+            const file = signatureInput.files[0];
+            const previewWrapper = document.getElementById("artisanPendingSignaturePreviewWrapper");
+            const previewImg = document.getElementById("artisanPendingSignaturePreview");
+
+            if (file && file.type === "image/png") {
+                signatureWarning.style.display = "none";
+                confirmBtn.disabled = false;
+
+                // ✅ Show Preview
+                const reader = new FileReader();
+                reader.onload = e => {
+                    previewImg.src = e.target.result;
+                    previewWrapper.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+
+            } else {
+                // ❌ Hide preview on invalid file
+                signatureWarning.style.display = "block";
+                confirmBtn.disabled = true;
+                previewWrapper.style.display = "none";
+                previewImg.src = "";
+                signatureInput.value = "";
+            }
+        });
         }
 
         // Card click - open project view modal

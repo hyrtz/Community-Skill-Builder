@@ -1,0 +1,26 @@
+﻿@model SkillBuilder.Models.ViewModels.UserProfileViewModel
+
+@if (Model.JoinedCommunities == null || !Model.JoinedCommunities.Any())
+{
+    <div class="user-community-empty active">You haven't joined any communities yet.</div>
+}
+else
+{
+    <div class="user-community-grid">
+        @foreach (var community in Model.JoinedCommunities)
+        {
+            <a href="/Community/Hub?selectedCommunityId=@community.Id" class="user-community-link">
+                <div class="user-community-card">
+                    <div class="user-community-info-wrapper">
+                        <img class="user-community-avatar" src="@community.AvatarUrl" alt="Avatar" />
+                        <div class="user-community-info">
+                            <div class="user-community-title">@community.Name</div>
+                            <div class="user-community-description">@community.Description</div>
+                        </div>
+                    </div>
+                    <div class="user-community-members">@community.MembersCount members</div>
+                </div>
+            </a>
+        }
+    </div>
+}

@@ -65,15 +65,23 @@
         : community.AvatarUrl;
 
         <a href="@Url.Action("CommunityHub", "Community", new { selectedCommunityId = community.Id })"
-           class="community-notebook-card @(Model.SelectedCommunity?.Id == community.Id ? "active" : "")">
+           class="community-notebook-card community-list-item @(Model.SelectedCommunity?.Id == community.Id ? "active" : "")"
+           data-name="@community.Name"
+           data-description="@community.Description">
+
             <img src="@avatarUrl"
                  class="community-notebook-avatar"
                  alt="@community.Name"
                  onerror="this.src='/uploads/community-profile/default-avatar.png';" />
+
             <div class="community-notebook-info">
                 <h3>@community.Name</h3>
                 <span>@community.MembersCount members</span>
             </div>
         </a>
     }
+
+    <p id="noCommunitiesFound" style="display:none; text-align:center; padding:1rem; color:#888;">
+        No communities match your search.
+    </p>
 </div>
