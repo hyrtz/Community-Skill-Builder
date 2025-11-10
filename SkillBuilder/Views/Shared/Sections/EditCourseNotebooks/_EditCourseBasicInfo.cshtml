@@ -191,13 +191,20 @@
         </div>
         <div class="basicinfo-form-col basicinfo-form-group">
             <label for="Course_Category">Category *</label>
-            <select asp-for="Course.Category" class="basicinfo-form-select" required>
+            <select asp-for="Course.Category" class="basicinfo-form-select" id="CategorySelect" required>
                 <option value="">Select category</option>
                 @foreach (var cat in new[] { "Pottery", "Weaving", "Woodcarving", "Paper Crafts", "Shoemaking", "Embroidery" })
                 {
                     <option value="@cat">@cat</option>
                 }
+                <option value="Other">Other</option>
             </select>
+
+            <!-- Custom category input -->
+            <input type="text" id="CustomCategoryInput" name="CustomCategory"
+                   class="basicinfo-form-control"
+                   placeholder="Enter custom category"
+                   style="margin-top: 0.75rem; display:none;" />
         </div>
     </div>
 
@@ -309,6 +316,33 @@
 </div>
 
 <script>
+
+    // Category: Show the custom input when Other is selected
+    const categorySelect = document.getElementById("CategorySelect");
+    const customCategoryInput = document.getElementById("CustomCategoryInput");
+
+    // Predefined categories
+    const predefinedCategories = ["Pottery", "Weaving", "Woodcarving", "Paper Crafts", "Shoemaking", "Embroidery"];
+
+    // Determine if current value is custom
+    const currentCategory = categorySelect.value;
+    if (!predefinedCategories.includes(currentCategory) && currentCategory) {
+        categorySelect.value = "Other";
+        customCategoryInput.style.display = "block";
+        customCategoryInput.required = true;
+        customCategoryInput.value = currentCategory; // Fill with existing custom category
+    }
+
+    categorySelect.addEventListener("change", function () {
+        if (this.value === "Other") {
+            customCategoryInput.style.display = "block";
+            customCategoryInput.required = true;
+        } else {
+            customCategoryInput.style.display = "none";
+            customCategoryInput.required = false;
+            customCategoryInput.value = "";
+        }
+    });
 
     // ====================== FILE VALIDATION ======================
     const fileRules = {

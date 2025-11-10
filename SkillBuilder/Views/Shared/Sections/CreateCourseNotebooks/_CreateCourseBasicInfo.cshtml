@@ -216,7 +216,7 @@
         </div>
         <div class="basicinfo-form-col basicinfo-form-group">
             <label for="Course_Category">Category *</label>
-            <select asp-for="Course.Category" class="basicinfo-form-select" required>
+            <select asp-for="Course.Category" class="basicinfo-form-select" id="CategorySelect" required>
                 <option value="">Select category</option>
                 <option>Pottery</option>
                 <option>Weaving</option>
@@ -224,7 +224,12 @@
                 <option>Paper Crafts</option>
                 <option>Shoemaking</option>
                 <option>Embroidery</option>
+                <option value="Other">Other</option>
             </select>
+
+            <!-- This input is hidden by default -->
+            <input type="text" id="CustomCategoryInput" name="CustomCategory" class="basicinfo-form-control"
+                   placeholder="Enter custom category" style="margin-top: 0.75rem; display: none;" />
         </div>
     </div>
 
@@ -331,6 +336,21 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+
+        // Show text input when "Other" is selected
+        const categorySelect = document.getElementById("CategorySelect");
+        const customCategoryInput = document.getElementById("CustomCategoryInput");
+
+        categorySelect.addEventListener("change", function () {
+            if (this.value === "Other") {
+                customCategoryInput.style.display = "block";
+                customCategoryInput.required = true;
+            } else {
+                customCategoryInput.style.display = "none";
+                customCategoryInput.required = false;
+                customCategoryInput.value = "";
+            }
+        });
 
         // -------------------- FILE VALIDATION SETTINGS --------------------
         const fileRules = {

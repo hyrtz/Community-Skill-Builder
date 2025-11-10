@@ -191,6 +191,7 @@
                 <label><input type="checkbox" value="Wood Carving" /> Wood Carving</label>
                 <label><input type="checkbox" value="Shoemaking" /> Shoemaking</label>
                 <label><input type="checkbox" value="Embroidery" /> Embroidery</label>
+                <label><input type="checkbox" value="Others" /> Others</label>
             </div>
 
             <h5>Level</h5>
@@ -294,9 +295,18 @@
             const courseLevel = card.getAttribute("data-level")?.toLowerCase() || "";
             const courseTitle = card.querySelector(".course-card-title").textContent.toLowerCase();
 
-            const matchesClass = selectedClasses.length === 0 || selectedClasses.some(c =>
-                courseCategory.includes(c) || courseTitle.includes(c)
-            );
+            const matchesClass = (() => {
+                if (selectedClasses.includes("others")) {
+                    const knownCategories = [
+                        "weaving", "pottery", "paper crafts", "wood carving", "shoemaking", "embroidery"
+                    ];
+                    return !knownCategories.some(cat => courseCategory.includes(cat));
+                }
+
+                return selectedClasses.length === 0 || selectedClasses.some(c =>
+                    courseCategory.includes(c) || courseTitle.includes(c)
+                );
+            })();
 
             const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(courseLevel);
 
@@ -306,15 +316,7 @@
             if (isVisible) visibleCount++;
         });
 
-        // Show or hide the "no courses" message dynamically
-        if (noCoursesMessage) {
-            if (visibleCount === 0) {
-                noCoursesMessage.style.display = "block";
-                noCoursesMessage.textContent = "No courses found.";
-            } else {
-                noCoursesMessage.style.display = "none";
-            }
-        }
+        noCoursesMessage.style.display = visibleCount === 0 ? "block" : "none";
     }
 
     // Auto-check box based on query string and bind filter logic

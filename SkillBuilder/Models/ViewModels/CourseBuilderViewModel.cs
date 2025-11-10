@@ -14,5 +14,6 @@
         public List<CourseModuleViewModel> Modules { get; set; } = new List<CourseModuleViewModel>();
         public List<CourseMaterialViewModel> Materials { get; set; } = new List<CourseMaterialViewModel>();
         public List<int> MaterialsToDelete { get; set; } = new();
+        public string? CustomCategory { get; set; }
     }
 }

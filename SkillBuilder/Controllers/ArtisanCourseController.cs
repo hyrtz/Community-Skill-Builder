@@ -54,6 +54,11 @@ namespace SkillBuilder.Controllers
             course.CreatedAt = DateTime.UtcNow;
             course.Duration = $"{model.DurationValue} {model.DurationUnit}";
 
+            if (course.Category == "Other" && !string.IsNullOrWhiteSpace(model.CustomCategory))
+            {
+                course.Category = model.CustomCategory.Trim();
+            }
+
             // ✅ File Uploads with Validation
             if (model.ImageFile != null)
             {
@@ -363,6 +368,12 @@ namespace SkillBuilder.Controllers
             // ------------------ Update Basic Course Info ------------------
             course.Title = model.Course.Title;
             course.Category = model.Course.Category;
+
+            if (course.Category == "Other" && !string.IsNullOrWhiteSpace(model.CustomCategory))
+            {
+                course.Category = model.CustomCategory.Trim();
+            }
+
             course.Overview = model.Course.Overview;
             course.Difficulty = model.Course.Difficulty;
             course.Duration = $"{model.DurationValue} {model.DurationUnit}";
