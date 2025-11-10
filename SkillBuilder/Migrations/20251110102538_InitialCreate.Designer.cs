@@ -13,7 +13,7 @@ using SkillBuilder.Data;
 namespace SkillBuilder.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251107113038_InitialCreate")]
+    [Migration("20251110102538_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
