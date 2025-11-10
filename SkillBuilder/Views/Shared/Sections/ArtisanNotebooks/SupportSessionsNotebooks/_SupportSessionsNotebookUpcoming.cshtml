@@ -112,8 +112,8 @@ else
 
                 <!-- Added Requested Date & Time -->
                 <div class="artisan-support-schedule">
-                    <span><i class="fas fa-calendar-alt"></i>Requested Date & Time: @request.SessionDate.ToString("MMMM d, yyyy")</span>
-                    <span><i class="fas fa-clock"></i>& @request.SessionTime.ToString(@"hh\:mm")</span>
+                    <span><i class="fas fa-calendar-alt"></i> Requested Date: @request.SessionDate.ToString("MMMM d, yyyy")</span>
+                    <span><i class="fas fa-clock"></i> Time: @(DateTime.Today.Add(request.SessionTime).ToString("hh:mm tt"))</span>
                 </div>
 
                 <div>

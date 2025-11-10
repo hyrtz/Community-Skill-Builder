@@ -9,6 +9,7 @@
         public double ProgressPercentage { get; set; }
         public string Link { get; set; }
         public int TotalLessons { get; set; }
+        public bool IsCompleted { get; set; }
         public bool IsPublished { get; set; }
     }
 }

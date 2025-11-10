@@ -47,38 +47,18 @@ namespace SkillBuilder.Controllers
 
             var enrolledCourses = user.Enrollments?.Select(e => e.Course).ToList() ?? new List<Course>();
 
-            var inProgressCourses = enrolledCourses.Select(course =>
-            {
-                var courseModulesOrdered = _context.CourseModules
-                    .Where(cm => cm.CourseId == course.Id)
-                    .OrderBy(cm => cm.Order)
-                    .ToList();
-
-                var completedSet = moduleProgress
-                    .Where(mp => mp.IsCompleted && mp.CourseModule.CourseId == course.Id)
-                    .Select(mp => mp.CourseModuleId)
-                    .ToHashSet();
-
-                int totalModules = courseModulesOrdered.Count;
-                int completedModules = completedSet.Count;
-
-                // Count project submission as completed
-                var hasSubmission = _context.CourseProjectSubmissions
-                    .Any(s => s.UserId == user.Id && s.CourseId == course.Id);
-                if (hasSubmission) completedModules += 1;
-
-                var progress = totalModules == 0 ? 0 : (double)completedModules / totalModules * 100;
-
-                return new CourseProgressViewModel
+            var inProgressCourses = user.Enrollments
+                .Where(e => !e.IsCompleted) // only include courses that are not completed
+                .Select(e => new CourseProgressViewModel
                 {
                     UserId = user.Id,
-                    CourseId = course.Id,
-                    CourseTitle = course.Title,
-                    CourseDescription = course.Overview,
-                    ProgressPercentage = Math.Round(progress, 0),
-                    IsPublished = course.IsPublished
-                };
-            }).ToList();
+                    CourseId = e.CourseId,
+                    CourseTitle = e.Course.Title,
+                    CourseDescription = e.Course.Overview,
+                    IsPublished = e.Course.IsPublished,
+                    IsCompleted = e.IsCompleted // directly from enrollment
+                })
+                .ToList();
 
             var allCourses = _context.Courses
                 .Include(c => c.Artisan)
