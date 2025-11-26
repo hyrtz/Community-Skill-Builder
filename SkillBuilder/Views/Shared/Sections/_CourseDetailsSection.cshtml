@@ -698,41 +698,6 @@
         }
     }
 
-    function enrollCourse(courseId) {
-        fetch("/Courses/Enroll", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include",
-            body: JSON.stringify({ courseId: courseId })
-        })
-        .then(res => {
-            if (!res.ok) {
-                console.error("Failed to enroll:", res.status);
-                return;
-            }
-            return res.json();
-        })
-        .then(data => {
-            if (!data) return;
-
-            if (data.success) {
-                if (data.showAchievement) {
-                    const firstAchievement = data.achievements[0];
-                    document.querySelector(".celebration-title").textContent = `🎉 ${firstAchievement}`;
-                    document.querySelector(".celebration-text").textContent =
-                        firstAchievement === "Lifelong Learner"
-                            ? "You've enrolled in 3 courses — keep going!"
-                            : "You’ve successfully enrolled in your first course.";
-                    showAchievementCelebration();
-                } else {
-                    location.reload();
-                }
-            }
-        });
-    }
-
     function showAchievementCelebration() {
         confetti({
             particleCount: 200,
@@ -813,8 +778,8 @@
                         document.querySelector(".celebration-title").textContent = `🎉 ${firstAchievement}`;
                         document.querySelector(".celebration-text").textContent =
                             firstAchievement === "Lifelong Learner"
-                                ? "You've enrolled in 3 courses — keep going!"
-                                : "You’ve successfully enrolled in your first course.";
+                                ? `You've enrolled in 3 courses — keep going! and earned 50 Threads!`
+                                : `You’ve successfully enrolled in your first course and earned 20 Threads!`;
 
                         showAchievementCelebration();
                         window.afterCelebrationRedirect = `/Courses/CourseModule/${courseId}`;

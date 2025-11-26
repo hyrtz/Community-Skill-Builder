@@ -1376,6 +1376,12 @@
                     submitBtn.disabled = true;
                     submitBtn.innerText = "Submitted";
 
+                    showAchievementCelebration(
+                        "Final Project & Course Completed!",
+                        "Congratulations! You successfully submitted your final project and completed the course!",
+                        70
+                    );
+
                     // Persist Final Project completion for this user
                     localStorage.setItem(`finalProjectCompleted_${userId}_@Model.Id`, "true");
 
@@ -1894,6 +1900,12 @@
 
                     // Mark rating as sent
                     localStorage.setItem(`course_${courseId}_ratingSent`, true);
+
+                    showAchievementCelebration(
+                        "Review Submitted!",
+                        "Thanks for sharing your feedback.",
+                        10 // optional: threads/points
+                    );
 
                     // Show Congrats section
                     document.getElementById("tahi-cc-rating-section").style.display = "none";

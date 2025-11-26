@@ -100,7 +100,12 @@
         <div class="admin-role">Administrator</div>
 
         <div class="admin-tabs">
-            <button class="admin-tab active" data-tab="users">User Management</button>
+            <button class="admin-tab active" data-tab="analytics">Analytics Overview</button>
+            <button class="admin-tab" data-tab="learnerAnalytics">Learner Analytics</button>
+            <button class="admin-tab" data-tab="artisanAnalytics">Artisan Analytics</button>
+            <button class="admin-tab" data-tab="courseAnalytics">Course Analytics</button>
+            <button class="admin-tab" data-tab="communityAnalytics">Community Analytics</button>
+            <button class="admin-tab" data-tab="users">User Management</button>
             <button class="admin-tab" data-tab="artisans">Artisan Management</button>
             <button class="admin-tab" data-tab="applications">Artisan Applications</button>
             <button class="admin-tab" data-tab="courses">Course Management</button>
@@ -111,7 +116,22 @@
 
     <!-- Main Panel -->
     <div class="admin-main">
-        <div class="admin-panel active" data-tab="users">
+        <div class="admin-panel active" data-tab="analytics">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookAnalytics", Model)
+        </div>
+        <div class="admin-panel" data-tab="learnerAnalytics">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookLearnerAnalytics", Model)
+        </div>
+        <div class="admin-panel" data-tab="artisanAnalytics">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookArtisanAnalytics", Model)
+        </div>
+        <div class="admin-panel" data-tab="courseAnalytics">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookCourseAnalytics", Model)
+        </div>
+        <div class="admin-panel" data-tab="communityAnalytics">
+            @Html.Partial("Sections/AdminNotebooks/_AdminNotebookCommunityAnalytics", Model)
+        </div>
+        <div class="admin-panel" data-tab="users">
             @Html.Partial("Sections/AdminNotebooks/_AdminNotebookUserManagement", Model)
         </div>
         <div class="admin-panel" data-tab="artisans">

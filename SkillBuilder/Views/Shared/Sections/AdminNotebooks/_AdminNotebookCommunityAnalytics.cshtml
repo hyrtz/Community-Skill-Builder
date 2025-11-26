@@ -1,0 +1,152 @@
+﻿@model SkillBuilder.Models.ViewModels.AdminProfileViewModel
+@using System.Text.Json
+
+<div style="max-width:1100px; margin:0 auto; font-family:Inter, sans-serif; padding:24px;">
+
+    <!-- Header and Date Range + Generate Report button -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <div>
+            <h2 style="font-weight:700; font-size:1.75rem; margin:0;">Community Management Analytics</h2>
+            <p style="color:#555; margin-top:4px;">Monitor the health of Tahi's online communities.</p>
+        </div>
+        <div style="display:flex; gap:12px; align-items:center;">
+            <button style="background:#2563EB; color:#fff; border:none; border-radius:6px; padding:10px 20px; font-weight:600; cursor:pointer;">
+                Generate Report ▼
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert for flagged posts -->
+    @{
+        var flaggedCount = Model.CommunityAnalytics?.FlaggedPostsCount ?? 0;
+    }
+    @if (flaggedCount > 0)
+    {
+        <div style="background:#FEE2E2; border:1px solid #FCA5A5; border-radius:6px; padding:12px 16px; color:#B91C1C; font-weight:600; display:flex; align-items:center; gap:8px; margin-bottom:20px;">
+            <svg xmlns="http://www.w3.org/2000/svg" style="height:20px; width:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+            </svg>
+            <span>@flaggedCount posts have been flagged and require moderation review. <a href="/AdminProfile/FlaggedPosts" style="color:#B91C1C; text-decoration:underline; font-weight:700; margin-left:8px;">Review Posts &rarr;</a></span>
+        </div>
+    }
+
+    <!-- Summary cards -->
+    <div style="display:flex; background:#F9FAFB; border-radius:12px; padding:24px; justify-content:space-between; box-shadow:0 1px 3px rgb(0 0 0 / 0.1); margin-bottom:32px;">
+        <div style="text-align:center; flex:1;">
+            <div style="font-weight:700; font-size:2rem; color:#111;">@Model.CommunityAnalytics?.TotalCommunities</div>
+            <div style="color:#555; margin-top:4px;">Total Communities</div>
+        </div>
+        <div style="text-align:center; flex:1; border-left:'1px solid #E5E7EB'; border-right:'1px solid #E5E7EB'; position: 'relative';">
+            <div style="font-weight:700; font-size:2rem; color:#111;">@Model.CommunityAnalytics?.TotalMembers</div>
+            <div style="color:#555; margin-top:4px;">
+                Active Members
+            </div>
+        </div>
+        <div style="text-align:center; flex:1;">
+            <div style="font-weight:700; font-size:2rem; color:#111;">@Model.CommunityAnalytics?.TotalPosts</div>
+            <div style="color:#555; margin-top:4px;">
+                Total Posts
+            </div>
+        </div>
+        <div style="text-align:center; flex:1;">
+            <div style="font-weight:700; font-size:2rem; color:#111;">@flaggedCount</div>
+            <div style="color:#555; margin-top:4px;">Flagged Posts</div>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:24px;">
+
+        <!-- Communities with Highest Engagement Table -->
+        <div style="flex:3; border:1px solid #3B82F6; border-radius:8px; padding:20px; background:#fff; box-shadow:0 1px 3px rgb(0 0 0 / 0.05);">
+            <h3 style="font-weight:600; font-size:1.25rem; margin-bottom:16px;">Communities with Highest Engagement</h3>
+
+            <table style="width:100%; border-collapse: collapse; font-size:0.9rem;">
+                <thead>
+                    <tr style="text-transform: uppercase; font-weight:600; color:#555; border-bottom:2px solid #E5E7EB;">
+                        <th style="padding:10px 12px; text-align:left;">Community Name</th>
+                        <th style="padding:10px 12px; text-align:right; width:80px;">Members</th>
+                        <th style="padding:10px 12px; text-align:right; width:80px;">Posts</th>
+                        <th style="padding:10px 12px; text-align:left; width:110px;">Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.CommunityAnalytics?.TopCommunities != null)
+                    {
+                        foreach (var community in Model.CommunityAnalytics.TopCommunities)
+                        {
+                            <tr style="border-bottom:1px solid #E5E7EB; color:#333;">
+                                <td style="padding:12px 12px;">@community.Name</td>
+                                <td style="padding:12px 12px; text-align:right;">@community.MembersCount</td>
+                                <td style="padding:12px 12px; text-align:right;">@community.TotalPosts</td>
+                                <td style="padding:12px 12px;">@community.Category</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Community Members Distribution Donut Chart -->
+        <div style="flex:1; background:#fff; border-radius:8px; padding:20px; box-shadow:0 1px 3px rgb(0 0 0 / 0.05);">
+            <h3 style="font-weight:600; font-size:1.1rem; margin-bottom:16px;">Community Members Distribution</h3>
+            <canvas id="membersDonutChart" style="max-width:220px; margin:0 auto;"></canvas>
+
+            <div style="display:flex; justify-content:center; gap:40px; margin-top:16px; font-weight:700;">
+                <div style="text-align:center; color:#2563EB;">
+                    <div style="font-size:1.6rem;">@Model.CommunityAnalytics?.TotalMembers</div>
+                    <div style="font-weight:600; font-size:0.9rem;">Active</div>
+                </div>
+                <div style="text-align:center; color:#C7D2FE;">
+                    <div style="font-size:1.6rem;">@Model.CommunityAnalytics?.MembersWithoutPosts</div>
+                    <div style="font-weight:600; font-size:0.9rem;">Inactive</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const analytics = @Html.Raw(JsonSerializer.Serialize(Model.CommunityAnalytics ?? new SkillBuilder.Models.Analytics.CommunityAnalyticsDto()));
+
+        function renderDonutChart(data) {
+            const ctx = document.getElementById('membersDonutChart').getContext('2d');
+            if (window.membersDonutChartInstance) window.membersDonutChartInstance.destroy();
+
+            window.membersDonutChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Active', 'Inactive'],
+                    datasets: [{
+                        data: [data.TotalMembers || 0, data.MembersWithoutPosts || 0],
+                        backgroundColor: ['#2563EB', '#C7D2FE'],
+                        hoverOffset: 20,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const label = ctx.label || '';
+                                const value = ctx.parsed || 0;
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDonutChart(analytics);
+        });
+    </script>
+}

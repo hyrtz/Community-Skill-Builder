@@ -1133,6 +1133,9 @@ namespace SkillBuilder.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1180,6 +1183,9 @@ namespace SkillBuilder.Migrations
                     b.Property<string>("SelectedInterests")
                         .HasColumnType("text");
 
+                    b.Property<decimal>("Threads")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("UserAvatar")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text")
@@ -1188,6 +1194,33 @@ namespace SkillBuilder.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("SkillBuilder.Models.UserAchievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateAchieved")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("ThreadsAwarded")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserAchievements");
                 });
 
             modelBuilder.Entity("SkillBuilder.Models.UserReport", b =>

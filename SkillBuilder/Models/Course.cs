@@ -17,8 +17,8 @@ namespace SkillBuilder.Models
         public string? WhatToLearn { get; set; }
         public string FullDescription { get; set; } = string.Empty;
         public string Requirements { get; set; } = string.Empty;
-        public string FinalProjectTitle { get; set; } = string.Empty; 
-        public string FinalProjectDescription { get; set; } = string.Empty; 
+        public string FinalProjectTitle { get; set; } = string.Empty;
+        public string FinalProjectDescription { get; set; } = string.Empty;
 
         public string CreatedBy { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

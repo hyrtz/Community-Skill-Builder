@@ -15,11 +15,13 @@ namespace SkillBuilder.Controllers
     {
         private readonly AppDbContext _context;
         private readonly INotificationService _notificationService;
+        private readonly IAchievementService _achievementService;
 
-        public CoursesController(AppDbContext context, INotificationService notificationService)
+        public CoursesController(AppDbContext context, INotificationService notificationService, IAchievementService achievementService)
         {
             _context = context;
             _notificationService = notificationService;
+            _achievementService = achievementService;
         }
 
         [HttpGet("")]
@@ -134,9 +136,9 @@ namespace SkillBuilder.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized(new { success = false, message = "Login required." });
 
-            var user = _context.Users
+            var user = await _context.Users
                 .Include(u => u.Enrollments)
-                .FirstOrDefault(u => u.Id == userId);
+                .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
                 return NotFound(new { success = false, message = "User not found." });
@@ -147,9 +149,9 @@ namespace SkillBuilder.Controllers
             if (user.IsDeactivated)
                 return BadRequest(new { success = false, message = "Your account is deactivated. Please contact support." });
 
-            var course = _context.Courses
+            var course = await _context.Courses
                 .Include(c => c.Artisan)
-                .FirstOrDefault(c => c.Id == request.CourseId);
+                .FirstOrDefaultAsync(c => c.Id == request.CourseId);
 
             if (course == null)
                 return NotFound(new { success = false, message = "Course not found." });
@@ -170,17 +172,26 @@ namespace SkillBuilder.Controllers
                 EnrolledAt = DateTime.UtcNow
             });
 
-            await _context.SaveChangesAsync(); // async version of SaveChanges
+            await _context.SaveChangesAsync();
 
             int currentCount = _context.Enrollments.Count(e => e.UserId == userId);
 
             List<string> achievements = new();
-            if (previousCount == 0 && currentCount >= 1)
-                achievements.Add("Welcome to Tahi!");
-            if (previousCount < 3 && currentCount >= 3)
-                achievements.Add("Lifelong Learner");
 
-            // Notifications
+            // ✅ Use AchievementService here
+            if (previousCount == 0 && currentCount >= 1)
+            {
+                var firstCourse = await _achievementService.AwardAchievementAsync(userId, "FirstCourseEnrolled");
+                if (firstCourse != null) achievements.Add(firstCourse.Title);
+            }
+
+            if (previousCount < 3 && currentCount >= 3)
+            {
+                var threeCourses = await _achievementService.AwardAchievementAsync(userId, "ThreeCoursesEnrolled");
+                if (threeCourses != null) achievements.Add(threeCourses.Title);
+            }
+
+            // Notifications to course artisan
             if (course.Artisan != null)
             {
                 await _notificationService.AddNotificationAsync(
@@ -189,6 +200,7 @@ namespace SkillBuilder.Controllers
                 );
             }
 
+            // Notifications to user
             await _notificationService.AddNotificationAsync(
                 userId,
                 $"You successfully enrolled in the course \"{course.Title}\"."
@@ -198,7 +210,8 @@ namespace SkillBuilder.Controllers
             {
                 success = true,
                 showAchievement = achievements.Any(),
-                achievements
+                achievements,
+                threads = user.Threads  // optional: return updated threads
             });
         }
 
@@ -332,22 +345,27 @@ namespace SkillBuilder.Controllers
         {
             var userId = User.FindFirstValue("UserId");
             if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
+                return Unauthorized(new { success = false, message = "Unauthorized" });
 
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null) return NotFound();
+            var user = await _context.Users
+                .Include(u => u.ProjectSubmissions)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return NotFound(new { success = false, message = "User not found." });
 
             var course = await _context.Courses
-                .Include(c => c.Artisan) // include Artisan to get owner
+                .Include(c => c.Artisan)
                 .FirstOrDefaultAsync(c => c.Id == dto.CourseId);
-            if (course == null) return NotFound();
+            if (course == null)
+                return NotFound(new { success = false, message = "Course not found." });
 
             string mediaUrl = null;
 
             if (dto.File != null && dto.File.Length > 0)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "projects");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
 
                 var fileName = $"{Guid.NewGuid()}_{dto.File.FileName}";
                 var filePath = Path.Combine(uploadsFolder, fileName);
@@ -374,14 +392,29 @@ namespace SkillBuilder.Controllers
             _context.CourseProjectSubmissions.Add(submission);
             await _context.SaveChangesAsync();
 
+            // 🔄 Recalculate course progress
             await RecalculateProgress(userId, dto.CourseId);
 
-            // ✅ Notifications
+            // 🏆 Award ProjectSubmitted achievement
+            var achievements = new List<AchievementViewModel>();
+
+            // First project submission
+            var projectAchievement = await _achievementService.AwardAchievementAsync(userId, "ProjectSubmitted");
+            if (projectAchievement != null)
+                achievements.Add(projectAchievement);
+
+            // Check if course completed achievement should also be awarded
+            var completedAchievement = await _achievementService.AwardAchievementAsync(userId, "CourseCompleted");
+            if (completedAchievement != null)
+                achievements.Add(completedAchievement);
+
+            // 🔔 Notifications to user
             await _notificationService.AddNotificationAsync(
                 userId,
                 $"Your final project \"{submission.Title}\" has been submitted successfully."
             );
 
+            // 🔔 Notify Artisan
             if (course.Artisan != null)
             {
                 await _notificationService.AddNotificationAsync(
@@ -390,7 +423,13 @@ namespace SkillBuilder.Controllers
                 );
             }
 
-            return Ok(new { success = true, submissionId = submission.Id });
+            return Ok(new
+            {
+                success = true,
+                submissionId = submission.Id,
+                achievements, // return all awarded achievements
+                threads = user.Threads
+            });
         }
 
         public class FinalProjectDto

@@ -11,6 +11,7 @@ namespace SkillBuilder.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<UserReport> UserReports { get; set; }
+        public DbSet<UserAchievement> UserAchievements { get; set; }
         public DbSet<CourseProjectSubmission> CourseProjectSubmissions { get; set; }
         public DbSet<Artisan> Artisans { get; set; }
         public DbSet<ArtisanApplication> ArtisanApplications { get; set; }

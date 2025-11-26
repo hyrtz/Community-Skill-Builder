@@ -16,9 +16,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+
+builder.Services.AddScoped<IAchievementService, AchievementService>();
+
+builder.Services.AddHostedService<WeeklyLeaderboardRewardService>();
+
+builder.Services.AddScoped<ICommunityAnalyticsService, CommunityAnalyticsService>();
+
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+    options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50 MB
 });
 
 

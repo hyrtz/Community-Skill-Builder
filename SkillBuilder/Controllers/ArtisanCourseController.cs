@@ -39,7 +39,7 @@ namespace SkillBuilder.Controllers
         }
 
         [HttpPost("CreateCourse")]
-        [RequestSizeLimit(200 * 1024 * 1024)] // Allow up to 200 MB for this action
+        [RequestSizeLimit(50 * 1024 * 1024)] // Allow up to 50 MB for this action
         public async Task<IActionResult> CreateCourse(CourseBuilderViewModel model)
         {
             if (!ModelState.IsValid)
@@ -72,9 +72,9 @@ namespace SkillBuilder.Controllers
 
             if (model.VideoFile != null)
             {
-                if (model.VideoFile.Length > 200 * 1024 * 1024) // 200 MB
+                if (model.VideoFile.Length > 50 * 1024 * 1024) // 50 MB
                 {
-                    ModelState.AddModelError("VideoFile", "Video file must be under 200 MB.");
+                    ModelState.AddModelError("VideoFile", "Video file must be under 50 MB.");
                     return View("~/Views/Actions/ArtisanActions/CreateCourse.cshtml", model);
                 }
                 course.Video = await SaveFileAsync(model.VideoFile, "course-videos");
@@ -237,8 +237,8 @@ namespace SkillBuilder.Controllers
             }
             else if (extension is ".mp4" or ".mov" or ".avi")
             {
-                if (file.Length > 200 * 1024 * 1024)
-                    throw new InvalidOperationException("Video files must be under 200 MB.");
+                if (file.Length > 50 * 1024 * 1024)
+                    throw new InvalidOperationException("Video files must be under 50 MB.");
             }
             else
             {
