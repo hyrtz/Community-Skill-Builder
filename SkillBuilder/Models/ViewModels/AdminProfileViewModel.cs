@@ -5,6 +5,7 @@ namespace SkillBuilder.Models.ViewModels
     {
         public Admin Admin { get; set; }
         public List<User> Users { get; set; }
+        public List<MonthlyActiveUsersDto> MonthlyActiveUsers { get; set; } = new();
         public List<User> AllUsers { get; set; }
         public List<Artisan> Artisans { get; set; }
         public List<Artisan> AllArtisans { get; set; }

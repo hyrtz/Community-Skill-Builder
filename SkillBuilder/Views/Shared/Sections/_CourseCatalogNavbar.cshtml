@@ -8,12 +8,29 @@
     var userId = User.FindFirst("UserId")?.Value;
     var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
 
+    // Declare user here so it's available everywhere
+    SkillBuilder.Models.User? user = null;
+
     decimal currentThreads = 0;
 
     if (!string.IsNullOrEmpty(userId))
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        user = await _context.Users
+            .Include(u => u.Artisan) // <-- important!
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
         currentThreads = user?.Threads ?? 0;
+    }
+
+    // Now you can safely use user below
+    bool isApproved = false;
+    bool isVerified = user?.IsVerified ?? false;
+    bool isDeactivated = user?.IsDeactivated ?? false;
+
+    // Only check IsApproved if the user is an Artisan
+    if (userRole == "Artisan" && user?.Artisan != null)
+    {
+        isApproved = user.Artisan.IsApproved;
     }
 
     string homeLink = "/";
@@ -502,10 +519,6 @@
     <div class="navbar-right">
         @if (User.Identity.IsAuthenticated && userRole == "Artisan")
         {
-            var isApproved = User.FindFirst("IsApproved")?.Value == "True";
-            var isVerified = User.FindFirst("IsVerified")?.Value == "True";
-            var isDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
-
             if (isDeactivated)
             {
                 <a class="navbar-item create-course-btn disabled" style="pointer-events:none; opacity:0.5;">

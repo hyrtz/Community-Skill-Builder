@@ -432,7 +432,7 @@
         const previewDiv = input.parentNode.querySelector(".curriculum-upload-preview");
         const errorSpan = input.closest(".curriculum-edit-form-group").querySelector(".file-error");
         const file = input.files[0];
-        const maxSizeKB = 700; // 700 KB
+        const maxSizeMB = 20; // 20 MB
         const allowedTypes = ['image/jpeg','image/png','image/gif','image/webp'];
 
         if(!file) return;
@@ -447,9 +447,9 @@
             return;
         }
 
-        if(file.size > maxSizeKB * 1024){
+        if(file.size > maxSizeMB * 1024 * 1024){
             if(errorSpan) {
-                errorSpan.textContent = `File too large. Max ${maxSizeKB} KB.`;
+                errorSpan.textContent = `File too large. Max ${maxSizeMB} MB.`;
                 errorSpan.style.display='block';
             }
             input.value = '';
@@ -471,7 +471,7 @@
         const previewDiv = input.parentNode.querySelector(".curriculum-upload-preview");
         const errorSpan = input.closest(".curriculum-edit-form-group").querySelector(".file-error");
         const file = input.files[0];
-        const maxSizeMB = 50;
+        const maxSizeMB = 200;
         const allowedTypes = ['video/mp4','video/webm','video/ogg'];
 
         if(!file) return;

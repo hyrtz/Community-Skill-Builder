@@ -14,6 +14,31 @@
         currentThreads = user?.Threads ?? 0;
     }
 
+    bool isApproved = false;
+    bool isVerified = false;
+    bool isDeactivated = false;
+
+    if (!string.IsNullOrEmpty(userId) && userRole == "Artisan")
+    {
+        // Load user WITH artisan data
+        var user = await _context.Users
+            .AsNoTracking()
+            .Include(u => u.Artisan)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user != null)
+        {
+            isVerified = user.IsVerified;
+            isDeactivated = user.IsDeactivated;
+
+            // Approval comes from Artisan table
+            if (user.Artisan != null)
+            {
+                isApproved = user.Artisan.IsApproved;
+            }
+        }
+    }
+
     string profileUrl = userRole switch
     {
         "Learner" => $"/UserProfile/{userId}",
@@ -515,11 +540,7 @@
     <div class="navbar-right">
         @if (User.Identity.IsAuthenticated && userRole == "Artisan")
         {
-            var isApproved = User.FindFirst("IsApproved")?.Value == "True";
-            var isVerified = User.FindFirst("IsVerified")?.Value == "True";
-            var isDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
-
-            if (isDeactivated)
+            @if (isDeactivated)
             {
                 <a class="navbar-item create-course-btn disabled" style="pointer-events:none; opacity:0.5;">
                     Account Deactivated - Cannot Create Course

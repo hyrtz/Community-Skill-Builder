@@ -642,5 +642,23 @@ namespace SkillBuilder.Controllers
             var model = await _communityAnalytics.GetAnalyticsAsync(range);
             return View("~/Views/Profile/_AdminNotebookCommunityAnalytics.cshtml", model);
         }
+
+        [HttpGet("Notebook/ReportLogs")]
+        public IActionResult NotebookReportLogs()
+        {
+            var vm = new AdminProfileViewModel
+            {
+                ReportLogs = new List<ReportLogViewModel>()
+            };
+
+            return View("~/Views/Shared/Sections/AdminNotebooks/_AdminNotebookReportLogs.cshtml", vm);
+        }
+
+        [HttpGet("GetCommunityJoinAnalytics")]
+        public async Task<IActionResult> GetCommunityJoinAnalytics(string range = "lastmonth")
+        {
+            var data = await _communityAnalytics.GetAnalyticsAsync(range);
+            return Json(data.CommunityJoinHistory);
+        }
     }
 }

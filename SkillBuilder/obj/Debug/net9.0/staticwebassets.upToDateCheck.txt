@@ -212,7 +212,7 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\asse
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Icons\Course.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Icons\Community.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Icons\Bell.ico
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\css\style.css
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\js\script.js
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Avatar\Sample9.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Avatar\Sample8.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Avatar\Sample7.ico
@@ -237,4 +237,4 @@ C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\asse
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Icons\ProfilePortfolio.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Icons\Back.ico
 C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\Icons\DownloadMaterials.ico
-C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\js\script.js
+C:\Users\PREDATOR\Desktop\Tahi\Community-Skill-Builder\SkillBuilder\wwwroot\assets\css\style.css

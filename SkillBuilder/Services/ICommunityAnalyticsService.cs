@@ -43,19 +43,28 @@ namespace SkillBuilder.Services
 
             var dto = new CommunityAnalyticsDto();
 
+            // --- Summary counts ---
             dto.TotalCommunities = await _db.Communities.CountAsync(c => !c.IsArchived);
             dto.TotalPosts = await _db.CommunityPosts.CountAsync(p => p.IsPublished);
             dto.TotalMembers = await _db.CommunityMemberships.CountAsync();
 
-            dto.MembersWithPosts = await _db.CommunityPosts
-                .Select(p => p.AuthorId)
+            var communityIds = await _db.Communities
+                .Where(c => !c.IsArchived)
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            dto.MembersWithPosts = await _db.CommunityMemberships
+                .Where(m => communityIds.Contains(m.CommunityId))
+                .Where(m => _db.CommunityPosts.Any(p => p.AuthorId == m.UserId && p.CommunityId == m.CommunityId))
+                .Select(m => m.UserId)
                 .Distinct()
                 .CountAsync();
 
-            dto.MembersWithoutPosts = dto.TotalMembers - dto.MembersWithPosts;
+            dto.MembersWithoutPosts = Math.Max(0, dto.TotalMembers - dto.MembersWithPosts);
 
             dto.FlaggedPostsCount = await _db.CommunityPostReports.CountAsync();
 
+            // --- Top communities by members ---
             dto.TopCommunities = await _db.Communities
                 .Where(c => !c.IsArchived)
                 .Select(c => new TopCommunityDto
@@ -63,12 +72,14 @@ namespace SkillBuilder.Services
                     CommunityId = c.Id,
                     Name = c.Name,
                     MembersCount = c.Memberships.Count,
-                    TotalPosts = c.Posts.Count
+                    TotalPosts = c.Posts.Count,
+                    Category = c.Category
                 })
                 .OrderByDescending(c => c.MembersCount)
                 .Take(5)
                 .ToListAsync();
 
+            // --- Flagged posts details ---
             dto.FlaggedPosts = await _db.CommunityPostReports
                 .Include(r => r.Post)
                 .Include(r => r.Post.Author)
@@ -87,6 +98,38 @@ namespace SkillBuilder.Services
                 })
                 .OrderByDescending(r => r.ReportedAt)
                 .ToListAsync();
+
+            var dates = Enumerable.Range(0, (end - start).Days)
+                      .Select(d => start.AddDays(d))
+                      .ToList();
+
+            var joinHistory = await _db.CommunityJoinRequests
+                .Where(j => j.RequestedAt >= start && j.RequestedAt < end)
+                .GroupBy(j => new { j.Community.Name, Date = j.RequestedAt.Date })
+                .Select(g => new CommunityJoinHistoryDto
+                {
+                    CommunityName = g.Key.Name,
+                    Date = g.Key.Date,
+                    JoinCount = g.Count()
+                })
+                .ToListAsync();
+
+            var grouped = joinHistory
+                .GroupBy(x => x.CommunityName)
+                .Select(g => new JoinTrendSeriesDto
+                {
+                    CommunityName = g.Key,
+                    Counts = dates.Select(d =>
+                        g.FirstOrDefault(j => j.Date.Date == d.Date)?.JoinCount ?? 0
+                    ).ToList()
+                })
+                .ToList();
+
+            dto.JoinTrend = new CommunityJoinTrendDto
+            {
+                Labels = dates.Select(d => d.ToString("MMM dd")).ToList(),
+                Series = grouped
+            };
 
             return dto;
         }

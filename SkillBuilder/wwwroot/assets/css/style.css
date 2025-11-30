@@ -425,6 +425,7 @@ main {
 }
 
     .auth-modal-right a {
+        font-size: 15px;
         color: #007bff;
         text-decoration: none;
         transition: color 0.3s, text-decoration 0.3s;

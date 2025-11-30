@@ -347,12 +347,12 @@
     // ====================== FILE VALIDATION ======================
     const fileRules = {
         image: {
-            maxSize: 5 * 1024 * 1024, // 5 MB
+            maxSize: 20 * 1024 * 1024, // 20 MB
             allowed: [".jpg", ".jpeg", ".png", ".gif", ".webp"]
         },
         video: {
-            maxSize: 50 * 1024 * 1024, // 50 MB
-            allowed: [".mp4", ".mov", ".avi"]
+            maxSize: 200 * 1024 * 1024, // 200 MB
+            allowed: [".mp4", ".mov", ".avi", ".mkv"]
         }
     };
 

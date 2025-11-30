@@ -20,8 +20,17 @@ public class WeeklyLeaderboardRewardService : IHostedService, IDisposable
     public Task StartAsync(CancellationToken cancellationToken)
     {
         var now = DateTime.Now;
-        var nextMonday = now.AddDays(((int)DayOfWeek.Monday - (int)now.DayOfWeek + 7) % 7);
-        var nextRun = new DateTime(nextMonday.Year, nextMonday.Month, nextMonday.Day, 0, 0, 0);
+
+        // Calculate days until next Monday
+        int daysUntilMonday = ((int)DayOfWeek.Monday - (int)now.DayOfWeek + 7) % 7;
+
+        // If today is Monday but time already passed 00:00 → schedule next week
+        if (daysUntilMonday == 0 && now.TimeOfDay > TimeSpan.Zero)
+            daysUntilMonday = 7;
+
+        // Next Monday at 00:00
+        var nextRun = now.Date.AddDays(daysUntilMonday);
+
         var initialDelay = nextRun - now;
 
         _timer = new Timer(DoWork, null, initialDelay, TimeSpan.FromDays(7));

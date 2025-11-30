@@ -370,6 +370,7 @@ namespace SkillBuilder.Controllers
             string FirstName,
             string LastName,
             string Email,
+            DateTime? BirthDate,
             IFormFile UserAvatar,
             string CurrentPassword,
             string NewPassword,
@@ -383,6 +384,11 @@ namespace SkillBuilder.Controllers
 
             user.FirstName = FirstName;
             user.LastName = LastName;
+
+            if (BirthDate.HasValue)
+            {
+                user.BirthDate = DateOnly.FromDateTime(BirthDate.Value);
+            }
 
             if (!string.Equals(user.Email, Email, StringComparison.OrdinalIgnoreCase))
             {

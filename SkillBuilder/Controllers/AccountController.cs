@@ -75,10 +75,7 @@ namespace SkillBuilder.Controllers
                 new Claim(ClaimTypes.NameIdentifier, newUser.Id),
                 new Claim(ClaimTypes.Name, newUser.FirstName + " " + newUser.LastName),
                 new Claim(ClaimTypes.Email, newUser.Email),
-                new Claim(ClaimTypes.Role, newUser.Role),
-                new Claim("IsVerified", newUser.IsVerified.ToString()),
-                new Claim("IsDeactivated", newUser.IsDeactivated.ToString()),
-                new Claim("Threads", newUser.Threads.ToString())
+                new Claim(ClaimTypes.Role, newUser.Role)
             };
 
             var identity = new ClaimsIdentity(claims, "TahiAuth");
@@ -155,10 +152,7 @@ namespace SkillBuilder.Controllers
                 new Claim(ClaimTypes.NameIdentifier, newUser.Id),
                 new Claim(ClaimTypes.Name, newUser.FirstName + " " + newUser.LastName),
                 new Claim(ClaimTypes.Email, newUser.Email),
-                new Claim(ClaimTypes.Role, newUser.Role),
-                new Claim("IsVerified", newUser.IsVerified.ToString()),
-                new Claim("IsDeactivated", newUser.IsDeactivated.ToString()),
-                new Claim("IsApproved", artisan.IsApproved.ToString())
+                new Claim(ClaimTypes.Role, newUser.Role)
             };
 
             var identity = new ClaimsIdentity(claims, "TahiAuth");
@@ -326,10 +320,7 @@ namespace SkillBuilder.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),
-                new Claim("IsVerified", user.IsVerified.ToString()),
-                new Claim("IsDeactivated", user.IsDeactivated.ToString()),
-                new Claim("Threads", user.Threads.ToString())
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
             if (user.Role == "Artisan")

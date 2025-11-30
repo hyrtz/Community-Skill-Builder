@@ -59,6 +59,12 @@ namespace SkillBuilder.Controllers
                 course.Category = model.CustomCategory.Trim();
             }
 
+            // ------------------ FREE COURSE LOGIC ------------------
+            course.IsFree = model.Course.IsFree;
+
+            // Only set DesiredThreads if course is not free
+            course.DesiredThreads = !model.Course.IsFree ? model.Course.DesiredThreads : 0M;
+
             // ✅ File Uploads with Validation
             if (model.ImageFile != null)
             {
@@ -224,21 +230,21 @@ namespace SkillBuilder.Controllers
 
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
-            // ✅ File type and size validation (added .webp)
+            // ✅ Updated file type and size validation
             if (extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp")
             {
-                if (file.Length > 5 * 1024 * 1024)
-                    throw new InvalidOperationException("Image files must be under 5 MB.");
+                if (file.Length > 20 * 1024 * 1024) // 20 MB
+                    throw new InvalidOperationException("Image files must be under 20 MB.");
             }
             else if (extension is ".pdf" or ".docx" or ".txt")
             {
-                if (file.Length > 10 * 1024 * 1024)
-                    throw new InvalidOperationException("Document files must be under 10 MB.");
+                if (file.Length > 100 * 1024 * 1024) // 100 MB
+                    throw new InvalidOperationException("Document files must be under 100 MB.");
             }
             else if (extension is ".mp4" or ".mov" or ".avi")
             {
-                if (file.Length > 50 * 1024 * 1024)
-                    throw new InvalidOperationException("Video files must be under 50 MB.");
+                if (file.Length > 200 * 1024 * 1024) // 200 MB
+                    throw new InvalidOperationException("Video files must be under 200 MB.");
             }
             else
             {
@@ -377,6 +383,8 @@ namespace SkillBuilder.Controllers
             course.Overview = model.Course.Overview;
             course.Difficulty = model.Course.Difficulty;
             course.Duration = $"{model.DurationValue} {model.DurationUnit}";
+            course.IsFree = model.Course.IsFree;
+            course.DesiredThreads = !model.Course.IsFree ? model.Course.DesiredThreads : 0M;
             course.Requirements = model.Course.Requirements;
             course.WhatToLearn = model.LearningObjectives != null
                 ? string.Join("||", model.LearningObjectives.Where(o => !string.IsNullOrWhiteSpace(o)))

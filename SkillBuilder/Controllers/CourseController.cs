@@ -37,10 +37,21 @@ namespace SkillBuilder.Controllers
                 .Include(c => c.Materials)
                 .AsQueryable();
 
+            var userId = User.FindFirstValue("UserId");
+            decimal userThreads = 0;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+                if (user != null)
+                    userThreads = user.Threads;
+            }
+
+            ViewData["UserThreads"] = userThreads;
+
             // Only show published courses for normal users
             if (!User.IsInRole("Admin"))
             {
-                var userId = User.FindFirstValue("UserId");
                 courses = courses.Where(c => c.IsPublished || c.Artisan.UserId == userId);
             }
 
@@ -162,6 +173,14 @@ namespace SkillBuilder.Controllers
             var alreadyEnrolled = user.Enrollments.Any(e => e.CourseId == request.CourseId);
             if (alreadyEnrolled)
                 return BadRequest(new { success = false, message = "Already enrolled." });
+
+            // ✅ Deduct threads based on course.DesiredThreads
+            decimal threadsToDeduct = course.DesiredThreads;
+
+            if (user.Threads < threadsToDeduct)
+                return BadRequest(new { success = false, message = "Not enough threads to enroll in this course." });
+
+            user.Threads -= threadsToDeduct;
 
             int previousCount = user.Enrollments?.Count() ?? 0;
 

@@ -8,15 +8,24 @@ namespace SkillBuilder.Models.Analytics
         public int TotalLearners { get; set; }
         public int TotalArtisans { get; set; }
         public int TotalCourses { get; set; }
+        public int TotalEnrollments { get; set; }
+        public int UnenrolledLearners { get; set; }
+        public int EnrollmentRate { get; set; }
+        public double AverageArtisanRating { get; set; }
         public int CompletionRate { get; set; }
         public int EnrollmentGrowth { get; set; }
+        public int PendingArtisanApplications { get; set; }
+        public int PublishedCourses { get; set; }
+        public int UnpublishedCourses { get; set; }
 
         public List<MonthlyEnrollmentDto> MonthlyEnrollments { get; set; } = new();
         public List<CategoryEnrollmentDto> CategoryEnrollments { get; set; } = new();
         public List<CategoryMonthlyEnrollmentDto> CategoryMonthlyEnrollments { get; set; } = new();
         public List<TopCourseDto> TopCourses { get; set; } = new();
+        public List<CommunityPostCountDto> TopCommunities { get; set; } = new();
         public List<TopArtisanDto> TopArtisans { get; set; } = new();
         public List<TopArtisanDto> TopArtisansByEnrollments { get; set; } = new();
+        public List<MonthlyEnrollmentDto> ArtisanApplicationsMonthly { get; set; } = new();
         public LearnerAnalyticsDto LearnerCharts { get; set; } = new LearnerAnalyticsDto();
     }
 
@@ -52,6 +61,7 @@ namespace SkillBuilder.Models.Analytics
         public int TotalEnroll { get; set; }
         public string Category { get; set; } = "N/A";
         public bool IsPublished { get; set; }
+        public int CompletedEnrollments { get; set; }
     }
 
     public class TopArtisanDto
@@ -61,6 +71,8 @@ namespace SkillBuilder.Models.Analytics
         public string Skill { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
         public int TotalStudents { get; set; }
+        public double AverageRating { get; set; }
+        public int CoursesCount { get; set; }
     }
 
     public class EnrollmentByCityDto
@@ -91,8 +103,24 @@ namespace SkillBuilder.Models.Analytics
         public List<int> TopCourseTotalEnrollments => TopCourses.Select(c => c.TotalEnroll).ToList();
 
         // Example: split total enrollments 50/50 for Gen Z / Millennials
-        public List<int> TopCourseGenZ => TopCourses.Select(c => c.TotalEnroll / 2).ToList();
-        public List<int> TopCourseMillennials => TopCourses.Select(c => c.TotalEnroll / 2).ToList();
+        public List<int> TopCourseGenZ { get; set; } = new();
+        public List<int> TopCourseMillennials { get; set; } = new();
+
+        public int UnenrolledStudents { get; set; } = 0;
+        public int EnrollmentRate { get; set; } = 0;
+    }
+
+    public class MonthlyActiveUsersDto
+    {
+        public string MonthLabel { get; set; } = "";
+        public int ActiveUsers { get; set; }
+    }
+
+    public class CommunityPostCountDto
+    {
+        public int CommunityId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int PostCount { get; set; }
     }
 
 }

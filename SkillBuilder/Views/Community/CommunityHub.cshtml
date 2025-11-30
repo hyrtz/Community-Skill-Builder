@@ -1,11 +1,28 @@
-﻿@model SkillBuilder.Models.ViewModels.CommunityHubViewModel
+﻿@using SkillBuilder.Data
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext _context
+@model SkillBuilder.Models.ViewModels.CommunityHubViewModel
 
 @{
     ViewData["Title"] = "Community Hub";
-    var isDeactivated = User.FindFirst("IsDeactivated")?.Value == "True";
-    var isVerified = User.FindFirst("IsVerified")?.Value == "True";
-    var isAdmin = User.IsInRole("Admin");
+
+    // Default values
+    bool isDeactivated = false;
+    bool isVerified = false;
+    bool isAdmin = User.IsInRole("Admin");
     var currentUserRole = User.IsInRole("Artisan") ? "artisan" : "learner";
+
+    // Get current user from DB
+    var userId = User.FindFirst("UserId")?.Value;
+    if (!string.IsNullOrEmpty(userId))
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is not null)
+        {
+            isDeactivated = user.IsDeactivated;
+            isVerified = user.IsVerified;
+        }
+    }
 }
 
 <style>
@@ -1193,7 +1210,7 @@
             }
 
             // ---- STEP 2: Handle image upload with validation (max 700 KB) ----
-            const handleImageUpload = (input, previewImg, deleteBtn, maxSizeKB = 700) => {
+            const handleImageUpload = (input, previewImg, deleteBtn, maxSizeMB = 20) => {
                 if (!input || !previewImg || !deleteBtn) return;
 
                 // Create error message element
@@ -1205,7 +1222,7 @@
 
                 input.addEventListener("change", e => {
                     const file = e.target.files[0];
-                    const maxSizeBytes = maxSizeKB * 1024;
+                    const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
                     // Reset previous error
                     errorMsg.style.display = "none";
@@ -1221,7 +1238,7 @@
                     }
 
                     if (file.size > maxSizeBytes) {
-                        errorMsg.textContent = `File is too large. Maximum allowed size is ${maxSizeKB} KB.`;
+                        errorMsg.textContent = `File is too large. Maximum allowed size is ${maxSizeMB} MB.`;
                         errorMsg.style.display = "block";
                         input.value = "";
                         return;
@@ -1250,8 +1267,8 @@
             };
 
             // Apply to banner and profile inputs
-            handleImageUpload(bannerInput, bannerPreview, document.getElementById("bannerDeleteBtn"), 700);
-            handleImageUpload(profileInput, profilePreview, document.getElementById("profileDeleteBtn"), 700);
+            handleImageUpload(bannerInput, bannerPreview, document.getElementById("bannerDeleteBtn"), 20);
+            handleImageUpload(profileInput, profilePreview, document.getElementById("profileDeleteBtn"), 20);
 
             // ---- STEP 2: Enable Finish only if both images selected ----
             const checkStep2Ready = () => {
@@ -1304,7 +1321,7 @@
         const otherpostCategoryInput = document.getElementById("communityPostsOtherCategory");
         const hiddenCategoryInput = document.getElementById("communityPostsCategory");
 
-        const MAX_IMAGE_KB = 700;
+        const MAX_IMAGE_MB = 20;
         let selectedCategoryPost = null;
 
         // Open modal
@@ -1380,8 +1397,8 @@
                     return;
                 }
 
-                if (file.size > MAX_IMAGE_KB * 1024) {
-                    errorMsg.textContent = `File is too large. Maximum allowed size is ${MAX_IMAGE_KB} KB.`;
+                if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+                    errorMsg.textContent = `File is too large. Maximum allowed size is ${MAX_IMAGE_MB} MB.`;
                     errorMsg.style.display = "block";
                     imageInput.value = "";
                     imagePreview.src = "";

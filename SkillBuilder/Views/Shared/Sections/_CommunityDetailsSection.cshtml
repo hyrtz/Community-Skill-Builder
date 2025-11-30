@@ -1423,9 +1423,9 @@
                 return;
             }
 
-            const maxSizeKB = 700;
-            if (file.size > maxSizeKB * 1024) {
-                if (editFileErrorMsg) editFileErrorMsg.innerText = `File too large. Maximum ${maxSizeKB} KB allowed.`;
+            const maxSizeMB = 20;
+            if (file.size > maxSizeMB * 1024 * 1024) {
+                if (editFileErrorMsg) editFileErrorMsg.innerText = `File too large. Maximum ${maxSizeMB} MB allowed.`;
                 e.target.value = '';
                 imagePreview.style.display = 'none';
                 updateEditSaveButtonState();
@@ -2094,9 +2094,9 @@
                 }
 
                 // ✅ File size validation (max 700 KB)
-                const maxSizeKB = 700;
-                if (file.size > maxSizeKB * 1024) {
-                    if (fileErrorMsg) fileErrorMsg.innerText = `File is too large. Maximum allowed size is ${maxSizeKB} KB.`;
+                const maxSizeMB = 20;
+                if (file.size > maxSizeMB * 1024 * 1024) {
+                    if (fileErrorMsg) fileErrorMsg.innerText = `File is too large. Maximum allowed size is ${maxSizeMB} MB.`;
                     e.target.value = '';
                     postImagePreview.style.display = 'none';
                     return;

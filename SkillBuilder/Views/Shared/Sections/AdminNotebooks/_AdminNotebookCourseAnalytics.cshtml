@@ -5,7 +5,7 @@
 <div class="analytics-container" style="padding:20px; font-family:Inter, sans-serif; max-width:1200px; margin:0 auto;">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:16px;">
         <div>
-            <h1 style="font-size:1.75rem; font-weight:700; margin:0;">Course Performance Analytics</h1>
+            <h1 style="font-size:1.75rem; font-weight:700; margin:0;color: #344AEA;">Course Performance Analytics</h1>
             <p style="margin:4px 0 0;color:#666;">Monitor which traditional art forms resonate with your learners.</p>
         </div>
         <div style="display:flex; gap:12px; align-items:center;">
@@ -22,36 +22,36 @@
 
     <!-- top cards -->
     <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:20px;">
-        <div class="card" style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+        <div class="card" style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.1);">
             <div style="font-size:1.75rem; font-weight:700;">@Model.Analytics.TotalCourses</div>
             <div style="color:#666;">Active Courses</div>
         </div>
 
-        <div class="card" id="completionCard" style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+        <div class="card" id="completionCard" style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.1);">
             <div id="completionValue" style="font-size:1.75rem; font-weight:700;">0%</div>
             <div style="color:#666;">Completion Rate</div>
         </div>
 
-        <div class="card" id="growthCard" style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+        <div class="card" id="growthCard" style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.1);">
             <div id="growthValue" style="font-size:1.75rem; font-weight:700;">0%</div>
             <div style="color:#666;">Enrollment Growth</div>
         </div>
     </div>
 
     <!-- Enrollment Trends -->
-    <div style="background:#fff; border-radius:12px; padding:20px; margin-top:25px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+    <div style="background:#fff; border-radius:12px; padding:20px; margin-top:25px; box-shadow:0 2px 12px rgba(0,0,0,0.1);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h3 style="font-weight:600; margin:0;">Enrollment Trends Based on Categories</h3>
             <div style="display:flex; gap:8px; align-items:center;">
-                <button class="trend-toggle" data-range="weekly" style="padding:6px 12px; border-radius:6px; border:1px solid #e5e7eb; background:#fff;">Weekly</button>
-                <button class="trend-toggle" data-range="monthly" style="padding:6px 12px; border-radius:6px; border:1px solid #e5e7eb; background:#fff;">Monthly</button>
+                @* <button class="trend-toggle" data-range="weekly" style="padding:6px 12px; border-radius:6px; border:1px solid #e5e7eb; background:#fff;">Weekly</button>
+                <button class="trend-toggle" data-range="monthly" style="padding:6px 12px; border-radius:6px; border:1px solid #e5e7eb; background:#fff;">Monthly</button> *@
             </div>
         </div>
         <canvas id="categoryTrendChart" style="margin-top:16px; height:120px;"></canvas>
     </div>
 
     <!-- Course Popularity table -->
-    <div style="background:#fff; padding:20px; border-radius:12px; margin-top:25px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+    <div style="background:#fff; padding:20px; border-radius:12px; margin-top:25px; box-shadow:0 2px 12px rgba(0,0,0,0.1);">
         <h3 style="font-weight:600; margin:0 0 12px 0;">Course Popularity by Ranking</h3>
 
         <table style="width:100%; margin-top:6px; border-collapse:collapse;">
@@ -224,9 +224,10 @@
         return Math.round(((last - prev) / prev) * 100);
     }
 
+    // ✅ Updated to calculate based on actual IsCompleted enrollments
     function setTopCards(analytics) {
         const enrollments = analytics?.TopCourses?.reduce((acc, c) => acc + (c.TotalEnroll || 0), 0) || 0;
-        const completed = analytics?.TopCourses?.reduce((acc, c) => acc + (c.AverageRating > 0 ? c.TotalEnroll : 0), 0) || 0;
+        const completed = analytics?.TopCourses?.reduce((acc, c) => acc + (c.CompletedEnrollments || 0), 0) || 0;
         const completionRate = enrollments ? Math.round((completed / enrollments) * 100) : 0;
         const growth = calculateEnrollmentGrowth(analytics);
 
@@ -236,6 +237,7 @@
         if (gv) gv.textContent = growth + '%';
     }
 
+    // ✅ Updated ranking table to use CompletedEnrollments instead of AverageRating
     function renderRankingTable(analytics) {
         const tbody = document.getElementById('rankingBody');
         if (!tbody) return;
@@ -248,7 +250,9 @@
             const title = course.Title || 'Untitled';
             const enroll = (course.TotalEnroll !== undefined && course.TotalEnroll !== null) ? course.TotalEnroll : 0;
             const category = course.Category || 'N/A';
-            const completion = (course.AverageRating !== undefined && course.AverageRating > 0) ? Math.round(course.AverageRating) + '%' : '0%';
+            const completion = enroll > 0
+                ? Math.round((course.CompletedEnrollments || 0) / enroll * 100) + '%'
+                : '0%';
             const status = (course.IsPublished === false) ? 'DRAFT' : 'PUBLISHED';
 
             const tr = document.createElement('tr');
@@ -266,9 +270,11 @@
         });
     }
 
-    async function fetchAnalytics(range = 'lastmonth', grouping = 'monthly') {
+    async function fetchAnalytics(range = 'lastmonth') {
         try {
-            const res = await fetch(`/AdminProfile/GetCourseAnalytics?range=${range}&group=${grouping}`, { headers: { 'Accept':'application/json' } });
+            const res = await fetch(`/AdminProfile/GetCourseAnalytics?range=${range}&group=monthly`, {
+                headers: { 'Accept': 'application/json' }
+            });
             if (!res.ok) throw new Error('Failed to fetch analytics: ' + res.status);
             return await res.json();
         } catch(err) {
@@ -282,34 +288,14 @@
         renderCategoryChart(initialAnalytics, 'monthly');
         renderRankingTable(initialAnalytics);
 
-        document.querySelectorAll('.trend-toggle').forEach(btn => {
-            btn.addEventListener('click', async e => {
-                const range = e.currentTarget.dataset.range || 'monthly';
-                document.querySelectorAll('.trend-toggle').forEach(b => b.style.background = '#fff');
-                e.currentTarget.style.background = '#f3f4f6';
-
-                const analytics = await fetchAnalytics(document.getElementById('dateRange').value, range);
-                if (analytics) {
-                    renderCategoryChart(analytics, range);
-                    setTopCards(analytics);
-                    renderRankingTable(analytics);
-                }
-            });
-        });
-
         document.getElementById('dateRange').addEventListener('change', async e => {
             const range = e.target.value;
-            const active = document.querySelector('.trend-toggle[style*="background:#f3f4f6"]');
-            const grouping = active ? active.dataset.range : 'monthly';
-            const analytics = await fetchAnalytics(range, grouping);
+            const analytics = await fetchAnalytics(range);
             if (analytics) {
                 setTopCards(analytics);
-                renderCategoryChart(analytics, grouping);
+                renderCategoryChart(analytics);
                 renderRankingTable(analytics);
             }
         });
-
-        const monthlyBtn = document.querySelector('.trend-toggle[data-range="monthly"]');
-        if (monthlyBtn) monthlyBtn.style.background = '#f3f4f6';
     });
 </script>
