@@ -128,7 +128,7 @@ namespace SkillBuilder.Services
             "FirstCourseEnrolled" => 20M,
             "ThreeCoursesEnrolled" => 50M,
             "CourseCompleted" => 30M,
-            "ProjectSubmitted" => 40M,
+            "ProjectSubmitted" => 70M,
             "FirstReviewSubmitted" => 10M,
             _ => 0M
         };

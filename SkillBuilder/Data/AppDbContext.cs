@@ -23,6 +23,7 @@ namespace SkillBuilder.Data
         public DbSet<CourseModule> CourseModules { get; set; }
         public DbSet<CourseMaterial> CourseMaterials { get; set; }
         public DbSet<ModuleContent> ModuleContents { get; set; }
+        public DbSet<InteractiveContent> InteractiveContents { get; set; }
         public DbSet<QuizQuestion> QuizQuestions { get; set; }
         public DbSet<ModuleProgress> ModuleProgress { get; set; }
         public DbSet<SupportSessionRequest> SupportSessionRequests { get; set; }

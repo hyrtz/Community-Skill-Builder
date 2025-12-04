@@ -930,6 +930,50 @@ namespace SkillBuilder.Migrations
                     b.ToTable("CommunityReports");
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.InteractiveContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CorrectAnswer")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ModuleContentId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("OptionA")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OptionB")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OptionC")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OptionD")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("ReflectionMinChars")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModuleContentId");
+
+                    b.ToTable("InteractiveContents");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.ModuleContent", b =>
                 {
                     b.Property<int>("Id")
@@ -1512,6 +1556,17 @@ namespace SkillBuilder.Migrations
                     b.Navigation("Reporter");
                 });
 
+            modelBuilder.Entity("SkillBuilder.Models.InteractiveContent", b =>
+                {
+                    b.HasOne("SkillBuilder.Models.ModuleContent", "ModuleContent")
+                        .WithMany("InteractiveContents")
+                        .HasForeignKey("ModuleContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ModuleContent");
+                });
+
             modelBuilder.Entity("SkillBuilder.Models.ModuleContent", b =>
                 {
                     b.HasOne("SkillBuilder.Models.CourseModule", "CourseModule")
@@ -1615,6 +1670,8 @@ namespace SkillBuilder.Migrations
 
             modelBuilder.Entity("SkillBuilder.Models.ModuleContent", b =>
                 {
+                    b.Navigation("InteractiveContents");
+
                     b.Navigation("QuizQuestions");
                 });
 

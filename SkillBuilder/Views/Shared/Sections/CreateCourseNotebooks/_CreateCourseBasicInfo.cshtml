@@ -259,7 +259,7 @@
     <!-- Overview -->
     <div class="basicinfo-form-group">
         <label for="Course_Overview">Course Overview *</label>
-        <textarea asp-for="Course.Overview" class="basicinfo-form-control" rows="4" placeholder="Write a brief overview..." required></textarea>
+        <textarea asp-for="Course.Overview" class="basicinfo-form-control tinymce-editor" rows="4" placeholder="Write a brief overview..." required></textarea>
     </div>
 
     <!-- Difficulty & Duration -->
@@ -288,7 +288,7 @@
     <!-- Requirements -->
     <div class="basicinfo-form-group">
         <label for="Course_Requirements">Requirements *</label>
-        <textarea asp-for="Course.Requirements" class="basicinfo-form-control" rows="3" placeholder="List required tools or skills" required></textarea>
+        <textarea asp-for="Course.Requirements" class="basicinfo-form-control tinymce-editor" rows="3" placeholder="List required tools or skills" required></textarea>
     </div>
 
     <!-- Learning Objectives -->
@@ -309,7 +309,7 @@
     <!-- Full Description -->
     <div class="basicinfo-form-group">
         <label for="Course_FullDescription">Full Course Description *</label>
-        <textarea asp-for="Course.FullDescription" class="basicinfo-form-control" rows="5" placeholder="Detailed explanation..." required></textarea>
+        <textarea asp-for="Course.FullDescription" class="basicinfo-form-control tinymce-editor" rows="5" placeholder="Detailed explanation..." required></textarea>
     </div>
 
     <!-- Image Upload -->
@@ -359,6 +359,16 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+
+        tinymce.init({
+            selector: 'textarea.tinymce-editor', // target textareas
+            menubar: false,
+            plugins: 'lists link image table code',
+            toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist ',
+            height: 250,
+            license_key: 'gpl', // ensures GPL/open source license
+            branding: false
+        });
 
         // Show text input when "Other" is selected
         const categorySelect = document.getElementById("CategorySelect");
