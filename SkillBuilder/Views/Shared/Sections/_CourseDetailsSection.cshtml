@@ -459,7 +459,6 @@
     }
 
     .course-detail-right a.course-detail-enroll-btn {
-        margin-bottom: 1rem;
         text-align: center;
     }
 
@@ -601,8 +600,9 @@
                                         <button type="button" class="course-detail-enroll-btn" id="view-completion-btn">Receive Completion</button>
                                     }
 
-                                    <a asp-controller="Courses" asp-action="Forum" asp-route-id="@Model.Id"
-                                       class="course-detail-enroll-btn" style="text-decoration:none;">
+                                    <a asp-controller="Courses" asp-action="Forum" asp-route-courseId="@Model.Id"
+                                       class="course-detail-enroll-btn"
+                                       style="text-decoration:none;">
                                         Course Forum
                                     </a>
                                 </form>
